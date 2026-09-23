@@ -109,5 +109,27 @@
     return next;
   }
 
-  return { SCHEMA_VERSION, ENTITY_KEYS, createEmptyOperations, migrateOperations, validateOperations, summarizeOperations, appendActivity, validateMaterial, upsertMaterial };
+  function upsertMaterialPackage(operations, packageRecord) {
+    if (!packageRecord?.id || !packageRecord?.clientId || !String(packageRecord?.title || '').trim()) throw new Error('Pacote exige id, clientId e título');
+    if (!Array.isArray(packageRecord.materialIds) || !packageRecord.materialIds.length) throw new Error('Pacote exige pelo menos um material');
+    const next = migrateOperations(operations);
+    const known = new Set(next.materials.map(item => String(item.id)));
+    if (packageRecord.materialIds.some(id => !known.has(String(id)))) throw new Error('Pacote contém material inexistente');
+    const index = next.materialPackages.findIndex(item => String(item.id) === String(packageRecord.id));
+    if (index >= 0) next.materialPackages.splice(index, 1, cloneJson(packageRecord)); else next.materialPackages.unshift(cloneJson(packageRecord));
+    next.updatedAt = isoNow();
+    return next;
+  }
+
+  function appendMaterialShare(operations, share) {
+    if (!share?.id || !share?.materialId || !share?.clientId || !share?.channel || !share?.preparedAt) throw new Error('Compartilhamento exige identificação, material, cliente, canal e preparo');
+    if (share.sentAt && share.sentConfirmedByUser !== true) throw new Error('sentAt exige confirmação explícita do usuário');
+    const next = migrateOperations(operations);
+    if (!next.materials.some(item => String(item.id) === String(share.materialId))) throw new Error('Material do compartilhamento não existe');
+    if (!next.materialShares.some(item => String(item.id) === String(share.id))) next.materialShares.unshift(cloneJson(share));
+    next.updatedAt = isoNow();
+    return next;
+  }
+
+  return { SCHEMA_VERSION, ENTITY_KEYS, createEmptyOperations, migrateOperations, validateOperations, summarizeOperations, appendActivity, validateMaterial, upsertMaterial, upsertMaterialPackage, appendMaterialShare };
 }));

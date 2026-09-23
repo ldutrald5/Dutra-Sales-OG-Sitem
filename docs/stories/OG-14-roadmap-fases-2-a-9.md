@@ -80,6 +80,8 @@ OG-11, OG-12 e componentes da OG-13. Conteúdo real e autorizações podem chega
 
 ## Fase 3 — CRM, Call AI e pacotes de materiais
 
+**Status:** Ready for Review — implementada na OG-16.
+
 ### Resultado
 
 Recomendar material com base no contexto registrado, montar pacote revisável e registrar o que foi enviado ao cliente.
@@ -94,12 +96,12 @@ Recomendar material com base no contexto registrado, montar pacote revisável e 
 
 ### Critérios de saída
 
-- [ ] Recomendação informa por que o material foi sugerido.
-- [ ] Ausência de conteúdo compatível gera estado vazio honesto.
-- [ ] Pacote pode ser revisado e alterado antes de uso.
-- [ ] Registro de envio não afirma abertura ou visualização sem sinal técnico.
-- [ ] Call AI continua funcional sem áudio e sem IA externa.
-- [ ] Gravação permanece manual e local.
+- [x] Recomendação informa por que o material foi sugerido.
+- [x] Ausência de conteúdo compatível gera estado vazio honesto.
+- [x] Pacote pode ser revisado e alterado antes de uso.
+- [x] Registro de envio não afirma abertura ou visualização sem sinal técnico.
+- [x] Call AI continua funcional sem áudio e sem IA externa.
+- [x] Gravação permanece manual e local.
 
 ### Dependências
 

@@ -18,6 +18,7 @@
     "og:ops": "node scripts/og-operations.mjs",
     "og:ops:test": "node scripts/test_operations_foundation.mjs",
     "og:library:test": "node scripts/test_material_library.mjs",
+    "og:packages:test": "node scripts/test_material_packages.mjs",
     "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs",
     "prepare": "husky"
   },

@@ -3469,6 +3469,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     inspector.insertAdjacentHTML('beforeend', buildCommercialPanel(lead));
     bindCommercialPanel(lead);
+    inspector.insertAdjacentHTML('beforeend', buildClientMaterialsPanel(lead, 'crm'));
+    bindClientMaterialsPanel(inspector, lead);
 
     const previewTextarea = inspector.querySelector('#crm-msg-preview');
     if (previewTextarea) {
@@ -3840,7 +3842,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ${factRow('Dor', lead.pain, lead.pain ? 'confirmed' : 'hypothesis')}
       ${factRow('Situação', lead.status || 'novo')}
       ${factRow('Última interação', recent?.note || '', recent ? 'confirmed' : 'missing', recent ? formatCallDate(recent.at) : 'CRM')}
-      ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}`;
+      ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}
+      ${buildClientMaterialsPanel(lead, 'call-ai')}`;
+    bindClientMaterialsPanel(context, lead);
     document.getElementById('call-ai-session-account').textContent = lead.empresa || lead.nome;
   }
 
@@ -4376,6 +4380,119 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (action === 'preview') openMaterialPreview(material);
     });
     renderMaterialLibrary();
+  }
+
+  function materialRecommendations(lead) {
+    return OG_SALES_MATERIALS.recommendMaterials(state.operations.materials, lead);
+  }
+
+  function buildClientMaterialsPanel(lead, surface) {
+    const recommendations = materialRecommendations(lead);
+    const packages = state.operations.materialPackages.filter(item => String(item.clientId) === String(lead.id));
+    const shares = state.operations.materialShares.filter(item => String(item.clientId) === String(lead.id) && item.sentConfirmedByUser);
+    return `<section class="client-materials" data-client-materials="${escapeHtml(surface)}">
+      <div class="client-materials-head"><div><span class="og-kicker">MATERIAIS PARA ESTA CONTA</span><strong>${recommendations.length ? `${recommendations.length} recomendação${recommendations.length === 1 ? '' : 'ões'}` : 'Nenhuma correspondência ainda'}</strong></div><button type="button" data-build-material-package>Montar pacote</button></div>
+      ${recommendations.length ? `<div class="client-material-recommendations">${recommendations.slice(0, 3).map(item => `<button type="button" data-preview-client-material="${escapeHtml(item.material.id)}"><b>${escapeHtml(item.material.title)}</b><span>Porque: ${escapeHtml(item.reasons.join(' · '))}</span></button>`).join('')}</div>` : '<p class="client-material-empty">Cadastre e aprove materiais com tags compatíveis na Biblioteca. O sistema não vai inventar uma recomendação.</p>'}
+      <div class="client-material-stats"><span>${packages.length} pacote${packages.length === 1 ? '' : 's'} preparado${packages.length === 1 ? '' : 's'}</span><span>${shares.length} envio${shares.length === 1 ? '' : 's'} confirmado${shares.length === 1 ? '' : 's'}</span></div>
+    </section>`;
+  }
+
+  function bindClientMaterialsPanel(root, lead) {
+    root.querySelectorAll('[data-build-material-package]').forEach(button => button.addEventListener('click', () => openMaterialPackageBuilder(lead)));
+    root.querySelectorAll('[data-preview-client-material]').forEach(button => button.addEventListener('click', () => {
+      const material = state.operations.materials.find(item => item.id === button.dataset.previewClientMaterial);
+      if (material) openMaterialPreview(material);
+    }));
+  }
+
+  function openMaterialPackageBuilder(lead, existingPackage = null) {
+    document.querySelector('.material-package-backdrop')?.remove();
+    const recommendations = materialRecommendations(lead);
+    const allowed = state.operations.materials.filter(item => item.status === 'approved' && item.audience === 'customer_authorized');
+    const selected = new Set(existingPackage?.materialIds || recommendations.filter(item => item.score > 0).slice(0, 4).map(item => item.material.id));
+    const dialog = document.createElement('div');
+    dialog.className = 'material-package-backdrop';
+    dialog.innerHTML = `<section class="material-package" role="dialog" aria-modal="true" aria-labelledby="material-package-title">
+      <header><div><span class="og-kicker">PACOTE REVISÁVEL</span><h2 id="material-package-title">Materiais para ${escapeHtml(lead.empresa || lead.nome)}</h2><p>Revise cada item. Preparar ou abrir o WhatsApp não registra envio.</p></div><button type="button" data-package-close aria-label="Fechar">✕</button></header>
+      <div class="material-package-body">
+        <section><h3>Escolha os materiais</h3><div class="material-package-list">${allowed.length ? allowed.map(material => {
+          const recommendation = recommendations.find(item => item.material.id === material.id);
+          return `<label><input type="checkbox" value="${escapeHtml(material.id)}" ${selected.has(material.id) ? 'checked' : ''}><span><b>${escapeHtml(material.title)}</b><small>${escapeHtml(recommendation ? `Recomendado porque: ${recommendation.reasons.join(' · ')}` : 'Disponível e autorizado para cliente')}</small></span></label>`;
+        }).join('') : '<div class="client-material-empty">Não há materiais aprovados e autorizados para cliente. Revise a Biblioteca primeiro.</div>'}</div></section>
+        <section class="material-package-form"><h3>Mensagem e registro</h3><label><span>Título do pacote</span><input id="package-title-input" required value="${escapeHtml(existingPackage?.title || `Materiais para ${lead.empresa || lead.nome}`)}"></label><label><span>Mensagem de abertura</span><textarea id="package-message-input" rows="5">${escapeHtml(existingPackage?.messageDraft || `Olá ${lead.nome || ''}, separei estes materiais considerando o que conversamos sobre ${lead.pain || 'a operação da frota'}.`)}</textarea></label><label><span>Canal planejado</span><select id="package-channel"><option value="whatsapp">WhatsApp</option><option value="email">E-mail</option><option value="meeting">Reunião</option><option value="other">Outro</option></select></label><label><span>Próxima ação após o envio</span><input id="package-next-action" value="${escapeHtml(lead.nextAction || 'Confirmar recebimento e tirar dúvidas')}"></label></section>
+      </div>
+      <footer><span>Somente a confirmação final cria um registro de envio.</span><div><button type="button" data-package-close>Cancelar</button><button type="button" data-package-save>Salvar rascunho</button><button type="button" data-package-prepare class="og-button og-button-primary">Revisar e preparar</button></div></footer>
+    </section>`;
+    document.body.appendChild(dialog);
+    const close = () => dialog.remove();
+    dialog.querySelectorAll('[data-package-close]').forEach(button => button.addEventListener('click', close));
+    const readPackage = () => {
+      const materialIds = [...dialog.querySelectorAll('.material-package-list input:checked')].map(input => input.value);
+      if (!materialIds.length) { showNotification('Escolha pelo menos um material.', 'info'); return null; }
+      const title = dialog.querySelector('#package-title-input').value.trim();
+      if (!title) { showNotification('Informe um título para o pacote.', 'info'); return null; }
+      const now = new Date().toISOString();
+      return { id: existingPackage?.id || newLibraryId('pkg'), clientId: lead.id, title, materialIds, messageDraft: dialog.querySelector('#package-message-input').value.trim(), channel: dialog.querySelector('#package-channel').value, nextAction: dialog.querySelector('#package-next-action').value.trim(), status: 'draft', createdAt: existingPackage?.createdAt || now, updatedAt: now, schemaVersion: 1 };
+    };
+    const persist = packageRecord => {
+      state.operations = OG_OPERATIONS_MODEL.upsertMaterialPackage(state.operations, packageRecord);
+      saveOperationsToStorage();
+      return packageRecord;
+    };
+    dialog.querySelector('[data-package-save]').addEventListener('click', () => {
+      const packageRecord = readPackage(); if (!packageRecord) return;
+      persist(packageRecord); close(); refreshClientMaterialSurfaces(lead); showNotification('Pacote salvo como rascunho.', 'success');
+    });
+    dialog.querySelector('[data-package-prepare]').addEventListener('click', () => {
+      const packageRecord = readPackage(); if (!packageRecord) return;
+      packageRecord.status = 'reviewed'; persist(packageRecord); close(); openMaterialPackageReview(lead, packageRecord);
+    });
+    dialog.querySelector('[data-package-close]')?.focus();
+  }
+
+  function openMaterialPackageReview(lead, packageRecord) {
+    const materials = packageRecord.materialIds.map(id => state.operations.materials.find(item => item.id === id)).filter(Boolean);
+    const packageText = OG_SALES_MATERIALS.composePackageText(packageRecord, state.operations.materials, lead);
+    const dialog = document.createElement('div');
+    dialog.className = 'material-package-backdrop';
+    dialog.innerHTML = `<section class="material-package material-package-review" role="dialog" aria-modal="true" aria-labelledby="material-package-review-title"><header><div><span class="og-kicker">REVISÃO FINAL</span><h2 id="material-package-review-title">${escapeHtml(packageRecord.title)}</h2><p>Nenhum envio foi registrado. Confira o conteúdo antes de copiar ou abrir outro aplicativo.</p></div><button type="button" data-package-close aria-label="Fechar">✕</button></header><div class="material-package-review-grid"><div><h3>Conteúdo do pacote</h3>${materials.map(item => `<article><b>${escapeHtml(item.title)}</b><span>${escapeHtml(LIBRARY_TYPE_LABELS[item.mediaType] || item.mediaType)} · ${escapeHtml(materialPermissionLabel(item))}</span></article>`).join('')}</div><label><span>Mensagem completa</span><textarea id="package-review-text" rows="14">${escapeHtml(packageText)}</textarea></label></div><div class="material-share-confirm"><label><span>Resultado inicial</span><select id="package-share-result"><option value="aguardando_retorno">Aguardando retorno</option><option value="cliente_pediu">Solicitado pelo cliente</option><option value="apresentado_reuniao">Apresentado em reunião</option></select></label><label><span>Próxima ação</span><input id="package-share-next" value="${escapeHtml(packageRecord.nextAction || '')}"></label></div><footer><span>Copiar ou abrir o WhatsApp não confirma envio.</span><div><button type="button" data-package-edit>Voltar e editar</button><button type="button" data-package-copy>Copiar conteúdo</button><button type="button" data-package-whatsapp>Abrir WhatsApp</button><button type="button" data-package-confirm class="og-button og-button-primary">Confirmar que enviei</button></div></footer></section>`;
+    document.body.appendChild(dialog);
+    const close = () => dialog.remove();
+    dialog.querySelector('[data-package-close]').addEventListener('click', close);
+    dialog.querySelector('[data-package-edit]').addEventListener('click', () => { close(); openMaterialPackageBuilder(lead, packageRecord); });
+    dialog.querySelector('[data-package-copy]').addEventListener('click', async () => { await navigator.clipboard.writeText(dialog.querySelector('#package-review-text').value); showNotification('Pacote copiado para revisão. Nenhum envio foi registrado.', 'success'); });
+    dialog.querySelector('[data-package-whatsapp]').addEventListener('click', () => {
+      const phone = String(lead.telefone || '').replace(/\D/g, '');
+      const normalized = phone.startsWith('55') ? phone : `55${phone}`;
+      if (!phone) return showNotification('Cliente sem telefone cadastrado.', 'info');
+      window.open(`https://api.whatsapp.com/send?phone=${normalized}&text=${encodeURIComponent(dialog.querySelector('#package-review-text').value)}`, '_blank');
+      showNotification('WhatsApp aberto. Confirme o envio somente depois de enviar.', 'info');
+    });
+    dialog.querySelector('[data-package-confirm]').addEventListener('click', () => confirmMaterialPackageShare(lead, packageRecord, dialog));
+    dialog.querySelector('[data-package-close]').focus();
+  }
+
+  function confirmMaterialPackageShare(lead, packageRecord, dialog) {
+    if (!window.confirm('Você confirma que este pacote foi realmente enviado ao cliente?')) return;
+    const now = new Date().toISOString();
+    const result = dialog.querySelector('#package-share-result').value;
+    const nextAction = dialog.querySelector('#package-share-next').value.trim();
+    packageRecord.status = 'ready'; packageRecord.sentConfirmedAt = now; packageRecord.updatedAt = now;
+    state.operations = OG_OPERATIONS_MODEL.upsertMaterialPackage(state.operations, packageRecord);
+    packageRecord.materialIds.forEach((materialId, index) => {
+      state.operations = OG_OPERATIONS_MODEL.appendMaterialShare(state.operations, { id: `${packageRecord.id}_share_${index}`, materialId, clientId: lead.id, packageId: packageRecord.id, channel: packageRecord.channel, preparedAt: packageRecord.createdAt, sentAt: now, sentConfirmedByUser: true, commercialOutcome: result, nextAction, createdAt: now, updatedAt: now, schemaVersion: 1 });
+    });
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'material.share_confirmed', at: now, clientId: lead.id, packageId: packageRecord.id, materialCount: packageRecord.materialIds.length });
+    lead.interactions = Array.isArray(lead.interactions) ? lead.interactions : [];
+    lead.interactions.push({ id: newLibraryId('int'), at: now, type: 'material', note: `Envio confirmado: ${packageRecord.title} (${packageRecord.materialIds.length} materiais)`, packageId: packageRecord.id, result });
+    if (nextAction) lead.nextAction = nextAction;
+    saveOperationsToStorage(); saveLeadsToStorage(); dialog.remove(); refreshClientMaterialSurfaces(lead); renderOperationsFoundation();
+    showNotification('Envio confirmado e registrado no histórico do cliente.', 'success');
+  }
+
+  function refreshClientMaterialSurfaces(lead) {
+    if (String(state.selectedLeadId) === String(lead.id)) renderLeadInspector();
+    if (String(state.callAI.selectedLeadId) === String(lead.id)) renderCallAIContext();
   }
 
   function renderOperationsFoundation() {
