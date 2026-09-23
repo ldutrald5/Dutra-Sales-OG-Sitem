@@ -1,3 +1,10 @@
+# Cloudflare Tunnel — modelo para Sistema OG
+# 1. Copie para: %USERPROFILE%\.cloudflared\config.yml
+# 2. Substitua TUNNEL_UUID e o hostname pelo seus
+# 3. credentials-file aponta para o JSON gerado por: cloudflared tunnel create sistema-og
+#
+# O PC precisa estar com o Sistema OG rodando (porta 4321).
+
 tunnel: TUNNEL_UUID
 credentials-file: C:\Users\SEU_USUARIO\.cloudflared\TUNNEL_UUID.json
 

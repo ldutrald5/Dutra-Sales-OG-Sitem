@@ -6,19 +6,24 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v10';
+const SW_VERSION = 'v11';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
 const SYNC_STORE = 'outbox';
 const SYNC_TAG = 'og-sync-state';
 
+/** Recursos essenciais para abrir e usar o app offline (primeira pintura + lógica). */
 const SHELL_URLS = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
   '/data.js',
+  '/call-ai/call-model.js',
+  '/call-ai/provider.js',
+  '/call-ai/call-ui.js',
+  '/call-ai/call-ui.css',
   '/manifest.webmanifest',
   '/assets/og-utilities.css',
   '/assets/logo-olho-de-gato.jpg',
@@ -26,6 +31,7 @@ const SHELL_URLS = [
   '/assets/icons/icon-512.png'
 ];
 
+/** Imagens de marca — cacheadas em background após install, sem falhar o SW. */
 const PREFETCH_MEDIA = [
   '/assets/premium/optimized/hero-desktop-1280.webp',
   '/assets/premium/optimized/hero-mobile-640.webp',
@@ -40,12 +46,15 @@ const MEDIA_EXT = /\.(webp|png|jpe?g|gif|svg|ico|woff2?)$/i;
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_SHELL);
+    // addAll é all-or-nothing; precache item a item para não quebrar o install
     await Promise.all(
       SHELL_URLS.map(async url => {
         try {
           const res = await fetch(url, { cache: 'no-cache' });
           if (res.ok) await cache.put(url, res);
-        } catch (_) {}
+        } catch (_) {
+          /* shell parcial ainda é melhor que install falho */
+        }
       })
     );
     self.skipWaiting();
@@ -57,6 +66,8 @@ self.addEventListener('activate', event => {
     const keep = new Set([CACHE_SHELL, CACHE_RUNTIME]);
     const keys = await caches.keys();
     await Promise.all(keys.filter(k => !keep.has(k)).map(k => caches.delete(k)));
+
+    // Prefetch de mídia em background (não bloqueia activate)
     caches.open(CACHE_RUNTIME).then(cache => {
       PREFETCH_MEDIA.forEach(url => {
         fetch(url, { cache: 'no-cache' })
@@ -64,6 +75,7 @@ self.addEventListener('activate', event => {
           .catch(() => {});
       });
     });
+
     await self.clients.claim();
   })());
 });
@@ -77,6 +89,7 @@ self.addEventListener('message', event => {
   }
 });
 
+/** Background Sync: reenvia PUT /api/state quando a rede volta (Chrome/Edge). */
 self.addEventListener('sync', event => {
   if (event.tag === SYNC_TAG) {
     event.waitUntil(flushOutbox());
@@ -118,34 +131,62 @@ async function clearOutbox() {
 async function flushOutbox() {
   const pending = await readOutbox();
   if (!pending || !pending.body) return true;
-  const body = { ...pending.body, forceMerge: true };
+
+  // forceMerge: servidor aplica união por id / campos (nível 2)
+  const body = {
+    ...pending.body,
+    forceMerge: true
+  };
+
   const response = await fetch(pending.url || '/api/state', {
     method: pending.method || 'PUT',
     headers: pending.headers || { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (response.status === 409) throw new Error('Background sync: conflito de revision');
-  if (!response.ok) throw new Error(`Background sync falhou: ${response.status}`);
+
+  if (response.status === 409) {
+    // Reagenda: a página fará pull+merge no próximo online
+    throw new Error('Background sync: conflito de revision');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Background sync falhou: ${response.status}`);
+  }
+
   await clearOutbox();
+
   const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-  clientsList.forEach(client => client.postMessage({ type: 'OG_SYNC_COMPLETE', revision: null }));
+  clientsList.forEach(client => {
+    client.postMessage({ type: 'OG_SYNC_COMPLETE', revision: null });
+  });
   return true;
 }
 
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
   const url = new URL(req.url);
+
+  // Só intercepta same-origin
   if (url.origin !== self.location.origin) return;
+
+  // API e estado compartilhado: sempre rede
   if (url.pathname.startsWith('/api/')) return;
+
+  // Navegação (SPA): rede primeiro, offline → index.html
   if (req.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(req));
     return;
   }
+
+  // Mídia: cache-first (rápido offline, atualiza em segundo plano)
   if (MEDIA_EXT.test(url.pathname) || url.pathname.startsWith('/assets/')) {
     event.respondWith(cacheFirst(req, CACHE_RUNTIME));
     return;
   }
+
+  // Shell JS/CSS/JSON: stale-while-revalidate
   event.respondWith(staleWhileRevalidate(req));
 });
 
@@ -158,7 +199,10 @@ async function networkFirstNavigation(req) {
     }
     return fresh;
   } catch (_) {
-    const cached = (await caches.match(req)) || (await caches.match('/index.html')) || (await caches.match('/'));
+    const cached =
+      (await caches.match(req)) ||
+      (await caches.match('/index.html')) ||
+      (await caches.match('/'));
     if (cached) return cached;
     return offlineFallbackPage();
   }
@@ -167,12 +211,15 @@ async function networkFirstNavigation(req) {
 async function cacheFirst(req, cacheName) {
   const cached = await caches.match(req);
   if (cached) {
-    fetch(req).then(async res => {
-      if (res && res.ok) {
-        const cache = await caches.open(cacheName);
-        await cache.put(req, res);
-      }
-    }).catch(() => {});
+    // revalidação silenciosa
+    fetch(req)
+      .then(async res => {
+        if (res && res.ok) {
+          const cache = await caches.open(cacheName);
+          await cache.put(req, res);
+        }
+      })
+      .catch(() => {});
     return cached;
   }
   try {
@@ -190,16 +237,22 @@ async function cacheFirst(req, cacheName) {
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_SHELL);
   const cached = await cache.match(req);
-  const networkPromise = fetch(req).then(async res => {
-    if (res && res.ok) await cache.put(req, res.clone());
-    return res;
-  }).catch(() => null);
+  const networkPromise = fetch(req)
+    .then(async res => {
+      if (res && res.ok) await cache.put(req, res.clone());
+      return res;
+    })
+    .catch(() => null);
+
   if (cached) {
     networkPromise.catch(() => {});
     return cached;
   }
+
   const fresh = await networkPromise;
   if (fresh) return fresh;
+
+  // fallback de navegação se pediram HTML
   if (req.headers.get('accept')?.includes('text/html')) {
     return (await caches.match('/index.html')) || offlineFallbackPage();
   }

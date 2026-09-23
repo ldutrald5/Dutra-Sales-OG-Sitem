@@ -1,38 +1,30 @@
-# Dutra Sales OG / AIOX
+
+
+# Environment & Secrets (AIOX)
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
 *.key
 *.pem
-*.p12
-credentials.json
-**/secrets/**
+
+# Dependencies (AIOX)
 node_modules/
 apps/sistema-og/.data/
-apps/sistema-og/imports/*.json
-!apps/sistema-og/imports/.gitkeep
-.wrangler/
-wrangler.temporary.jsonc
+node_modules
+
+# Build & Logs (AIOX)
 dist/
 build/
 *.log
 logs/
-npm-debug.log*
-.cache/
+
+# IDE & OS (AIOX)
 .DS_Store
 Thumbs.db
 .idea/
 *.swp
-.vscode/
-.antigravity/
-.claude/
-.cursor/
-.gemini/
-.kimi/
+
+# AIOX Local (AIOX)
 .aiox-core/local/
 .claude/settings.local.json
 .aiox/install-log.txt
-*.tmp
-*.bak
-*.orig
-*~

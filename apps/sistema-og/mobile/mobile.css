@@ -1,0 +1,161 @@
+/* ==========================================================================
+   OLHO DE GATO (OG) — SISTEMA MOBILE
+   Estilos Touch-First, Safe Areas para iOS/Android e Navegação Inferior
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --og-brand: #ffde17;
+  --og-brand-hover: #f4c900;
+  --og-bg-dark: #091118;
+  --og-surface-dark: #101a22;
+  --og-card-dark: #121e27;
+  --og-border-dark: #273743;
+  --og-green-neon: #10b981;
+  --og-red-risk: #ef4444;
+  --og-text-primary: #f8fafc;
+  --og-text-secondary: #94a3b8;
+  --og-text-muted: #64748b;
+  --bottom-nav-height: 64px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--og-bg-dark);
+  color: var(--og-text-primary);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 16px) + 16px);
+  padding-top: env(safe-area-inset-top, 0px);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Header Compacto Mobile */
+.mobile-header {
+  background: linear-gradient(180deg, rgba(16, 26, 34, 0.98), rgba(9, 17, 24, 0.95));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--og-border-dark);
+}
+
+/* Card Mobile */
+.mobile-card {
+  background: var(--og-card-dark);
+  border: 1px solid var(--og-border-dark);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-card-highlight {
+  border-color: rgba(255, 222, 23, 0.4);
+  background: linear-gradient(145deg, #15222d, #111b23);
+}
+
+/* Inputs Touch-Friendly */
+input, select, textarea {
+  font-size: 16px !important; /* Evita zoom automático no iOS */
+}
+
+/* Feedback de Toque */
+button:active, .touch-feedback:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+/* Barra de Navegação Inferior (Bottom Bar) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(16, 26, 34, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--og-border-dark);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  color: var(--og-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.bottom-nav-item.active {
+  color: var(--og-brand);
+}
+
+.bottom-nav-item.active svg {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 6px rgba(255, 222, 23, 0.5));
+}
+
+.bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.15s ease;
+}
+
+/* Barra Flutuante de Compartilhamento WhatsApp */
+.mobile-floating-action {
+  position: sticky;
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px);
+  z-index: 40;
+}
+
+/* Badges e Pílulas */
+.badge-og {
+  background: rgba(255, 222, 23, 0.15);
+  color: #ffde17;
+  border: 1px solid rgba(255, 222, 23, 0.35);
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Transições Suaves entre Abas */
+.tab-pane {
+  display: none;
+  animation: fadeIn 0.18s ease-in-out forwards;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Olho de Gato — Equalizador Mobile",
+  "short_name": "OG Mobile",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#091118",
+  "theme_color": "#ffde17",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "../assets/logo-olho-de-gato.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "../assets/logo-olho-de-gato.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

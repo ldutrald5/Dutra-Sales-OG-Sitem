@@ -97,6 +97,8 @@ function mergeLead(a, b) {
     : (Number.isFinite(Number(older.fleetSize)) ? Number(older.fleetSize) : 0);
   merged.interactions = unionById(a.interactions || [], b.interactions || [], 'id')
     .sort((x, y) => Date.parse(x.at || 0) - Date.parse(y.at || 0));
+  merged.calls = unionById(a.calls || [], b.calls || [], 'id')
+    .sort((x, y) => Date.parse(x.startedAt || x.createdAt || 0) - Date.parse(y.startedAt || y.createdAt || 0));
   if (!merged.source) merged.source = newer.source || older.source;
   merged.updatedAt = new Date(Math.max(aT, bT, Date.now())).toISOString();
   return merged;
@@ -158,6 +160,7 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
+      // Sempre une por id (nível 2) para não apagar leads/notas do outro aparelho
       const leads = mergeLeads(body.leads, current.leads || []);
       const history = mergeHistory(body.history, current.history || []);
 

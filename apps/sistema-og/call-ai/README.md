@@ -1,8 +1,10 @@
 # Call AI Light
 
-- `provider.js` — `OGCallAnalysis` + `LocalHeuristicProvider`
-- `call-ai.js` — UI + modelo `normalizeCall`
+Módulo local-first do Sistema OG para transformar transcrições ou anotações em um rascunho comercial revisável.
 
-Bridge do CRM: `window.OGCallAIBridge` (definido em `app.js`).
+- `call-model.js`: normalização aditiva de `lead.calls[]`.
+- `provider.js`: `CallAnalysisProvider` e `LocalHeuristicProvider`, sem rede e sem API paga.
+- `call-ui.js`: formulário de análise, revisão, descarte e histórico.
+- `call-ui.css`: estilos específicos que reutilizam os tokens visuais existentes.
 
-Fluxo: analisar → rascunho editável → salvar ligação (human-in-the-loop).
+Analisar não persiste dados. O CRM só salva após revisão humana explícita.
