@@ -15,6 +15,8 @@
     "og:assets": "node scripts/optimize-og-assets.mjs",
     "og:call-ai:test": "node scripts/test_call_ai.mjs",
     "og:product:test": "node scripts/test_product_evolution.mjs",
+    "og:ops": "node scripts/og-operations.mjs",
+    "og:ops:test": "node scripts/test_operations_foundation.mjs",
     "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs",
     "prepare": "husky"
   },

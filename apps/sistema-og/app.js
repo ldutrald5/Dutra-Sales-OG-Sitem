@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       targetVehicleName: 'Mercedes-Benz Accelo'
     },
     history: [],
+    operations: OG_OPERATIONS_MODEL.createEmptyOperations(),
     leads: [],
     selectedLeadId: null,
     selectedLeadIds: new Set(),
@@ -134,6 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.leads = [];
       saveLeadsToStorage();
     }
+    const savedOperations = localStorage.getItem('og_operations_state');
+    state.operations = OG_OPERATIONS_MODEL.migrateOperations(savedOperations ? JSON.parse(savedOperations) : {});
+    localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
   } catch (e) {
     console.error('Erro ao ler localStorage', e);
   }
@@ -200,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const response = await apiFetch('/api/state', {
           method: 'PUT',
-          body: JSON.stringify({ leads: state.leads, history: state.history, revision: serverRevision })
+          body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: serverRevision })
         });
         if (!response.ok) throw new Error('Servidor indisponível');
         const saved = await response.json();
@@ -218,13 +222,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Sem sincronização');
       const shared = await response.json();
       serverRevision = Number(shared.revision || 0);
-      const serverHasData = (shared.leads?.length || 0) + (shared.history?.length || 0) > 0;
+      const serverHasData = (shared.leads?.length || 0) + (shared.history?.length || 0) + (shared.operations?.activityEvents?.length || 0) > 0;
       const browserHasData = state.leads.length + state.history.length > 0;
       if (serverHasData) {
         state.leads = (shared.leads || []).map(normalizeLead);
         state.history = shared.history || [];
+        state.operations = OG_OPERATIONS_MODEL.migrateOperations(shared.operations || state.operations);
         localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
         localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
+        localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
         renderDayDashboard();
         if (state.currentTab === 'crm') renderCrmModule();
         if (state.currentTab === 'historico') renderHistory();
@@ -283,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (tabId === 'crm') renderCrmModule();
     else if (tabId === 'guia') renderConsultantEngine();
     else if (tabId === 'call-ai') renderCallAIContext();
+    else if (tabId === 'operacoes') renderOperationsFoundation();
     document.querySelectorAll('.og-mobile-nav button').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -2943,6 +2950,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         createdDate: new Date().toISOString()
       });
       state.leads.unshift(lead);
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+        id: `EVT-${Date.now().toString(36).toUpperCase()}`,
+        type: 'client.created',
+        at: new Date().toISOString(),
+        clientId: lead.id,
+        source: `quick-lead:${quickLeadOrigin}`
+      });
+      localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
       state.selectedLeadId = lead.id;
       saveLeadsToStorage();
       renderDayDashboard();
@@ -4169,6 +4184,27 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
   }
 
+  function renderOperationsFoundation() {
+    const root = document.getElementById('operations-foundation');
+    if (!root) return;
+    const interactions = state.leads.reduce((total, lead) => total + (lead.interactions?.length || 0), 0);
+    const summary = OG_OPERATIONS_MODEL.summarizeOperations(state.operations);
+    const lastEvent = state.operations.activityEvents[0];
+    const metrics = [
+      ['Clientes', state.leads.length, 'Registro único compartilhado'],
+      ['Conversas', interactions, 'Histórico confirmado no CRM'],
+      ['Cotações salvas', state.history.length, 'Base atual do histórico'],
+      ['Eventos operacionais', summary.counts.activityEvents, 'Fundação para dashboards']
+    ];
+    root.innerHTML = `
+      <div class="operations-metrics">${metrics.map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${value}</strong><small>${escapeHtml(note)}</small></article>`).join('')}</div>
+      <section class="operations-foundation-grid">
+        <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos passam a usar coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Persistência local e servidor</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Biblioteca, vendas e comissões aguardam as próximas fases</b></div></article>
+        <article class="clean-card operations-status-card"><span class="og-kicker">ATIVIDADE MAIS RECENTE</span><h2>${lastEvent ? escapeHtml(lastEvent.type) : 'Nenhum evento novo'}</h2><p>${lastEvent ? `${escapeHtml(lastEvent.clientId || '')} · ${escapeHtml(new Date(lastEvent.at).toLocaleString('pt-BR'))}` : 'Os novos cadastros e ações operacionais passarão a alimentar esta linha do tempo.'}</p><button type="button" data-operations-open-crm class="og-button og-button-primary">Abrir clientes</button></article>
+      </section>`;
+    root.querySelector('[data-operations-open-crm]')?.addEventListener('click', () => switchTab('crm'));
+  }
+
   function syncVehicleGallerySelection() {
     const selected = state.consultant.selectedVehicleId;
     document.querySelectorAll('[data-og-vehicle]').forEach(item => {
@@ -4211,6 +4247,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <button type="button" data-mobile-tab="call-ai"><span>🎧</span><small>Call AI</small></button>
       <button type="button" data-mobile-tab="cotacao"><span>＋</span><small>Cotação</small></button>
       <button type="button" data-mobile-tab="scripts"><span>💬</span><small>Vendas</small></button>
+      <button type="button" data-mobile-tab="operacoes"><span>📊</span><small>Operações</small></button>
       <button type="button" data-mobile-tab="historico"><span>≡</span><small>Histórico</small></button>`;
     document.body.appendChild(nav);
     nav.querySelectorAll('button').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.mobileTab)));
@@ -4296,6 +4333,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   renderCatalog();
   renderTransporters();
   renderSalesKnowledge();
+  renderOperationsFoundation();
   renderDayDashboard();
   recalculateQuote();
 });

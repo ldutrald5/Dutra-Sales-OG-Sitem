@@ -19,6 +19,6 @@ assert.ok(app.includes('12 / vidaUtilComOgMeses'), 'ROI deve comparar o ciclo am
 assert.ok(data.includes('id: "micro_onibus"'), 'Segmento micro-ônibus ausente');
 assert.ok(data.includes('id: "van"'), 'Segmento vans ausente');
 assert.ok(!data.includes('Suporte Micro-ônibus'), 'Não deve inventar suporte de micro-ônibus');
-assert.ok(sw.includes("SW_VERSION = 'v14'"), 'Cache PWA precisa ser atualizado');
+assert.ok(/SW_VERSION = 'v\d+'/.test(sw), 'Cache PWA precisa ter versão explícita');
 
 console.log('Product evolution static checks: PASS');

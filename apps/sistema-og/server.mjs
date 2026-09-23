@@ -3,6 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const operationsModel = require('./operations-model.js');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(root, '.data');
@@ -36,9 +40,10 @@ function sendJson(res, status, value) {
 
 function readSharedState() {
   try {
-    return JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+    const stored = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+    return { ...stored, operations: operationsModel.migrateOperations(stored.operations || {}) };
   } catch {
-    return { revision: 0, updatedAt: null, leads: [], history: [] };
+    return { revision: 0, updatedAt: null, leads: [], history: [], operations: operationsModel.createEmptyOperations() };
   }
 }
 
@@ -171,6 +176,21 @@ function mergeHistory(local = [], remote = []) {
     .slice(0, 5000);
 }
 
+function mergeOperations(local = {}, remote = {}) {
+  const newer = operationsModel.migrateOperations(local);
+  const older = operationsModel.migrateOperations(remote);
+  const merged = operationsModel.createEmptyOperations();
+  for (const key of operationsModel.ENTITY_KEYS) merged[key] = unionById(newer[key], older[key], 'id');
+  merged.createdAt = older.createdAt || newer.createdAt;
+  merged.updatedAt = new Date().toISOString();
+  merged.migrationLog = unionById(
+    newer.migrationLog.map((item, index) => ({ id: `${item.toVersion}-${item.at || index}`, ...item })),
+    older.migrationLog.map((item, index) => ({ id: `${item.toVersion}-${item.at || index}`, ...item })),
+    'id'
+  ).map(({ id, ...item }) => item);
+  return merged;
+}
+
 async function readBody(req) {
   const chunks = [];
   let size = 0;
@@ -204,18 +224,21 @@ const server = http.createServer(async (req, res) => {
           revision: serverRevision,
           updatedAt: current.updatedAt,
           leads: current.leads || [],
-          history: current.history || []
+          history: current.history || [],
+          operations: operationsModel.migrateOperations(current.operations || {})
         });
       }
 
       const leads = mergeLeads(body.leads, current.leads || []);
       const history = mergeHistory(body.history, current.history || []);
+      const operations = mergeOperations(body.operations, current.operations || {});
 
       const next = {
         revision: serverRevision + 1,
         updatedAt: new Date().toISOString(),
         leads: cleanArray(leads, 10000),
-        history: cleanArray(history, 5000)
+        history: cleanArray(history, 5000),
+        operations
       };
       writeSharedState(next);
       return sendJson(res, 200, next);
