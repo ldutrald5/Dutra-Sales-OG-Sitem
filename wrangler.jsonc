@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sistema-og",
+  "main": "cloudflare/worker.mjs",
+  "compatibility_date": "2026-09-19",
+  "assets": {
+    "directory": "apps/sistema-og",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "OG_DATA",
+      "id": "SUBSTITUIR_PELO_ID_DO_KV"
+    }
+  ]
+}
