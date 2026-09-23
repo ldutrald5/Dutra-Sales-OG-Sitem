@@ -1,106 +1,63 @@
-# Dutra Sales OG
+# Dutra Sales OG · Sistema OG
 
-Sistema comercial da operação de vendas **Olho de Gato** (equalizadores de pressão / frota).
+**Operação comercial Olho de Gato** — equalizadores de pressão para frota.
 
-Monorepo **AIOX** com o aplicativo **Sistema OG** em `apps/sistema-og/`.
+Repositório: [ldutrald5/Dutra-Sales-OG-Sitem](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem)
 
-## Principais áreas (implementado)
+## O que é
 
-- CRM e gestão de leads
-- Meu Dia (fila, follow-ups, prioridades)
-- Cotação multi-veículos e peças
-- Consultor técnico por tipo de caminhão
-- Scripts / biblioteca de vendas
-- Transportadoras homologadas
-- Histórico de propostas
-- Copiloto comercial (secretário + alertas a partir dos dados)
-- PWA (instalável) e layout mobile
-- Sincronização PC ↔ celular na mesma rede (servidor local + merge)
-- Scripts de atalho Windows e Cloudflare Tunnel (opcional)
+Aplicativo **local-first** (PWA) para o vendedor:
 
-## Em evolução (roadmap)
+| Módulo | Função |
+|--------|--------|
+| **Meu Dia** | Fila, follow-ups, prioridades |
+| **CRM** | Leads, decisor, dor, frota, interações |
+| **Cotação** | Multi-veículos, peças, propostas |
+| **Call AI** | Transcrição → rascunho → revisão → CRM |
+| **Consultor** | Orientação por tipo de caminhão |
+| **Histórico** | Propostas e ligações |
 
-Preparação da linha **DUTRA SALES AI** (Call AI e inteligência comercial).
-Detalhes: [docs/PROJECT-CONTEXT.md](docs/PROJECT-CONTEXT.md) e stories em `docs/stories/`.
+Call AI: heurística local · Ollama (Qwen) · OpenAI (chave só no servidor).
 
-| Story | Tema | Status |
-|-------|------|--------|
-| OG-1 | Copiloto Comercial | Implementado (review) |
-| OG-2 | Modernização visual | Implementado (review) |
-| OG-3+ | Call AI, áudio, sales intelligence… | Planejado |
+## Rodar (exibição)
 
-## Requisitos
+### Windows
+1. Abra a pasta do projeto (Drive ou clone Git).
+2. Node.js 24+ instalado.
+3. Dois cliques em **INICIAR-SISTEMA-OG.cmd**.
+4. Abra **http://127.0.0.1:4321**
 
-- **Node.js** 24.x
-- **npm** 11+
-
-## Instalação
-
+### Terminal
 ```bash
-git clone https://github.com/ldutrald5/Dutra-Sales-OG-Sitem.git
-cd Dutra-Sales-OG-Sitem
 npm install
-```
-
-Copie `.env.example` → `.env` apenas se for usar integrações AIOX/LLM (o Sistema OG roda **sem** chave para uso comercial local).
-
-## Iniciar o Sistema OG
-
-```bash
 npm run og:start
 ```
 
-Abra: [http://127.0.0.1:4321](http://127.0.0.1:4321)
+Celular (mesma Wi-Fi): IP mostrado no terminal, ou `/celular`.
 
-No Windows (pasta do projeto):
-
-- `INICIAR-SISTEMA-OG.cmd` — sobe o servidor e abre como app
-- `CRIAR-ATALHO-SISTEMA-OG.cmd` — atalho na área de trabalho
-
-Celular na **mesma Wi‑Fi**: use o botão **Celular** no app ou a URL que o terminal mostrar (`http://IP:4321`).
-
-## Validação
+## Call AI (opcional)
 
 ```bash
-npm run og:check
+ollama pull qwen2.5:7b
 ```
 
-## Scripts úteis
+`.env` na raiz:
+```env
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:7b
+# OPENAI_API_KEY=sk-...
+```
 
-| Comando | Função |
-|---------|--------|
-| `npm run og:start` | Servidor local do Sistema OG |
-| `npm run og:css` | Rebuild do CSS Tailwind (utilities) |
-| `npm run og:check` | Verificação sintática JS |
-| `npm run og:tunnel` | Quick Tunnel Cloudflare (se `cloudflared` instalado) |
-| `npm run og:cloud:deploy` | Deploy Worker (requer conta/KV configurados) |
+## Stories
+
+| Story | Tema | Status |
+|-------|------|--------|
+| OG-1 | Copiloto comercial | Implementado |
+| OG-2 | Modernização visual | Implementado |
+| OG-3 | Call AI Light | Implementado |
 
 ## Estrutura
 
-```text
-/
-├── AGENTS.md              # Regras para agentes de IA
-├── package.json
-├── apps/sistema-og/       # Aplicativo comercial (frontend + server.mjs)
-├── docs/                  # Stories, arquitetura, design, contexto
-├── cloudflare/            # Worker + tunnel
-├── scripts/               # Utilitários Windows/build
-└── .aiox-core/            # Framework AIOX
-```
+`apps/sistema-og/` — app · `call-ai/` — provedores · `docs/stories/` — AIOX
 
-## Fontes de verdade
-
-| Onde | Papel |
-|------|--------|
-| **GitHub** (este repo) | Código oficial |
-| **Google Drive** | Backup / assets auxiliares |
-| **PC local** | Desenvolvimento e uso diário do vendedor |
-
-## Segurança
-
-- Não commite `.env`, tokens ou `apps/sistema-og/.data/` (estado CRM local).
-- Dados de clientes ficam no aparelho / servidor local; não vão para o Git.
-
-## Licença / uso
-
-Projeto privado da operação comercial Olho de Gato / Dutra Sales.
+`.env` e `.data/` não vão para o Git.
