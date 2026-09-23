@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     history: [],
     operations: OG_OPERATIONS_MODEL.createEmptyOperations(),
+    library: { query: '', type: 'all', status: 'active', audience: 'all', favoritesOnly: false },
     leads: [],
     selectedLeadId: null,
     selectedLeadIds: new Set(),
@@ -233,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
         renderDayDashboard();
         if (state.currentTab === 'crm') renderCrmModule();
+        if (state.currentTab === 'biblioteca') renderMaterialLibrary();
         if (state.currentTab === 'historico') renderHistory();
       } else if (browserHasData) scheduleServerSync();
       setSyncStatus('Sincronizado', 'ok');
@@ -289,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (tabId === 'crm') renderCrmModule();
     else if (tabId === 'guia') renderConsultantEngine();
     else if (tabId === 'call-ai') renderCallAIContext();
+    else if (tabId === 'biblioteca') renderMaterialLibrary();
     else if (tabId === 'operacoes') renderOperationsFoundation();
     document.querySelectorAll('.og-mobile-nav button').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4184,6 +4187,197 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
   }
 
+  function saveOperationsToStorage() {
+    state.operations.updatedAt = new Date().toISOString();
+    localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+    scheduleServerSync();
+  }
+
+  const LIBRARY_TYPE_LABELS = { video: 'Vídeo', image: 'Imagem', pdf: 'PDF', presentation: 'Apresentação', audio: 'Áudio', link: 'Link', script: 'Script', message: 'Mensagem' };
+  const LIBRARY_STATUS_LABELS = { draft: 'Rascunho', approved: 'Aprovado', outdated: 'Desatualizado', archived: 'Arquivado' };
+  const LIBRARY_TYPE_ICONS = { video: '▶', image: '▧', pdf: 'PDF', presentation: '▤', audio: '♪', link: '↗', script: '“”', message: '✉' };
+  let libraryPreviewUrl = null;
+
+  function parseLibraryTags(value) {
+    return [...new Set(String(value || '').split(',').map(item => item.trim()).filter(Boolean))].slice(0, 30);
+  }
+
+  function newLibraryId(prefix = 'mat') {
+    return `${prefix}_${globalThis.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(16).slice(2)}`}`;
+  }
+
+  function librarySearchText(material) {
+    return [material.title, material.description, material.origin, ...(material.segmentIds || []), ...(material.salesStages || []), ...(material.painTags || []), ...(material.objectionTags || []), ...(material.decisionMakerRoles || []), ...(material.productIds || []), ...(material.vehicleTypeIds || [])].join(' ').toLocaleLowerCase('pt-BR');
+  }
+
+  function filteredMaterials() {
+    const query = state.library.query.toLocaleLowerCase('pt-BR').trim();
+    return [...state.operations.materials].filter(material => {
+      if (state.library.type !== 'all' && material.mediaType !== state.library.type) return false;
+      if (state.library.status === 'active' && material.status === 'archived') return false;
+      if (state.library.status !== 'all' && state.library.status !== 'active' && material.status !== state.library.status) return false;
+      if (state.library.audience !== 'all' && material.audience !== state.library.audience) return false;
+      if (state.library.favoritesOnly && !material.favorite) return false;
+      return !query || librarySearchText(material).includes(query);
+    }).sort((a, b) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || String(b.lastOpenedAt || b.updatedAt).localeCompare(String(a.lastOpenedAt || a.updatedAt)));
+  }
+
+  function materialPermissionLabel(material) {
+    return material.audience === 'customer_authorized' ? '✓ Autorizado para cliente' : '🔒 Uso interno';
+  }
+
+  function safeLibraryUrl(value) {
+    try {
+      const url = new URL(value, location.origin);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch { return ''; }
+  }
+
+  function renderMaterialLibrary() {
+    const gallery = document.getElementById('library-gallery');
+    if (!gallery) return;
+    const materials = filteredMaterials();
+    document.getElementById('library-results-count').textContent = `${materials.length} ${materials.length === 1 ? 'material' : 'materiais'} · ${state.operations.materials.length} no total`;
+    if (!materials.length) {
+      gallery.innerHTML = `<div class="library-empty"><span>🎞️</span><h3>${state.operations.materials.length ? 'Nenhum material neste filtro' : 'Sua biblioteca começa aqui'}</h3><p>${state.operations.materials.length ? 'Ajuste a busca ou os filtros para localizar outro conteúdo.' : 'Cadastre o primeiro vídeo, imagem, PDF, link, áudio, roteiro ou mensagem.'}</p><button type="button" data-library-empty-new class="og-button og-button-primary">Cadastrar material</button></div>`;
+      gallery.querySelector('[data-library-empty-new]')?.addEventListener('click', openMaterialEditor);
+      return;
+    }
+    gallery.innerHTML = materials.map(material => `
+      <article class="library-card" data-material-id="${escapeHtml(material.id)}">
+        <button type="button" class="library-favorite ${material.favorite ? 'active' : ''}" data-library-action="favorite" aria-label="${material.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" aria-pressed="${Boolean(material.favorite)}">★</button>
+        <button type="button" class="library-card-main" data-library-action="preview">
+          <span class="library-media-icon" data-type="${escapeHtml(material.mediaType)}">${escapeHtml(LIBRARY_TYPE_ICONS[material.mediaType] || '◇')}</span>
+          <span class="library-card-copy"><small>${escapeHtml(LIBRARY_TYPE_LABELS[material.mediaType] || material.mediaType)} · v${escapeHtml(material.contentVersion || '1.0')}</small><strong>${escapeHtml(material.title)}</strong><span>${escapeHtml(material.description || 'Sem descrição')}</span></span>
+        </button>
+        <div class="library-card-meta"><span data-status="${escapeHtml(material.status)}">${escapeHtml(LIBRARY_STATUS_LABELS[material.status] || material.status)}</span><span data-audience="${escapeHtml(material.audience)}">${escapeHtml(materialPermissionLabel(material))}</span></div>
+        <div class="library-card-tags">${[...(material.segmentIds || []), ...(material.painTags || []), ...(material.vehicleTypeIds || [])].slice(0, 4).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
+        <div class="library-card-actions"><button type="button" data-library-action="edit">Editar</button><button type="button" data-library-action="preview">Visualizar</button></div>
+      </article>`).join('');
+  }
+
+  function openMaterialEditor(material = null) {
+    const editor = document.getElementById('library-editor');
+    editor.classList.remove('hidden');
+    document.getElementById('library-editor-title').textContent = material ? 'Editar material' : 'Cadastrar material';
+    document.getElementById('library-material-id').value = material?.id || '';
+    document.getElementById('library-title-input').value = material?.title || '';
+    document.getElementById('library-type').value = material?.mediaType || 'video';
+    document.getElementById('library-status').value = material?.status || 'draft';
+    document.getElementById('library-description').value = material?.description || '';
+    document.getElementById('library-file').value = '';
+    document.getElementById('library-link').value = material?.externalUrl || '';
+    document.getElementById('library-content').value = material?.textContent || '';
+    document.getElementById('library-audience').value = material?.audience || 'internal';
+    document.getElementById('library-version').value = material?.contentVersion || '1.0';
+    document.getElementById('library-segments').value = (material?.segmentIds || []).join(', ');
+    document.getElementById('library-stages').value = (material?.salesStages || []).join(', ');
+    document.getElementById('library-pains').value = (material?.painTags || []).join(', ');
+    document.getElementById('library-objections').value = (material?.objectionTags || []).join(', ');
+    document.getElementById('library-decision-makers').value = (material?.decisionMakerRoles || []).join(', ');
+    document.getElementById('library-products').value = (material?.productIds || []).join(', ');
+    document.getElementById('library-vehicles').value = (material?.vehicleTypeIds || []).join(', ');
+    document.getElementById('library-origin').value = material?.origin || '';
+    document.getElementById('library-consent').value = material?.consentRef || '';
+    editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('library-title-input').focus({ preventScroll: true });
+  }
+
+  function closeMaterialEditor() { document.getElementById('library-editor')?.classList.add('hidden'); }
+
+  async function saveMaterial(event) {
+    event.preventDefault();
+    const id = document.getElementById('library-material-id').value || newLibraryId();
+    const existingIndex = state.operations.materials.findIndex(item => item.id === id);
+    const existing = existingIndex >= 0 ? state.operations.materials[existingIndex] : null;
+    const audience = document.getElementById('library-audience').value;
+    const consentRef = document.getElementById('library-consent').value.trim();
+    if (audience === 'customer_authorized' && !consentRef) return showNotification('Informe a referência da autorização antes de liberar para cliente.', 'warning');
+    const file = document.getElementById('library-file').files[0];
+    let localAsset = existing?.localAsset || null;
+    if (file) {
+      try { localAsset = await OG_MATERIAL_STORE.put(id, file); }
+      catch { return showNotification('Não foi possível guardar o arquivo neste aparelho.', 'warning'); }
+    }
+    const now = new Date().toISOString();
+    const material = {
+      id, title: document.getElementById('library-title-input').value.trim(), mediaType: document.getElementById('library-type').value,
+      description: document.getElementById('library-description').value.trim(), status: document.getElementById('library-status').value,
+      audience, consentRef: consentRef || null, contentVersion: document.getElementById('library-version').value.trim() || '1.0',
+      externalUrl: document.getElementById('library-link').value.trim(), textContent: document.getElementById('library-content').value.trim(),
+      segmentIds: parseLibraryTags(document.getElementById('library-segments').value), salesStages: parseLibraryTags(document.getElementById('library-stages').value),
+      painTags: parseLibraryTags(document.getElementById('library-pains').value), objectionTags: parseLibraryTags(document.getElementById('library-objections').value),
+      decisionMakerRoles: parseLibraryTags(document.getElementById('library-decision-makers').value), productIds: parseLibraryTags(document.getElementById('library-products').value),
+      vehicleTypeIds: parseLibraryTags(document.getElementById('library-vehicles').value), origin: document.getElementById('library-origin').value.trim() || 'Não informada',
+      localAsset, favorite: Boolean(existing?.favorite), createdAt: existing?.createdAt || now, updatedAt: now, schemaVersion: 1
+    };
+    state.operations = OG_OPERATIONS_MODEL.upsertMaterial(state.operations, material);
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: existing ? 'material.updated' : 'material.created', at: now, materialId: id });
+    saveOperationsToStorage();
+    closeMaterialEditor();
+    renderMaterialLibrary();
+    renderOperationsFoundation();
+    showNotification(existing ? 'Material atualizado.' : 'Material cadastrado na biblioteca.', 'success');
+  }
+
+  async function openMaterialPreview(material) {
+    material.lastOpenedAt = new Date().toISOString();
+    saveOperationsToStorage();
+    if (libraryPreviewUrl) { URL.revokeObjectURL(libraryPreviewUrl); libraryPreviewUrl = null; }
+    let asset = null;
+    if (material.localAsset?.id) {
+      try { asset = await OG_MATERIAL_STORE.get(material.localAsset.id); } catch { asset = null; }
+      if (asset?.blob) libraryPreviewUrl = URL.createObjectURL(asset.blob);
+    }
+    const dialog = document.createElement('div');
+    dialog.className = 'library-preview-backdrop';
+    dialog.innerHTML = `<section class="library-preview" role="dialog" aria-modal="true" aria-labelledby="library-preview-title"><header><div><span class="og-kicker">${escapeHtml(LIBRARY_TYPE_LABELS[material.mediaType] || material.mediaType)}</span><h2 id="library-preview-title">${escapeHtml(material.title)}</h2></div><button type="button" data-library-close aria-label="Fechar prévia">✕</button></header><div class="library-preview-media">${renderMaterialAsset(material, asset)}</div><div class="library-preview-info"><p>${escapeHtml(material.description || 'Sem descrição')}</p><div class="library-card-meta"><span data-status="${escapeHtml(material.status)}">${escapeHtml(LIBRARY_STATUS_LABELS[material.status] || material.status)}</span><span data-audience="${escapeHtml(material.audience)}">${escapeHtml(materialPermissionLabel(material))}</span></div><small>Fonte: ${escapeHtml(material.origin || 'Não informada')} · versão ${escapeHtml(material.contentVersion || '1.0')}</small></div><footer><button type="button" data-library-close>Fechar</button>${material.audience === 'customer_authorized' ? '<button type="button" data-library-prepare class="og-button og-button-primary">Preparar para cliente</button>' : '<span class="library-internal-warning">Conteúdo interno: não compartilhar com cliente</span>'}</footer></section>`;
+    document.body.appendChild(dialog);
+    const close = () => { if (libraryPreviewUrl) URL.revokeObjectURL(libraryPreviewUrl); libraryPreviewUrl = null; dialog.remove(); };
+    dialog.querySelectorAll('[data-library-close]').forEach(button => button.addEventListener('click', close));
+    dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
+    dialog.querySelector('[data-library-prepare]')?.addEventListener('click', async () => {
+      const text = [material.textContent, material.externalUrl].filter(Boolean).join('\n\n');
+      if (!text) return showNotification('Este material não tem texto ou link para copiar.', 'info');
+      await navigator.clipboard.writeText(text);
+      showNotification('Conteúdo copiado para você revisar. Nenhum envio foi feito.', 'success');
+    });
+    dialog.querySelector('[data-library-close]')?.focus();
+  }
+
+  function renderMaterialAsset(material, asset) {
+    if (libraryPreviewUrl && material.mediaType === 'image') return `<img src="${libraryPreviewUrl}" alt="Prévia de ${escapeHtml(material.title)}">`;
+    if (libraryPreviewUrl && material.mediaType === 'video') return `<video src="${libraryPreviewUrl}" controls></video>`;
+    if (libraryPreviewUrl && material.mediaType === 'audio') return `<audio src="${libraryPreviewUrl}" controls></audio>`;
+    if (libraryPreviewUrl && material.mediaType === 'pdf') return `<iframe src="${libraryPreviewUrl}" title="PDF: ${escapeHtml(material.title)}"></iframe>`;
+    const externalUrl = safeLibraryUrl(material.externalUrl);
+    if (externalUrl) return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">Abrir referência externa ↗</a>`;
+    if (material.textContent) return `<pre>${escapeHtml(material.textContent)}</pre>`;
+    return `<div class="library-preview-missing"><span>${asset ? 'Formato sem prévia integrada' : 'Arquivo indisponível neste aparelho'}</span><small>Os metadados continuam preservados. Edite o material para anexar novamente.</small></div>`;
+  }
+
+  function initMaterialLibrary() {
+    document.getElementById('library-new')?.addEventListener('click', () => openMaterialEditor());
+    document.getElementById('library-editor-close')?.addEventListener('click', closeMaterialEditor);
+    document.getElementById('library-form-cancel')?.addEventListener('click', closeMaterialEditor);
+    document.getElementById('library-form')?.addEventListener('submit', saveMaterial);
+    document.getElementById('library-search')?.addEventListener('input', event => { state.library.query = event.target.value; renderMaterialLibrary(); });
+    document.getElementById('library-filter-type')?.addEventListener('change', event => { state.library.type = event.target.value; renderMaterialLibrary(); });
+    document.getElementById('library-filter-status')?.addEventListener('change', event => { state.library.status = event.target.value; renderMaterialLibrary(); });
+    document.getElementById('library-filter-audience')?.addEventListener('change', event => { state.library.audience = event.target.value; renderMaterialLibrary(); });
+    document.getElementById('library-filter-favorites')?.addEventListener('click', event => { state.library.favoritesOnly = !state.library.favoritesOnly; event.currentTarget.setAttribute('aria-pressed', String(state.library.favoritesOnly)); event.currentTarget.classList.toggle('active', state.library.favoritesOnly); renderMaterialLibrary(); });
+    document.getElementById('library-gallery')?.addEventListener('click', event => {
+      const action = event.target.closest('[data-library-action]')?.dataset.libraryAction;
+      const id = event.target.closest('[data-material-id]')?.dataset.materialId;
+      const material = state.operations.materials.find(item => item.id === id);
+      if (!action || !material) return;
+      if (action === 'favorite') { material.favorite = !material.favorite; material.updatedAt = new Date().toISOString(); saveOperationsToStorage(); renderMaterialLibrary(); }
+      if (action === 'edit') openMaterialEditor(material);
+      if (action === 'preview') openMaterialPreview(material);
+    });
+    renderMaterialLibrary();
+  }
+
   function renderOperationsFoundation() {
     const root = document.getElementById('operations-foundation');
     if (!root) return;
@@ -4194,12 +4388,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ['Clientes', state.leads.length, 'Registro único compartilhado'],
       ['Conversas', interactions, 'Histórico confirmado no CRM'],
       ['Cotações salvas', state.history.length, 'Base atual do histórico'],
-      ['Eventos operacionais', summary.counts.activityEvents, 'Fundação para dashboards']
+      ['Materiais', summary.counts.materials, 'Biblioteca comercial local-first']
     ];
     root.innerHTML = `
       <div class="operations-metrics">${metrics.map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${value}</strong><small>${escapeHtml(note)}</small></article>`).join('')}</div>
       <section class="operations-foundation-grid">
-        <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos passam a usar coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Persistência local e servidor</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Biblioteca, vendas e comissões aguardam as próximas fases</b></div></article>
+        <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos usam coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Biblioteca Comercial ativa</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Vendas e comissões aguardam as próximas fases</b></div></article>
         <article class="clean-card operations-status-card"><span class="og-kicker">ATIVIDADE MAIS RECENTE</span><h2>${lastEvent ? escapeHtml(lastEvent.type) : 'Nenhum evento novo'}</h2><p>${lastEvent ? `${escapeHtml(lastEvent.clientId || '')} · ${escapeHtml(new Date(lastEvent.at).toLocaleString('pt-BR'))}` : 'Os novos cadastros e ações operacionais passarão a alimentar esta linha do tempo.'}</p><button type="button" data-operations-open-crm class="og-button og-button-primary">Abrir clientes</button></article>
       </section>`;
     root.querySelector('[data-operations-open-crm]')?.addEventListener('click', () => switchTab('crm'));
@@ -4247,6 +4441,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <button type="button" data-mobile-tab="call-ai"><span>🎧</span><small>Call AI</small></button>
       <button type="button" data-mobile-tab="cotacao"><span>＋</span><small>Cotação</small></button>
       <button type="button" data-mobile-tab="scripts"><span>💬</span><small>Vendas</small></button>
+      <button type="button" data-mobile-tab="biblioteca"><span>🎞️</span><small>Biblioteca</small></button>
       <button type="button" data-mobile-tab="operacoes"><span>📊</span><small>Operações</small></button>
       <button type="button" data-mobile-tab="historico"><span>≡</span><small>Histórico</small></button>`;
     document.body.appendChild(nav);
@@ -4324,6 +4519,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initDayDashboard();
   initQuickLead();
   initCallAI();
+  initMaterialLibrary();
   initPremiumExperience();
   initCrmEvents();
   initItemPricingModal();

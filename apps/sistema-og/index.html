@@ -130,6 +130,11 @@
           <span>💬 Central de Vendas & ROI</span>
         </button>
 
+        <button data-tab="biblioteca" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <span aria-hidden="true">🎞️</span>
+          <span>Biblioteca Comercial</span>
+        </button>
+
         <button data-tab="operacoes" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <span aria-hidden="true">📊</span>
           <span>Performance & Operações</span>
@@ -1089,13 +1094,62 @@
     <div id="tab-operacoes" class="tab-content hidden space-y-6">
       <section class="operations-hero" aria-labelledby="operations-title">
         <div><span class="og-kicker">CENTRAL DE PERFORMANCE & OPERAÇÕES</span><h1 id="operations-title">Do trabalho comercial ao resultado.</h1><p>Uma visão única dos clientes, conversas, cotações e eventos que alimentarão performance, documentos e comissões.</p></div>
-        <div class="operations-phase"><small>FASE ATUAL</small><strong>Fundação operacional</strong><span>Schema, migração e persistência</span></div>
+        <div class="operations-phase"><small>FASE ATUAL</small><strong>Biblioteca Comercial</strong><span>Materiais, busca, filtros e prévia</span></div>
       </section>
       <div id="operations-foundation" aria-live="polite"></div>
       <section class="clean-card operations-roadmap" aria-label="Próximas fases">
-        <div><b>Próxima entrega</b><span>Biblioteca Comercial: materiais, busca, filtros, favoritos e prévia.</span></div>
+        <div><b>Entrega atual</b><span>Biblioteca Comercial: materiais, busca, filtros, favoritos, permissão e prévia local.</span></div>
         <div><b>Preparado para depois</b><span>Performance, funil, vendas, documentos, planilhas e comissões usarão o mesmo modelo versionado.</span></div>
       </section>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- FASE 2: BIBLIOTECA COMERCIAL                                            -->
+    <!-- ======================================================================= -->
+    <div id="tab-biblioteca" class="tab-content hidden space-y-5">
+      <section class="library-hero" aria-labelledby="library-title">
+        <div><span class="og-kicker">BIBLIOTECA COMERCIAL</span><h1 id="library-title">O material certo, na hora da conversa.</h1><p>Organize vídeos, imagens, PDFs, apresentações, áudios, links, scripts e mensagens. Arquivos enviados ficam guardados somente neste aparelho.</p></div>
+        <button id="library-new" type="button" class="og-button og-button-primary">＋ Cadastrar material</button>
+      </section>
+
+      <section class="library-toolbar clean-card" aria-label="Busca e filtros da biblioteca">
+        <label class="library-search"><span class="sr-only">Pesquisar materiais</span><input id="library-search" type="search" placeholder="Pesquisar por título, dor, objeção, produto ou veículo"></label>
+        <select id="library-filter-type" aria-label="Filtrar por tipo"><option value="all">Todos os tipos</option><option value="video">Vídeos</option><option value="image">Imagens</option><option value="pdf">PDFs</option><option value="presentation">Apresentações</option><option value="audio">Áudios</option><option value="link">Links</option><option value="script">Scripts</option><option value="message">Mensagens</option></select>
+        <select id="library-filter-status" aria-label="Filtrar por status"><option value="active">Ativos</option><option value="all">Todos os status</option><option value="draft">Rascunhos</option><option value="approved">Aprovados</option><option value="outdated">Desatualizados</option><option value="archived">Arquivados</option></select>
+        <select id="library-filter-audience" aria-label="Filtrar por permissão"><option value="all">Todas as permissões</option><option value="customer_authorized">Autorizado para cliente</option><option value="internal">Uso interno</option></select>
+        <button id="library-filter-favorites" type="button" class="og-chip" aria-pressed="false">★ Favoritos</button>
+      </section>
+
+      <div class="library-layout">
+        <section aria-labelledby="library-results-title">
+          <div class="library-section-head"><div><h2 id="library-results-title">Materiais</h2><p id="library-results-count">0 materiais</p></div></div>
+          <div id="library-gallery" class="library-gallery"></div>
+        </section>
+
+        <aside id="library-editor" class="clean-card library-editor hidden" aria-labelledby="library-editor-title">
+          <div class="library-editor-head"><div><span class="og-kicker">NOVO CONTEÚDO</span><h2 id="library-editor-title">Cadastrar material</h2></div><button id="library-editor-close" type="button" aria-label="Fechar cadastro">✕</button></div>
+          <form id="library-form" class="library-form">
+            <input id="library-material-id" type="hidden">
+            <label><span>Título *</span><input id="library-title-input" required maxlength="120"></label>
+            <div class="library-form-grid"><label><span>Tipo *</span><select id="library-type" required><option value="video">Vídeo</option><option value="image">Imagem</option><option value="pdf">PDF</option><option value="presentation">Apresentação</option><option value="audio">Áudio</option><option value="link">Link</option><option value="script">Script</option><option value="message">Mensagem</option></select></label><label><span>Status</span><select id="library-status"><option value="draft">Rascunho</option><option value="approved">Aprovado</option><option value="outdated">Desatualizado</option><option value="archived">Arquivado</option></select></label></div>
+            <label><span>Descrição</span><textarea id="library-description" rows="3" maxlength="600"></textarea></label>
+            <label><span>Arquivo neste aparelho</span><input id="library-file" type="file" accept="image/*,video/*,audio/*,.pdf,.ppt,.pptx"><small>O arquivo não é enviado ao servidor nem ao GitHub.</small></label>
+            <label><span>Link ou referência externa</span><input id="library-link" type="url" placeholder="https://..."></label>
+            <label><span>Texto, roteiro ou mensagem</span><textarea id="library-content" rows="4" maxlength="5000"></textarea></label>
+            <div class="library-form-grid"><label><span>Público</span><select id="library-audience"><option value="internal">Uso interno</option><option value="customer_authorized">Autorizado para cliente</option></select></label><label><span>Versão</span><input id="library-version" value="1.0" maxlength="20"></label></div>
+            <label><span>Segmentos</span><input id="library-segments" placeholder="transportadora, mineração"></label>
+            <label><span>Etapas comerciais</span><input id="library-stages" placeholder="diagnóstico, proposta, negociação"></label>
+            <label><span>Dores</span><input id="library-pains" placeholder="desgaste irregular, parada, custo"></label>
+            <label><span>Objeções</span><input id="library-objections" placeholder="preço, instalação, garantia"></label>
+            <label><span>Decisores</span><input id="library-decision-makers" placeholder="dono, manutenção, compras"></label>
+            <label><span>Produtos</span><input id="library-products" placeholder="equalizador, suporte, mangueira"></label>
+            <label><span>Veículos</span><input id="library-vehicles" placeholder="caminhão, carreta, ônibus, van"></label>
+            <label><span>Fonte / autoria</span><input id="library-origin" placeholder="Olho de Gato, cliente autorizado, fabricante"></label>
+            <label><span>Referência de autorização</span><input id="library-consent" placeholder="Obrigatória para material autorizado ao cliente"></label>
+            <div class="library-form-actions"><button id="library-form-cancel" type="button">Cancelar</button><button type="submit" class="og-button og-button-primary">Salvar material</button></div>
+          </form>
+        </aside>
+      </div>
     </div>
 
   </main>
@@ -1181,6 +1235,7 @@
   <!-- Scripts da Aplicação -->
   <script src="data.js"></script>
   <script src="operations-model.js"></script>
+  <script src="material-store.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

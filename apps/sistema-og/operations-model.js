@@ -84,5 +84,30 @@
     return next;
   }
 
-  return { SCHEMA_VERSION, ENTITY_KEYS, createEmptyOperations, migrateOperations, validateOperations, summarizeOperations, appendActivity };
+  function validateMaterial(material) {
+    const errors = [];
+    const mediaTypes = new Set(['video', 'image', 'pdf', 'presentation', 'audio', 'link', 'script', 'message']);
+    const statuses = new Set(['draft', 'approved', 'outdated', 'archived']);
+    const audiences = new Set(['internal', 'customer_authorized']);
+    if (!material?.id) errors.push('material exige id');
+    if (!String(material?.title || '').trim()) errors.push('material exige título');
+    if (!mediaTypes.has(material?.mediaType)) errors.push('mediaType inválido');
+    if (!statuses.has(material?.status)) errors.push('status inválido');
+    if (!audiences.has(material?.audience)) errors.push('audience inválido');
+    if (material?.audience === 'customer_authorized' && !String(material?.consentRef || '').trim()) errors.push('material autorizado exige consentRef');
+    return { valid: errors.length === 0, errors };
+  }
+
+  function upsertMaterial(operations, material) {
+    const result = validateMaterial(material);
+    if (!result.valid) throw new Error(result.errors.join('; '));
+    const next = migrateOperations(operations);
+    const index = next.materials.findIndex(item => String(item.id) === String(material.id));
+    if (index >= 0) next.materials.splice(index, 1, cloneJson(material));
+    else next.materials.unshift(cloneJson(material));
+    next.updatedAt = isoNow();
+    return next;
+  }
+
+  return { SCHEMA_VERSION, ENTITY_KEYS, createEmptyOperations, migrateOperations, validateOperations, summarizeOperations, appendActivity, validateMaterial, upsertMaterial };
 }));

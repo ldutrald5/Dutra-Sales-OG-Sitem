@@ -42,6 +42,8 @@ Fases independentes podem avançar em paralelo somente quando não alterarem o m
 
 ## Fase 2 — Biblioteca Comercial
 
+**Status:** Ready for Review — implementada na OG-15.
+
 ### Resultado
 
 Galeria local-first capaz de cadastrar, localizar, visualizar e classificar materiais comerciais sem transformar a biblioteca em uma pasta desorganizada.
@@ -57,12 +59,12 @@ Galeria local-first capaz de cadastrar, localizar, visualizar e classificar mate
 
 ### Critérios de saída
 
-- [ ] Material pode ser cadastrado e recuperado por ID estável.
-- [ ] Filtros cobrem segmento, etapa, dor, objeção, decisor, produto, veículo e permissão.
-- [ ] Prévia falha com segurança quando mídia está ausente.
-- [ ] Consentimento/permissão é visível antes de “Usar com cliente”.
-- [ ] Nenhum envio é automático.
-- [ ] Materiais desatualizados podem ser auditados.
+- [x] Material pode ser cadastrado e recuperado por ID estável.
+- [x] Busca cobre segmento, etapa, dor, objeção, decisor, produto e veículo; filtros dedicados cobrem tipo, status e permissão.
+- [x] Prévia falha com segurança quando mídia está ausente.
+- [x] Consentimento/permissão é visível antes de “Usar com cliente”.
+- [x] Nenhum envio é automático.
+- [x] Materiais desatualizados podem ser localizados e auditados pelos metadados.
 
 ### Dependências
 
@@ -375,4 +377,3 @@ OG-11/12/13, backend seguro, política organizacional, Fase 4 para métricas e F
 | Data | Versão | Descrição | Autor |
 |---|---:|---|---|
 | 2026-09-23 | 0.1 | Roadmap rastreável criado a partir das fases 2–9 da missão | @po/@sm |
-
