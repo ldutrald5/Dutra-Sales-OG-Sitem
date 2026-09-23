@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v10';
+const SW_VERSION = 'v11';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -20,7 +20,7 @@ const SHELL_URLS = [
   '/app.js',
   '/data.js',
   '/manifest.webmanifest',
-  '/assets/og-utilities.css',
+  '/assets/vendor/tailwindcss.js',
   '/assets/logo-olho-de-gato.jpg',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png'
@@ -31,8 +31,7 @@ const PREFETCH_MEDIA = [
   '/assets/premium/optimized/hero-mobile-640.webp',
   '/assets/premium/optimized/produto-og-768.webp',
   '/assets/premium/optimized/caminhoes-pesados-960.webp',
-  '/assets/premium/optimized/caminhoes-medios-960.webp',
-  '/imports/lucas-2026.json'
+  '/assets/premium/optimized/caminhoes-medios-960.webp'
 ];
 
 const MEDIA_EXT = /\.(webp|png|jpe?g|gif|svg|ico|woff2?)$/i;

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sistema OG">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/logo-olho-de-gato.jpg">
+  <link rel="preload" as="image" href="assets/premium/optimized/hero-desktop-1280.webp" media="(min-width: 768px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/premium/optimized/hero-mobile-640.webp" media="(max-width: 767px)" fetchpriority="high">
+  <title>Olho de Gato (OG) — Sistema Especialista de Cotação, Multi-Veículos & Vendas</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="assets/vendor/tailwindcss.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            og: {
+              brand: '#ffde17',
+              brandDark: '#f4c900',
+              dark: '#070707',
+              card: '#15171b',
+              border: '#30343a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos Customizados Ultra Clean & Print Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- ========================================================================= -->
+  <!-- DOCUMENTO OFICIAL DE PROPOSTA OLHO DE GATO (IMPRESSÃO / PDF EXATO)        -->
+  <!-- ========================================================================= -->
+  <div id="official-proposal-print">
+    <!-- Preenchido dinamicamente via app.js com base no modelo selecionado -->
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- TOPBAR CLEAN & NAVEGAÇÃO                                                  -->
+  <!-- ========================================================================= -->
+  <header class="brand-header sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo e Título Clean -->
+        <div class="flex items-center gap-3">
+          <div class="brand-logo-plate" title="Olho de Gato — Equalizador de Pressão">
+            <img src="assets/logo-olho-de-gato.jpg" alt="Logo Olho de Gato">
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-base tracking-tight text-slate-100">OLHO DE GATO</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold px-1.5 py-0.5 rounded">SISTEMA MULTI-VEÍCULOS</span>
+            </div>
+            <p class="text-[11px] text-slate-400 hidden sm:block">Equalização contínua para uma frota que não pode parar</p>
+          </div>
+        </div>
+
+        <!-- Contatos Rápidos da Empresa e Botão Versão Mobile -->
+        <div class="flex items-center gap-4">
+          <button id="btn-install-app" type="button" class="hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-bold transition shadow-sm" title="Instalar o Sistema OG neste aparelho">
+            <span>📱</span>
+            <span>Instalar app</span>
+          </button>
+
+          <div class="hidden md:flex items-center gap-5 text-xs text-slate-400 border-l border-slate-800 pl-4">
+            <div>
+              <span class="text-slate-500 block text-[10px] font-semibold">Atendimento Fábrica</span>
+              <span class="text-slate-200 font-bold font-mono">(44) 3013-1004</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block text-[10px] font-semibold">WhatsApp Vendas</span>
+              <span class="text-slate-200 font-bold font-mono">(11) 94234-4428</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Barra de Abas / Menu de Navegação -->
+      <div id="nav-tabs-container" class="flex overflow-x-auto gap-1 sm:gap-2 py-2 border-t border-slate-800/80 scrollbar-none text-xs sm:text-sm">
+        <button data-tab="dia" class="nav-tab px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold shadow-md transition flex items-center gap-2 flex-shrink-0">
+          <span aria-hidden="true">◉</span>
+          <span>Meu Dia</span>
+        </button>
+
+        <button data-tab="cotacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          <span>⚡ Cotação Multi-Veículos (Frota)</span>
+        </button>
+
+        <button data-tab="guia" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+          <span>🚛 Consultor de Suportes (Árvore)</span>
+        </button>
+
+        <button data-tab="crm" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          <span>🎯 Leads & Transcrição OCR</span>
+        </button>
+
+        <button data-tab="catalogo" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          <span>📦 Vitrine de Peças & Códigos</span>
+        </button>
+
+        <button data-tab="transportadoras" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+          <span>🚚 Transportadoras</span>
+        </button>
+
+        <button data-tab="scripts" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          <span>💬 Central de Vendas & ROI</span>
+        </button>
+
+        <button data-tab="historico" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>📜 Histórico</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- CONTEÚDO PRINCIPAL                                                        -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ======================================================================= -->
+    <!-- MEU DIA: SECRETÁRIO, ASSISTENTE E TREINADOR COMERCIAL                  -->
+    <!-- ======================================================================= -->
+    <div id="tab-dia" class="tab-content space-y-6">
+      <section class="og-command-hero" aria-labelledby="day-title">
+        <div class="og-command-copy">
+          <span class="og-kicker">CENTRAL COMERCIAL · OLHO DE GATO</span>
+          <h1 id="day-title">Seu dia, com cada próximo passo no lugar.</h1>
+          <p id="day-guidance">Comece pelos retornos vencidos e termine cada conversa com uma ação e uma data.</p>
+          <div class="og-hero-actions" aria-label="Ações rápidas do dia">
+            <button id="btn-hero-start" type="button" class="og-button og-button-primary">Começar pelas prioridades</button>
+            <button id="btn-hero-quote" type="button" class="og-button og-button-ghost">Criar cotação</button>
+          </div>
+        </div>
+        <div class="og-command-clock" aria-label="Horário e bloco comercial atual">
+          <strong id="day-clock">--:--</strong>
+          <span id="day-block">Preparando sua rotina</span>
+        </div>
+      </section>
+
+      <section class="og-product-proof" aria-labelledby="product-proof-title">
+        <div class="og-product-proof-copy">
+          <span class="og-kicker">TECNOLOGIA OLHO DE GATO</span>
+          <h2 id="product-proof-title">Pressão equilibrada. Menos desgaste. Mais estrada.</h2>
+          <p>O equalizador conecta os pneus do rodado duplo, facilita a inspeção visual e ajuda a manter a pressão uniforme durante a operação.</p>
+          <ul class="og-benefit-list">
+            <li><span aria-hidden="true">✓</span> Equalização contínua no rodado duplo</li>
+            <li><span aria-hidden="true">✓</span> Indicador visual para conferência rápida</li>
+            <li><span aria-hidden="true">✓</span> Aplicação orientada por veículo e eixo</li>
+          </ul>
+          <button id="btn-product-application" type="button" class="og-button og-button-secondary">Ver produto e aplicação</button>
+        </div>
+        <picture class="og-product-proof-media">
+          <source srcset="assets/premium/optimized/produto-og-768.webp" media="(max-width: 767px)">
+          <img src="assets/premium/optimized/produto-og-1280.webp" loading="lazy" width="1280" height="720" alt="Equalizador Olho de Gato instalado em uma roda de caminhão">
+        </picture>
+      </section>
+
+      <section class="og-routine" aria-label="Rotina comercial recomendada">
+        <div data-routine="morning"><small>09:00–11:00</small><strong>Prospecção</strong><span>Ligar e abrir conversas</span></div>
+        <div data-routine="midday"><small>11:00–12:00</small><strong>Organização</strong><span>Registrar e agendar</span></div>
+        <div data-routine="afternoon"><small>13:00–17:00</small><strong>Avanço</strong><span>Diagnóstico e propostas</span></div>
+        <div data-routine="closing"><small>17:00–17:30</small><strong>Fechamento</strong><span>CRM e plano de amanhã</span></div>
+      </section>
+
+      <section class="og-kpi-grid" aria-label="Indicadores do dia">
+        <button class="og-kpi" data-day-filter="overdue"><span>Vencidos</span><strong id="kpi-overdue">0</strong><small>Precisam de decisão agora</small></button>
+        <button class="og-kpi" data-day-filter="today"><span>Hoje</span><strong id="kpi-today">0</strong><small>Retornos agendados</small></button>
+        <button class="og-kpi" data-day-filter="priority"><span>Prioridade alta</span><strong id="kpi-priority">0</strong><small>Oportunidades importantes</small></button>
+        <button class="og-kpi" data-day-filter="no-action"><span>Sem próximo passo</span><strong id="kpi-no-action">0</strong><small>Risco de esfriar</small></button>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 clean-card p-5">
+          <div class="og-section-head">
+            <div><span class="og-kicker">SECRETÁRIO COMERCIAL</span><h2>Fila de ação</h2></div>
+            <div class="og-filter-row" role="group" aria-label="Filtrar fila">
+              <button class="og-chip active" data-day-filter="all">Todos</button>
+              <button class="og-chip" data-day-filter="overdue">Vencidos</button>
+              <button class="og-chip" data-day-filter="today">Hoje</button>
+              <button class="og-chip" data-day-filter="priority">Alta</button>
+            </div>
+          </div>
+          <div id="day-opportunity-list" class="og-opportunity-list"></div>
+        </div>
+
+        <aside class="lg:col-span-4 space-y-4">
+          <div class="clean-card p-5 og-coach-card">
+            <span class="og-kicker">TREINADOR DE VENDAS</span>
+            <h2 id="coach-title">Seu foco de hoje</h2>
+            <p id="coach-message">O sistema usará os registros do CRM para apontar a lacuna comercial mais importante.</p>
+            <div id="coach-prompts" class="og-coach-prompts"></div>
+          </div>
+          <div class="clean-card p-5">
+            <span class="og-kicker">REGISTRO RÁPIDO</span>
+            <h2 class="text-base font-bold text-slate-100 mt-2">Terminou uma ligação?</h2>
+            <p class="text-xs text-slate-400 mt-1 mb-3">Abra o cliente e registre uma nota curta. O próximo passo volta para esta fila automaticamente.</p>
+            <button id="btn-open-crm-from-day" class="w-full px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition">Abrir CRM e registrar conversa</button>
+          </div>
+        </aside>
+      </section>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 1: COTAÇÃO MULTI-VEÍCULOS (FROTAS MISTAS)                          -->
+    <!-- ======================================================================= -->
+    <div id="tab-cotacao" class="tab-content hidden space-y-6">
+
+      <!-- 1. Configuração Comercial & Dados do Cliente -->
+      <div class="clean-card p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-slate-200">Dados da Empresa / Cliente</span>
+          <span class="text-[11px] text-amber-400 font-semibold">Informações para a Proposta Oficial</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Nome / Contato</label>
+            <input type="text" id="client-name" value="" placeholder="Ex: Lucas Dutra" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Razão Social / Empresa</label>
+            <input type="text" id="client-company" value="" placeholder="Ex: Vendruscolo Transportes" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">CNPJ do Cliente</label>
+            <input type="text" id="client-cnpj" value="" placeholder="Ex: 44.615.764/0001-67" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Inscrição Estadual (IE)</label>
+            <input type="text" id="client-ie" value="" placeholder="Ex: 797.830.339.114" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">WhatsApp / Telefone</label>
+            <input type="text" id="client-phone" value="" placeholder="Ex: 44 9165-8321" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 border-t border-slate-800/60">
+          <div>
+            <label class="block text-[11px] font-semibold text-amber-400 mb-1">Condição Negociada (Parcelamento)</label>
+            <select id="client-parcelas" class="w-full bg-slate-900 border border-amber-500/50 rounded-lg px-3 py-2 text-xs text-slate-100 font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="1">1x (À Vista — 3% Desconto)</option>
+              <option value="2">2x (30/60 dias)</option>
+              <option value="3">3x (30/60/90 dias — Mais Recomendada)</option>
+              <option value="4">4x (4 parcelas mensais)</option>
+              <option value="5">5x (5 parcelas mensais)</option>
+              <option value="6" selected>6x (6 parcelas mensais — Padrão)</option>
+              <option value="8">8x (8 parcelas mensais)</option>
+              <option value="10">10x (10 parcelas mensais — Especial)</option>
+              <option value="12">12x (12 parcelas mensais)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Tabela de Preço</label>
+            <select id="client-tier" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="lead_ie">Lead — CNPJ com IE (R$ 213 EQ / R$ 22 SUP)</option>
+              <option value="lead_sem_ie">Lead — Autônomo / Sem IE (R$ 239 EQ / R$ 24 SUP)</option>
+              <option value="revenda">Revenda Autorizada (R$ 157 EQ / R$ 20 SUP / R$ 30 MANG)</option>
+              <option value="tabela_base">Tabela Geral Catálogo (R$ 172 EQ / R$ 22 SUP)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Texto do Frete na Proposta</label>
+            <input type="text" id="client-frete-texto" value="FRETE A NEGOCIAR (+/- R$ 120,00)" placeholder="Ex: SEM CUSTO ou FRETE A NEGOCIAR (+/- R$ 120,00)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Prazo de Entrega</label>
+            <input type="text" id="client-prazo-entrega" value="15 DIAS ÚTEIS" placeholder="Ex: 15 DIAS ÚTEIS" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Painel de Controle Multi-Veículos & Exportações -->
+      <div class="clean-card p-4 space-y-4">
+        
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <h2 class="font-bold text-sm text-slate-100">Veículos da Frota (Multi-Veículos)</h2>
+            <span id="badge-total-vehicles-count" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900 text-amber-400 border border-slate-700">2 veículos</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-between lg:justify-end">
+            <!-- Seletor do Modelo de PDF -->
+            <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Layout PDF:</span>
+              <select id="pdf-template-selector" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-amber-400 font-bold focus:outline-none">
+                <option value="vendruscolo" selected>📄 Modelo 1: Vendruscolo (Dark/Amarelo/Verde Neon — Foto)</option>
+                <option value="lorentrans">📄 Modelo 2: Lorentrans (Executivo c/ Risco e Diluição)</option>
+                <option value="multi_roi">📄 Modelo 3: Frotas Mistas & ROI (Técnico Detalhado)</option>
+              </select>
+            </div>
+
+            <button id="btn-import-quote-modal" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-xs border border-slate-700 transition flex items-center gap-1.5">
+              <span>📷 Importar Orçamento</span>
+            </button>
+            <button id="btn-start-parts-quote" class="px-3.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 font-bold text-xs transition flex items-center gap-1.5">
+              <span>🧰 Só Peças</span>
+            </button>
+            <button id="btn-add-vehicle-slot" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition flex items-center gap-1.5">
+              <span>+ Adicionar Outro Caminhão</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Botões do WhatsApp (3 Opções) e Impressão -->
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[11px] font-bold text-slate-300 mr-1 flex items-center gap-1">
+              <span>💬</span> WhatsApp:
+            </span>
+            <button id="btn-copy-whatsapp-simple" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition flex items-center gap-1" title="Mensagem curta de ~5 linhas, ideal para contato rápido sem Ver Mais">
+              <span>1. Curta (Sem 'Ver Mais')</span>
+            </button>
+            <button id="btn-copy-whatsapp-standard" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1" title="Mensagem comercial detalhada veículo por veículo">
+              <span>2. Padrão por Veículo</span>
+            </button>
+            <button id="btn-copy-whatsapp-roi" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1" title="Mensagem executiva completa com ROI, economia anual e payback">
+              <span>3. Executiva com ROI & Payback</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-save-quote" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition" title="Salvar no histórico">
+              💾 Salvar
+            </button>
+            <button id="btn-print-quote" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span>📄 Imprimir / Gerar PDF Oficial</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- SANFONA / CONTAINER DE VEÍCULOS -->
+        <div id="vehicles-accordion-container" class="space-y-3 pt-2">
+          <!-- Renderizado dinamicamente via app.js -->
+        </div>
+
+        <!-- SEÇÃO DE ITENS E FERRAMENTAS EXTRAS (AVULSAS) -->
+        <div id="extra-items-container" class="parts-workbench bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🧰</span> Reposição e Manutenção
+            </span>
+            <span class="text-[10px] text-slate-400">Adicione peças individuais, mesmo sem cadastrar um caminhão</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase">
+                  <th class="py-2 px-3">Código</th>
+                  <th class="py-2 px-3">Descrição</th>
+                  <th class="py-2 px-3 text-center">Quantidade</th>
+                  <th class="py-2 px-3 text-right">Valor Unitário</th>
+                  <th class="py-2 px-3 text-right">Subtotal</th>
+                  <th class="py-2 px-3 text-right w-8"></th>
+                </tr>
+              </thead>
+              <tbody id="extra-items-tbody">
+                <!-- Gerado via app.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-2 pt-2">
+            <select id="quick-add-extra-piece-select" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 flex-1 focus:outline-none">
+              <!-- Populado via app.js -->
+            </select>
+            <div class="flex items-center gap-2">
+              <input type="number" id="quick-add-extra-piece-qty" value="1" min="1" max="99" class="w-14 bg-slate-900 border border-slate-700 rounded py-1.5 text-center text-xs font-bold text-slate-100">
+              <button id="btn-add-extra-piece" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition whitespace-nowrap">
+                + Adicionar Peça
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3. Totais Consolidados da Frota -->
+      <div id="quote-metrics-card" class="clean-card p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Total Geral do Pedido</span>
+          <div id="metric-total" class="text-xl font-black text-amber-400 mt-0.5">R$ 0,00</div>
+          <div id="metric-subtotal" class="text-[11px] text-slate-400 mt-0.5">Subtotal: R$ 0,00</div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Condição Negociada</span>
+          <div id="metric-condicao" class="text-sm font-bold text-slate-200 mt-1">6x de R$ 0,00</div>
+          <div class="text-[10px] text-emerald-400 mt-0.5 font-semibold">Sem juros no faturado</div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Custo Diluído por Veículo</span>
+          <div id="metric-parcela-info" class="text-sm font-bold text-slate-200 mt-1">R$ 0,00 / mês</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">por caminhão/mês</div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Proteção de Frota</span>
+          <div id="metric-pecas" class="text-sm font-bold text-slate-200 mt-1">0 peças (0 pneus)</div>
+          <div class="text-[10px] text-emerald-400 mt-0.5 font-semibold">Frete e Treinamento Inclusos</div>
+        </div>
+
+      </div>
+
+      <!-- 3.5 Dados para Cotação de Frete (USO INTERNO — não entra na proposta) -->
+      <div id="freight-quote-info-card" class="clean-card p-4 border border-dashed border-slate-700">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <span>🚚</span> Dados para Cotação de Frete <span class="text-slate-500 font-normal">(uso interno — não entra na proposta)</span>
+          </span>
+          <button id="btn-copy-freight-info" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 transition">
+            Copiar dados
+          </button>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div>
+            <span class="text-slate-500 block text-[10px] font-semibold">Peso Total</span>
+            <span id="freight-info-peso" class="font-bold text-slate-200">0,0 kg</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[10px] font-semibold">Volumes</span>
+            <span id="freight-info-volumes" class="font-bold text-slate-200">0</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[10px] font-semibold">Dimensões / volume</span>
+            <span id="freight-info-dim" class="font-bold text-slate-200">—</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[10px] font-semibold">Destino</span>
+            <span id="freight-info-destino" class="font-bold text-slate-200">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 2: CONSULTOR DE SUPORTES POR TIPO DE CAMINHÃO (ÁRVORE DE DECISÃO)    -->
+    <!-- ======================================================================= -->
+    <div id="tab-guia" class="tab-content hidden space-y-6">
+
+      <section class="og-vehicle-gallery" aria-labelledby="vehicle-gallery-title">
+        <div class="og-vehicle-gallery-head">
+          <div>
+            <span class="og-kicker">ESCOLHA PELA OPERAÇÃO</span>
+            <h2 id="vehicle-gallery-title">Qual caminhão você está configurando?</h2>
+          </div>
+          <p>A imagem orienta a categoria; o nome e as perguntas técnicas confirmam a aplicação correta.</p>
+        </div>
+        <div class="og-vehicle-gallery-grid">
+          <article class="og-vehicle-visual">
+            <img src="assets/premium/optimized/caminhoes-medios-960.webp" loading="lazy" width="960" height="540" alt="Caminhões médios e urbanos">
+            <div class="og-vehicle-copy"><strong>Leves e médios</strong><small>Escolha a configuração exata</small></div>
+            <div class="og-vehicle-options" aria-label="Configurações de caminhões leves e médios">
+              <button type="button" data-og-vehicle="3_4">3/4 ou VUC</button>
+              <button type="button" data-og-vehicle="toco_4x2">Toco 4x2</button>
+            </div>
+          </article>
+          <article class="og-vehicle-visual">
+            <img src="assets/premium/optimized/caminhoes-pesados-960.webp" loading="lazy" width="960" height="540" alt="Cavalos mecânicos e caminhões pesados">
+            <div class="og-vehicle-copy"><strong>Pesados e conjuntos</strong><small>Escolha a composição exata</small></div>
+            <div class="og-vehicle-options" aria-label="Configurações de caminhões pesados e conjuntos">
+              <button type="button" data-og-vehicle="trucado_6x2_8x2">Truck ou Bitruck</button>
+              <button type="button" data-og-vehicle="trucado_reboque">Romeu e Julieta</button>
+              <button type="button" data-og-vehicle="cavalo_toco_carreta3">Cavalo 4x2 + Carreta</button>
+              <button type="button" data-og-vehicle="trucado_carreta3">Cavalo 6x2 + Carreta</button>
+              <button type="button" data-og-vehicle="bitrem_7eixos">Bitrem</button>
+              <button type="button" data-og-vehicle="rodotrem_9eixos">Rodotrem</button>
+            </div>
+          </article>
+        </div>
+      </section>
+      
+      <div class="clean-card p-5">
+        <div class="max-w-3xl mb-4">
+          <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">ÁRVORE DE DECISÃO TÉCNICA</span>
+          <h2 class="text-lg font-bold text-slate-100 mt-2">Consultor Inteligente de Suportes por Caminhão</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Digite o modelo (ex: <i>"Accelo"</i>, <i>"Delivery 3/4"</i>, <i>"Scania R450"</i>, <i>"Volvo VM"</i>, <i>"Bitrem 6x4"</i>) e adicione o veículo diretamente na cotação multi-veículos!</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div class="md:col-span-2">
+            <input type="text" id="consultant-search-input" placeholder="Digite: Accelo, Delivery 3/4, Toco Scania, Bitrem, Rodotrem..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex-1">
+              <select id="consultant-libras-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 font-bold">
+                <option value="110" selected>110 Libras (EQ-110)</option>
+                <option value="115">115 Libras (EQ-115)</option>
+                <option value="120">120 Libras (EQ-120)</option>
+              </select>
+            </div>
+            <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" id="consultant-include-dianteira" checked class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500">
+              <span>Dianteira</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 mb-4" id="consultant-vehicle-quick-buttons">
+          <!-- Populado via app.js -->
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div id="consultant-questions-container" class="lg:col-span-7 space-y-2.5">
+            <!-- Renderizado via app.js -->
+          </div>
+
+          <div id="consultant-resolution-container" class="lg:col-span-5 bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <!-- Renderizado via app.js -->
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800 text-right">
+          <button id="btn-inject-consultant-to-quote" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition inline-flex items-center gap-2">
+            <span>⚡ Injetar este Veículo na Cotação Multi-Veículos</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 3: CRM, EXCLUSÃO EM MASSA & TRANSCRIÇÃO OCR                        -->
+    <!-- ======================================================================= -->
+    <div id="tab-crm" class="tab-content hidden space-y-6">
+      
+      <div class="clean-card p-4 flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold">
+            🎯
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-base text-slate-100">Gestão de Leads & Transcrição</h2>
+              <span id="crm-total-count-badge" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900 text-amber-400 border border-slate-700">0 leads</span>
+            </div>
+            <p class="text-xs text-slate-400">Importe contatos, transcreva fotos e dispare mensagens em 1 clique.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <input type="text" id="crm-search-input" placeholder="Buscar por nome, CNPJ..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none flex-1 sm:w-48">
+
+          <select id="crm-status-filter" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none font-semibold">
+            <option value="all">Todos os Status</option>
+            <option value="novo">Novo Lead</option>
+            <option value="contatado">Contatado</option>
+            <option value="proposta_enviada">Proposta Enviada</option>
+            <option value="negociacao">Em Negociação</option>
+            <option value="fechado">Venda Fechada 🏆</option>
+          </select>
+
+          <button id="btn-crm-import-modal" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md">
+            📥 Importar / OCR
+          </button>
+
+          <button id="btn-crm-clear-all" class="px-3 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition">
+            Limpar Base
+          </button>
+
+          <button id="btn-crm-export-csv" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
+            CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 clean-card p-4 overflow-hidden flex flex-col justify-between">
+          <div class="overflow-x-auto max-h-[580px] overflow-y-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 bg-[#111827] z-10">
+                  <th class="py-2.5 px-3 w-10 text-center">
+                    <input type="checkbox" id="crm-select-all-checkbox" class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500">
+                  </th>
+                  <th class="py-2.5 px-3">Empresa / Contato</th>
+                  <th class="py-2.5 px-3">Telefone / CNPJ</th>
+                  <th class="py-2.5 px-3">Cidade</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                  <th class="py-2.5 px-3 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="crm-leads-tbody">
+                <!-- Preenchido via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 clean-card p-5">
+          <div id="crm-lead-inspector">
+            <!-- Renderizado dinamicamente via app.js -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BARRA FLUTUANTE DE AÇÕES EM MASSA (BATCH TOOLBAR) -->
+    <div id="crm-batch-toolbar" class="batch-toolbar">
+      <div class="bg-slate-900 border border-slate-700 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 text-xs font-semibold">
+        <div class="flex items-center gap-2 text-slate-200">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="batch-selected-count">0 selecionados</span>
+        </div>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <button id="btn-batch-delete" class="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold transition flex items-center gap-1.5 shadow-md">
+          <span>Excluir Selecionados</span>
+        </button>
+        <button id="btn-batch-cancel" class="text-slate-400 hover:text-slate-200 transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL DE IMPORTAÇÃO & OCR -->
+    <div id="modal-import-leads" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="clean-card max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📸</span>
+            <h3 class="font-bold text-base text-slate-100">Importação de Leads & Transcrição OCR</h3>
+          </div>
+          <button id="btn-close-modal-import" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+          <div id="ocr-dropzone" class="ocr-dropzone p-6 text-center">
+            <input type="file" id="ocr-input-file" accept="image/*" class="hidden">
+            <label for="ocr-input-file" class="cursor-pointer flex flex-col items-center gap-1.5">
+              <span class="text-2xl">🖼️</span>
+              <span class="text-xs font-bold text-slate-200">Clique para carregar ou arraste uma foto/print aqui</span>
+            </label>
+          </div>
+
+          <div id="ocr-image-container" class="hidden flex items-center gap-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+            <img id="ocr-preview-img" class="w-20 h-20 object-cover rounded-lg border border-slate-700">
+            <div class="text-xs text-slate-300">
+              <div class="font-bold text-slate-100">Imagem Carregada</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Pronta para reconhecimento OCR.</div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-300">Instrução / Prompt para OCR:</label>
+            <input type="text" id="ocr-prompt-input" value="Extraia apenas o Nome do Cliente e o Código/ID de cada registro da imagem." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-medium focus:outline-none">
+            
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button data-preset="nome_codigo" class="btn-ocr-preset px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-semibold">
+                Apenas Nome e Código
+              </button>
+              <button data-preset="nome_telefone_cnpj" class="btn-ocr-preset px-2.5 py-1 rounded-md bg-slate-950 text-slate-300 border border-slate-700 text-[11px] font-medium">
+                Nome, Telefone e CNPJ
+              </button>
+            </div>
+          </div>
+
+          <div class="text-right pt-1">
+            <button id="btn-execute-ocr" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition ml-auto">
+              <span>🔍 Reconhecer Texto</span>
+            </button>
+          </div>
+
+          <div id="ocr-progress-container" class="hidden space-y-1 pt-2">
+            <div class="flex justify-between text-[11px] text-slate-400 font-semibold">
+              <span id="ocr-progress-text">Processando OCR...</span>
+            </div>
+            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div id="ocr-progress-bar" class="bg-amber-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div id="ocr-result-container" class="hidden space-y-2 pt-2 border-t border-slate-800">
+            <textarea id="ocr-extracted-textarea" rows="4" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 font-mono leading-relaxed focus:outline-none"></textarea>
+            <div class="text-right">
+              <button id="btn-import-ocr-leads" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition">
+                + Importar para os Leads
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-4 space-y-3">
+          <textarea id="textarea-leads-import" rows="3" placeholder="Cole contatos: Nome, Empresa, Telefone, CNPJ, Cidade" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-100 font-mono focus:outline-none"></textarea>
+          <div class="flex items-center justify-between pt-1">
+            <input type="file" id="file-leads-import" accept=".csv, .txt" class="text-xs text-slate-400">
+            <button id="btn-process-import" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
+              Processar e Importar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 4: VITRINE DE PEÇAS & CÓDIGOS                                      -->
+    <!-- ======================================================================= -->
+    <div id="tab-catalogo" class="tab-content hidden space-y-6">
+      <div class="clean-card p-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
+        <div class="w-full sm:w-80">
+          <input type="text" id="catalog-search" placeholder="Buscar peça por código ou nome..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div class="w-full sm:w-60">
+          <select id="catalog-category-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-semibold focus:outline-none">
+            <option value="all">Todas as Categorias</option>
+            <option value="equalizador">Equalizadores de Pressão</option>
+            <option value="suporte">Suportes de Fixação</option>
+            <option value="mangueira">Mangueiras Trinoladas</option>
+            <option value="ferramenta">Ferramentas & Kits</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Renderizado dinamicamente via app.js -->
+      </div>
+    </div>
+
+    <!-- MODAL: PREÇOS POR TIPO DE CLIENTE (Vitrine de Peças) -->
+    <div id="modal-item-pricing" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="clean-card w-full max-w-lg p-5 space-y-4 animate-fade-in">
+        <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+          <div>
+            <span id="item-pricing-code" class="font-mono font-bold text-sm bg-slate-900 text-amber-400 px-2 py-0.5 rounded border border-slate-700">EQ-000</span>
+            <h3 id="item-pricing-name" class="font-bold text-slate-100 text-sm mt-2">Nome da peça</h3>
+          </div>
+          <button id="btn-close-modal-item-pricing" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Serve para</span>
+          <p id="item-pricing-desc" class="text-xs text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-2">Preço por tipo de cliente</span>
+          <div id="item-pricing-tiers" class="space-y-2">
+            <!-- Preenchido via app.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 5: TRANSPORTADORAS                                                 -->
+    <!-- ======================================================================= -->
+    <div id="tab-transportadoras" class="tab-content hidden space-y-6">
+      <div class="clean-card p-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
+        <div>
+          <h2 class="font-bold text-base text-slate-100">Transportadoras Homologadas Olho de Gato</h2>
+          <p class="text-xs text-slate-400">22 transportadoras cadastradas com discagem direta.</p>
+        </div>
+        <div class="w-full sm:w-72">
+          <input type="text" id="transporter-search" placeholder="Buscar transportadora ou cidade..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none">
+        </div>
+      </div>
+
+      <div id="transporters-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Renderizado dinamicamente via app.js -->
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 6: CENTRAL DE VENDAS & ROI                                         -->
+    <!-- ======================================================================= -->
+    <div id="tab-scripts" class="tab-content hidden space-y-6">
+      <div class="clean-card p-6 shadow-xl">
+        <div class="max-w-2xl mb-4">
+          <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">CALCULADORA DE RETORNO (ROI)</span>
+          <h2 class="text-lg font-bold text-slate-100 mt-2">Demonstração de Economia Financeira para o Cliente</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Comprove na ligação que o equipamento se paga em menos de 60 dias.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 border-y border-slate-800 py-4 my-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Total de Pneus na Frota</label>
+            <input type="number" id="roi-tires-count" value="48" min="2" max="10000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Preço Médio por Pneu (R$)</label>
+            <input type="number" id="roi-tire-price" value="1750" min="500" max="10000" step="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-amber-400 mb-1">Investimento no Equipamento (R$)</label>
+            <input type="number" id="roi-investment" value="" placeholder="Ex: 8500" min="0" step="100" class="w-full bg-slate-900 border border-amber-500/40 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">
+          </div>
+          <div class="bg-amber-500/10 border border-amber-500/25 rounded-xl p-3 flex flex-col justify-center">
+            <span class="text-[10px] text-amber-400 uppercase font-bold">Payback Estimado</span>
+            <div id="roi-res-payback" class="text-xl font-black text-amber-400">—</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-300">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-emerald-400 font-bold text-base">💰</span>
+              <span class="font-bold text-slate-100">Economia em Pneus (+20% vida útil)</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Mensal</span>
+              <span id="roi-res-economy-tires-monthly" class="text-emerald-400 font-bold">R$ 0,00</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Anual</span>
+              <span id="roi-res-economy-tires" class="text-emerald-400 font-bold">R$ 0,00</span>
+            </div>
+          </div>
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-blue-400 font-bold text-base">⛽</span>
+              <span class="font-bold text-slate-100">Economia de Combustível (~2%)</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Mensal</span>
+              <span id="roi-res-diesel-monthly" class="text-blue-400 font-bold">R$ 0,00</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Anual</span>
+              <span id="roi-res-diesel" class="text-blue-400 font-bold">R$ 0,00</span>
+            </div>
+          </div>
+          <div class="bg-amber-500/10 p-3 rounded-xl border border-amber-500/25">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-amber-400 font-bold text-base">📊</span>
+              <span class="font-bold text-slate-100">Economia Total</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Mensal</span>
+              <span id="roi-res-total-monthly" class="text-amber-400 font-bold">R$ 0,00</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500">Anual</span>
+              <span id="roi-res-total" class="text-amber-400 font-bold">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTA DE DORES E GANCHOS (biblioteca clicável, editável) -->
+      <div class="clean-card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">BIBLIOTECA DE VENDAS</span>
+            <h3 class="text-sm font-bold text-slate-100 mt-2">Dores e Ganchos de Abordagem</h3>
+          </div>
+          <button id="btn-open-dores-ganchos" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
+            📋 Ver Dores e Ganchos
+          </button>
+        </div>
+        <p class="text-xs text-slate-400">Clique para ver as opções de dores e ganchos por segmento, ou escreva e adicione as suas próprias.</p>
+      </div>
+
+      <!-- MODAL: DORES E GANCHOS -->
+      <div id="modal-dores-ganchos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="clean-card w-full max-w-2xl max-h-[85vh] flex flex-col p-5 space-y-3 animate-fade-in">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-slate-100 text-sm">🎯 Dores e Ganchos de Abordagem</h3>
+            <button id="btn-close-modal-dores-ganchos" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+          </div>
+
+          <div id="dores-ganchos-list" class="overflow-y-auto space-y-2 flex-1 pr-1">
+            <!-- Preenchido via app.js -->
+          </div>
+
+          <div class="border-t border-slate-800 pt-3 space-y-2">
+            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Adicionar a sua própria</span>
+            <input type="text" id="input-nova-dor" placeholder="Dor do cliente (ex: Estouro de pneu na estrada)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none">
+            <input type="text" id="input-novo-gancho" placeholder="Gancho de abordagem (ex: E se isso nunca mais acontecesse?)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none">
+            <button id="btn-add-dor-gancho" class="w-full px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
+              + Adicionar à Lista
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Matriz dos 16 Segmentos & Ganchos de Ligação
+        </h3>
+        <div id="sales-segments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Renderizado via app.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 7: HISTÓRICO                                                       -->
+    <!-- ======================================================================= -->
+    <div id="tab-historico" class="tab-content hidden space-y-6">
+      <div class="clean-card p-4">
+        <h2 class="font-bold text-base text-slate-100">Histórico de Propostas Salvas</h2>
+        <p class="text-xs text-slate-400">Recupere orçamentos gerados anteriormente em 1 clique.</p>
+      </div>
+
+      <div id="history-container" class="space-y-3">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- IMPORTAÇÃO DE ORÇAMENTO PARA REPOSIÇÃO / NOVA COTAÇÃO -->
+  <div id="modal-import-quote" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="clean-card max-w-4xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-3">
+        <div>
+          <span class="eyebrow">IMPORTAÇÃO INTELIGENTE</span>
+          <h3 class="font-bold text-lg text-slate-100 mt-1">Transcrever orçamento e criar nova cotação</h3>
+          <p class="text-xs text-slate-400 mt-1">Envie uma foto ou cole o texto. Revise os itens antes de adicioná-los à área de reposição.</p>
+        </div>
+        <button id="btn-close-import-quote" class="text-slate-400 hover:text-white text-lg p-1" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="quote-ocr-dropzone" class="ocr-dropzone p-6 text-center min-h-40 flex items-center justify-center">
+          <input type="file" id="quote-ocr-file" accept="image/*" class="hidden">
+          <label for="quote-ocr-file" class="cursor-pointer flex flex-col items-center gap-2">
+            <span class="text-3xl">📄</span>
+            <span class="text-xs font-bold text-slate-100">Selecionar foto do orçamento</span>
+            <span class="text-[11px] text-slate-500">JPG, PNG ou print colado</span>
+          </label>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-300">Texto reconhecido ou copiado</label>
+          <textarea id="quote-ocr-text" rows="6" placeholder="Cole aqui os itens do orçamento, se preferir..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"></textarea>
+          <div class="flex flex-wrap gap-2">
+            <button id="btn-read-quote-image" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition">🔍 Ler imagem</button>
+            <button id="btn-parse-quote-text" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs font-bold transition">Preparar itens</button>
+          </div>
+          <p id="quote-ocr-status" class="text-[11px] text-slate-500">A leitura acontece no seu navegador; confirme sempre os dados antes de importar.</p>
+        </div>
+      </div>
+
+      <div id="quote-import-preview" class="hidden border-t border-slate-800 pt-4 space-y-3">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider">Itens identificados</h4>
+            <p class="text-[11px] text-slate-500">Ajuste a quantidade ou remova qualquer linha antes de continuar.</p>
+          </div>
+          <span id="quote-import-count" class="text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2 py-1 rounded-full">0 itens</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-[10px] text-slate-400 uppercase border-b border-slate-800"><tr><th class="p-2">Código</th><th class="p-2">Descrição</th><th class="p-2 text-center">Qtd.</th><th class="p-2 text-right">Valor unit.</th><th class="p-2 text-right">Total</th><th class="p-2 text-right">Ação</th></tr></thead>
+            <tbody id="quote-import-tbody"></tbody>
+          </table>
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <button id="btn-cancel-quote-import" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
+          <button id="btn-apply-quote-import" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow">Adicionar à cotação de peças</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts da Aplicação -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

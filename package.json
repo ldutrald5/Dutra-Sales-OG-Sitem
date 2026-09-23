@@ -2,7 +2,7 @@
   "name": "meu-projeto-aiox",
   "version": "0.1.0",
   "private": true,
-  "description": "Projeto Greenfield AIOX em português — Sistema OG / Dutra Sales",
+  "description": "Projeto AIOX em português — Sistema OG / Dutra Sales",
   "scripts": {
     "aiox": "aiox-core",
     "aiox:version": "aiox-core --version",
@@ -10,12 +10,9 @@
     "aiox:config-check": "aiox-core config validate",
     "og:start": "node apps/sistema-og/server.mjs",
     "og:start:lan": "node apps/sistema-og/server.mjs",
-    "og:css": "node scripts/build-og-css.mjs",
-    "og:css:watch": "npx --yes tailwindcss@3.4.17 -i apps/sistema-og/tailwind.input.css -o apps/sistema-og/assets/og-utilities.css -c apps/sistema-og/tailwind.config.cjs --watch",
     "og:cloud:dev": "wrangler dev",
     "og:cloud:deploy": "wrangler deploy",
-    "og:tunnel": "cloudflared tunnel --url http://127.0.0.1:4321",
-    "og:tunnel:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-cloudflare-tunnel.ps1",
+    "og:assets": "node scripts/optimize-og-assets.mjs",
     "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs",
     "prepare": "husky"
   },
