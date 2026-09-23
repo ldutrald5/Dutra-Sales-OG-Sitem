@@ -104,7 +104,7 @@ const OG_DATA = {
     kitManutencao545: 500
   },
 
-  // 16 SEGMENTOS DE MERCADO
+  // 18 SEGMENTOS DE MERCADO
   segments: [
     { id: "transportadora", name: "Transportadora / Carga Seca", icon: "🚚", dor: "Custo elevado com reposição de pneus, alto consumo de combustível e caminhão parado.", gancho: "Quanto vocês gastam hoje com pneus e como controlam o desgaste dos rodados duplos?", focoVenda: "Custo total da frota, eliminação do rodízio e quilometragem extra." },
     { id: "refrigerado", name: "Carga Refrigerada / Frigorífico", icon: "❄️", dor: "Alta quilometragem contínua e risco elevado com perecíveis parados.", gancho: "Quanto custa para vocês um caminhão ficar parado por problema de pneu durante uma operação refrigerada?", focoVenda: "Disponibilidade 24h, pontualidade e zero paradas." },
@@ -116,6 +116,8 @@ const OG_DATA = {
     { id: "mineracao", name: "Mineração / Pedreiras", icon: "⛏️", dor: "Pneus de altíssimo valor unitário e hora parada cara.", gancho: "Quanto representa financeiramente para a sua mineradora uma hora de caminhão parado por pneu?", focoVenda: "Preservação de pneus de altíssimo custo." },
     { id: "construcao", name: "Construção / Caçamba", icon: "🏗️", dor: "Impactos nas rodas e cortes de talão frequentes.", gancho: "Vocês têm problema frequente com desgaste irregular e corte de talão nos pneus?", focoVenda: "Equalização em pisos acidentados." },
     { id: "onibus", name: "Empresa de Ônibus / Passageiros", icon: "🚌", dor: "Segurança dos passageiros e alta quilometragem.", gancho: "Como a equipe de vocês faz a conferência diária da pressão dos pneus internos?", focoVenda: "Gerenciamento visual sem desmontar rodas." },
+    { id: "micro_onibus", name: "Micro-ônibus / Fretamento", icon: "🚐", dor: "Operação frequente, segurança de passageiros e pouco tempo disponível para inspeção.", gancho: "Como vocês conferem hoje os pneus internos antes de cada rota?", focoVenda: "Inspeção visual, disponibilidade e segurança da operação." },
+    { id: "van", name: "Vans / Transporte Executivo", icon: "🚐", dor: "Rotas intensas e custo de parada em serviços com horário marcado.", gancho: "Quanto uma parada por pneu impacta a agenda e o atendimento dos passageiros?", focoVenda: "Previsibilidade da operação e cuidado preventivo dos pneus." },
     { id: "distribuicao", name: "Distribuição / Logística", icon: "🚛", dor: "Tempo escasso para manutenção na saída da frota.", gancho: "Quanto tempo a sua equipe perde diariamente fazendo a calibragem pneu por pneu?", focoVenda: "Calibragem rápida em ponto único." },
     { id: "combustivel", name: "Transporte de Combustível", icon: "🛢️", dor: "Prevenção crítica de aquecimento de talão e acidentes.", gancho: "Como vocês fazem o controle preventivo e inspeção de pressão antes da viagem?", focoVenda: "Segurança e inspeção visual rápida." },
     { id: "tanque_liquido", name: "Carga Líquida / Tanque", icon: "🧴", dor: "Desgaste acentuado nas curvas pelo efeito onda.", gancho: "Vocês conseguem acompanhar facilmente a pressão dos pneus internos durante viagens longas?", focoVenda: "Estabilidade do conjunto." },

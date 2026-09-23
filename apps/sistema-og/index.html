@@ -199,7 +199,8 @@
         <div class="lg:col-span-8 clean-card p-5">
           <div class="og-section-head">
             <div><span class="og-kicker">SECRETÁRIO COMERCIAL</span><h2>Fila de ação</h2></div>
-            <div class="og-filter-row" role="group" aria-label="Filtrar fila">
+            <div class="og-filter-row" role="group" aria-label="Ações e filtros da fila">
+              <button class="og-chip og-chip-add" type="button" data-quick-lead="dia">＋ Adicionar cliente</button>
               <button class="og-chip active" data-day-filter="all">Todos</button>
               <button class="og-chip" data-day-filter="overdue">Vencidos</button>
               <button class="og-chip" data-day-filter="today">Hoje</button>
@@ -595,6 +596,10 @@
             📥 Importar / OCR
           </button>
 
+          <button type="button" data-quick-lead="crm" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+            ＋ Novo cliente
+          </button>
+
           <button id="btn-crm-clear-all" class="px-3 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition">
             Limpar Base
           </button>
@@ -809,10 +814,10 @@
         <div class="max-w-2xl mb-4">
           <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">CALCULADORA DE RETORNO (ROI)</span>
           <h2 class="text-lg font-bold text-slate-100 mt-2">Demonstração de Economia Financeira para o Cliente</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Comprove na ligação que o equipamento se paga em menos de 60 dias.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Simule o retorno com premissas visíveis. O cálculo de pneus parte de uma vida útil atual de 18 meses.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 border-y border-slate-800 py-4 my-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 border-y border-slate-800 py-4 my-4">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Total de Pneus na Frota</label>
             <input type="number" id="roi-tires-count" value="48" min="2" max="10000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">
@@ -820,6 +825,11 @@
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Preço Médio por Pneu (R$)</label>
             <input type="number" id="roi-tire-price" value="1750" min="500" max="10000" step="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Vida útil atual</label>
+            <div class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold">18 meses</div>
+            <small class="text-[10px] text-slate-500">Premissa padrão do estudo</small>
           </div>
           <div>
             <label class="block text-xs font-semibold text-amber-400 mb-1">Investimento no Equipamento (R$)</label>
@@ -917,7 +927,7 @@
       <div>
         <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          Matriz dos 16 Segmentos & Ganchos de Ligação
+          Matriz dos 18 Segmentos & Ganchos de Ligação
         </h3>
         <div id="sales-segments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Renderizado via app.js -->
@@ -960,11 +970,12 @@
           </select>
         </div>
         <button id="call-ai-prepare" type="button" class="og-button og-button-primary" disabled>Preparar roteiro</button>
+        <button type="button" data-quick-lead="call-ai" class="og-button og-button-ghost">＋ Cliente novo</button>
       </section>
 
       <div id="call-ai-empty" class="call-ai-empty">
         <strong>Selecione um cliente para começar</strong>
-        <span>A busca usa o CRM real e não consome IA enquanto você digita.</span>
+        <span>Depois de escolher o cliente e clicar em “Preparar roteiro”, aparecem contexto, teleprompter em 8 etapas, objeções, anotações e gravação.</span>
       </div>
 
       <section id="call-ai-workspace" class="call-ai-workspace hidden" aria-live="polite">
@@ -1068,6 +1079,30 @@
     </div>
 
   </main>
+
+  <!-- CADASTRO RÁPIDO COMPARTILHADO: MEU DIA, CRM E CALL AI -->
+  <div id="modal-quick-lead" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="quick-lead-title">
+    <form id="quick-lead-form" class="clean-card w-full max-w-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-3">
+        <div><span class="og-kicker">CADASTRO RÁPIDO</span><h2 id="quick-lead-title" class="font-bold text-lg text-slate-100 mt-1">Adicionar cliente</h2><p class="text-xs text-slate-400 mt-1">Cadastre o essencial agora e complete o restante depois no CRM.</p></div>
+        <button id="quick-lead-close" type="button" class="text-slate-400 hover:text-white text-lg p-1" aria-label="Fechar">✕</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="og-field"><span>Empresa *</span><input id="quick-lead-company" required maxlength="120" placeholder="Nome da empresa ou cliente"></label>
+        <label class="og-field"><span>Contato</span><input id="quick-lead-contact" maxlength="100" placeholder="Nome da pessoa"></label>
+        <label class="og-field"><span>Telefone / WhatsApp</span><input id="quick-lead-phone" inputmode="tel" maxlength="24" placeholder="(44) 99999-9999"></label>
+        <label class="og-field"><span>Cidade / UF</span><input id="quick-lead-city" maxlength="100" placeholder="Maringá - PR"></label>
+        <label class="og-field"><span>Segmento</span><select id="quick-lead-segment"></select></label>
+        <label class="og-field"><span>Prioridade</span><select id="quick-lead-priority"><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select></label>
+        <label class="og-field og-field-full"><span>Próxima ação</span><input id="quick-lead-next-action" maxlength="180" placeholder="Ex.: ligar para entender a frota"></label>
+        <label class="og-field og-field-full"><span>Próximo retorno</span><input id="quick-lead-follow-up" type="datetime-local"></label>
+      </div>
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t border-slate-800 pt-4">
+        <button id="quick-lead-cancel" type="button" class="px-4 py-2.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
+        <button type="submit" class="px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black">Salvar cliente</button>
+      </div>
+    </form>
+  </div>
 
   <!-- IMPORTAÇÃO DE ORÇAMENTO PARA REPOSIÇÃO / NOVA COTAÇÃO -->
   <div id="modal-import-quote" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">

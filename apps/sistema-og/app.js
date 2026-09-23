@@ -6,6 +6,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const TIRE_BASE_LIFE_MONTHS = 18;
+  const TIRE_LIFE_GAIN_RATE = 0.20;
   // Estado Global da Aplicação
   const state = {
     currentTab: 'dia',
@@ -803,8 +805,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const custoPorConjuntoMes = totalConjuntos > 0 ? valorParcela / totalConjuntos : valorParcela;
 
     // Cálculo de ROI e Payback transparente
-    // Premissa 1: +20% no aumento da vida útil dos pneus
-    const economiaPneusAnual = (totalPneusFrota * precoPneu) * 0.20;
+    // Premissa 1: ciclo-base de 18 meses e +20% de vida útil (novo ciclo: 21,6 meses)
+    const patrimonioPneus = totalPneusFrota * precoPneu;
+    const vidaUtilComOgMeses = TIRE_BASE_LIFE_MONTHS * (1 + TIRE_LIFE_GAIN_RATE);
+    const custoPneusAnualSemOg = patrimonioPneus * (12 / TIRE_BASE_LIFE_MONTHS);
+    const custoPneusAnualComOg = patrimonioPneus * (12 / vidaUtilComOgMeses);
+    const economiaPneusAnual = Math.max(0, custoPneusAnualSemOg - custoPneusAnualComOg);
     const economiaPneusMensal = economiaPneusAnual / 12;
 
     // Premissa 2: 2% de economia média no consumo de combustível
@@ -843,6 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
       custoPorVeiculo,
       patrimonioEmRisco,
       precoPneu,
+      vidaUtilPneuMeses: TIRE_BASE_LIFE_MONTHS,
+      vidaUtilComOgMeses,
       economiaPneusAnual,
       economiaPneusMensal,
       economiaDieselAnual,
@@ -1653,7 +1661,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           </div>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 11px; margin-bottom: 10px;">
             <div>
-              <div style="color: #94a3b8;">Economia em Pneus (+20% vida útil):</div>
+              <div style="color: #94a3b8;">Economia em Pneus (18 → ${data.vidaUtilComOgMeses.toFixed(1)} meses):</div>
               <div style="font-size: 14px; font-weight: 800; color: #34d399; font-family: monospace; margin-top: 2px;">R$ ${data.economiaPneusMensal.toFixed(2)}/mês</div>
               <div style="font-size: 10px; color: #64748b;">(R$ ${data.economiaPneusAnual.toFixed(2)}/ano)</div>
             </div>
@@ -1752,7 +1760,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     msg += `🛡️ *PROTEÇÃO PATRIMONIAL:*\n`;
     msg += `• Patrimônio de Pneus Protegido: *R$ ${quoteData.patrimonioEmRisco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}*\n\n`;
     msg += `📈 *PREMISSAS DE ECONOMIA & GANHO FINANCEIRO:*\n`;
-    msg += `• Pneus (+20% vida útil): Economia de *R$ ${quoteData.economiaPneusMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaPneusAnual.toFixed(2)}/ano)\n`;
+    msg += `• Pneus (vida útil de 18 para ${quoteData.vidaUtilComOgMeses.toFixed(1)} meses): Economia de *R$ ${quoteData.economiaPneusMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaPneusAnual.toFixed(2)}/ano)\n`;
     msg += `• Combustível (est. 2% economia diesel): Economia de *R$ ${quoteData.economiaDieselMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaDieselAnual.toFixed(2)}/ano)\n`;
     msg += `• *Economia Total Estimada:* *R$ ${quoteData.economiaTotalMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaTotalAnual.toFixed(2)}/ano)\n`;
     msg += `⏱️ *Payback do Investimento:* ~*${quoteData.paybackDias} dias* de operação! (~${quoteData.paybackMeses} meses)\n\n`;
@@ -2714,7 +2722,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const precoPneu = parseFloat(inputTirePrice.value) || 0;
       const investimento = parseFloat(inputInvestment ? inputInvestment.value : '') || 0;
 
-      const economiaPneusAnual = (numPneus * precoPneu) * 0.20;
+      const patrimonioPneus = numPneus * precoPneu;
+      const vidaUtilComOgMeses = TIRE_BASE_LIFE_MONTHS * (1 + TIRE_LIFE_GAIN_RATE);
+      const custoPneusAnualSemOg = patrimonioPneus * (12 / TIRE_BASE_LIFE_MONTHS);
+      const custoPneusAnualComOg = patrimonioPneus * (12 / vidaUtilComOgMeses);
+      const economiaPneusAnual = Math.max(0, custoPneusAnualSemOg - custoPneusAnualComOg);
       const economiaDieselAnual = numPneus * 450.00;
       const totalAnual = economiaPneusAnual + economiaDieselAnual;
       const totalMensal = totalAnual / 12;
@@ -2868,6 +2880,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   // MEU DIA — SECRETÁRIO, ASSISTENTE E TREINADOR COMERCIAL
   // =========================================================================
   let dayFilter = 'all';
+  let quickLeadOrigin = 'crm';
 
   function normalizeLead(lead) {
     return {
@@ -2881,6 +2894,68 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       lastContactAt: typeof lead.lastContactAt === 'string' ? lead.lastContactAt : '',
       interactions: Array.isArray(lead.interactions) ? lead.interactions : []
     };
+  }
+
+  function createQuickLeadId() {
+    return `LEAD-${Date.now().toString(36).toUpperCase()}`;
+  }
+
+  function openQuickLead(origin = 'crm') {
+    quickLeadOrigin = origin;
+    const modal = document.getElementById('modal-quick-lead');
+    const form = document.getElementById('quick-lead-form');
+    if (!modal || !form) return;
+    form.reset();
+    document.getElementById('quick-lead-priority').value = 'media';
+    document.getElementById('quick-lead-segment').value = 'transportadora';
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('quick-lead-company')?.focus(), 30);
+  }
+
+  function closeQuickLead() {
+    document.getElementById('modal-quick-lead')?.classList.add('hidden');
+  }
+
+  function initQuickLead() {
+    const segment = document.getElementById('quick-lead-segment');
+    if (segment) segment.innerHTML = OG_DATA.segments.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.icon)} ${escapeHtml(item.name)}</option>`).join('');
+    document.querySelectorAll('[data-quick-lead]').forEach(button => button.addEventListener('click', () => openQuickLead(button.dataset.quickLead)));
+    document.getElementById('quick-lead-close')?.addEventListener('click', closeQuickLead);
+    document.getElementById('quick-lead-cancel')?.addEventListener('click', closeQuickLead);
+    document.getElementById('modal-quick-lead')?.addEventListener('click', event => { if (event.target.id === 'modal-quick-lead') closeQuickLead(); });
+    document.getElementById('quick-lead-form')?.addEventListener('submit', event => {
+      event.preventDefault();
+      const empresa = document.getElementById('quick-lead-company').value.trim();
+      if (!empresa) return;
+      const lead = normalizeLead({
+        id: createQuickLeadId(),
+        empresa,
+        nome: document.getElementById('quick-lead-contact').value.trim() || empresa,
+        telefone: document.getElementById('quick-lead-phone').value.replace(/\D/g, ''),
+        cidadeUf: document.getElementById('quick-lead-city').value.trim(),
+        cnpj: '',
+        segmentId: document.getElementById('quick-lead-segment').value,
+        status: 'novo',
+        priority: document.getElementById('quick-lead-priority').value,
+        nextAction: document.getElementById('quick-lead-next-action').value.trim(),
+        followUpAt: document.getElementById('quick-lead-follow-up').value,
+        observacoes: `Cadastro rápido em ${new Date().toLocaleDateString('pt-BR')}`,
+        createdDate: new Date().toISOString()
+      });
+      state.leads.unshift(lead);
+      state.selectedLeadId = lead.id;
+      saveLeadsToStorage();
+      renderDayDashboard();
+      renderCrmModule();
+      closeQuickLead();
+      if (quickLeadOrigin === 'call-ai') {
+        switchTab('call-ai');
+        selectCallClient(lead.id);
+      } else if (quickLeadOrigin === 'crm') {
+        switchTab('crm');
+      }
+      showNotification(`${empresa} foi adicionado ao sistema.`, 'success');
+    });
   }
 
   function escapeHtml(value) {
@@ -4210,6 +4285,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initQuoteImport();
   initConsultantEngine();
   initDayDashboard();
+  initQuickLead();
   initCallAI();
   initPremiumExperience();
   initCrmEvents();

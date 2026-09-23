@@ -43,9 +43,10 @@ npm run og:start
 | OG-1 | Copiloto Comercial | Implementado |
 | OG-2 | Modernização visual | Implementado |
 | OG-3 | Call AI Assistente Comercial | Implementado em modo manual com Sales Brain local |
-| OG-4 | Áudio | Planejado |
+| OG-4 | Gravação local de áudio | Implementado; transcrição permanece separada |
 | OG-5 | Transcrição | Planejado |
 | OG-6 | Sales Intelligence AI | Planejado |
 | OG-7 | Integração CRM avançada | Planejado |
 | OG-8 | Live Call Copilot | Planejado |
 | OG-9 | Analytics | Planejado |
+| OG-10 | Evolução operacional 2026 | Entrega 1 implementada; galerias, transportadoras e árvore técnica planejadas |
