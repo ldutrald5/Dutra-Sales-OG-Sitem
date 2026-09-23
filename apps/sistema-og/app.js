@@ -101,7 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ocrImageBase64: null,
     ocrExtractedText: '',
     quoteImportImageBase64: null,
-    quoteImportItems: []
+    quoteImportItems: [],
+    callAI: {
+      selectedLeadId: null,
+      objective: 'primeiro_contato',
+      script: [],
+      step: 0,
+      completed: [],
+      notes: '',
+      signals: [],
+      sources: [],
+      sessionId: null,
+      fontSize: 1
+    }
   };
 
   let serverSyncTimer = null;
@@ -267,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (tabId === 'scripts') renderSalesKnowledge();
     else if (tabId === 'crm') renderCrmModule();
     else if (tabId === 'guia') renderConsultantEngine();
+    else if (tabId === 'call-ai') renderCallAIContext();
     document.querySelectorAll('.og-mobile-nav button').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -3645,6 +3658,307 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return addedCount;
   }
 
+  // =========================================================================
+  // CALL AI — ASSISTENTE COMERCIAL DE LIGAÇÕES (MANUAL + SALES BRAIN LOCAL)
+  // =========================================================================
+  const callObjectives = {
+    primeiro_contato: 'Primeiro contato', qualificacao: 'Qualificação', diagnostico: 'Diagnóstico',
+    retorno: 'Retorno de contato anterior', followup_proposta: 'Follow-up de proposta',
+    negociacao: 'Negociação', proximo_passo: 'Fechamento de próximo passo', pos_venda: 'Pós-venda',
+    expansao: 'Expansão', indicacao: 'Pedido de indicação'
+  };
+
+  function normalizeCallSearch(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  function callLead() {
+    return state.leads.find(lead => String(lead.id) === String(state.callAI.selectedLeadId)) || null;
+  }
+
+  function suggestCallObjective(lead) {
+    if (!lead || lead.status === 'novo') return 'primeiro_contato';
+    if (lead.status === 'proposta_enviada') return 'followup_proposta';
+    if (lead.status === 'negociacao') return 'negociacao';
+    if (lead.pain) return 'retorno';
+    return 'diagnostico';
+  }
+
+  function formatCallDate(value) {
+    if (!value) return 'Não informado';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'Não informado' : date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  function renderCallSearchResults(matches, activeIndex = 0) {
+    const box = document.getElementById('call-ai-search-results');
+    const input = document.getElementById('call-ai-client-search');
+    if (!box || !input) return;
+    if (!matches.length) {
+      box.innerHTML = '<div class="call-ai-no-result">Nenhum cliente encontrado. Cadastre no CRM ou ajuste a pesquisa.</div>';
+      box.classList.remove('hidden');
+      input.setAttribute('aria-expanded', 'true');
+      return;
+    }
+    box.innerHTML = matches.map((lead, index) => `
+      <button type="button" role="option" aria-selected="${index === activeIndex}" class="${index === activeIndex ? 'active' : ''}" data-call-client="${escapeHtml(lead.id)}">
+        <strong>${escapeHtml(lead.empresa || lead.nome || 'Cliente sem nome')}</strong>
+        <span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span>
+        <small>${escapeHtml(lead.status || 'novo')} · último contato: ${escapeHtml(formatCallDate(lead.lastContactAt))} · ${escapeHtml(lead.nextAction || 'sem próxima ação')}</small>
+      </button>`).join('');
+    box.classList.remove('hidden');
+    input.setAttribute('aria-expanded', 'true');
+    box.querySelectorAll('[data-call-client]').forEach(button => button.addEventListener('click', () => selectCallClient(button.dataset.callClient)));
+  }
+
+  function selectCallClient(id) {
+    const currentNotes = document.getElementById('call-ai-notes')?.value.trim();
+    if (state.callAI.selectedLeadId && String(state.callAI.selectedLeadId) !== String(id) && currentNotes) {
+      if (!window.confirm('Existem anotações não salvas desta conta. Deseja descartá-las e trocar de cliente?')) return;
+    }
+    const lead = state.leads.find(item => String(item.id) === String(id));
+    if (!lead) return;
+    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
+    const objective = document.getElementById('call-ai-objective');
+    if (objective) objective.value = state.callAI.objective;
+    const input = document.getElementById('call-ai-client-search');
+    if (input) input.value = lead.empresa || lead.nome || '';
+    document.getElementById('call-ai-search-results')?.classList.add('hidden');
+    input?.setAttribute('aria-expanded', 'false');
+    document.getElementById('call-ai-prepare')?.removeAttribute('disabled');
+    renderCallAIContext();
+  }
+
+  function factRow(label, value, status = 'confirmed', source = 'CRM') {
+    return `<div class="call-ai-fact"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || 'Não informado')}</strong><small data-status="${status}">${status === 'confirmed' ? 'Confirmado' : status === 'hypothesis' ? 'Hipótese a validar' : 'Não informado'} · ${escapeHtml(source)}</small></div>`;
+  }
+
+  function renderCallAIContext() {
+    const lead = callLead();
+    const context = document.getElementById('call-ai-client-context');
+    if (!context || !lead) return;
+    const recent = lead.interactions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
+    context.innerHTML = `
+      <div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div>
+      ${factRow('Segmento', lead.segmentId, lead.segmentId ? 'confirmed' : 'missing')}
+      ${factRow('Frota', lead.fleetSize ? `${lead.fleetSize} veículos` : '', lead.fleetSize ? 'confirmed' : 'missing')}
+      ${factRow('Decisor', lead.decisionMaker, lead.decisionMaker ? 'confirmed' : 'missing')}
+      ${factRow('Dor', lead.pain, lead.pain ? 'confirmed' : 'hypothesis')}
+      ${factRow('Situação', lead.status || 'novo')}
+      ${factRow('Última interação', recent?.note || '', recent ? 'confirmed' : 'missing', recent ? formatCallDate(recent.at) : 'CRM')}
+      ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}`;
+    document.getElementById('call-ai-session-account').textContent = lead.empresa || lead.nome;
+  }
+
+  function safeKnowledgeText(record) {
+    const caution = /requer validação|premissa/i.test(record.status || '') || /não garantir|não prometer/i.test(record.text || '');
+    return { text: record.text, caution };
+  }
+
+  function buildCallScript(lead, objective, knowledge) {
+    const company = lead.empresa || 'a empresa';
+    const contact = lead.nome || 'você';
+    const knownPain = lead.pain?.trim();
+    const decision = lead.decisionMaker?.trim();
+    const lastAction = lead.nextAction?.trim();
+    const knowledgePoint = knowledge.find(item => !safeKnowledgeText(item).caution) || knowledge[0];
+    const solutionText = knowledgePoint
+      ? `Pelo que você me contou, posso relacionar isso a ${knowledgePoint.title.toLowerCase()}. Quero validar a aplicação antes de falar em resultado.`
+      : 'Posso explicar como o equalizador ajuda na inspeção e na equalização do rodado, depois de confirmar a aplicação correta.';
+    const opening = objective === 'primeiro_contato'
+      ? `Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Posso usar dois minutos para entender como a ${company} controla a calibragem e o desgaste dos pneus?`
+      : `Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Estou retomando nosso contato sobre ${lastAction || knownPain || 'a operação da frota'}. Continua sendo um bom momento para conversarmos?`;
+    return [
+      { title: 'Abertura', speech: opening, question: 'Você consegue falar por dois minutos agora?', observe: 'Confirme disponibilidade e cargo. Não avance se a pessoa estiver sem tempo.', branches: ['Se sim: contextualize o motivo.', 'Se não: combine dia e horário exatos.'] },
+      { title: 'Contextualização', speech: `Quero entender a realidade da ${company} antes de sugerir qualquer aplicação.`, question: lastAction ? `O que mudou desde que combinamos: “${lastAction}”?` : 'Como vocês fazem hoje a conferência de pressão nos rodados?', observe: 'Separe processo atual de opinião. Registre quem executa e com que frequência.', branches: ['Processo claro: aprofunde falhas e custo.', 'Processo informal: descubra frequência e responsável.'] },
+      { title: 'Diagnóstico', speech: knownPain ? `Você já mencionou “${knownPain}”. Quero confirmar se isso continua acontecendo.` : 'Para eu não presumir o problema, preciso entender onde existe perda hoje.', question: knownPain ? 'Com que frequência isso acontece e em quais veículos?' : 'Qual problema com pneus ou calibragem mais incomoda a operação hoje?', observe: knownPain ? 'Valide uma informação já registrada; não a trate como atual sem confirmação.' : 'Busque situação, frequência e evidência.', branches: ['Dor confirmada: quantifique o impacto.', 'Sem dor clara: investigue rotina e exceções.'] },
+      { title: 'Exploração do impacto', speech: 'Quero colocar esse problema em uma medida que faça sentido para vocês.', question: 'Quando isso acontece, qual é o impacto em pneu, combustível, manutenção ou disponibilidade?', observe: 'Peça números somente se o cliente souber. Não invente custo, economia ou urgência.', branches: ['Tem números: confirme período e fonte.', 'Não tem números: registre a lacuna para calcular depois.'] },
+      { title: 'Conexão com a solução', speech: solutionText, question: 'Faz sentido avaliarmos a aplicação em um veículo ou conjunto específico?', observe: knowledgePoint ? `Fonte: ${knowledgePoint.id} · ${knowledgePoint.source} · ${knowledgePoint.status}` : 'Sales Brain indisponível; permaneça no diagnóstico.', branches: ['Faz sentido: defina veículo, eixo e pressão.', 'Dúvida técnica: leve para validação antes da proposta.'] },
+      { title: 'Tratamento de objeção', speech: 'Entendi. Antes de responder, quero separar se a preocupação é investimento, aplicação ou prioridade.', question: 'Qual desses pontos pesa mais para você agora?', observe: 'Não rebata de imediato. Classifique a objeção e aprofunde uma vez.', branches: ['Preço: volte ao custo do problema sem prometer retorno.', 'Concorrente: investigue satisfação e diferença esperada.'] },
+      { title: 'Próximo passo', speech: 'Para não deixar isso solto, proponho sairmos com uma ação simples e responsável definido.', question: decision ? `Além de ${decision}, quem precisa participar do próximo passo?` : 'Quem mais precisa participar da avaliação e qual é o próximo passo mais útil?', observe: 'Combine ação, responsável e data. Proposta sem diagnóstico não é avanço.', branches: ['Há decisor: agende a próxima conversa.', 'Falta informação: combine o envio ou levantamento.'] },
+      { title: 'Encerramento', speech: 'Vou resumir para confirmar se entendi corretamente antes de encerrar.', question: 'O resumo está correto e podemos seguir com o próximo passo combinado?', observe: 'Repita apenas fatos confirmados. Depois encerre a sessão e revise antes de salvar.', branches: ['Confirmado: registre no CRM.', 'Correção: ajuste as anotações antes de salvar.'] }
+    ];
+  }
+
+  async function prepareCallAIScript() {
+    const lead = callLead();
+    if (!lead) return showNotification('Selecione um cliente antes de preparar o roteiro.', 'info');
+    state.callAI.objective = document.getElementById('call-ai-objective').value;
+    const button = document.getElementById('call-ai-prepare');
+    button.disabled = true;
+    button.textContent = 'Preparando…';
+    let results = [];
+    try {
+      const response = await apiFetch('/api/knowledge/search', {
+        method: 'POST',
+        body: JSON.stringify({ query: `${lead.segmentId} ${lead.pain} ${lead.status}`, objective: callObjectives[state.callAI.objective], tags: ['diagnóstico', 'objeções', 'abordagem'], limit: 6 })
+      });
+      if (response.ok) results = (await response.json()).results || [];
+    } catch (error) {
+      console.warn('Sales Brain indisponível', error);
+    }
+    state.callAI.sources = results;
+    state.callAI.script = buildCallScript(lead, state.callAI.objective, results);
+    state.callAI.step = 0;
+    state.callAI.completed = [];
+    state.callAI.sessionId = `CALL-${Date.now()}`;
+    document.getElementById('call-ai-empty').classList.add('hidden');
+    document.getElementById('call-ai-workspace').classList.remove('hidden');
+    document.getElementById('call-ai-footer').classList.remove('hidden');
+    document.getElementById('call-ai-session-state').textContent = `${callObjectives[state.callAI.objective]} · modo manual`;
+    renderCallAIStep();
+    renderCallAISources();
+    button.disabled = false;
+    button.textContent = 'Atualizar roteiro';
+  }
+
+  function saveCurrentCallSpeech() {
+    if (!state.callAI.script.length) return;
+    state.callAI.script[state.callAI.step].speech = document.getElementById('call-ai-speech')?.textContent.trim() || state.callAI.script[state.callAI.step].speech;
+  }
+
+  function renderCallAIStep() {
+    const item = state.callAI.script[state.callAI.step];
+    if (!item) return;
+    document.getElementById('call-ai-step-label').textContent = `ETAPA ${state.callAI.step + 1} DE ${state.callAI.script.length}`;
+    document.getElementById('call-ai-step-title').textContent = item.title;
+    const speech = document.getElementById('call-ai-speech');
+    speech.textContent = item.speech;
+    speech.style.fontSize = `${state.callAI.fontSize}em`;
+    document.getElementById('call-ai-question').textContent = item.question;
+    document.getElementById('call-ai-observe').textContent = item.observe;
+    document.getElementById('call-ai-branches').innerHTML = item.branches.map(branch => `<p>${escapeHtml(branch)}</p>`).join('');
+    document.getElementById('call-ai-progress-bar').style.width = `${((state.callAI.step + 1) / state.callAI.script.length) * 100}%`;
+    document.getElementById('call-ai-prev').disabled = state.callAI.step === 0;
+    document.getElementById('call-ai-next').disabled = state.callAI.step === state.callAI.script.length - 1;
+    const complete = state.callAI.completed.includes(state.callAI.step);
+    document.getElementById('call-ai-complete').classList.toggle('done', complete);
+    document.getElementById('call-ai-complete').textContent = complete ? '✓ Etapa concluída' : '✓ Marcar etapa';
+  }
+
+  function renderCallAISources() {
+    const target = document.getElementById('call-ai-sources');
+    if (!target) return;
+    target.innerHTML = state.callAI.sources.length ? `<strong>Fontes consultadas</strong>${state.callAI.sources.map(item => {
+      const caution = safeKnowledgeText(item).caution;
+      return `<details><summary>${escapeHtml(item.id)} · ${escapeHtml(item.title)}</summary><p>${escapeHtml(item.text)}</p><small class="${caution ? 'caution' : ''}">${escapeHtml(item.status)} · ${escapeHtml(item.source)} · ${escapeHtml(item.locator)}</small></details>`;
+    }).join('')}` : '<small>Sales Brain indisponível. O roteiro usa somente o CRM e perguntas seguras.</small>';
+  }
+
+  const callSignalResponses = {
+    sem_tempo: ['Entendi. Vamos ser objetivos e combinar um horário melhor.', 'Qual dia e horário funciona para retomarmos por dez minutos?'],
+    concorrente: ['Ótimo, então vocês já valorizam esse tipo de controle. Quero entender o que funciona e o que ainda poderia melhorar.', 'O que você mais gosta na solução atual e onde ela ainda deixa espaço para melhoria?'],
+    caro: ['Entendi a preocupação com investimento. Antes de comparar preço, precisamos medir o custo do problema e confirmar a aplicação.', 'O valor preocupa mais pelo orçamento disponível ou porque o retorno ainda não ficou claro?'],
+    outro_decisor: ['Perfeito. Faz sentido envolver essa pessoa para não perdermos informação.', 'Qual é o papel dela e qual seria a melhor forma de fazermos a próxima conversa juntos?'],
+    proposta: ['Posso preparar uma proposta, mas quero garantir que ela reflita a aplicação correta.', 'Quais veículos, eixos e quantidades precisam entrar nesta primeira avaliação?'],
+    material: ['Envio o material certo para o seu cenário, sem sobrecarregar você com informação.', 'Qual ponto você precisa mostrar internamente: aplicação, funcionamento ou justificativa financeira?'],
+    sem_interesse: ['Entendi. Não quero insistir sem motivo.', 'É uma questão de momento, prioridade ou a solução não se encaixa na operação?']
+  };
+
+  function suggestCallAdaptation(signal) {
+    const response = callSignalResponses[signal];
+    if (!response) return;
+    state.callAI.signals.push({ signal, at: new Date().toISOString() });
+    const pending = document.getElementById('call-ai-suggestion-pending');
+    pending.innerHTML = `<strong>Sugestão para o próximo momento</strong><p>${escapeHtml(response[0])}</p><p><b>Pergunta:</b> ${escapeHtml(response[1])}</p><button type="button" id="call-ai-apply-suggestion">Aplicar ao próximo bloco</button>`;
+    pending.classList.remove('hidden');
+    document.getElementById('call-ai-apply-suggestion').addEventListener('click', () => {
+      const next = Math.min(state.callAI.step + 1, state.callAI.script.length - 1);
+      state.callAI.script[next] = { ...state.callAI.script[next], speech: response[0], question: response[1] };
+      pending.classList.add('hidden');
+      showNotification('Sugestão aplicada ao próximo bloco.', 'success');
+    });
+  }
+
+  function openCallAIReview() {
+    saveCurrentCallSpeech();
+    const lead = callLead();
+    const notes = document.getElementById('call-ai-notes').value.trim();
+    state.callAI.notes = notes;
+    document.getElementById('call-ai-summary').value = notes || `Ligação com ${lead?.empresa || lead?.nome || 'cliente'} sobre ${callObjectives[state.callAI.objective]}.`;
+    document.getElementById('call-ai-next-action').value = lead?.nextAction || '';
+    document.getElementById('call-ai-follow-up').value = lead?.followUpAt || '';
+    document.getElementById('call-ai-change-preview').innerHTML = `<strong>Prévia das alterações</strong><p>Histórico: será acrescentado somente após sua aprovação.</p><p>Próxima ação: <del>${escapeHtml(lead?.nextAction || 'não informada')}</del> → valor revisado acima.</p><p>Retorno: <del>${escapeHtml(formatCallDate(lead?.followUpAt))}</del> → data revisada acima.</p>`;
+    document.getElementById('call-ai-review').classList.remove('hidden');
+    document.getElementById('call-ai-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function saveCallAIReview() {
+    const lead = callLead();
+    if (!lead) return;
+    const result = document.getElementById('call-ai-result').value;
+    const summary = document.getElementById('call-ai-summary').value.trim();
+    if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
+    const sessionId = state.callAI.sessionId;
+    if (lead.interactions.some(item => item.sessionId === sessionId)) return showNotification('Esta sessão já foi registrada.', 'info');
+    const now = new Date().toISOString();
+    lead.interactions.push({ id: `INT-${Date.now()}`, sessionId, at: now, type: 'call_ai', objective: state.callAI.objective, result, note: summary, signals: state.callAI.signals.map(item => item.signal) });
+    if (result !== 'sem_contato') lead.lastContactAt = now;
+    lead.nextAction = document.getElementById('call-ai-next-action').value.trim();
+    lead.followUpAt = document.getElementById('call-ai-follow-up').value;
+    if (result === 'proposta') lead.status = 'proposta_enviada';
+    else if (result === 'negociacao') lead.status = 'negociacao';
+    else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
+    saveLeadsToStorage();
+    renderLeadsTable();
+    document.getElementById('call-ai-review').classList.add('hidden');
+    document.getElementById('call-ai-session-state').textContent = 'Sessão salva no CRM';
+    showNotification('Ligação registrada no CRM após sua aprovação.', 'success');
+  }
+
+  function initCallAI() {
+    const input = document.getElementById('call-ai-client-search');
+    const results = document.getElementById('call-ai-search-results');
+    let matches = [];
+    let activeIndex = 0;
+    input?.addEventListener('input', () => {
+      const query = normalizeCallSearch(input.value);
+      const digits = String(input.value).replace(/\D/g, '');
+      matches = query.length < 2 && digits.length < 3 ? [] : state.leads.filter(lead => {
+        const text = normalizeCallSearch([lead.empresa, lead.nome, lead.cidadeUf, lead.status].join(' '));
+        const leadDigits = `${lead.telefone || ''}${lead.cnpj || ''}`.replace(/\D/g, '');
+        return (query && text.includes(query)) || (digits.length >= 3 && leadDigits.includes(digits));
+      }).slice(0, 8);
+      activeIndex = 0;
+      renderCallSearchResults(matches, activeIndex);
+    });
+    input?.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { results.classList.add('hidden'); input.setAttribute('aria-expanded', 'false'); return; }
+      if (!matches.length) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeIndex = (activeIndex + (event.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
+        renderCallSearchResults(matches, activeIndex);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        selectCallClient(matches[activeIndex].id);
+      }
+    });
+    document.getElementById('call-ai-objective')?.addEventListener('change', event => { state.callAI.objective = event.target.value; });
+    document.getElementById('call-ai-prepare')?.addEventListener('click', prepareCallAIScript);
+    document.getElementById('call-ai-change-client')?.addEventListener('click', () => { input.focus(); input.select(); });
+    document.getElementById('call-ai-prev')?.addEventListener('click', () => { saveCurrentCallSpeech(); state.callAI.step = Math.max(0, state.callAI.step - 1); renderCallAIStep(); });
+    document.getElementById('call-ai-next')?.addEventListener('click', () => { saveCurrentCallSpeech(); state.callAI.step = Math.min(state.callAI.script.length - 1, state.callAI.step + 1); renderCallAIStep(); });
+    document.getElementById('call-ai-complete')?.addEventListener('click', () => { const step = state.callAI.step; state.callAI.completed = state.callAI.completed.includes(step) ? state.callAI.completed.filter(item => item !== step) : [...state.callAI.completed, step]; renderCallAIStep(); });
+    document.getElementById('call-ai-copy')?.addEventListener('click', async () => { await navigator.clipboard.writeText(document.getElementById('call-ai-speech').textContent); showNotification('Fala copiada.', 'success'); });
+    document.getElementById('call-ai-font-down')?.addEventListener('click', () => { state.callAI.fontSize = Math.max(.8, state.callAI.fontSize - .1); renderCallAIStep(); });
+    document.getElementById('call-ai-font-up')?.addEventListener('click', () => { state.callAI.fontSize = Math.min(1.8, state.callAI.fontSize + .1); renderCallAIStep(); });
+    document.getElementById('call-ai-focus')?.addEventListener('click', () => document.body.classList.toggle('call-ai-focus-mode'));
+    document.querySelectorAll('[data-call-signal]').forEach(button => button.addEventListener('click', () => suggestCallAdaptation(button.dataset.callSignal)));
+    document.getElementById('call-ai-ask-now')?.addEventListener('click', () => { const item = state.callAI.script[state.callAI.step]; if (item) showNotification(item.question, 'info'); });
+    document.getElementById('call-ai-adapt-notes')?.addEventListener('click', () => { const notes = document.getElementById('call-ai-notes').value.trim(); if (!notes) return showNotification('Escreva uma anotação antes de adaptar.', 'info'); suggestCallAdaptation(notes.toLowerCase().includes('caro') ? 'caro' : notes.toLowerCase().includes('proposta') ? 'proposta' : 'outro_decisor'); });
+    document.getElementById('call-ai-end')?.addEventListener('click', openCallAIReview);
+    document.getElementById('call-ai-review-close')?.addEventListener('click', () => document.getElementById('call-ai-review').classList.add('hidden'));
+    document.getElementById('call-ai-save')?.addEventListener('click', saveCallAIReview);
+    document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
+    document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
+    apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {
+      const badge = document.getElementById('call-ai-knowledge-status');
+      badge.dataset.mode = info.available ? 'ready' : 'missing';
+      badge.textContent = info.available ? `Sales Brain v${info.version} · ${info.stats.indexedRecords} trechos privados` : 'Sales Brain ausente · modo CRM';
+    }).catch(() => { const badge = document.getElementById('call-ai-knowledge-status'); badge.dataset.mode = 'missing'; badge.textContent = 'Sales Brain indisponível · modo CRM'; });
+  }
+
   function saveLeadsToStorage() {
     try {
       localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
@@ -3693,6 +4007,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     nav.innerHTML = `
       <button type="button" data-mobile-tab="dia" class="active"><span>◉</span><small>Meu Dia</small></button>
       <button type="button" data-mobile-tab="crm"><span>◎</span><small>Clientes</small></button>
+      <button type="button" data-mobile-tab="call-ai"><span>🎧</span><small>Call AI</small></button>
       <button type="button" data-mobile-tab="cotacao"><span>＋</span><small>Cotação</small></button>
       <button type="button" data-mobile-tab="scripts"><span>💬</span><small>Vendas</small></button>
       <button type="button" data-mobile-tab="historico"><span>≡</span><small>Histórico</small></button>`;
@@ -3769,6 +4084,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initQuoteImport();
   initConsultantEngine();
   initDayDashboard();
+  initCallAI();
   initPremiumExperience();
   initCrmEvents();
   initItemPricingModal();

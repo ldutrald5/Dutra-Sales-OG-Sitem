@@ -26,6 +26,8 @@ build/
 logs/
 npm-debug.log*
 .cache/
+__pycache__/
+*.pyc
 
 # IDE & OS (AIOX)
 .DS_Store

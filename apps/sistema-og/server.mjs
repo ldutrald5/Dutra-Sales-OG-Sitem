@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(root, '.data');
 const dataFile = path.join(dataDir, 'shared-state.json');
+const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const port = Number(process.env.OG_PORT || 4321);
 const host = process.env.OG_HOST || '0.0.0.0';
 const types = {
@@ -39,6 +40,55 @@ function readSharedState() {
   } catch {
     return { revision: 0, updatedAt: null, leads: [], history: [] };
   }
+}
+
+function readKnowledge() {
+  try {
+    return JSON.parse(fs.readFileSync(knowledgeFile, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function normalizeSearch(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function searchKnowledge(body) {
+  const knowledge = readKnowledge();
+  if (!knowledge) return { available: false, version: null, results: [] };
+  const tags = Array.isArray(body.tags) ? body.tags : [];
+  const query = normalizeSearch([body.query, body.objective, ...tags].filter(Boolean).join(' '));
+  const tokens = [...new Set(query.split(' ').filter(token => token.length > 2))];
+  const limit = Math.min(12, Math.max(1, Number(body.limit) || 6));
+  const scored = knowledge.records.map(record => {
+    const title = normalizeSearch(record.title);
+    const category = normalizeSearch(record.category);
+    const tags = normalizeSearch((record.tags || []).join(' '));
+    const text = normalizeSearch(record.text);
+    let score = 0;
+    for (const token of tokens) {
+      if (title.includes(token)) score += 5;
+      if (category.includes(token)) score += 4;
+      if (tags.includes(token)) score += 4;
+      if (text.includes(token)) score += 1;
+    }
+    if (/alta/i.test(record.confidence || '')) score += 1;
+    if (/requer validação|premissa/i.test(record.status || '')) score -= 1;
+    return { record, score };
+  }).filter(item => item.score > 0 || tokens.length === 0);
+  scored.sort((a, b) => b.score - a.score || a.record.id.localeCompare(b.record.id));
+  return {
+    available: true,
+    version: knowledge.version,
+    stats: knowledge.stats,
+    results: scored.slice(0, limit).map(({ record, score }) => ({ ...record, score }))
+  };
 }
 
 function writeSharedState(next) {
@@ -176,6 +226,21 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/access' && req.method === 'GET') {
     return sendJson(res, 200, buildAccessInfo());
+  }
+
+  if (url.pathname === '/api/knowledge/status' && req.method === 'GET') {
+    const knowledge = readKnowledge();
+    return sendJson(res, 200, knowledge
+      ? { available: true, version: knowledge.version, importedAt: knowledge.importedAt, sources: knowledge.sources, stats: knowledge.stats }
+      : { available: false, version: null, message: 'Base OG Sales Brain ainda não foi importada neste computador.' });
+  }
+
+  if (url.pathname === '/api/knowledge/search' && req.method === 'POST') {
+    try {
+      return sendJson(res, 200, searchKnowledge(await readBody(req)));
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message });
+    }
   }
 
   if ((url.pathname === '/celular' || url.pathname === '/acesso-celular') && (req.method === 'GET' || req.method === 'HEAD')) {

@@ -40,7 +40,7 @@ Celular (mesma Wi-Fi): use o endereço de rede mostrado no terminal. A versão H
 |-------|------|--------|
 | OG-1 | Copiloto comercial | Implementado |
 | OG-2 | Modernização visual | Implementado |
-| OG-3 | Call AI Light | Planejado |
+| OG-3 | Call AI Assistente Comercial | Implementado em modo manual com Sales Brain local |
 
 ## Estrutura
 

@@ -42,7 +42,7 @@ npm run og:start
 |----|------|--------|
 | OG-1 | Copiloto Comercial | Implementado |
 | OG-2 | Modernização visual | Implementado |
-| OG-3 | Call AI Light | Planejado |
+| OG-3 | Call AI Assistente Comercial | Implementado em modo manual com Sales Brain local |
 | OG-4 | Áudio | Planejado |
 | OG-5 | Transcrição | Planejado |
 | OG-6 | Sales Intelligence AI | Planejado |

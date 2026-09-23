@@ -110,6 +110,11 @@
           <span>🎯 Leads & Transcrição OCR</span>
         </button>
 
+        <button data-tab="call-ai" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <span aria-hidden="true">🎧</span>
+          <span>Call AI</span>
+        </button>
+
         <button data-tab="catalogo" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
           <span>📦 Vitrine de Peças & Códigos</span>
@@ -921,7 +926,117 @@
     </div>
 
     <!-- ======================================================================= -->
-    <!-- ABA 7: HISTÓRICO                                                       -->
+    <!-- CALL AI: ASSISTENTE COMERCIAL DE LIGAÇÕES                              -->
+    <!-- ======================================================================= -->
+    <div id="tab-call-ai" class="tab-content hidden space-y-5">
+      <section class="call-ai-top" aria-labelledby="call-ai-title">
+        <div>
+          <span class="og-kicker">ASSISTENTE DE LIGAÇÕES B2B</span>
+          <h1 id="call-ai-title">Conduza a conversa com contexto e próximo passo.</h1>
+          <p>O sistema prepara e adapta o roteiro. Você controla a conversa e aprova cada registro no CRM.</p>
+        </div>
+        <div id="call-ai-knowledge-status" class="call-ai-status" data-mode="loading">Verificando Sales Brain…</div>
+      </section>
+
+      <section class="call-ai-setup" aria-label="Preparação da ligação">
+        <div class="call-ai-search-wrap">
+          <label for="call-ai-client-search">Cliente ou conta</label>
+          <input id="call-ai-client-search" type="search" autocomplete="off" placeholder="Pesquisar cliente, empresa, contato, telefone ou CNPJ…" aria-autocomplete="list" aria-controls="call-ai-search-results" aria-expanded="false">
+          <div id="call-ai-search-results" class="call-ai-search-results hidden" role="listbox"></div>
+        </div>
+        <div class="call-ai-objective-wrap">
+          <label for="call-ai-objective">Objetivo da ligação</label>
+          <select id="call-ai-objective">
+            <option value="primeiro_contato">Primeiro contato</option>
+            <option value="qualificacao">Qualificação</option>
+            <option value="diagnostico">Diagnóstico</option>
+            <option value="retorno">Retorno de contato anterior</option>
+            <option value="followup_proposta">Follow-up de proposta</option>
+            <option value="negociacao">Negociação</option>
+            <option value="proximo_passo">Fechamento de próximo passo</option>
+            <option value="pos_venda">Pós-venda</option>
+            <option value="expansao">Expansão</option>
+            <option value="indicacao">Pedido de indicação</option>
+          </select>
+        </div>
+        <button id="call-ai-prepare" type="button" class="og-button og-button-primary" disabled>Preparar roteiro</button>
+      </section>
+
+      <div id="call-ai-empty" class="call-ai-empty">
+        <strong>Selecione um cliente para começar</strong>
+        <span>A busca usa o CRM real e não consome IA enquanto você digita.</span>
+      </div>
+
+      <section id="call-ai-workspace" class="call-ai-workspace hidden" aria-live="polite">
+        <aside class="call-ai-context" aria-label="Contexto comercial da conta">
+          <div class="call-ai-panel-head"><span>CONTEXTO DA CONTA</span><button id="call-ai-change-client" type="button">Trocar</button></div>
+          <div id="call-ai-client-context"></div>
+        </aside>
+
+        <div class="call-ai-prompter" aria-label="Teleprompter da ligação">
+          <div class="call-ai-prompter-head">
+            <div><span id="call-ai-step-label">ETAPA 1 DE 8</span><h2 id="call-ai-step-title">Abertura</h2></div>
+            <div class="call-ai-recording"><span aria-hidden="true">●</span> Áudio desligado · modo manual</div>
+          </div>
+          <div id="call-ai-suggestion-pending" class="call-ai-suggestion-pending hidden"></div>
+          <article id="call-ai-card" class="call-ai-card">
+            <div class="call-ai-script-block"><span>FALA SUGERIDA</span><p id="call-ai-speech" contenteditable="true"></p></div>
+            <div class="call-ai-script-block call-ai-question"><span>PERGUNTA</span><p id="call-ai-question"></p></div>
+            <div class="call-ai-script-block call-ai-observe"><span>O QUE OBSERVAR</span><p id="call-ai-observe"></p></div>
+            <div class="call-ai-script-block call-ai-branches"><span>SE O CLIENTE RESPONDER…</span><div id="call-ai-branches"></div></div>
+          </article>
+          <div class="call-ai-progress" aria-label="Progresso do roteiro"><span id="call-ai-progress-bar"></span></div>
+          <div class="call-ai-controls">
+            <button id="call-ai-prev" type="button">← Anterior</button>
+            <button id="call-ai-complete" type="button">✓ Marcar etapa</button>
+            <button id="call-ai-next" type="button" class="primary">Próxima →</button>
+            <button id="call-ai-copy" type="button">Copiar fala</button>
+            <button id="call-ai-font-down" type="button" aria-label="Diminuir fonte">A−</button>
+            <button id="call-ai-font-up" type="button" aria-label="Aumentar fonte">A+</button>
+            <button id="call-ai-focus" type="button">Modo foco</button>
+          </div>
+        </div>
+
+        <aside class="call-ai-assist" aria-label="Adaptação e anotações">
+          <div class="call-ai-panel-head"><span>ADAPTAR AGORA</span></div>
+          <div id="call-ai-quick-actions" class="call-ai-quick-actions">
+            <button type="button" data-call-signal="sem_tempo">Cliente está sem tempo</button>
+            <button type="button" data-call-signal="concorrente">Já utiliza outra solução</button>
+            <button type="button" data-call-signal="caro">Achou caro</button>
+            <button type="button" data-call-signal="outro_decisor">Precisa consultar outra pessoa</button>
+            <button type="button" data-call-signal="proposta">Pediu proposta</button>
+            <button type="button" data-call-signal="material">Pediu material</button>
+            <button type="button" data-call-signal="sem_interesse">Não demonstrou interesse</button>
+          </div>
+          <button id="call-ai-ask-now" type="button" class="call-ai-wide-action">O que perguntar agora?</button>
+          <label for="call-ai-notes">Anotações da sessão</label>
+          <textarea id="call-ai-notes" rows="8" placeholder="Registre apenas o que o cliente realmente disse ou combinou."></textarea>
+          <button id="call-ai-adapt-notes" type="button" class="call-ai-wide-action">Adaptar às minhas anotações</button>
+          <div id="call-ai-sources" class="call-ai-sources"></div>
+        </aside>
+      </section>
+
+      <section id="call-ai-footer" class="call-ai-footer hidden">
+        <div><strong id="call-ai-session-account">Nenhuma conta</strong><span id="call-ai-session-state">Sessão em preparação</span></div>
+        <button id="call-ai-reset" type="button">Reiniciar roteiro</button>
+        <button id="call-ai-end" type="button" class="og-button og-button-primary">Encerrar sessão e revisar</button>
+      </section>
+
+      <section id="call-ai-review" class="call-ai-review hidden" aria-labelledby="call-ai-review-title">
+        <div class="call-ai-panel-head"><div><span>REVISÃO ANTES DO CRM</span><h2 id="call-ai-review-title">Confira exatamente o que será salvo</h2></div><button id="call-ai-review-close" type="button">Fechar</button></div>
+        <div class="call-ai-review-grid">
+          <label>Resultado informado<select id="call-ai-result"><option value="">Selecione…</option><option value="contato_realizado">Contato realizado</option><option value="sem_contato">Não consegui falar</option><option value="interesse">Demonstrou interesse</option><option value="proposta">Pediu proposta</option><option value="negociacao">Em negociação</option><option value="sem_interesse">Sem interesse agora</option></select></label>
+          <label>Próxima ação<input id="call-ai-next-action" placeholder="Ex.: enviar proposta revisada"></label>
+          <label>Data do retorno<input id="call-ai-follow-up" type="datetime-local"></label>
+          <label class="full">Resumo factual<textarea id="call-ai-summary" rows="5"></textarea></label>
+        </div>
+        <div id="call-ai-change-preview" class="call-ai-change-preview"></div>
+        <div class="call-ai-review-actions"><button id="call-ai-discard" type="button">Descartar sessão</button><button id="call-ai-save" type="button" class="og-button og-button-primary">Aprovar e registrar no CRM</button></div>
+      </section>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 8: HISTÓRICO                                                       -->
     <!-- ======================================================================= -->
     <div id="tab-historico" class="tab-content hidden space-y-6">
       <div class="clean-card p-4">

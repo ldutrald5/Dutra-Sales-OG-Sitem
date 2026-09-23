@@ -55,3 +55,25 @@ Os PNGs de origem ficam em `assets/premium/`. As versões WebP entregues pelo ap
 ```powershell
 node scripts/optimize-og-assets.mjs
 ```
+
+## Call AI
+
+A aba **Call AI** usa os clientes reais do CRM e funciona completamente em modo manual:
+
+1. Pesquise e selecione uma conta.
+2. Confirme ou altere o objetivo sugerido.
+3. Clique em **Preparar roteiro**.
+4. Navegue pelas oito etapas do teleprompter e registre anotações.
+5. Use **Encerrar sessão e revisar** para conferir cada alteração antes de salvar no CRM.
+
+A busca de clientes e a navegação não chamam IA. O Sales Brain é consultado apenas ao preparar o roteiro. Se a base estiver ausente, o roteiro continua funcionando com o contexto do CRM e perguntas seguras.
+
+### Importar o OG Sales Brain
+
+Os documentos e o índice gerado ficam em `apps/sistema-og/.data/knowledge/` e não são enviados ao GitHub. Para atualizar a base, execute o importador com Python e `python-docx`:
+
+```powershell
+python scripts/import_og_sales_brain.py "caminho\base.jsonl" "caminho\base.docx" "apps\sistema-og\.data\knowledge\index.json"
+```
+
+O endpoint local `/api/knowledge/status` informa a versão e `/api/knowledge/search` retorna somente os trechos relevantes. Alegações marcadas como premissa ou pendentes de validação permanecem identificadas na interface.

@@ -13,6 +13,7 @@
     "og:cloud:dev": "wrangler dev",
     "og:cloud:deploy": "wrangler deploy",
     "og:assets": "node scripts/optimize-og-assets.mjs",
+    "og:call-ai:test": "node scripts/test_call_ai.mjs",
     "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs",
     "prepare": "husky"
   },
