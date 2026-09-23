@@ -112,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
       signals: [],
       sources: [],
       sessionId: null,
-      fontSize: 1
+      fontSize: 1,
+      recording: { recorder: null, streams: [], chunks: [], audioContext: null, url: null, startedAt: null }
     }
   };
 
@@ -3906,6 +3907,127 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     showNotification('Ligação registrada no CRM após sua aprovação.', 'success');
   }
 
+  function setCallRecordingStatus(message, mode = 'idle') {
+    const status = document.getElementById('call-ai-recording-status');
+    if (!status) return;
+    status.dataset.state = mode;
+    status.innerHTML = `<span aria-hidden="true">●</span> ${escapeHtml(message)}`;
+  }
+
+  function supportedRecordingMimeType() {
+    const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+    return candidates.find(type => window.MediaRecorder?.isTypeSupported(type)) || '';
+  }
+
+  function releaseCallRecordingStreams() {
+    state.callAI.recording.streams.forEach(stream => stream.getTracks().forEach(track => track.stop()));
+    state.callAI.recording.streams = [];
+    if (state.callAI.recording.audioContext) {
+      state.callAI.recording.audioContext.close().catch(() => {});
+      state.callAI.recording.audioContext = null;
+    }
+  }
+
+  async function startCallRecording() {
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      return showNotification('Este navegador não oferece gravação de áudio.', 'info');
+    }
+    const mode = document.getElementById('call-ai-audio-source').value;
+    const startButton = document.getElementById('call-ai-record-start');
+    const pauseButton = document.getElementById('call-ai-record-pause');
+    const stopButton = document.getElementById('call-ai-record-stop');
+    startButton.disabled = true;
+    setCallRecordingStatus('Aguardando sua permissão…', 'requesting');
+    try {
+      let recordingStream;
+      const streams = [];
+      state.callAI.recording.streams = streams;
+      if (mode === 'computer') {
+        const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        streams.push(displayStream);
+        if (!displayStream.getAudioTracks().length) {
+          displayStream.getTracks().forEach(track => track.stop());
+          throw new Error('A janela foi compartilhada sem áudio. Marque “Compartilhar áudio” e tente novamente.');
+        }
+        const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        streams.push(microphoneStream);
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const context = new AudioContextClass();
+        const destination = context.createMediaStreamDestination();
+        context.createMediaStreamSource(displayStream).connect(destination);
+        context.createMediaStreamSource(microphoneStream).connect(destination);
+        recordingStream = destination.stream;
+        state.callAI.recording.audioContext = context;
+        displayStream.getVideoTracks()[0]?.addEventListener('ended', () => {
+          if (state.callAI.recording.recorder?.state !== 'inactive') stopCallRecording();
+        });
+      } else {
+        const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        streams.push(microphoneStream);
+        recordingStream = microphoneStream;
+      }
+      const mimeType = supportedRecordingMimeType();
+      const recorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+      state.callAI.recording.streams = streams;
+      state.callAI.recording.chunks = [];
+      state.callAI.recording.recorder = recorder;
+      state.callAI.recording.startedAt = new Date();
+      recorder.addEventListener('dataavailable', event => { if (event.data?.size) state.callAI.recording.chunks.push(event.data); });
+      recorder.addEventListener('stop', () => {
+        const blob = new Blob(state.callAI.recording.chunks, { type: recorder.mimeType || 'audio/webm' });
+        if (state.callAI.recording.url) URL.revokeObjectURL(state.callAI.recording.url);
+        const url = URL.createObjectURL(blob);
+        state.callAI.recording.url = url;
+        const lead = callLead();
+        const playback = document.getElementById('call-ai-recording-playback');
+        const download = document.getElementById('call-ai-recording-download');
+        playback.src = url;
+        download.href = url;
+        download.download = `ligacao-og-${normalizeCallSearch(lead?.empresa || lead?.nome || 'cliente').replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.webm`;
+        document.getElementById('call-ai-recording-result').classList.remove('hidden');
+        setCallRecordingStatus(`Gravação pronta · ${(blob.size / 1024 / 1024).toFixed(1)} MB`, 'ready');
+        releaseCallRecordingStreams();
+        startButton.disabled = false;
+        startButton.classList.remove('hidden');
+        pauseButton.classList.add('hidden');
+        stopButton.classList.add('hidden');
+      });
+      recorder.start(1000);
+      setCallRecordingStatus(mode === 'computer' ? 'Gravando áudio do PC + microfone' : 'Gravando microfone', 'recording');
+      startButton.classList.add('hidden');
+      pauseButton.classList.remove('hidden');
+      stopButton.classList.remove('hidden');
+      pauseButton.textContent = 'Pausar';
+    } catch (error) {
+      releaseCallRecordingStreams();
+      startButton.disabled = false;
+      setCallRecordingStatus(error?.message || 'Permissão negada ou gravação cancelada.', 'error');
+      showNotification(error?.message || 'Não foi possível iniciar a gravação.', 'info');
+    }
+  }
+
+  function toggleCallRecordingPause() {
+    const recorder = state.callAI.recording.recorder;
+    const button = document.getElementById('call-ai-record-pause');
+    if (!recorder || recorder.state === 'inactive') return;
+    if (recorder.state === 'recording') {
+      recorder.pause();
+      button.textContent = 'Continuar';
+      setCallRecordingStatus('Gravação pausada', 'paused');
+    } else if (recorder.state === 'paused') {
+      recorder.resume();
+      button.textContent = 'Pausar';
+      setCallRecordingStatus('Gravando chamada', 'recording');
+    }
+  }
+
+  function stopCallRecording() {
+    const recorder = state.callAI.recording.recorder;
+    if (!recorder || recorder.state === 'inactive') return;
+    setCallRecordingStatus('Finalizando arquivo…', 'processing');
+    recorder.stop();
+  }
+
   function initCallAI() {
     const input = document.getElementById('call-ai-client-search');
     const results = document.getElementById('call-ai-search-results');
@@ -3950,6 +4072,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-end')?.addEventListener('click', openCallAIReview);
     document.getElementById('call-ai-review-close')?.addEventListener('click', () => document.getElementById('call-ai-review').classList.add('hidden'));
     document.getElementById('call-ai-save')?.addEventListener('click', saveCallAIReview);
+    document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
+    document.getElementById('call-ai-record-pause')?.addEventListener('click', toggleCallRecordingPause);
+    document.getElementById('call-ai-record-stop')?.addEventListener('click', stopCallRecording);
     document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
     document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
     apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {
@@ -3957,6 +4082,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       badge.dataset.mode = info.available ? 'ready' : 'missing';
       badge.textContent = info.available ? `Sales Brain v${info.version} · ${info.stats.indexedRecords} trechos privados` : 'Sales Brain ausente · modo CRM';
     }).catch(() => { const badge = document.getElementById('call-ai-knowledge-status'); badge.dataset.mode = 'missing'; badge.textContent = 'Sales Brain indisponível · modo CRM'; });
+    window.addEventListener('beforeunload', releaseCallRecordingStreams);
   }
 
   function saveLeadsToStorage() {

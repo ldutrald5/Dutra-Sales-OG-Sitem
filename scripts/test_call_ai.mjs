@@ -21,7 +21,13 @@ for (const stage of ['Abertura', 'Contextualização', 'Diagnóstico', 'Explora�
 
 assert.ok(app.includes("sessionId"), 'Gravação precisa de chave idempotente');
 assert.ok(app.includes("lead.interactions.some(item => item.sessionId === sessionId)"), 'Duplicação deve ser bloqueada');
-assert.ok(!app.includes('getUserMedia('), 'Microfone não deve ser ativado nesta etapa');
+assert.ok(html.includes('call-ai-record-start'), 'Botão de iniciar gravação deve existir');
+assert.ok(html.includes('call-ai-record-stop'), 'Botão de encerrar gravação deve existir');
+assert.ok(html.includes('call-ai-audio-source'), 'Seletor da fonte de áudio deve existir');
+assert.ok(app.includes("getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording)"), 'Gravação deve começar somente após clique explícito');
+assert.ok(app.includes('navigator.mediaDevices.getDisplayMedia'), 'Captura opcional do áudio do computador deve existir');
+assert.ok(app.includes('navigator.mediaDevices.getUserMedia'), 'Captura do microfone deve existir');
+assert.ok(app.includes('URL.createObjectURL(blob)'), 'Gravação deve gerar reprodução local');
 assert.ok(server.includes("/api/knowledge/status"));
 assert.ok(server.includes("/api/knowledge/search"));
 assert.ok(ignore.includes('apps/sistema-og/.data/'));

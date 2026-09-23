@@ -976,7 +976,19 @@
         <div class="call-ai-prompter" aria-label="Teleprompter da ligação">
           <div class="call-ai-prompter-head">
             <div><span id="call-ai-step-label">ETAPA 1 DE 8</span><h2 id="call-ai-step-title">Abertura</h2></div>
-            <div class="call-ai-recording"><span aria-hidden="true">●</span> Áudio desligado · modo manual</div>
+            <div class="call-ai-recording-area">
+              <div id="call-ai-recording-status" class="call-ai-recording" data-state="idle"><span aria-hidden="true">●</span> Áudio desligado · modo manual</div>
+              <div class="call-ai-recording-controls">
+                <label class="sr-only" for="call-ai-audio-source">Fonte da gravação</label>
+                <select id="call-ai-audio-source" title="Escolher fonte da gravação">
+                  <option value="microphone">Microfone</option>
+                  <option value="computer">Áudio do PC + microfone</option>
+                </select>
+                <button id="call-ai-record-start" type="button">● Gravar chamada</button>
+                <button id="call-ai-record-pause" type="button" class="hidden">Pausar</button>
+                <button id="call-ai-record-stop" type="button" class="hidden">■ Encerrar</button>
+              </div>
+            </div>
           </div>
           <div id="call-ai-suggestion-pending" class="call-ai-suggestion-pending hidden"></div>
           <article id="call-ai-card" class="call-ai-card">
@@ -1013,6 +1025,12 @@
           <textarea id="call-ai-notes" rows="8" placeholder="Registre apenas o que o cliente realmente disse ou combinou."></textarea>
           <button id="call-ai-adapt-notes" type="button" class="call-ai-wide-action">Adaptar às minhas anotações</button>
           <div id="call-ai-sources" class="call-ai-sources"></div>
+          <div id="call-ai-recording-result" class="call-ai-recording-result hidden">
+            <strong>Gravação desta sessão</strong>
+            <audio id="call-ai-recording-playback" controls></audio>
+            <a id="call-ai-recording-download" download="ligacao-og.webm">Baixar gravação</a>
+            <small>O arquivo permanece neste aparelho até você baixá-lo ou fechar a página.</small>
+          </div>
         </aside>
       </section>
 

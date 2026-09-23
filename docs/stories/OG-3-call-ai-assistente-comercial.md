@@ -31,7 +31,7 @@ Permitir que Lucas pesquise uma conta real, prepare e conduza uma ligação B2B 
 - API local de status e busca no `server.mjs`.
 - Roteiro determinístico com fallback seguro quando a base estiver ausente.
 - Revisão editável e gravação idempotente no histórico do cliente.
-- Áudio e transcrição permanecem desativados nesta etapa porque não há provedor configurado nem autorização de microfone.
+- A gravação de áudio é opcional e começa somente após clique explícito. O usuário pode capturar o microfone ou compartilhar uma janela/tela com áudio e combinar esse som com o microfone. A gravação permanece local no navegador, com pausa, reprodução e download; transcrição automática ainda não foi incluída.
 
 ## Validação
 
