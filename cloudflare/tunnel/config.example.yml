@@ -1,0 +1,7 @@
+tunnel: TUNNEL_UUID
+credentials-file: C:\Users\SEU_USUARIO\.cloudflared\TUNNEL_UUID.json
+
+ingress:
+  - hostname: og.seudominio.com
+    service: http://127.0.0.1:4321
+  - service: http_status:404
