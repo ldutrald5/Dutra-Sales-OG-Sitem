@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./index.html', './app.js'],
+  content: [
+    './index.html',
+    './app.js',
+  ],
   darkMode: 'class',
   theme: {
     extend: {
@@ -15,10 +18,20 @@ module.exports = {
       },
     },
   },
+  // Classes montadas por ternário no app.js — garantir presença no CSS final
   safelist: [
-    'bg-amber-500', 'bg-amber-500/10', 'text-slate-950', 'shadow-md',
-    'bg-slate-900', 'hover:bg-slate-800', 'text-slate-300', 'border',
-    'border-slate-700', 'border-b', 'border-slate-800/50', 'hover:bg-slate-800/40',
+    'bg-amber-500',
+    'bg-amber-500/10',
+    'text-slate-950',
+    'shadow-md',
+    'bg-slate-900',
+    'hover:bg-slate-800',
+    'text-slate-300',
+    'border',
+    'border-slate-700',
+    'border-b',
+    'border-slate-800/50',
+    'hover:bg-slate-800/40',
     'active-vehicle',
   ],
   plugins: [],

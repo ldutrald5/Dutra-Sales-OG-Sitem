@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Olho de Gato — Versão Mobile</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffde17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="../assets/logo-olho-de-gato.jpg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            og: {
+              brand: '#ffde17',
+              brandDark: '#eab308',
+              dark: '#091118',
+              card: '#121e27',
+              border: '#273743'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos Mobile -->
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="bg-[#091118] text-slate-100 min-h-screen flex flex-col">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER MOBILE                                                             -->
+  <!-- ========================================================================= -->
+  <header class="mobile-header sticky top-0 z-40 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-lg overflow-hidden border border-amber-400/80 bg-white flex-shrink-0">
+        <img src="../assets/logo-olho-de-gato.jpg" alt="Logo OG" class="w-full h-full object-cover">
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-extrabold text-sm tracking-tight text-slate-100">OLHO DE GATO</span>
+          <span class="badge-og">MOBILE</span>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-tight">Cotações Rápidas de Bolso</p>
+      </div>
+    </div>
+
+    <!-- Acesso à Versão Completa Desktop -->
+    <a href="../index.html" class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 hover:bg-slate-700 transition">
+      <span>🖥️</span>
+      <span>Desktop</span>
+    </a>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- CONTEÚDO PRINCIPAL (ABAS MOBILE)                                          -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 px-4 py-4 max-w-lg mx-auto w-full space-y-4">
+
+    <!-- ======================================================================= -->
+    <!-- ABA 1: COTAÇÃO RÁPIDA DE BOLSO                                          -->
+    <!-- ======================================================================= -->
+    <section id="tab-cotacao" class="tab-pane active space-y-4">
+
+      <!-- Card do Cliente -->
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">1. Dados do Cliente</span>
+          <span class="text-[10px] text-slate-400">Proposta Expressa</span>
+        </div>
+
+        <div class="space-y-2.5">
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1">Nome / Contato</label>
+            <input type="text" id="m-client-name" placeholder="Ex: Rodrigo Mendes" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">Empresa / Frota</label>
+              <input type="text" id="m-client-company" placeholder="Ex: TransMendes" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">WhatsApp</label>
+              <input type="tel" id="m-client-phone" placeholder="DDD + Número" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card do Veículo / Frota -->
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">2. Selecione o Veículo</span>
+          <span id="m-badge-pneus" class="badge-og">10 Pneus</span>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1">Tipo de Veículo / Configuração</label>
+            <select id="m-vehicle-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+              <option value="cavalo_6x2">Cavalo 6x2 (10 Pneus / 4 Equalizadores)</option>
+              <option value="cavalo_6x4">Cavalo 6x4 Traçado (10 Pneus / 4 Equalizadores)</option>
+              <option value="cavalo_4x2">Cavalo 4x2 Toco (6 Pneus / 2 Equalizadores)</option>
+              <option value="bitruck_8x2">Bitruck 8x2 (12 Pneus / 4 Equalizadores)</option>
+              <option value="truck_6x2">Truck 6x2 Tradicional (10 Pneus / 4 Equalizadores)</option>
+              <option value="toco_4x2">Toco 4x2 Urbano (6 Pneus / 2 Equalizadores)</option>
+              <option value="3_4">Caminhão 3/4 Leve (6 Pneus / 2 Equalizadores)</option>
+              <option value="carreta_3eixos">Carreta 3 Eixos (12 Pneus / 6 Equalizadores)</option>
+              <option value="bitrem">Bi-trem 7 Eixos (22 Pneus / 10 Equalizadores)</option>
+              <option value="rodotrem">Rodotrem 9 Eixos (34 Pneus / 16 Equalizadores)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">Calibragem (Libras)</label>
+              <select id="m-libras" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                <option value="110" selected>110 LBS (Padrão)</option>
+                <option value="120">120 LBS (Pesado)</option>
+                <option value="105">105 LBS</option>
+                <option value="100">100 LBS</option>
+                <option value="115">115 LBS</option>
+                <option value="125">125 LBS</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">Qtd. Caminhões</label>
+              <input type="number" id="m-vehicle-qty" value="1" min="1" max="99" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-center focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+            <div>
+              <span class="text-xs font-bold text-slate-200 block">Incluir Dianteira?</span>
+              <span class="text-[10px] text-slate-400">Equalizadores e suportes direcionais</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="m-include-dianteira" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-400"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Comercial & Condição -->
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">3. Condições Comerciais</span>
+        </div>
+
+        <div class="space-y-2.5">
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1">Tabela de Preço</label>
+            <select id="m-tier" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+              <option value="lead_ie">Lead — CNPJ c/ IE (R$ 213 EQ / R$ 22 SUP)</option>
+              <option value="lead_sem_ie">Lead — Sem IE / Autônomo (R$ 239 EQ / R$ 24 SUP)</option>
+              <option value="revenda">Revenda Autorizada (R$ 157 EQ / R$ 20 SUP)</option>
+              <option value="tabela_base">Tabela Cheia (R$ 172 EQ / R$ 22 SUP)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">Parcelamento</label>
+              <select id="m-parcelas" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                <option value="1">1x (À Vista -3%)</option>
+                <option value="2">2x (30/60 dias)</option>
+                <option value="3">3x (30/60/90 dias)</option>
+                <option value="4">4x</option>
+                <option value="5">5x</option>
+                <option value="6" selected>6x (Padrão)</option>
+                <option value="10">10x (Especial)</option>
+                <option value="12">12x</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-300 font-semibold mb-1">Frete</label>
+              <input type="text" id="m-frete-text" value="A Negociar" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card de Resultados em Tempo Real -->
+      <div class="mobile-card mobile-card-highlight space-y-3">
+        <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
+          <span class="text-xs font-extrabold text-amber-400 uppercase tracking-wider">Resumo da Cotação</span>
+          <span class="text-[10px] text-emerald-400 font-bold">Frete e Suporte Inclusos</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-400 font-bold uppercase block">Valor Total</span>
+            <span id="m-resumo-total" class="text-xl font-black text-amber-400">R$ 0,00</span>
+          </div>
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-400 font-bold uppercase block">Condição</span>
+            <span id="m-resumo-parcela" class="text-sm font-black text-slate-100">6x de R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/80 text-xs text-slate-300 flex items-center justify-between">
+          <span>📦 Total de Peças: <strong id="m-resumo-pecas" class="text-amber-400">0 un</strong></span>
+          <span>🚛 Pneus Protegidos: <strong id="m-resumo-pneus-total" class="text-emerald-400">0</strong></span>
+        </div>
+
+        <!-- Botão WhatsApp Grande -->
+        <button id="m-btn-send-whatsapp" class="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition touch-feedback">
+          <svg class="w-5 h-5 text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span>Disparar Proposta no WhatsApp</span>
+        </button>
+
+        <button id="m-btn-copy-proposal" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition">
+          <span>📋 Copiar Resumo para a Área de Transferência</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 2: CONSULTOR DE SUPORTES TOUCH                                      -->
+    <!-- ======================================================================= -->
+    <section id="tab-suportes" class="tab-pane space-y-4">
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Consultor de Suportes</span>
+          <span class="badge-og">Árvore Guiada</span>
+        </div>
+        <p class="text-xs text-slate-300">Descubra o suporte correto respondendo às perguntas do caminhão:</p>
+
+        <div class="space-y-3 pt-1">
+          <div>
+            <label class="block text-[11px] text-slate-300 font-semibold mb-1">Qual é a Linha do Caminhão?</label>
+            <select id="m-support-line" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+              <option value="scania">Scania (P, G, R, Linha NTG)</option>
+              <option value="volvo">Volvo (FH, FM, VM)</option>
+              <option value="mb">Mercedes-Benz (Actros, Axor, Atego, Accelo)</option>
+              <option value="vw">Volkswagen / MAN (Constellation, Meteor)</option>
+              <option value="iveco">Iveco (Hi-Way, S-Way, Stralis, Tector)</option>
+              <option value="carreta">Carreta / Reboque / Rodotrem (Randon, Guerra, Facchini...)</option>
+            </select>
+          </div>
+
+          <div id="m-support-questions" class="space-y-3">
+            <!-- Dinâmico via mobile.js -->
+          </div>
+
+          <!-- Resultado do Suporte -->
+          <div id="m-support-result" class="p-3.5 rounded-xl bg-slate-950 border border-amber-400/40 space-y-2">
+            <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider block">Suportes Recomendados:</span>
+            <div id="m-support-tags" class="flex flex-wrap gap-1.5">
+              <!-- Códigos recomendados -->
+            </div>
+            <p id="m-support-desc" class="text-xs text-slate-300 mt-1"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 3: CENTRAL WHATSAPP & MODELOS PRONTOS                                -->
+    <!-- ======================================================================= -->
+    <section id="tab-whatsapp" class="tab-pane space-y-4">
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Modelos Prontos para WhatsApp</span>
+        </div>
+        <p class="text-xs text-slate-300">Escolha o modelo comercial ideal para enviar ao cliente agora:</p>
+
+        <div class="space-y-3">
+          <!-- Modelo 1: Curto -->
+          <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-100">1. Modelo Curto (Direto ao Ponto)</span>
+              <span class="text-[10px] text-emerald-400 font-semibold">Sem 'Ver Mais'</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Mensagem enxuta de 5 linhas com valor e parcelamento direto.</p>
+            <button id="m-btn-copy-w-short" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold border border-slate-700 transition">
+              Copiar Modelo Curto
+            </button>
+          </div>
+
+          <!-- Modelo 2: Padrão Veículo -->
+          <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-100">2. Modelo Padrão por Veículo</span>
+              <span class="text-[10px] text-amber-400 font-semibold">Mais Utilizado</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Apresentação detalhada com equalizadores, suportes e condições.</p>
+            <button id="m-btn-copy-w-standard" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold border border-slate-700 transition">
+              Copiar Modelo Padrão
+            </button>
+          </div>
+
+          <!-- Modelo 3: Executivo ROI -->
+          <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-100">3. Modelo Executivo com ROI</span>
+              <span class="text-[10px] text-blue-400 font-semibold">Para Frotistas & Diretores</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Argumentação com economia em pneus, diesel e tempo de retorno do investimento.</p>
+            <button id="m-btn-copy-w-roi" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold border border-slate-700 transition">
+              Copiar Modelo Executivo c/ ROI
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- ABA 4: CATÁLOGO RÁPIDO DE PEÇAS                                         -->
+    <!-- ======================================================================= -->
+    <section id="tab-catalogo" class="tab-pane space-y-4">
+      <div class="mobile-card space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Catálogo Rápido de Peças</span>
+        </div>
+
+        <div>
+          <input type="text" id="m-catalog-search" placeholder="🔍 Buscar por código (Ex: EQ-110, EQ-1145...)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+
+        <div id="m-catalog-list" class="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+          <!-- Populado via mobile.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (BOTTOM NAVIGATION BAR)                  -->
+  <!-- ========================================================================= -->
+  <nav class="bottom-nav">
+    <button data-target="tab-cotacao" class="bottom-nav-item active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+      <span>Cotação</span>
+    </button>
+
+    <button data-target="tab-suportes" class="bottom-nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+      <span>Suportes</span>
+    </button>
+
+    <button data-target="tab-whatsapp" class="bottom-nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+      <span>WhatsApp</span>
+    </button>
+
+    <button data-target="tab-catalogo" class="bottom-nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+      <span>Catálogo</span>
+    </button>
+  </nav>
+
+  <!-- Scripts -->
+  <script src="../data.js"></script>
+  <script src="mobile.js"></script>
+</body>
+</html>

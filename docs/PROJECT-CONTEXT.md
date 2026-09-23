@@ -22,6 +22,10 @@ Browser (PWA) + `server.mjs` (Node :4321) + opcional Cloudflare Worker/KV e Tunn
 
 Ver pasta `apps/sistema-og/` e README do app. Estado local em `.data/` (não versionado).
 
+O OG-3 Call AI Light vive em `apps/sistema-og/call-ai/`. Ele analisa somente
+transcrição/anotação colada com heurísticas locais e exige revisão humana antes
+de gravar `lead.calls[]` e atualizar o CRM. Não grava áudio e não chama APIs de IA.
+
 ## 11. Regras para não quebrar dados
 
 - Não apagar localStorage de usuários
@@ -42,7 +46,7 @@ npm run og:start
 |----|------|--------|
 | OG-1 | Copiloto Comercial | Implementado |
 | OG-2 | Modernização visual | Implementado |
-| OG-3 | Call AI Light | Planejado |
+| OG-3 | Call AI Light | Implementado (heurística local + revisão humana) |
 | OG-4 | Áudio | Planejado |
 | OG-5 | Transcrição | Planejado |
 | OG-6 | Sales Intelligence AI | Planejado |

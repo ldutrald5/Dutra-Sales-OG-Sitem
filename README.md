@@ -27,7 +27,8 @@ Detalhes: [docs/PROJECT-CONTEXT.md](docs/PROJECT-CONTEXT.md) e stories em `docs/
 |-------|------|--------|
 | OG-1 | Copiloto Comercial | Implementado (review) |
 | OG-2 | Modernização visual | Implementado (review) |
-| OG-3+ | Call AI, áudio, sales intelligence… | Planejado |
+| OG-3 | Call AI Light (heurística local + revisão humana) | Implementado |
+| OG-4+ | Áudio, transcrição, sales intelligence… | Planejado |
 
 ## Requisitos
 

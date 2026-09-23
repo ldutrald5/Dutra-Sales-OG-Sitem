@@ -2,7 +2,7 @@
   "name": "meu-projeto-aiox",
   "version": "0.1.0",
   "private": true,
-  "description": "Projeto Greenfield AIOX em português — Sistema OG / Dutra Sales",
+  "description": "Projeto Greenfield AIOX em português para Codex e Claude Code",
   "scripts": {
     "aiox": "aiox-core",
     "aiox:version": "aiox-core --version",
