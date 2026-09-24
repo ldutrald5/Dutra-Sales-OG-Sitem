@@ -1,0 +1,19 @@
+# Entregas existentes
+
+Este registro descreve capacidades já presentes no código. Não substitui testes de aceite nem implica que os módulos estejam completos.
+
+| Referência | Entrega comprovável | Evidência principal |
+|---|---|---|
+| OG-1 | Copiloto comercial integrado ao CRM leve | `docs/stories/OG-1-copiloto-comercial-integrado.md` |
+| OG-2 | Identidade visual e interface premium responsiva | `docs/stories/OG-2-modernizacao-visual-sistema-og.md` |
+| OG-3/4 | Call AI manual e gravação local por ação explícita | `docs/stories/OG-3-call-ai-assistente-comercial.md`, `apps/sistema-og/app.js` |
+| OG-11/12 | Envelope operacional v1 e migração aditiva | `apps/sistema-og/operations-model.js` |
+| OG-13 | Fundação de navegação, componentes e testes | `docs/stories/OG-13-fundacao-navegacao-componentes-testes.md` |
+| OG-15 | Biblioteca Comercial local-first | `material-store.js`, `docs/stories/OG-15-biblioteca-comercial-local-first.md` |
+| OG-16 | Pacotes de materiais ligados a CRM/Call AI | `sales-materials.js`, `docs/stories/OG-16-crm-call-ai-pacotes-materiais.md` |
+| OG-17 | Performance e funil baseados em eventos reais | `performance-engine.js`, `docs/stories/OG-17-performance-funil-eventos-reais.md` |
+| Infra | PWA offline, servidor local e opção Cloudflare | `service-worker.js`, `server.mjs`, `cloudflare/worker.mjs` |
+
+## Convenção para novas conclusões
+
+Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.
