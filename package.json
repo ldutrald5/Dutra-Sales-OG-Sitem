@@ -21,7 +21,8 @@
     "og:packages:test": "node scripts/test_material_packages.mjs",
     "og:performance:test": "node scripts/test_performance_dashboard.mjs",
     "og:sales-desk:test": "node scripts/test_sales_desk.mjs",
-    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/components/ui-components.js",
+    "og:prospecting:test": "node scripts/test_prospecting_engine.mjs",
+    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/services/prospect-parser.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/modules/prospecting-engine.js && node --check apps/sistema-og/components/ui-components.js",
     "validate": "node scripts/validate.mjs",
     "hooks:setup": "node scripts/setup-git-hooks.mjs",
     "prepare": "node scripts/setup-git-hooks.mjs"

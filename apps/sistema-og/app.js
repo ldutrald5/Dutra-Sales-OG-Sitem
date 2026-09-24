@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     leadFilterStatus: 'all',
     leadSearchQuery: '',
     salesDeskSearch: '',
+    prospecting: { view: 'inbox', previewRows: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
     ocrImageBase64: null,
     ocrExtractedText: '',
     quoteImportImageBase64: null,
@@ -286,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (tabId === 'dia') renderDayDashboard();
+    else if (tabId === 'prospeccao') renderProspecting();
     else if (tabId === 'historico') renderHistory();
     else if (tabId === 'catalogo') renderCatalog();
     else if (tabId === 'transportadoras') renderTransporters();
@@ -3168,6 +3170,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
     root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
       state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
+      state.callAI.returnTab = 'dia';
       state.callAI.selectedLeadId = lead.id;
       switchTab('call-ai');
       selectCallClient(lead.id);
@@ -3243,6 +3246,166 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (event.key.toLowerCase() === 'a') { event.preventDefault(); document.querySelector('.sales-desk-actions summary')?.click(); }
     });
     setInterval(updateDayClock, 30000);
+  }
+
+  const PROSPECT_ORIGINS = ['Sistema OG', 'Indicação', 'LinkedIn', 'Google/Maps', 'Lista', 'WhatsApp', 'Contato antigo', 'Outro'];
+
+  function classifyProspectPreview(row) {
+    const duplicates = OG_CRM_SERVICE.findPossibleDuplicates(state.leads, row);
+    if (!duplicates.length) return { ...row, duplicateStatus: 'NEW', duplicateId: '' };
+    const exact = duplicates.find(lead => (row.cnpj && lead.cnpj === row.cnpj) || (row.telefone && lead.telefone === row.telefone) || (row.codigo && lead.internalCode === row.codigo));
+    return { ...row, duplicateStatus: exact ? 'EXISTING' : 'POSSIBLE', duplicateId: (exact || duplicates[0]).id };
+  }
+
+  function setProspectingView(view) {
+    state.prospecting.view = view;
+    document.querySelectorAll('[data-prospect-view]').forEach(button => button.classList.toggle('active', button.dataset.prospectView === view));
+    renderProspecting();
+  }
+
+  function renderProspecting() {
+    const root = document.getElementById('prospecting-root');
+    if (!root) return;
+    if (state.prospecting.view === 'inbox') renderProspectInbox(root);
+    else if (state.prospecting.view === 'queue') renderProspectQueue(root);
+    else renderProspectFocus(root);
+  }
+
+  function renderProspectInbox(root) {
+    const rows = state.prospecting.previewRows;
+    const counts = rows.reduce((acc, row) => { acc[row.duplicateStatus] = (acc[row.duplicateStatus] || 0) + 1; if (row.confidence === 'review') acc.review += 1; return acc; }, { NEW: 0, POSSIBLE: 0, EXISTING: 0, review: 0 });
+    root.innerHTML = `<section class="prospect-inbox-grid"><div class="clean-card prospect-capture"><span class="og-kicker">ENTRADA BRUTA</span><h2>Cole uma linha por prospect</h2><textarea id="prospect-bulk-input" rows="12" placeholder="014508    AJBAM SOLUÇÕES    Beatriz    5544991426479&#10;Rodolog Transportes, Carlos, gestor de frota, 44988888888"></textarea><div class="prospect-batch-fields"><label>Origem do lote<select id="prospect-batch-origin">${PROSPECT_ORIGINS.map(item => `<option>${escapeHtml(item)}</option>`).join('')}</select></label><label>Tag do lote<input id="prospect-batch-tag" placeholder="Transportadoras PR - 24/09"></label></div><div class="prospect-capture-actions"><button type="button" id="prospect-process" class="og-button og-button-primary">Processar localmente</button><button type="button" disabled title="Somente linhas ambíguas usarão IA em uma fase futura">✨ Interpretar ambíguas com IA · em breve</button></div><p>Processamento local, sem IA e sem enviar dados para fora.</p></div><aside class="clean-card prospect-layer-card"><span class="og-kicker">AUTOMAÇÃO × INTELIGÊNCIA</span><h3>Esta etapa custa zero IA</h3><p><b>Automação:</b> parser, duplicidade, fila, datas, templates e métricas.</p><p><b>Inteligência:</b> estratégia, objeções e análise profunda ficam no Call AI.</p><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></aside></section>${rows.length ? `<section class="clean-card prospect-preview"><header><div><span class="og-kicker">PREVIEW EDITÁVEL</span><h2>${rows.length} prospects encontrados</h2><p>${counts.NEW} novos · ${counts.POSSIBLE} possíveis duplicados · ${counts.EXISTING} existentes · ${counts.review} para revisar</p></div><button type="button" id="prospect-import" class="og-button og-button-primary">Importar ${counts.NEW} novos</button></header><div class="prospect-table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Telefone</th><th>CNPJ/CPF</th><th>Código</th><th>Observação</th><th>Status</th></tr></thead><tbody>${rows.map((row, index) => `<tr class="${row.confidence === 'review' ? 'needs-review' : ''}"><td><input data-preview-index="${index}" data-preview-field="empresa" value="${escapeHtml(row.empresa)}"></td><td><input data-preview-index="${index}" data-preview-field="contato" value="${escapeHtml(row.contato)}"></td><td><input data-preview-index="${index}" data-preview-field="telefone" value="${escapeHtml(row.telefone)}"></td><td><input data-preview-index="${index}" data-preview-field="cnpj" value="${escapeHtml(row.cnpj || row.cpf)}"></td><td><input data-preview-index="${index}" data-preview-field="codigo" value="${escapeHtml(row.codigo)}"></td><td><input data-preview-index="${index}" data-preview-field="observacao" value="${escapeHtml(row.observacao)}"></td><td><select data-preview-index="${index}" data-preview-action><option value="import" ${row.duplicateStatus === 'NEW' ? 'selected' : ''}>${row.confidence === 'review' ? '⚠ Revisar/importar' : '✓ Novo'}</option><option value="ignore" ${row.duplicateStatus !== 'NEW' ? 'selected' : ''}>Ignorar · ${row.duplicateStatus}</option>${row.duplicateId ? '<option value="update">Atualizar dados faltantes</option>' : ''}</select></td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
+    root.querySelector('#prospect-process')?.addEventListener('click', () => {
+      const text = root.querySelector('#prospect-bulk-input').value;
+      const parsed = OG_PROSPECT_PARSER.parseBulk(text);
+      if (!parsed.length) return showNotification('Cole pelo menos uma linha para processar.', 'info');
+      state.prospecting.previewRows = parsed.map(classifyProspectPreview).map(row => ({ ...row, importAction: row.duplicateStatus === 'NEW' ? 'import' : 'ignore', sourceChannel: root.querySelector('#prospect-batch-origin').value, batchTag: root.querySelector('#prospect-batch-tag').value.trim() }));
+      renderProspecting();
+    });
+    root.querySelectorAll('[data-preview-field]').forEach(input => input.addEventListener('input', () => {
+      const row = state.prospecting.previewRows[Number(input.dataset.previewIndex)];
+      row[input.dataset.previewField] = input.value.trim();
+      Object.assign(row, classifyProspectPreview(row));
+    }));
+    root.querySelectorAll('[data-preview-action]').forEach(select => select.addEventListener('change', () => { state.prospecting.previewRows[Number(select.dataset.previewIndex)].importAction = select.value; }));
+    root.querySelector('#prospect-import')?.addEventListener('click', importProspectPreview);
+    root.querySelector('[data-prospect-feedback]')?.addEventListener('click', captureOperationalFeedback);
+  }
+
+  function importProspectPreview() {
+    const rows = state.prospecting.previewRows;
+    const toImport = rows.filter(row => row.importAction === 'import' && row.empresa);
+    const toUpdate = rows.filter(row => row.importAction === 'update' && row.duplicateId);
+    if (!toImport.length && !toUpdate.length) return showNotification('Nenhum prospect selecionado para importar.', 'info');
+    if (!window.confirm(`${toImport.length} novos e ${toUpdate.length} atualizações serão gravados. Continuar?`)) return;
+    const now = new Date().toISOString();
+    const imported = toImport.map((row, index) => OG_CRM_SERVICE.createProspect({ empresa: row.empresa, nome: row.contato, telefone: row.telefone, cnpj: row.cnpj, cpf: row.cpf, codigo: row.codigo, observacoes: row.observacao, sourceChannel: row.sourceChannel || 'Lista', batchTag: row.batchTag, operationalStatus: 'NEW_PROSPECT', enteredAt: now }, { id: `LEAD-${Date.now().toString(36).toUpperCase()}-${index}`, now }));
+    toUpdate.forEach(row => {
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, row.duplicateId);
+      if (!lead) return;
+      if (!lead.telefone && row.telefone) lead.telefone = row.telefone;
+      if (!lead.cnpj && row.cnpj) lead.cnpj = row.cnpj;
+      if (!lead.internalCode && row.codigo) lead.internalCode = row.codigo;
+      if (!lead.nome && row.contato) lead.nome = row.contato;
+    });
+    state.leads.unshift(...imported);
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: `EVT-BULK-${Date.now().toString(36).toUpperCase()}`, type: 'prospects.bulk_imported', at: now, count: imported.length, updatedCount: toUpdate.length, source: 'bulk_inbox', batchTag: toImport[0]?.batchTag || '' });
+    saveLeadsToStorage(); saveOperationsToStorage();
+    state.prospecting.previewRows = [];
+    state.prospecting.currentId = imported[0]?.id || null;
+    showNotification(`${imported.length} prospects entraram na fila.`, 'success');
+    setProspectingView('queue');
+  }
+
+  function uniqueLeadValues(key) { return [...new Set(state.leads.map(lead => lead[key]).filter(Boolean))].sort(); }
+
+  function renderProspectQueue(root) {
+    const queue = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
+    root.innerHTML = `<section class="clean-card prospect-queue"><header><div><span class="og-kicker">AINDA NÃO PROSPECTADOS</span><h2>${queue.length} aguardando primeira ação</h2></div><button type="button" id="start-prospect-session" class="og-button og-button-primary">▶ Prospectar agora</button></header><div class="prospect-filters"><select data-prospect-filter="origin"><option value="all">Todas as origens</option>${uniqueLeadValues('sourceChannel').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="batch"><option value="all">Todos os lotes</option>${uniqueLeadValues('batchTag').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="priority"><option value="all">Todas as prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div><div class="prospect-queue-list">${queue.length ? queue.map(lead => `<article><button type="button" data-prospect-open="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</span><small>${escapeHtml(lead.internalCode || 'Sem código')} · ${escapeHtml(lead.sourceChannel || 'Sem origem')} · ${escapeHtml(lead.batchTag || 'Sem lote')}</small></button><a href="tel:${escapeHtml(lead.telefone)}">Ligar</a><button type="button" data-prospect-wa="${escapeHtml(lead.id)}">WhatsApp</button></article>`).join('') : '<div class="sales-desk-empty">Fila concluída para estes filtros.</div>'}</div></section>`;
+    root.querySelectorAll('[data-prospect-filter]').forEach(select => { select.value = state.prospecting.filters[select.dataset.prospectFilter]; select.addEventListener('change', () => { state.prospecting.filters[select.dataset.prospectFilter] = select.value; renderProspecting(); }); });
+    root.querySelectorAll('[data-prospect-open]').forEach(button => button.addEventListener('click', () => { state.prospecting.currentId = button.dataset.prospectOpen; setProspectingView('focus'); }));
+    root.querySelectorAll('[data-prospect-wa]').forEach(button => button.addEventListener('click', () => { const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.prospectWa); if (lead) { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); } }));
+    root.querySelector('#start-prospect-session')?.addEventListener('click', () => { state.prospecting.currentId = queue[0]?.id || null; setProspectingView('focus'); });
+  }
+
+  function renderProspectFocus(root) {
+    const queue = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
+    let lead = OG_CRM_SERVICE.getLeadById(state.leads, state.prospecting.currentId);
+    if (!lead || OG_PROSPECTING.wasProspected(lead)) lead = queue.find(item => !state.prospecting.skippedIds.includes(item.id)) || queue[0];
+    state.prospecting.currentId = lead?.id || null;
+    const metrics = OG_PROSPECTING.sessionMetrics(state.prospecting.session.events);
+    if (!lead) { root.innerHTML = '<section class="clean-card prospect-finished"><h2>Fila concluída</h2><p>Não há prospects pendentes nestes filtros.</p><button type="button" data-back-inbox>Adicionar mais prospects</button></section>'; root.querySelector('[data-back-inbox]')?.addEventListener('click', () => setProspectingView('inbox')); return; }
+    const position = Math.max(1, queue.findIndex(item => item.id === lead.id) + 1);
+    const suggestion = OG_PROSPECTING.nextBestAction(lead);
+    root.innerHTML = `<section class="prospect-session-metrics"><div><small>Prospectados hoje</small><b>${metrics.processed}</b></div><div><small>Restantes</small><b>${queue.length}</b></div><div><small>Interessados</small><b>${metrics.interested}</b></div><div><small>Orçamentos</small><b>${metrics.quotes}</b></div><div><small>Não atendeu</small><b>${metrics.noAnswers}</b></div></section><section class="clean-card prospect-focus"><header><div><span class="og-kicker">PROSPECÇÃO · ${position} / ${queue.length}</span><h1>${escapeHtml(lead.empresa)}</h1><p>${escapeHtml(lead.nome || 'Contato não informado')} ${lead.cargo ? `· ${escapeHtml(lead.cargo)}` : ''}</p></div><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></header><div class="prospect-identity"><span>📱 ${escapeHtml(formatPhone(lead.telefone))}</span><span>CNPJ ${escapeHtml(OG_PROSPECT_PARSER.cnpjFormat(lead.cnpj) || 'não informado')}</span><span>Código ${escapeHtml(lead.internalCode || 'não informado')}</span><span>Origem ${escapeHtml(lead.sourceChannel || 'não informada')}</span></div><div class="prospect-next-best"><span>💡 Próxima ação sugerida</span><b>${escapeHtml(suggestion.label)}</b><small>${escapeHtml(suggestion.reason)}</small></div><div class="prospect-focus-actions"><a href="tel:${escapeHtml(lead.telefone)}" data-session-call>📞 Ligar</a><button type="button" data-session-whatsapp>💬 WhatsApp</button><button type="button" data-session-call-ai>Call AI</button><button type="button" data-session-skip>Pular</button><button type="button" data-session-delay>Adiar</button></div><div class="prospect-result-grid"><label>Resultado<select id="prospect-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label>Nota rápida<textarea id="prospect-note" rows="3" placeholder="O que aconteceu?"></textarea></label><label>Próxima ação<input id="prospect-next-action" placeholder="Ex.: enviar apresentação"></label><label>Quando<select id="prospect-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem ação</option></select></label><label id="prospect-date-wrap" class="hidden">Data<input id="prospect-specific-date" type="datetime-local"></label></div><button type="button" id="prospect-save-next" class="og-button og-button-primary prospect-save-next">Salvar e próximo →</button></section>`;
+    root.querySelector('[data-session-call]')?.addEventListener('click', () => state.prospecting.session.events.push({ type: 'attempt', channel: 'call', at: new Date().toISOString(), leadId: lead.id }));
+    root.querySelector('[data-session-whatsapp]').addEventListener('click', () => { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); });
+    root.querySelector('[data-session-call-ai]').addEventListener('click', () => { state.callAI.context = OG_CALL_AI_CONTEXT.build(lead); state.callAI.returnTab = 'prospeccao'; state.callAI.selectedLeadId = lead.id; switchTab('call-ai'); selectCallClient(lead.id); });
+    root.querySelector('[data-session-skip]').addEventListener('click', () => { state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null; renderProspecting(); });
+    root.querySelector('[data-session-delay]').addEventListener('click', () => { const when = window.prompt('Adiar para: mais tarde, amanhã ou AAAA-MM-DD HH:MM', 'amanhã'); if (!when) return; const mode = /amanh/i.test(when) ? 'tomorrow' : /mais tarde/i.test(when) ? 'today' : 'specific'; const value = mode === 'specific' ? when.replace(' ', 'T') : ''; const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, 'Retomar prospecção', followUpValue(mode, value)); persistSalesDeskActivity(lead, interaction, 'prospect.deferred'); state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null; renderProspecting(); });
+    root.querySelector('[data-prospect-feedback]').addEventListener('click', captureOperationalFeedback);
+    const mode = root.querySelector('#prospect-follow-mode'); mode.addEventListener('change', () => root.querySelector('#prospect-date-wrap').classList.toggle('hidden', mode.value !== 'specific'));
+    root.querySelector('#prospect-save-next').addEventListener('click', () => {
+      const result = root.querySelector('#prospect-result').value;
+      const note = root.querySelector('#prospect-note').value.trim();
+      const interaction = OG_INTERACTION_SERVICE.recordResult(lead, result, note);
+      lead.operationalStatus = 'WORKED_LEAD'; lead.firstContactAt ||= interaction.at;
+      const nextAction = mode.value === 'none' ? '' : root.querySelector('#prospect-next-action').value.trim();
+      if (nextAction || mode.value === 'none') OG_INTERACTION_SERVICE.setNextAction(lead, nextAction, followUpValue(mode.value, root.querySelector('#prospect-specific-date').value));
+      persistSalesDeskActivity(lead, interaction, 'prospect.processed');
+      state.prospecting.session.events.push({ type: 'processed', result, at: interaction.at, leadId: lead.id });
+      state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null;
+      renderProspecting();
+    });
+  }
+
+  function captureOperationalFeedback() {
+    const note = window.prompt('O que atrapalhou ou poderia ficar mais rápido?');
+    if (!note?.trim()) return;
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: `EVT-UX-${Date.now().toString(36).toUpperCase()}`, type: 'ux.feedback', at: new Date().toISOString(), note: note.trim(), module: state.currentTab });
+    saveOperationsToStorage(); showNotification('Sugestão registrada para o backlog.', 'success');
+  }
+
+  function initProspecting() {
+    document.querySelectorAll('[data-prospect-view]').forEach(button => button.addEventListener('click', () => setProspectingView(button.dataset.prospectView)));
+  }
+
+  function closeCommandCenter() { document.querySelector('.command-center-overlay')?.remove(); }
+
+  function openCommandCenter(initial = '') {
+    closeCommandCenter();
+    const overlay = document.createElement('div'); overlay.className = 'command-center-overlay';
+    overlay.innerHTML = `<section class="command-center clean-card" role="dialog" aria-modal="true" aria-labelledby="command-title"><header><div><span class="og-kicker">COMMAND CENTER</span><h2 id="command-title">Buscar ou executar</h2></div><kbd>Esc</kbd></header><input id="command-input" type="search" value="${escapeHtml(initial)}" placeholder="Empresa, telefone, CNPJ, código ou comando natural"><div id="command-results"></div><footer><span>Digite “novo” para cadastrar · “prospecção” para abrir a fila</span><button type="button" id="command-natural">Interpretar como comando</button></footer></section>`;
+    document.body.appendChild(overlay);
+    const input = overlay.querySelector('#command-input');
+    const render = () => {
+      const q = input.value.trim().toLowerCase();
+      const matches = q ? state.leads.filter(lead => [lead.empresa, lead.nome, lead.telefone, lead.cnpj, lead.internalCode].some(value => String(value || '').toLowerCase().includes(q))).slice(0, 8) : [];
+      const commands = [{ id: 'new', label: '＋ Novo prospect', match: 'novo' }, { id: 'desk', label: 'Abrir Mesa de Vendas', match: 'mesa' }, { id: 'prospecting', label: 'Abrir Modo Prospecção', match: 'prospecção prospectar caixa' }].filter(item => !q || item.match.includes(q));
+      overlay.querySelector('#command-results').innerHTML = `${commands.map(item => `<button type="button" data-command="${item.id}">${item.label}</button>`).join('')}${matches.map(lead => `<button type="button" data-command-lead="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || '')} · ${escapeHtml(formatPhone(lead.telefone))} · ${escapeHtml(lead.internalCode || '')}</span></button>`).join('') || (!commands.length ? '<p>Nenhum resultado. Você pode interpretar o texto como comando.</p>' : '')}`;
+      overlay.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', () => { const command = button.dataset.command; closeCommandCenter(); if (command === 'new') openQuickLead('dia'); if (command === 'desk') switchTab('dia'); if (command === 'prospecting') { switchTab('prospeccao'); setProspectingView('queue'); } }));
+      overlay.querySelectorAll('[data-command-lead]').forEach(button => button.addEventListener('click', () => { state.selectedLeadId = button.dataset.commandLead; closeCommandCenter(); switchTab('dia'); renderDayDashboard(); }));
+    };
+    input.addEventListener('input', render); render(); input.focus();
+    overlay.addEventListener('click', event => { if (event.target === overlay) closeCommandCenter(); });
+    overlay.querySelector('#command-natural').addEventListener('click', () => {
+      const parsed = OG_PROSPECT_PARSER.parseNaturalCommand(input.value);
+      if (!parsed.company) return showNotification('Não consegui identificar a empresa. Revise o comando.', 'warning');
+      const summary = `Empresa: ${parsed.company}\nContato: ${parsed.contact || 'não identificado'}\nResultado: ${parsed.result || 'não identificado'}\nPróxima ação: ${parsed.suggestedAction || 'não identificada'}\nConfiança: ${parsed.confidence}`;
+      if (!window.confirm(`${summary}\n\nSalvar esta interpretação?`)) return;
+      let lead = OG_CRM_SERVICE.findPossibleDuplicates(state.leads, { empresa: parsed.company })[0];
+      if (!lead) { lead = OG_CRM_SERVICE.createProspect({ empresa: parsed.company, nome: parsed.contact, sourceChannel: 'command_center' }); state.leads.unshift(lead); }
+      if (parsed.result) OG_INTERACTION_SERVICE.recordResult(lead, parsed.result, input.value);
+      if (parsed.suggestedAction) OG_INTERACTION_SERVICE.setNextAction(lead, parsed.suggestedAction, parsed.followUpAt);
+      saveLeadsToStorage(); closeCommandCenter(); state.selectedLeadId = lead.id; switchTab('dia'); renderDayDashboard();
+    });
+  }
+
+  function initCommandCenter() {
+    document.addEventListener('keydown', event => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openCommandCenter(); }
+      if (event.key === 'Escape') closeCommandCenter();
+    });
   }
 
   function buildCommercialPanel(lead) {
@@ -3964,7 +4127,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const lead = callLead();
     const context = document.getElementById('call-ai-client-context');
     if (!context || !lead) return;
-    const recent = lead.interactions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
+    const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead);
+    state.callAI.context = compact;
+    const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
       <div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div>
       ${factRow('Segmento', lead.segmentId, lead.segmentId ? 'confirmed' : 'missing')}
@@ -3974,9 +4139,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ${factRow('Situação', lead.status || 'novo')}
       ${factRow('Última interação', recent?.note || '', recent ? 'confirmed' : 'missing', recent ? formatCallDate(recent.at) : 'CRM')}
       ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}
+      <div class="call-ai-context-scope"><b>Contexto compacto</b><span>${compact.recentInteractions.length} interações recentes · ${compact.objections.length} objeções · sem carregar o CRM inteiro</span></div>
       ${buildClientMaterialsPanel(lead, 'call-ai')}`;
     bindClientMaterialsPanel(context, lead);
     document.getElementById('call-ai-session-account').textContent = lead.empresa || lead.nome;
+    const returnButton = document.getElementById('call-ai-return');
+    returnButton?.classList.toggle('hidden', !state.callAI.returnTab);
   }
 
   function safeKnowledgeText(record) {
@@ -4131,11 +4299,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
     state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result });
     if (lead.status !== previousStatus) state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'client.stage_changed', at: now, clientId: lead.id, fromStage: previousStatus, toStage: lead.status });
+    if (state.callAI.returnTab === 'prospeccao') lead.operationalStatus = 'WORKED_LEAD';
     saveLeadsToStorage();
     saveOperationsToStorage();
     renderLeadsTable();
     document.getElementById('call-ai-review').classList.add('hidden');
     document.getElementById('call-ai-session-state').textContent = 'Sessão salva no CRM';
+    if (state.callAI.returnTab === 'prospeccao') state.prospecting.session.events.push({ type: 'processed', result, at: now, leadId: lead.id });
     showNotification('Ligação registrada no CRM após sua aprovação.', 'success');
   }
 
@@ -4307,6 +4477,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
     document.getElementById('call-ai-record-pause')?.addEventListener('click', toggleCallRecordingPause);
     document.getElementById('call-ai-record-stop')?.addEventListener('click', stopCallRecording);
+    document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
     document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
     document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
     apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {
@@ -4834,6 +5005,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initQuoteImport();
   initConsultantEngine();
   initDayDashboard();
+  initProspecting();
+  initCommandCenter();
   initQuickLead();
   initCallAI();
   initMaterialLibrary();

@@ -4,6 +4,7 @@ import process from 'node:process';
 const steps = [
   ['og:check'],
   ['og:sales-desk:test'],
+  ['og:prospecting:test'],
   ['og:call-ai:test'],
   ['og:product:test'],
   ['og:ops:test'],

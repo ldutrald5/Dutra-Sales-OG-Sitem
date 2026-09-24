@@ -94,6 +94,9 @@
           <span aria-hidden="true">◉</span>
           <span>Meu Dia</span>
         </button>
+        <button data-tab="prospeccao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <span>🎯 Prospecção</span>
+        </button>
 
         <button data-tab="cotacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -227,6 +230,11 @@
           <div class="clean-card p-5 og-coach-card"><span class="og-kicker">PRÓXIMA MELHOR AÇÃO</span><h2 id="coach-title">Seu foco de hoje</h2><p id="coach-message">Selecione uma conta para trabalhar.</p><div id="coach-prompts" class="og-coach-prompts"></div></div>
         </aside>
       </section>
+    </div>
+
+    <div id="tab-prospeccao" class="tab-content hidden space-y-5">
+      <section class="prospecting-hero clean-card"><div><span class="og-kicker">MODO PROSPECÇÃO</span><h1>Encontrei. Colei. Prospectei. Próximo.</h1><p>Organize listas brutas, revise e trabalhe um prospect por vez.</p></div><div class="prospecting-tabs" role="tablist"><button type="button" data-prospect-view="inbox" class="active">📥 Caixa de Entrada</button><button type="button" data-prospect-view="queue">🎯 Para prospectar</button><button type="button" data-prospect-view="focus">▶ Modo focado</button></div></section>
+      <section id="prospecting-root" aria-live="polite"></section>
     </div>
 
     <!-- ======================================================================= -->
@@ -948,6 +956,7 @@
           <p>O sistema prepara e adapta o roteiro. Você controla a conversa e aprova cada registro no CRM.</p>
         </div>
         <div id="call-ai-knowledge-status" class="call-ai-status" data-mode="loading">Verificando Sales Brain…</div>
+        <button id="call-ai-return" type="button" class="og-button og-button-ghost hidden">← Voltar à operação</button>
       </section>
 
       <section class="call-ai-setup" aria-label="Preparação da ligação">
@@ -1236,7 +1245,9 @@
   <script src="services/interaction-service.js"></script>
   <script src="services/whatsapp-service.js"></script>
   <script src="services/call-ai-context.js"></script>
+  <script src="services/prospect-parser.js"></script>
   <script src="modules/sales-desk.js"></script>
+  <script src="modules/prospecting-engine.js"></script>
   <script src="components/ui-components.js"></script>
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>

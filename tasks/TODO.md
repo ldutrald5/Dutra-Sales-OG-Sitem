@@ -11,14 +11,14 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Dependências:** nenhuma funcional nova; usar o modelo atual.
 - **Status:** concluída em 2026-09-24; evidência em `tasks/DONE.md`.
 
-## TASK-002 — Prospect Quick Create
+## TASK-002 — Motor de Prospecção e Caixa de Entrada
 
-- **Objetivo:** cadastrar um prospect com Empresa, Telefone e contato opcional dentro da Mesa.
-- **Escopo:** adaptar o modal rápido existente, validar e evitar duplicata óbvia.
+- **Objetivo:** transformar listas brutas em prospects revisados e trabalhar uma fila sequencial.
+- **Escopo:** parser local, preview, duplicidade, importação, modo focado, métricas, recomendação e Command Center.
 - **Arquivos relevantes:** `docs/04-CRM.md`, `docs/05-MESA-DE-VENDAS.md`, `apps/sistema-og/app.js`.
 - **Critério de aceite:** cadastro mínimo aparece na fila e no CRM; duplicata provável gera revisão; entrada natural fica fora deste incremento se não houver story própria.
 - **Dependências:** TASK-001.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-24; evidência em `tasks/DONE.md`.
 
 ## TASK-003 — WhatsApp One Click
 
@@ -72,7 +72,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/06-CALL-AI.md`, `docs/09-CUSTOS-IA.md`, `knowledge/`, `apps/sistema-og/app.js`, `server.mjs`.
 - **Critério de aceite:** usa conta ativa, carrega apenas contexto relevante, funciona sem IA e não grava sugestões sem revisão.
 - **Dependências:** TASK-007.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-24; evidência em `tasks/DONE.md`.
 
 ## TASK-009 — Central de Comunicação
 
@@ -94,4 +94,4 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 
 ## Ordem recomendada
 
-Executar primeiro **TASK-001**. Ela cria a superfície na qual TASK-002 a TASK-009 serão integradas e impede novos fluxos isolados.
+Próxima recomendação: **TASK-009 — Central de Comunicação**.

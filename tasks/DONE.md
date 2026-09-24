@@ -23,6 +23,20 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 - **Validação:** `npm run og:sales-desk:test` e `npm run validate`.
 - **Limites:** confirmação real de envio, e-mail, IA de personalização e Proposta Premium permanecem para tarefas próprias.
 
+## TASK-002 — Motor de Prospecção e Caixa de Entrada
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** colagem de listas, parser local, preview editável, duplicidade, importação em lote, fila de novos prospects, modo sequencial, pular/adiar, salvar e próximo, métricas da sessão, recomendação por regras, feedback e Command Center.
+- **Compatibilidade:** prospects usam `state.leads`; importar não registra contato nem oportunidade.
+- **Validação:** `npm run og:prospecting:test` e `npm run validate`.
+
+## TASK-008 — Central Call AI
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** Call AI abre a conta ativa da Mesa ou Prospecção, exibe contexto compacto, mantém revisão antes do CRM e retorna ao fluxo operacional de origem.
+- **Custo:** busca local limitada; nenhuma IA é usada para fila, parser, métricas ou templates.
+- **Validação:** `npm run og:call-ai:test` e `npm run validate`.
+
 ## Convenção para novas conclusões
 
 Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.

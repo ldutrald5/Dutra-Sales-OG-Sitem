@@ -28,6 +28,9 @@ assert.ok(app.includes("getElementById('call-ai-record-start')?.addEventListener
 assert.ok(app.includes('navigator.mediaDevices.getDisplayMedia'), 'Captura opcional do áudio do computador deve existir');
 assert.ok(app.includes('navigator.mediaDevices.getUserMedia'), 'Captura do microfone deve existir');
 assert.ok(app.includes('URL.createObjectURL(blob)'), 'Gravação deve gerar reprodução local');
+assert.ok(html.includes('call-ai-return'), 'Call AI deve retornar à operação de origem');
+assert.ok(app.includes('OG_CALL_AI_CONTEXT.build(lead)'), 'Call AI deve usar contexto compacto por conta');
+assert.ok(app.includes('sem carregar o CRM inteiro'), 'A interface deve informar o escopo compacto');
 assert.ok(server.includes("/api/knowledge/status"));
 assert.ok(server.includes("/api/knowledge/search"));
 assert.ok(ignore.includes('apps/sistema-og/.data/'));

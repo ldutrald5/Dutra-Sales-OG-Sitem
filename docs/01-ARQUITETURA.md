@@ -74,4 +74,10 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 
 A Mesa de Vendas passou a usar serviços UMD pequenos e testáveis para compatibilidade do CRM, interações, WhatsApp e contexto do Call AI. Eles operam sobre `state.leads` e não criam uma segunda persistência. Os hooks versionados em `.githooks/` usam Node diretamente e o comando `npm run validate`, evitando a dependência anterior de Bash no Windows. A experiência legada em `/mobile` está congelada; a aplicação principal responsiva recebe as novas funcionalidades.
 
+## Incrementos TASK-002 e TASK-008
+
+O Motor de Prospecção adiciona parser, fila, recomendação e métricas determinísticas sobre `state.leads`. Importar cria `NEW_PROSPECT`, mas não registra contato. Abrir WhatsApp gera `whatsapp_opened` e conta apenas como tentativa da sessão; o prospect só sai da fila ao registrar resultado ou salvar uma sessão aprovada do Call AI. `message_sent` continua reservado à confirmação explícita.
+
+A camada de automação contém parser, importação, duplicidade, fila, datas, templates, Command Center e métricas. A camada de inteligência contém Call AI, estratégia, objeções complexas e análise. O Call AI recebe somente o contexto compacto da conta ativa e retorna à Mesa ou à Prospecção sem carregar o CRM inteiro.
+
 Detalhamento existente: [fundação operacional](architecture/og-operations-foundation.md), [mapa de produto](architecture/sistema-og-product-map.md) e [copiloto](architecture/sistema-og-copiloto.md).

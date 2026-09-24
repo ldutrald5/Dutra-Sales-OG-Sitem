@@ -16,6 +16,9 @@
       empresa: clean(lead.empresa || lead.nome),
       nome: clean(lead.nome),
       telefone: digits(lead.telefone),
+      cnpj: digits(lead.cnpj),
+      cpf: digits(lead.cpf),
+      internalCode: clean(lead.internalCode || lead.codigo),
       status: clean(lead.status) || 'novo',
       priority: ['alta', 'media', 'baixa'].includes(lead.priority) ? lead.priority : 'media',
       fleetSize: Number.isFinite(Number(lead.fleetSize)) ? Number(lead.fleetSize) : 0,
@@ -25,6 +28,10 @@
       nextAction: clean(lead.nextAction),
       followUpAt: clean(lead.followUpAt),
       lastContactAt: clean(lead.lastContactAt),
+      operationalStatus: clean(lead.operationalStatus) || (lead.interactions?.length ? 'WORKED_LEAD' : 'NEW_PROSPECT'),
+      sourceChannel: clean(lead.sourceChannel || lead.origem) || 'sistema_og',
+      batchTag: clean(lead.batchTag),
+      enteredAt: clean(lead.enteredAt || lead.createdDate),
       interactions: Array.isArray(lead.interactions) ? lead.interactions : [],
       contacts: Array.isArray(lead.contacts) ? lead.contacts : [],
       opportunities: Array.isArray(lead.opportunities) ? lead.opportunities : [],
@@ -35,9 +42,14 @@
   function findPossibleDuplicates(leads, prospect) {
     const companyKey = comparable(prospect.empresa);
     const phoneKey = digits(prospect.telefone);
+    const cnpjKey = digits(prospect.cnpj);
+    const codeKey = comparable(prospect.internalCode || prospect.codigo);
     return (leads || []).filter(item => {
       const lead = normalizeLead(item);
-      return (phoneKey && digits(lead.telefone) === phoneKey) || (companyKey && comparable(lead.empresa) === companyKey);
+      return (phoneKey && digits(lead.telefone) === phoneKey) ||
+        (cnpjKey && digits(lead.cnpj) === cnpjKey) ||
+        (codeKey && comparable(lead.internalCode) === codeKey) ||
+        (companyKey && comparable(lead.empresa) === companyKey);
     });
   }
 
@@ -50,13 +62,19 @@
       empresa,
       nome: clean(input.nome),
       telefone: digits(input.telefone),
+      cnpj: digits(input.cnpj),
+      cpf: digits(input.cpf),
+      internalCode: clean(input.internalCode || input.codigo),
       cidadeUf: clean(input.cidadeUf),
-      cnpj: '',
       segmentId: input.segmentId || 'transportadora',
       status: 'novo',
       priority: input.priority || 'media',
       nextAction: clean(input.nextAction),
       followUpAt: clean(input.followUpAt),
+      operationalStatus: input.operationalStatus || 'NEW_PROSPECT',
+      sourceChannel: input.sourceChannel || 'sistema_og',
+      batchTag: clean(input.batchTag),
+      enteredAt: input.enteredAt || now,
       observacoes: `Cadastro rápido em ${new Date(now).toLocaleDateString('pt-BR')}`,
       createdDate: now,
       createdBy: input.createdBy || null,

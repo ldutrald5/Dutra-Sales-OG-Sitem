@@ -566,6 +566,76 @@ body {
   .sales-desk-facts, .sales-desk-next { grid-template-columns: 1fr; }
   .sales-desk-row { grid-template-columns: 1fr auto; }
 }
+
+/* Motor de Prospecção */
+.prospecting-hero { display: flex; justify-content: space-between; align-items: end; gap: 1rem; padding: 1.2rem; }
+.prospecting-hero h1 { color: var(--og-text); font-size: 1.3rem; font-weight: 900; }
+.prospecting-hero p { color: var(--og-muted); font-size: .72rem; }
+.prospecting-tabs { display: flex; flex-wrap: wrap; gap: .4rem; }
+.prospecting-tabs button { padding: .65rem .8rem; border: 1px solid var(--og-border); border-radius: .65rem; color: #cbd5e1; font-size: .68rem; font-weight: 800; }
+.prospecting-tabs button.active { border-color: var(--og-brand); background: var(--og-brand); color: #171207; }
+.prospect-inbox-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 1rem; }
+.prospect-capture, .prospect-layer-card, .prospect-preview, .prospect-queue, .prospect-focus, .prospect-finished { padding: 1.1rem; }
+.prospect-capture h2, .prospect-preview h2, .prospect-queue h2, .prospect-layer-card h3 { color: var(--og-text); font-size: 1rem; font-weight: 850; }
+.prospect-capture textarea { width: 100%; margin: .8rem 0; padding: .85rem; border: 1px solid var(--og-border); border-radius: .75rem; background: #080d15; color: var(--og-text); font: .75rem/1.5 ui-monospace, monospace; resize: vertical; }
+.prospect-batch-fields, .prospect-capture-actions, .prospect-filters, .prospect-focus-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+.prospect-batch-fields label { flex: 1 1 180px; color: var(--og-muted); font-size: .65rem; }
+.prospect-batch-fields input, .prospect-batch-fields select, .prospect-filters select { width: 100%; margin-top: .25rem; padding: .65rem; border: 1px solid var(--og-border); border-radius: .6rem; background: #0b1220; color: var(--og-text); }
+.prospect-capture-actions button, .prospect-layer-card button { margin-top: .65rem; padding: .65rem .75rem; border: 1px solid var(--og-border); border-radius: .65rem; color: #dbe3ee; font-size: .68rem; font-weight: 800; }
+.prospect-capture > p, .prospect-layer-card p { margin-top: .65rem; color: var(--og-muted); font-size: .66rem; line-height: 1.5; }
+.prospect-preview { margin-top: 1rem; }
+.prospect-preview > header, .prospect-queue > header, .prospect-focus > header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .8rem; }
+.prospect-preview header p { color: var(--og-muted); font-size: .68rem; }
+.prospect-table-wrap { overflow: auto; max-height: 560px; }
+.prospect-preview table { min-width: 980px; width: 100%; border-collapse: collapse; }
+.prospect-preview th { padding: .55rem; color: var(--og-muted); font-size: .58rem; text-align: left; text-transform: uppercase; }
+.prospect-preview td { padding: .35rem; border-top: 1px solid var(--og-border); }
+.prospect-preview input, .prospect-preview select { width: 100%; padding: .5rem; border: 1px solid transparent; border-radius: .4rem; background: #0a101a; color: #dbe3ee; font-size: .65rem; }
+.prospect-preview tr.needs-review input { border-color: rgba(245,158,11,.45); }
+.prospect-filters { margin-bottom: .8rem; }
+.prospect-filters select { width: auto; min-width: 150px; }
+.prospect-queue-list { display: grid; gap: .45rem; }
+.prospect-queue-list article { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: .45rem; align-items: center; padding: .6rem; border: 1px solid var(--og-border); border-radius: .7rem; background: #0a111d; }
+.prospect-queue-list article > button:first-child { text-align: left; }
+.prospect-queue-list b, .prospect-queue-list span, .prospect-queue-list small { display: block; }
+.prospect-queue-list b { color: var(--og-text); font-size: .75rem; }
+.prospect-queue-list span, .prospect-queue-list small { color: var(--og-muted); font-size: .63rem; }
+.prospect-queue-list a, .prospect-queue-list article > button:not(:first-child), .prospect-focus-actions > * { padding: .55rem .65rem; border: 1px solid var(--og-border); border-radius: .55rem; color: #dbe3ee; font-size: .65rem; font-weight: 800; }
+.prospect-session-metrics { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .55rem; margin-bottom: 1rem; }
+.prospect-session-metrics div { padding: .75rem; border: 1px solid var(--og-border); border-radius: .7rem; background: var(--og-surface); }
+.prospect-session-metrics small, .prospect-session-metrics b { display: block; }
+.prospect-session-metrics small { color: var(--og-muted); font-size: .58rem; }
+.prospect-session-metrics b { color: var(--og-brand); font-size: 1.25rem; }
+.prospect-focus { max-width: 900px; margin: 0 auto; }
+.prospect-focus h1 { color: var(--og-text); font-size: 1.5rem; font-weight: 900; }
+.prospect-focus header p, .prospect-identity { color: var(--og-muted); font-size: .72rem; }
+.prospect-identity { display: flex; flex-wrap: wrap; gap: .75rem; padding: .75rem; border: 1px solid var(--og-border); border-radius: .7rem; background: #090f19; }
+.prospect-next-best { margin: .8rem 0; padding: .8rem; border-left: 3px solid var(--og-brand); background: rgba(246,201,69,.08); }
+.prospect-next-best span, .prospect-next-best b, .prospect-next-best small { display: block; }
+.prospect-next-best span, .prospect-next-best small { color: var(--og-muted); font-size: .63rem; }
+.prospect-next-best b { color: var(--og-brand); font-size: .82rem; }
+.prospect-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-top: 1rem; }
+.prospect-result-grid label { color: var(--og-muted); font-size: .62rem; }
+.prospect-result-grid input, .prospect-result-grid select, .prospect-result-grid textarea { width: 100%; margin-top: .25rem; padding: .65rem; border: 1px solid var(--og-border); border-radius: .6rem; background: #090f19; color: var(--og-text); }
+.prospect-save-next { width: 100%; margin-top: .8rem; }
+.command-center-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: start center; padding: 12vh 1rem 1rem; background: rgba(2,6,12,.82); backdrop-filter: blur(8px); }
+.command-center { width: min(680px,100%); padding: 1rem; box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+.command-center header, .command-center footer { display: flex; justify-content: space-between; align-items: center; gap: .7rem; }
+.command-center h2 { color: var(--og-text); font-size: 1rem; font-weight: 850; }
+.command-center > input { width: 100%; margin: .8rem 0; padding: .85rem; border: 1px solid var(--og-brand); border-radius: .7rem; background: #080d15; color: white; }
+#command-results { display: grid; gap: .3rem; max-height: 48vh; overflow: auto; }
+#command-results button { padding: .7rem; border: 1px solid var(--og-border); border-radius: .55rem; color: #dbe3ee; text-align: left; }
+#command-results b, #command-results span { display: block; }
+#command-results span, .command-center footer { color: var(--og-muted); font-size: .62rem; }
+.command-center footer { margin-top: .7rem; }
+.command-center footer button { color: var(--og-brand); font-weight: 800; }
+.call-ai-context-scope { margin-top: .7rem; padding: .65rem; border: 1px solid rgba(246,201,69,.28); border-radius: .65rem; background: rgba(246,201,69,.07); }
+.call-ai-context-scope b, .call-ai-context-scope span { display: block; }
+.call-ai-context-scope b { color: var(--og-brand); font-size: .65rem; }
+.call-ai-context-scope span { color: var(--og-muted); font-size: .6rem; }
+
+@media (max-width: 800px) { .prospect-inbox-grid { grid-template-columns: 1fr; } .prospecting-hero { align-items: stretch; flex-direction: column; } .prospect-session-metrics { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 520px) { .prospect-result-grid { grid-template-columns: 1fr; } .prospect-queue-list article { grid-template-columns: 1fr 1fr; } .prospect-queue-list article > button:first-child { grid-column: 1 / -1; } }
 .og-empty { padding: 2.2rem 1rem; border: 1px dashed var(--og-border); border-radius: 1rem; color: var(--og-muted); text-align: center; font-size: .78rem; }
 
 .og-coach-card { background: linear-gradient(155deg, rgba(246, 201, 69, .1), rgba(17, 24, 39, 1) 45%); }
