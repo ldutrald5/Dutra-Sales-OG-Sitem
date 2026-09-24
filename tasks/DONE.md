@@ -48,6 +48,14 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 - **Validação:** fixture estrutural do CRM, preservação de códigos/telefones textuais, conflito de observação e caracterização direta do Pós-Vendas.
 - **Próximo passo:** validar com o arquivo CRM real antes de criar importação transacional.
 
+## Integração Excel — conciliação campo a campo
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** o preview agora compara cada campo com o cliente atual e permite manter o Sistema, usar o Excel, juntar textos protegidos ou ignorar a diferença.
+- **Proteções:** a decisão padrão preserva o Sistema; resumo e observações exigem escolha humana; a aplicação ocorre somente após confirmação e registra arquivo, hash, linha e campos alterados.
+- **Base analisada:** 30 clientes compartilhados, sem inclusões, exclusões ou duplicidades frente ao cadastro inicial; mudanças técnicas encontradas somente em `updatedAt` e inicialização de `calls`.
+- **Validação:** criação, preservação, mesclagem de observações, atualização seletiva e suíte completa em `npm run validate`.
+
 ## TASK-009 — Central de Comunicação e OG Sales Brain
 
 - **Data:** 2026-09-24.

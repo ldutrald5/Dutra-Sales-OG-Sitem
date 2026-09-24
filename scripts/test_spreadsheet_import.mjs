@@ -10,7 +10,11 @@ const rows=service.readCrmRows(wb);assert.equal(rows[0].externalCode,'0012');ass
 let preview=service.preview(rows,[]);assert.equal(preview[0].status,'NEW');
 const leads=[{id:'L1',internalCode:'0012',empresa:'Rodolog',telefone:'04499999999',status:'novo',nextAction:'Ligar amanhã',priority:'Alta',observacoes:'Texto diferente'}];
 preview=service.preview(rows,leads);assert.equal(preview[0].status,'CONFLICT');assert.equal(preview[0].matchKey,'external_code');
-const sameRows=[{...rows[0],notes:'Texto diferente'}];assert.equal(service.preview(sameRows,leads)[0].status,'UNCHANGED');
+assert.ok(preview[0].changes.some(item=>item.field==='notes'&&item.protected));
+const kept=service.applyPreview(preview,leads,{'8':{fields:{notes:'keep'}}},{now:'2026-09-24T12:00:00.000Z'});assert.equal(kept.applied,0);assert.equal(kept.leads[0].observacoes,'Texto diferente');
+const merged=service.applyPreview(preview,leads,{'8':{fields:{notes:'append'}}},{now:'2026-09-24T12:00:00.000Z'});assert.equal(merged.applied,1);assert.match(merged.leads[0].observacoes,/Texto diferente/);assert.match(merged.leads[0].observacoes,/Observação protegida/);
+const created=service.applyPreview(service.preview(rows,[]),[],{'8':{action:'import',fields:{}}},{now:'2026-09-24T12:00:00.000Z',idFactory:()=> 'L2'});assert.equal(created.applied,1);assert.equal(created.leads[0].id,'L2');assert.equal(created.leads[0].internalCode,'0012');
+assert.equal(service.preview(rows,created.leads)[0].status,'UNCHANGED');
 const contract=service.protectedContract();assert.ok(contract.formula.includes('📋 CRM!Q:Q'));assert.ok(contract.manual.includes('📋 CRM!P:P'));
 assert.equal(typeof service.readArrayBuffer,'function');
 console.log('Spreadsheet CRM read-only preview checks: PASS');

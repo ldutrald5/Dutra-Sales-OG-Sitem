@@ -3963,6 +3963,42 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
   }
 
+  let crmExcelReview = null;
+
+  function spreadsheetDecisionOptions(change) {
+    const blankCurrent = !String(change.current || '').trim();
+    const selected = change.protected ? 'keep' : (blankCurrent ? 'excel' : 'keep');
+    const choices = [
+      ['keep', 'Manter sistema'],
+      ['excel', 'Usar Excel'],
+      ...(change.protected ? [['append', 'Juntar os dois']] : []),
+      ['ignore', 'Ignorar campo']
+    ];
+    return choices.map(([value, label]) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`).join('');
+  }
+
+  function renderCrmExcelReview(preview) {
+    const body = document.getElementById('crm-excel-preview-body');
+    body.innerHTML = preview.map(item => {
+      const match = item.matchKey ? `${item.matchKey} · ${item.confidence}` : '—';
+      let decisions = '<span class="spreadsheet-muted">Sem alteração</span>';
+      if (item.status === 'NEW') decisions = `<label class="spreadsheet-row-decision">Destino<select data-sheet-row="${item.row.sourceRow}" data-sheet-action><option value="ignore">Não importar</option><option value="import">Importar novo cliente</option></select></label>`;
+      else if (item.changes?.length) decisions = `<div class="spreadsheet-field-list">${item.changes.map(change => `<label class="spreadsheet-field"><span><b>${escapeHtml(change.label || change.field)}</b><small>Sistema: ${escapeHtml(change.current || 'vazio')}</small><small>Excel: ${escapeHtml(change.incoming || 'vazio')}</small></span><select data-sheet-row="${item.row.sourceRow}" data-sheet-field="${escapeHtml(change.field)}">${spreadsheetDecisionOptions(change)}</select></label>`).join('')}</div>`;
+      return `<tr><td>${item.row.sourceRow}</td><td><b>${escapeHtml(item.row.company || '—')}</b><small>${escapeHtml(item.row.externalCode || item.row.phone || '')}</small></td><td><span class="spreadsheet-state" data-state="${item.status}">${item.status}</span><small>${escapeHtml(item.reason)}</small></td><td>${escapeHtml(match)}</td><td>${decisions}</td></tr>`;
+    }).join('');
+  }
+
+  function collectCrmExcelDecisions() {
+    const decisions = {};
+    document.querySelectorAll('#crm-excel-preview-body [data-sheet-row]').forEach(input => {
+      const row = input.dataset.sheetRow;
+      decisions[row] ||= { action: 'review', fields: {} };
+      if (input.dataset.sheetAction !== undefined) decisions[row].action = input.value;
+      if (input.dataset.sheetField) decisions[row].fields[input.dataset.sheetField] = input.value;
+    });
+    return decisions;
+  }
+
   function initCrmExcelPreview() {
     const trigger=document.getElementById('btn-crm-excel-preview');
     const input=document.getElementById('crm-excel-file');
@@ -3984,11 +4020,27 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         const counts=preview.reduce((acc,item)=>{acc[item.status]=(acc[item.status]||0)+1;return acc;},{});
         document.getElementById('crm-excel-summary').textContent=`${file.name} · ${rows.length} registros · hash ${hash}`;
         document.getElementById('crm-excel-counters').innerHTML=['NEW','UNCHANGED','SAFE_UPDATE','POSSIBLE_DUPLICATE','CONFLICT','INVALID','PROTECTED_IGNORED'].map(status=>`<div><small>${status}</small><b>${counts[status]||0}</b></div>`).join('');
-        document.getElementById('crm-excel-preview-body').innerHTML=preview.map(item=>`<tr><td>${item.row.sourceRow}</td><td>${escapeHtml(item.row.company||'—')}</td><td>${escapeHtml(item.row.externalCode||'—')}</td><td>${escapeHtml(item.row.phone||'—')}</td><td><span class="spreadsheet-state" data-state="${item.status}">${item.status}</span></td><td>${escapeHtml(item.matchKey?`${item.matchKey} · ${item.confidence}`:'—')}</td><td>${escapeHtml(item.reason)}</td></tr>`).join('');
+        crmExcelReview={preview,hash,fileName:file.name,analyzedAt:new Date().toISOString()};
+        renderCrmExcelReview(preview);
+        document.getElementById('crm-excel-apply').disabled=false;
         panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});
-        showNotification('Preview concluído. Nenhum dado foi importado.','success');
+        showNotification('Comparação concluída. Suas alterações atuais foram preservadas por padrão.','success');
       }catch(error){showNotification(error.message||'Não foi possível ler o modelo Excel.','error');}
       finally{trigger.disabled=false;trigger.textContent='Excel · Preview';input.value='';}
+    });
+    document.getElementById('crm-excel-apply')?.addEventListener('click',()=>{
+      if(!crmExcelReview)return;
+      const decisions=collectCrmExcelDecisions();
+      const result=OG_SPREADSHEET_IMPORT.applyPreview(crmExcelReview.preview,state.leads,decisions,{idFactory:(row,index)=>`LEAD-XLSX-${Date.now().toString(36).toUpperCase()}-${index}`,now:new Date().toISOString()});
+      if(!result.applied)return showNotification('Nenhuma alteração foi selecionada para aplicar.','info');
+      const changedFields=result.audit.reduce((total,item)=>total+(item.changedFields?.length||0),0);
+      if(!window.confirm(`Aplicar ${result.applied} registro(s) e ${changedFields} campo(s)? Um registro de auditoria será criado.`))return;
+      state.leads=result.leads;
+      result.audit.forEach((item,index)=>{state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:`xlsx_${crmExcelReview.hash}_${item.sourceRow}_${index}`,type:item.type,at:new Date().toISOString(),clientId:item.leadId,metadata:{sourceFile:crmExcelReview.fileName,sourceHash:crmExcelReview.hash,sourceRow:item.sourceRow,changedFields:item.changedFields}});});
+      saveLeadsToStorage();saveOperationsToStorage();renderCrmModule();
+      document.getElementById('crm-excel-review-note').textContent=`Aplicação concluída: ${result.applied} registro(s), com trilha de auditoria e origem ${crmExcelReview.hash}.`;
+      document.getElementById('crm-excel-apply').disabled=true;
+      showNotification('Decisões aplicadas com segurança.','success');
     });
   }
 

@@ -1,5 +1,11 @@
 # Integração Excel
 
+## Conciliação segura
+
+O CRM compara o arquivo selecionado com a base que está aberta no navegador. Cada diferença recebe uma decisão independente: manter o valor atual, usar o Excel, juntar textos protegidos ou ignorar. Novos clientes começam como “não importar”. Nada é aplicado antes da confirmação final.
+
+Resumo de conversa e observações são campos protegidos. O sistema nunca os substitui silenciosamente. Uma aplicação confirmada cria eventos de auditoria com nome e hash do arquivo, linha de origem e lista de campos alterados. O arquivo Excel permanece somente leitura.
+
 ## Estado implementado
 
 A primeira fatia é somente leitura. Na tela CRM, o vendedor escolhe um arquivo `.xlsx`; o navegador valida as quatro abas esperadas, lê `📋 CRM` a partir do cabeçalho da linha 7 e compara cada registro com `state.leads`. Nenhum dado é persistido.
