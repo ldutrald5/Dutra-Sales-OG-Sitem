@@ -117,6 +117,7 @@
           <span aria-hidden="true">🎧</span>
           <span>Call AI</span>
         </button>
+        <button data-tab="comunicacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium"><span>✉ Central de Comunicação</span></button>
 
         <button data-tab="catalogo" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
@@ -945,9 +946,28 @@
       </div>
     </div>
 
-    <!-- ======================================================================= -->
-    <!-- CALL AI: ASSISTENTE COMERCIAL DE LIGAÇÕES                              -->
-    <!-- ======================================================================= -->
+    <div id="tab-comunicacao" class="tab-content hidden space-y-5">
+      <section class="communication-hero"><div><span class="og-kicker">CENTRAL DE COMUNICAÇÃO</span><h1>Template primeiro. Inteligência quando você pedir.</h1><p>Prepare WhatsApp e e-mail mantendo cliente, conhecimento e histórico ligados.</p></div><div id="communication-brain-status">Sales Brain carregando…</div></section>
+      <section class="communication-layout">
+        <aside class="communication-controls">
+          <label>Cliente<select id="communication-client"></select></label>
+          <label>Canal<select id="communication-channel"><option value="whatsapp">💬 WhatsApp</option><option value="email">📧 E-mail</option><option value="proposal">📄 Proposta</option><option value="form">📋 Formulário</option><option value="presentation">🎯 Apresentação</option></select></label>
+          <label>Objetivo<select id="communication-objective"><option value="FIRST_CONTACT">Primeiro contato</option><option value="DECISION_MAKER">Chegar ao decisor</option><option value="NO_ANSWER">Não atendeu</option><option value="AFTER_CALL">Pós-ligação</option><option value="PRESENTATION">Enviar apresentação</option><option value="QUOTE">Enviar orçamento</option><option value="FOLLOW_UP">Follow-up</option><option value="RECOVERY">Recuperar negociação</option><option value="PRICE_TOO_HIGH">Objeção de preço</option><option value="COST_REDUCTION">Cliente reduzindo custos</option><option value="NEGOTIATION">Negociação</option><option value="CLOSE">Fechamento</option><option value="AFTER_SALES">Pós-venda</option><option value="REFERRAL">Pedir indicação</option><option value="CUSTOM">Personalizado</option></select></label>
+          <label>Template<select id="communication-template"></select></label>
+          <div id="communication-context" class="communication-context"></div>
+        </aside>
+        <main class="communication-editor">
+          <label id="communication-recipient-wrap">Para<input id="communication-recipient" autocomplete="off"></label>
+          <label id="communication-subject-wrap" class="hidden">Assunto<input id="communication-subject"></label>
+          <label>Mensagem<textarea id="communication-body" rows="12"></textarea></label>
+          <div id="communication-warning" class="communication-warning hidden"></div>
+          <div id="communication-knowledge" class="communication-knowledge"></div>
+          <div class="communication-actions"><button id="communication-original" type="button">Usar template original</button><button id="communication-ai" type="button">✨ Personalizar com IA</button><button id="communication-copy" type="button">Copiar</button><button id="communication-save" type="button">Salvar rascunho</button><button id="communication-open" type="button" class="og-button og-button-primary">Abrir WhatsApp</button></div>
+        </main>
+      </section>
+    </div>
+
+    <!-- CALL AI: ASSISTENTE COMERCIAL DE LIGAÇÕES -->
     <div id="tab-call-ai" class="tab-content hidden space-y-5">
       <section class="call-ai-top" aria-labelledby="call-ai-title">
         <div>
@@ -1263,6 +1283,7 @@
   <script src="services/knowledge-selector.js"></script>
   <script src="services/call-ai-prompts.js"></script>
   <script src="services/ai-service.js"></script>
+  <script src="services/communication-service.js"></script>
   <script src="services/prospect-parser.js"></script>
   <script src="modules/sales-desk.js"></script>
   <script src="modules/prospecting-engine.js"></script>

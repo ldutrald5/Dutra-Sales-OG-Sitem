@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1",
+  "importedAt": "2026-09-24T10:28:53.378119+00:00",
+  "sources": [
+    {
+      "file": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "sha256": "11af74c4076dd089ca07099d8714daa4a44af7b85516e1fddf032655d1cb6b61"
+    },
+    {
+      "file": "2-OG_Sales_Brain_v0.1-1.docx",
+      "sha256": "0d87b4bcc8aa9668dabd9df39bbd9e6af6be9bd1a120ed41391d06f3783b4544"
+    }
+  ],
+  "governance": {
+    "structuredSource": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+    "humanManual": "2-OG_Sales_Brain_v0.1-1.docx",
+    "docxIndexed": false
+  },
+  "stats": {
+    "jsonlRecords": 13,
+    "docxRecords": 0,
+    "indexedRecords": 13,
+    "errors": 0,
+    "duplicates": 0,
+    "cautions": 5
+  },
+  "errors": [],
+  "duplicates": [],
+  "cautions": [
+    "OG-TIRE-001",
+    "OG-TIRE-002",
+    "OG-TIRE-003",
+    "OG-FUEL-001",
+    "OG-DUR-001"
+  ],
+  "records": [
+    {
+      "knowledge_id": "OG-CORE-001",
+      "id": "OG-CORE-001",
+      "category": "Princípio comercial",
+      "subcategory": "",
+      "title": "Venda ao dono pelo impacto financeiro",
+      "content": "Ao falar com dono ou gestor comprometido com a operação, conectar a solução ao custo da frota, especialmente pneus e combustível, e fazer a conta para o cliente em vez de esperar que ele faça sozinho.",
+      "text": "Ao falar com dono ou gestor comprometido com a operação, conectar a solução ao custo da frota, especialmente pneus e combustível, e fazer a conta para o cliente em vez de esperar que ele faça sozinho.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Treinamento interno",
+      "confidence": "Alta",
+      "tags": [
+        "dono",
+        "gestor",
+        "valor",
+        "custo",
+        "ROI"
+      ],
+      "source": "Reunião 22/09 - transcrições fornecidas",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 1",
+      "created_at": "2026-09-24T10:28:53.376016+00:00",
+      "updated_at": "2026-09-24T10:28:53.376016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-PROP-001",
+      "id": "OG-PROP-001",
+      "category": "Proposta de valor",
+      "subcategory": "",
+      "title": "Tríade de valor",
+      "content": "A apresentação deve ligar três pilares: gerenciamento visual da calibragem, economia/vida útil de pneus e potencial economia de combustível.",
+      "text": "A apresentação deve ligar três pilares: gerenciamento visual da calibragem, economia/vida útil de pneus e potencial economia de combustível.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Treinamento interno",
+      "confidence": "Alta",
+      "tags": [
+        "gerenciamento visual",
+        "pneus",
+        "diesel"
+      ],
+      "source": "Reunião 22/09 - transcrições fornecidas",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 2",
+      "created_at": "2026-09-24T10:28:53.376016+00:00",
+      "updated_at": "2026-09-24T10:28:53.376016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-TIRE-001",
+      "id": "OG-TIRE-001",
+      "category": "Pneus",
+      "subcategory": "",
+      "title": "Uma peça protege dois pneus",
+      "content": "O treinamento usa como unidade de raciocínio que uma peça atende/protege dois pneus, permitindo calcular patrimônio protegido e economia por posição/conjunto.",
+      "text": "O treinamento usa como unidade de raciocínio que uma peça atende/protege dois pneus, permitindo calcular patrimônio protegido e economia por posição/conjunto.",
+      "status": "PREMISSA_COMERCIAL",
+      "originalStatus": "Premissa comercial do treinamento",
+      "confidence": "Alta",
+      "tags": [
+        "pneu",
+        "peça",
+        "cálculo"
+      ],
+      "source": "AUDIO REUNIAO 22.9 1",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 3",
+      "created_at": "2026-09-24T10:28:53.376016+00:00",
+      "updated_at": "2026-09-24T10:28:53.376016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-TIRE-002",
+      "id": "OG-TIRE-002",
+      "category": "Pneus",
+      "subcategory": "",
+      "title": "Premissa de +20% de vida útil",
+      "content": "O treinamento orienta usar 20% como premissa de ganho de vida útil/economia de pneus para construir a conta comercial.",
+      "text": "O treinamento orienta usar 20% como premissa de ganho de vida útil/economia de pneus para construir a conta comercial.",
+      "status": "PENDENTE_VALIDACAO",
+      "originalStatus": "Requer validação técnica/documental",
+      "confidence": "Média",
+      "tags": [
+        "20%",
+        "vida útil",
+        "economia"
+      ],
+      "source": "AUDIO REUNIAO 22.9 1 / Texto colado",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 4",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-TIRE-003",
+      "id": "OG-TIRE-003",
+      "category": "Pneus",
+      "subcategory": "",
+      "title": "Ciclo médio de pneu",
+      "content": "A reunião cita aproximadamente 18 a 20 meses como ciclo médio de pneu para a conta de retorno.",
+      "text": "A reunião cita aproximadamente 18 a 20 meses como ciclo médio de pneu para a conta de retorno.",
+      "status": "PENDENTE_VALIDACAO",
+      "originalStatus": "Premissa contextual; validar por operação",
+      "confidence": "Média",
+      "tags": [
+        "18 meses",
+        "20 meses",
+        "ciclo"
+      ],
+      "source": "AUDIO REUNIAO 22.9 1",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 5",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-FUEL-001",
+      "id": "OG-FUEL-001",
+      "category": "Combustível",
+      "subcategory": "",
+      "title": "Faixa de economia de diesel",
+      "content": "O treinamento menciona uma faixa de 2% a 8% de economia de diesel e orienta usar 2% como cenário conservador/pior condição nas contas comerciais.",
+      "text": "O treinamento menciona uma faixa de 2% a 8% de economia de diesel e orienta usar 2% como cenário conservador/pior condição nas contas comerciais.",
+      "status": "PENDENTE_VALIDACAO",
+      "originalStatus": "Requer validação técnica/documental",
+      "confidence": "Média",
+      "tags": [
+        "diesel",
+        "2%",
+        "8%",
+        "cenário conservador"
+      ],
+      "source": "Texto colado / REUNIAO 22.9 2",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 6",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-FUEL-002",
+      "id": "OG-FUEL-002",
+      "category": "Combustível",
+      "subcategory": "",
+      "title": "Não garantir economia fixa",
+      "content": "O próprio treinamento reconhece múltiplas variáveis no consumo (pressão atual, condução, serra, chuva, temperatura, carga, distribuição de carga etc.) e recomenda não cravar um resultado individual sem contexto.",
+      "text": "O próprio treinamento reconhece múltiplas variáveis no consumo (pressão atual, condução, serra, chuva, temperatura, carga, distribuição de carga etc.) e recomenda não cravar um resultado individual sem contexto.",
+      "status": "REGRA_SEGURANCA",
+      "originalStatus": "Regra de segurança comercial",
+      "confidence": "Alta",
+      "tags": [
+        "diesel",
+        "variáveis",
+        "não garantir"
+      ],
+      "source": "Texto colado",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 7",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-FUEL-003",
+      "id": "OG-FUEL-003",
+      "category": "Combustível",
+      "subcategory": "",
+      "title": "Trocar o dinheiro de lugar",
+      "content": "A lógica de venda sugerida é comparar a parcela/investimento com uma economia operacional potencial, especialmente diesel, mostrando que parte do gasto recorrente pode financiar a solução.",
+      "text": "A lógica de venda sugerida é comparar a parcela/investimento com uma economia operacional potencial, especialmente diesel, mostrando que parte do gasto recorrente pode financiar a solução.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Técnica de apresentação",
+      "confidence": "Alta",
+      "tags": [
+        "ROI",
+        "parcela",
+        "diesel",
+        "valor"
+      ],
+      "source": "Texto colado",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 8",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-DUR-001",
+      "id": "OG-DUR-001",
+      "category": "Durabilidade",
+      "subcategory": "",
+      "title": "Reutilização por vários ciclos",
+      "content": "O treinamento relata clientes usando peças por 7, 8 e até 10 anos e sugere mostrar que a mesma peça pode continuar em novos ciclos de pneus e até migrar para caminhão novo.",
+      "text": "O treinamento relata clientes usando peças por 7, 8 e até 10 anos e sugere mostrar que a mesma peça pode continuar em novos ciclos de pneus e até migrar para caminhão novo.",
+      "status": "PENDENTE_VALIDACAO",
+      "originalStatus": "Evidência anedótica interna; validar base/RMA",
+      "confidence": "Média",
+      "tags": [
+        "durabilidade",
+        "8 anos",
+        "10 anos",
+        "RMA"
+      ],
+      "source": "AUDIO REUNIAO 22.9 1",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 9",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-PRICE-001",
+      "id": "OG-PRICE-001",
+      "category": "Preço",
+      "subcategory": "",
+      "title": "Não passar preço sem construir valor",
+      "content": "Regra explícita do treinamento: antes de discutir preço, calcular/explicar economia e valor; o preço isolado tende a parecer caro.",
+      "text": "Regra explícita do treinamento: antes de discutir preço, calcular/explicar economia e valor; o preço isolado tende a parecer caro.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Regra comercial",
+      "confidence": "Alta",
+      "tags": [
+        "preço",
+        "valor",
+        "objeção"
+      ],
+      "source": "AUDIO REUNIAO 22.9 1",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 10",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-CALL-001",
+      "id": "OG-CALL-001",
+      "category": "Ligação",
+      "subcategory": "",
+      "title": "Resumo de valor antes de encerrar",
+      "content": "Se o prospect quiser desligar, o treinamento orienta usar uma síntese curta com gerenciamento visual, pneu, combustível e prova social para plantar a dúvida/valor antes de encerrar, sem depender de uma apresentação longa.",
+      "text": "Se o prospect quiser desligar, o treinamento orienta usar uma síntese curta com gerenciamento visual, pneu, combustível e prova social para plantar a dúvida/valor antes de encerrar, sem depender de uma apresentação longa.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Técnica comercial; aplicar sem pressionar indevidamente",
+      "confidence": "Alta",
+      "tags": [
+        "ligação",
+        "30 segundos",
+        "1 minuto",
+        "encerramento"
+      ],
+      "source": "REUNIAO 22.9 2",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 11",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-STORY-001",
+      "id": "OG-STORY-001",
+      "category": "Storytelling",
+      "subcategory": "",
+      "title": "Analogias do cotidiano",
+      "content": "Para clientes pragmáticos ou céticos sobre consumo, o treinamento recomenda analogias simples do cotidiano (bicicleta, pneu de carro, direção econômica, grip) para explicar a relação entre calibragem/atrito e consumo.",
+      "text": "Para clientes pragmáticos ou céticos sobre consumo, o treinamento recomenda analogias simples do cotidiano (bicicleta, pneu de carro, direção econômica, grip) para explicar a relação entre calibragem/atrito e consumo.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Técnica comercial",
+      "confidence": "Alta",
+      "tags": [
+        "analogia",
+        "storytelling",
+        "cético"
+      ],
+      "source": "Texto colado",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 12",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    },
+    {
+      "knowledge_id": "OG-ADV-001",
+      "id": "OG-ADV-001",
+      "category": "Advocacy",
+      "subcategory": "",
+      "title": "Transformar gestor em defensor interno",
+      "content": "Uma apresentação bem feita para um gestor que veste a camisa e entende o valor pode transformá-lo em defensor interno da solução e fonte de indicações.",
+      "text": "Uma apresentação bem feita para um gestor que veste a camisa e entende o valor pode transformá-lo em defensor interno da solução e fonte de indicações.",
+      "status": "TREINAMENTO_INTERNO",
+      "originalStatus": "Insight comercial",
+      "confidence": "Alta",
+      "tags": [
+        "champion",
+        "gestor",
+        "indicação"
+      ],
+      "source": "Texto colado",
+      "origin": "1-OG_Sales_Brain_Knowledge_Base.jsonl",
+      "locator": "linha 13",
+      "created_at": "2026-09-24T10:28:53.377016+00:00",
+      "updated_at": "2026-09-24T10:28:53.377016+00:00",
+      "last_reviewed_at": ""
+    }
+  ]
+}

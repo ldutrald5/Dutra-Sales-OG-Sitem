@@ -81,7 +81,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/07-CENTRAL-COMUNICACAO.md`, `docs/08-TEMPLATES-COMERCIAIS.md`, `docs/02-BANCO-DE-DADOS.md`.
 - **Critério de aceite:** estados de rascunho, abertura e envio confirmado permanecem distintos; histórico e próxima ação são rastreáveis.
 - **Dependências:** TASK-007 e TASK-010.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-24; evidência em `tasks/DONE.md`.
 
 ## TASK-010 — Templates comerciais
 
@@ -94,4 +94,4 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 
 ## Ordem recomendada
 
-Próxima recomendação: **TASK-009 — Central de Comunicação**.
+Próxima recomendação: **TASK-010 — Templates comerciais e governança**.

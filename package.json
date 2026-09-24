@@ -14,6 +14,7 @@
     "og:cloud:deploy": "wrangler deploy",
     "og:assets": "node scripts/optimize-og-assets.mjs",
     "og:call-ai:test": "node scripts/test_call_ai.mjs",
+    "og:communication:test": "node scripts/test_communication_center.mjs",
     "og:product:test": "node scripts/test_product_evolution.mjs",
     "og:ops": "node scripts/og-operations.mjs",
     "og:ops:test": "node scripts/test_operations_foundation.mjs",
@@ -22,7 +23,7 @@
     "og:performance:test": "node scripts/test_performance_dashboard.mjs",
     "og:sales-desk:test": "node scripts/test_sales_desk.mjs",
     "og:prospecting:test": "node scripts/test_prospecting_engine.mjs",
-    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/services/knowledge-selector.js && node --check apps/sistema-og/services/call-ai-prompts.js && node --check apps/sistema-og/services/ai-service.js && node --check apps/sistema-og/services/prospect-parser.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/modules/prospecting-engine.js && node --check apps/sistema-og/components/ui-components.js",
+    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/services/knowledge-selector.js && node --check apps/sistema-og/services/call-ai-prompts.js && node --check apps/sistema-og/services/ai-service.js && node --check apps/sistema-og/services/communication-service.js && node --check apps/sistema-og/services/prospect-parser.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/modules/prospecting-engine.js && node --check apps/sistema-og/components/ui-components.js",
     "validate": "node scripts/validate.mjs",
     "hooks:setup": "node scripts/setup-git-hooks.mjs",
     "prepare": "node scripts/setup-git-hooks.mjs"

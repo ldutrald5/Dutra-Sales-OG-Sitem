@@ -11,6 +11,7 @@
     'quotes', 'quoteTemplates', 'messageTemplates', 'documentTemplates',
     'generatedDocuments', 'sales', 'commissions', 'partners', 'transporters',
     'transporterCoverage', 'users', 'goals', 'activityEvents'
+    , 'communications'
   ]);
 
   function isoNow(now) {

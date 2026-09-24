@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     leadSearchQuery: '',
     salesDeskSearch: '',
     prospecting: { view: 'inbox', previewRows: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
     ocrImageBase64: null,
     ocrExtractedText: '',
     quoteImportImageBase64: null,
@@ -3188,7 +3189,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
     root.querySelector('[data-client-crm]').addEventListener('click', () => { state.selectedLeadId = lead.id; switchTab('crm'); });
     root.querySelectorAll('[data-desk-template]').forEach(button => button.addEventListener('click', () => openDeskMessageComposer(lead, button.dataset.deskTemplate)));
-    root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => showNotification(`${button.dataset.futureAction}: entrada preparada para uma próxima tarefa.`, 'info')));
+    root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => {
+      if (button.dataset.futureAction === 'E-mail') return openCommunicationForLead(lead);
+      showNotification(`${button.dataset.futureAction}: entrada preparada para uma próxima tarefa.`, 'info');
+    }));
     const followMode = root.querySelector('#desk-follow-mode');
     followMode.addEventListener('change', () => root.querySelector('#desk-specific-wrap').classList.toggle('hidden', followMode.value !== 'specific'));
     root.querySelector('#desk-save-result').addEventListener('click', () => {
@@ -4060,8 +4064,72 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   // =========================================================================
-  // CALL AI — ASSISTENTE COMERCIAL DE LIGAÇÕES (MANUAL + SALES BRAIN LOCAL)
+  // CENTRAL DE COMUNICAÇÃO — TEMPLATE FIRST + SALES BRAIN SELETIVO
   // =========================================================================
+  function communicationLead() { return state.leads.find(item=>String(item.id)===String(state.communication.selectedLeadId)) || null; }
+  function communicationVariables(lead) { return { first_name:(lead?.nome||'').split(/\s+/)[0], contact_name:lead?.nome||'', company:lead?.empresa||lead?.nome||'', seller:state.client.vendedor||'Lucas, da Olho de Gato', segment:lead?.segmentId||'', next_action:lead?.nextAction||'', proposal_value:lead?.proposalValue||'', meeting_date:lead?.followUpAt||'', main_pain:lead?.pain||'' }; }
+  function communicationTemplates() {
+    const channel=state.communication.channel, objective=state.communication.objective;
+    let items=OG_COMMUNICATION_SERVICE.templates(channel,objective);
+    if(!items.length)items=OG_COMMUNICATION_SERVICE.TEMPLATES.filter(item=>item.channel===channel);
+    return items;
+  }
+  function renderCommunicationTemplate(reset=true){
+    const lead=communicationLead(); const templates=communicationTemplates(); const select=document.getElementById('communication-template');
+    select.innerHTML=templates.map(item=>`<option value="${item.templateId}">${escapeHtml(item.name)} · v${item.version}</option>`).join('')||'<option value="">Nenhum template disponível</option>';
+    if(!templates.some(item=>item.templateId===state.communication.templateId))state.communication.templateId=templates[0]?.templateId||'';
+    select.value=state.communication.templateId;
+    const template=templates.find(item=>item.templateId===state.communication.templateId);
+    if(template&&reset){ const rendered=OG_COMMUNICATION_SERVICE.render(template,communicationVariables(lead)); state.communication.original=rendered; document.getElementById('communication-body').value=rendered.body; document.getElementById('communication-subject').value=rendered.subject; document.getElementById('communication-warning').classList.toggle('hidden',!rendered.missing.length); document.getElementById('communication-warning').textContent=rendered.missing.length?`Dados ausentes: ${rendered.missing.join(', ')}. Revise antes de usar.`:''; state.communication.aiUsed=false; state.communication.knowledgeIds=[]; }
+  }
+  function renderCommunication(){
+    const client=document.getElementById('communication-client'); if(!client)return;
+    client.innerHTML=state.leads.map(lead=>`<option value="${escapeHtml(lead.id)}">${escapeHtml(lead.empresa||lead.nome)}</option>`).join('');
+    if(!state.communication.selectedLeadId||!state.leads.some(item=>String(item.id)===String(state.communication.selectedLeadId)))state.communication.selectedLeadId=state.selectedLeadId||state.leads[0]?.id||null;
+    client.value=state.communication.selectedLeadId||'';
+    const lead=communicationLead(); document.getElementById('communication-channel').value=state.communication.channel; document.getElementById('communication-objective').value=state.communication.objective;
+    document.getElementById('communication-recipient').value=state.communication.channel==='email'?(lead?.email||''):(lead?.telefone||'');
+    document.getElementById('communication-subject-wrap').classList.toggle('hidden',state.communication.channel!=='email');
+    document.getElementById('communication-open').textContent=state.communication.channel==='whatsapp'?'Abrir WhatsApp':state.communication.channel==='email'?'Copiar e-mail':'Abrir ponto de entrada';
+    document.getElementById('communication-context').innerHTML=lead?`<strong>${escapeHtml(lead.empresa||lead.nome)}</strong><span>${escapeHtml([lead.nome,lead.cargo,lead.status].filter(Boolean).join(' · '))}</span><small>${escapeHtml(lead.pain||'Dor não registrada')} · ${escapeHtml(lead.nextAction||'Sem próxima ação')}</small>`:'Selecione um cliente.';
+    renderCommunicationTemplate(true);
+  }
+  async function personalizeCommunication(){
+    const lead=communicationLead(); if(!lead)return showNotification('Selecione um cliente.','info');
+    const button=document.getElementById('communication-ai'); button.disabled=true; button.textContent='Selecionando conhecimento…';
+    const records=state.communication.brain?.records||[];
+    const selected=OG_KNOWLEDGE_SELECTOR.selectRecords(records,{intent:'personalize_message',channel:state.communication.channel,persona:lead.cargo||lead.decisionMaker,stage:lead.status,objections:lead.objections,messagePurpose:state.communication.objective},3);
+    const context=OG_CALL_AI_CONTEXT.build(lead,{intent:'personalize_message'});
+    context.communication={channel:state.communication.channel,objective:state.communication.objective,persona:lead.cargo||lead.decisionMaker||'',mainPain:lead.pain||'',baseTemplate:document.getElementById('communication-body').value};
+    const request=OG_CALL_AI_PROMPTS.build('personalize_message',context,document.getElementById('communication-body').value,selected.map(OG_KNOWLEDGE_SELECTOR.forPrompt));
+    const response=await OG_AI_SERVICE.generate(request);
+    if(communicationLead()?.id!==lead.id)return;
+    document.getElementById('communication-body').value=response.recommendedResponse||document.getElementById('communication-body').value;
+    state.communication.aiUsed=true; state.communication.knowledgeIds=response.knowledge_ids_used||[];
+    document.getElementById('communication-knowledge').textContent=`Baseado em ${state.communication.knowledgeIds.length} conhecimentos OG · revisão humana obrigatória`;
+    button.disabled=false; button.textContent='✨ Gerar novamente com IA';
+  }
+  function saveCommunication(status){
+    const lead=communicationLead(); if(!lead)return null;
+    const communication=OG_COMMUNICATION_SERVICE.record({companyId:lead.id,contactId:lead.contactId||'',opportunityId:lead.opportunities?.find(item=>item.status!=='closed')?.id||'',channel:state.communication.channel,objective:state.communication.objective,templateId:state.communication.templateId,aiUsed:state.communication.aiUsed,knowledge_ids_used:state.communication.knowledgeIds,status,subject:document.getElementById('communication-subject').value,body:document.getElementById('communication-body').value});
+    state.operations.communications.unshift({...communication,id:communication.communicationId}); saveOperationsToStorage(); return communication;
+  }
+  function openCommunicationForLead(lead){state.communication.selectedLeadId=lead.id;state.selectedLeadId=lead.id;switchTab('comunicacao');renderCommunication();}
+  function initCommunication(){
+    fetch('/knowledge/og-sales-brain.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(brain=>{state.communication.brain=brain;const badge=document.getElementById('communication-brain-status');badge.textContent=brain?`Sales Brain v${brain.version} · ${brain.stats.indexedRecords} conhecimentos`:'Sales Brain indisponível · templates ativos';}).catch(()=>{});
+    document.getElementById('communication-client')?.addEventListener('change',e=>{state.communication.selectedLeadId=e.target.value;renderCommunication();});
+    document.getElementById('communication-channel')?.addEventListener('change',e=>{state.communication.channel=e.target.value;renderCommunication();});
+    document.getElementById('communication-objective')?.addEventListener('change',e=>{state.communication.objective=e.target.value;renderCommunicationTemplate(true);});
+    document.getElementById('communication-template')?.addEventListener('change',e=>{state.communication.templateId=e.target.value;renderCommunicationTemplate(true);});
+    document.getElementById('communication-original')?.addEventListener('click',()=>renderCommunicationTemplate(true));
+    document.getElementById('communication-ai')?.addEventListener('click',personalizeCommunication);
+    document.getElementById('communication-copy')?.addEventListener('click',async()=>{await navigator.clipboard.writeText(document.getElementById('communication-body').value);saveCommunication('prepared');showNotification('Mensagem copiada e registrada como preparada.','success');});
+    document.getElementById('communication-save')?.addEventListener('click',()=>{saveCommunication('draft');showNotification('Rascunho salvo.','success');});
+    document.getElementById('communication-open')?.addEventListener('click',()=>{const lead=communicationLead();if(state.communication.channel==='whatsapp'){saveCommunication('opened');openDeskWhatsApp(lead,document.getElementById('communication-body').value);}else if(state.communication.channel==='email'){navigator.clipboard.writeText(`${document.getElementById('communication-subject').value}\n\n${document.getElementById('communication-body').value}`);saveCommunication('prepared');showNotification('E-mail copiado. Nenhum envio foi realizado.','success');}else showNotification('Ponto de entrada preparado para uma tarefa futura.','info');});
+    renderCommunication();
+  }
+
+  // CALL AI — ASSISTENTE COMERCIAL DE LIGAÇÕES (MANUAL + SALES BRAIN LOCAL)
   const callObjectives = {
     primeiro_contato: 'Primeiro contato', qualificacao: 'Qualificação', diagnostico: 'Diagnóstico',
     retorno: 'Retorno de contato anterior', followup_proposta: 'Follow-up de proposta',
@@ -5122,6 +5190,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initProspecting();
   initCommandCenter();
   initQuickLead();
+  initCommunication();
   initCallAI();
   initMaterialLibrary();
   initPerformanceDashboard();

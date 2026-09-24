@@ -40,4 +40,12 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 
 ## Convenção para novas conclusões
 
+## TASK-009 — Central de Comunicação e OG Sales Brain
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** Central contextual para WhatsApp e e-mail, templates versionados, editor, cópia, abertura do WhatsApp, rascunho e personalização opcional pelo mesmo motor do Call AI.
+- **Sales Brain:** 13 IDs do JSONL preservados e governança normalizada; DOCX registrado somente como manual humano.
+- **Segurança:** alegações pendentes/premissas são qualificadas, conhecimento usado fica rastreável e nenhuma abertura é marcada como envio.
+- **Validação:** `npm run og:communication:test` e `npm run validate`.
+
 Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.

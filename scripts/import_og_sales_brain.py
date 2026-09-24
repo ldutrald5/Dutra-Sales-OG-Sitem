@@ -6,9 +6,6 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
-from docx import Document
-
-
 def normalize(value):
     text = unicodedata.normalize("NFKD", str(value or ""))
     text = "".join(char for char in text if not unicodedata.combining(char))
@@ -19,20 +16,15 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def category_from_heading(heading):
-    value = normalize(heading)
-    mapping = {
-        "roi": "Diagnóstico e ROI",
-        "fluxo de conversa": "Abordagens",
-        "personas": "Segmentos e personas",
-        "mensagens": "Abordagens",
-        "regras da call": "Regras da Call AI",
-        "validado": "Governança",
-        "crm": "Follow-up e CRM",
-        "objec": "Objeções",
-        "pos venda": "Pós-venda",
-    }
-    return next((category for key, category in mapping.items() if key in value), "Conhecimento comercial")
+def governance_status(value):
+    status = normalize(value)
+    if "regra de seguranca" in status: return "REGRA_SEGURANCA"
+    if "requer validacao" in status or "validar" in status: return "PENDENTE_VALIDACAO"
+    if "anedotica" in status or "case" in status: return "CASE_INTERNO"
+    if "premissa" in status: return "PREMISSA_COMERCIAL"
+    if "treinamento" in status or "tecnica" in status or "insight" in status or "regra comercial" in status: return "TREINAMENTO_INTERNO"
+    if "validado" in status: return "VALIDADO"
+    return "PENDENTE_VALIDACAO"
 
 
 def import_jsonl(path):
@@ -48,81 +40,36 @@ def import_jsonl(path):
                 missing = [key for key in ("id", "category", "title", "statement", "source") if not row.get(key)]
                 if missing:
                     raise ValueError("campos ausentes: " + ", ".join(missing))
+                original_status = str(row.get("status") or "Não informado")
+                now = datetime.now(timezone.utc).isoformat()
                 records.append({
+                    "knowledge_id": str(row["id"]),
                     "id": str(row["id"]),
                     "category": str(row["category"]),
+                    "subcategory": str(row.get("subcategory") or ""),
                     "title": str(row["title"]),
+                    "content": str(row["statement"]),
                     "text": str(row["statement"]),
-                    "status": str(row.get("status") or "Não informado"),
+                    "status": governance_status(original_status),
+                    "originalStatus": original_status,
                     "confidence": str(row.get("confidence") or "Não informada"),
                     "tags": [str(tag) for tag in row.get("tags", []) if str(tag).strip()],
                     "source": str(row["source"]),
                     "origin": path.name,
                     "locator": f"linha {line_number}",
+                    "created_at": str(row.get("created_at") or now),
+                    "updated_at": str(row.get("updated_at") or now),
+                    "last_reviewed_at": str(row.get("last_reviewed_at") or ""),
                 })
             except Exception as exc:
                 errors.append({"line": line_number, "error": str(exc)})
     return records, errors
 
 
-def import_docx(path, canonical_texts):
-    document = Document(path)
-    records = []
-    heading = "Introdução"
-    counter = 0
-    for paragraph_number, paragraph in enumerate(document.paragraphs, 1):
-        text = paragraph.text.strip()
-        if not text:
-            continue
-        style = (paragraph.style.name or "").casefold()
-        if style.startswith(("heading", "título")):
-            heading = text
-            continue
-        if style == "title" or normalize(text) in {"og sales brain", "base de conhecimento comercial v0 1"}:
-            continue
-        if normalize(text) in canonical_texts or normalize(text).startswith("fonte "):
-            continue
-        counter += 1
-        records.append({
-            "id": f"OG-DOCX-P{paragraph_number:03d}",
-            "category": category_from_heading(heading),
-            "title": heading,
-            "text": text,
-            "status": "Documento interno",
-            "confidence": "Consultar fonte",
-            "tags": normalize(heading).split()[:8],
-            "source": path.name,
-            "origin": path.name,
-            "locator": f"parágrafo {paragraph_number}",
-        })
-    for table_number, table in enumerate(document.tables, 1):
-        for row_number, row in enumerate(table.rows, 1):
-            cells = [cell.text.strip() for cell in row.cells]
-            text = " | ".join(value for value in cells if value)
-            if not text or normalize(text) in canonical_texts:
-                continue
-            counter += 1
-            records.append({
-                "id": f"OG-DOCX-T{table_number:02d}R{row_number:02d}",
-                "category": "Tabela de referência",
-                "title": f"Tabela {table_number}",
-                "text": text,
-                "status": "Documento interno",
-                "confidence": "Consultar fonte",
-                "tags": ["tabela", "referência"],
-                "source": path.name,
-                "origin": path.name,
-                "locator": f"tabela {table_number}, linha {row_number}",
-            })
-    return records
-
-
 def main():
     jsonl, docx, output = map(Path, sys.argv[1:4])
     canonical, errors = import_jsonl(jsonl)
-    canonical_texts = {normalize(record["text"]) for record in canonical}
-    supplemental = import_docx(docx, canonical_texts)
-    all_records = canonical + supplemental
+    all_records = canonical
     seen, duplicates = {}, []
     for record in all_records:
         fingerprint = normalize(record["text"])
@@ -133,7 +80,7 @@ def main():
     deduplicated = [record for record in all_records if seen.get(normalize(record["text"])) == record["id"]]
     cautions = [
         record["id"] for record in deduplicated
-        if any(term in normalize(record.get("status")) for term in ("requer validacao", "premissa"))
+        if any(term in normalize(record.get("status")) for term in ("requer validacao", "pendente validacao", "premissa", "case interno"))
         or any(term in normalize(record["text"]) for term in ("nao garantir", "nao prometer"))
     ]
     result = {
@@ -144,9 +91,10 @@ def main():
             {"file": jsonl.name, "sha256": sha256(jsonl)},
             {"file": docx.name, "sha256": sha256(docx)},
         ],
+        "governance": {"structuredSource": jsonl.name, "humanManual": docx.name, "docxIndexed": False},
         "stats": {
             "jsonlRecords": len(canonical),
-            "docxRecords": len(supplemental),
+            "docxRecords": 0,
             "indexedRecords": len(deduplicated),
             "errors": len(errors),
             "duplicates": len(duplicates),

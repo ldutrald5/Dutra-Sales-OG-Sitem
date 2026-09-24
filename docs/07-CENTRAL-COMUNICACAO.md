@@ -34,3 +34,13 @@ Primeiro contato, chegar ao decisor, não atendeu, pós-ligação, apresentaçã
 ## Integrações futuras
 
 Integração oficial de e-mail ou WhatsApp dependerá de credenciais, consentimento, política de retenção e story própria. Até lá, links e cópia manual são o caminho seguro e econômico.
+
+## Implementação TASK-009
+
+- O JSONL é a fonte estruturada inicial; IDs, status original, confiança e fonte são preservados.
+- O DOCX é manual humano e referência de governança, registrado por nome e hash, sem indexação automática.
+- Status são normalizados em uma taxonomia de governança; premissas e pendências não viram promessa externa.
+- WhatsApp e e-mail usam templates versionados antes de qualquer IA.
+- Personalização reutiliza `ai-service`, contexto mínimo e no máximo três conhecimentos selecionados.
+- Cada rascunho registra cliente, contato, canal, objetivo, template, uso de IA e `knowledge_ids_used`.
+- Copiar ou abrir canal registra `prepared`/`opened`; nunca `sent` sem confirmação real.
