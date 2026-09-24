@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const require=createRequire(import.meta.url);
+const service=require('../apps/sistema-og/services/data-safety-service.js');
+const model=require('../apps/sistema-og/operations-model.js');
+const current={leads:[{id:'L1',empresa:'Atual',updatedAt:'2026-09-24T10:00:00Z'}],history:[],operations:model.createEmptyOperations('2026-09-24T10:00:00Z')};
+current.operations.activityEvents=[{id:'E1',type:'ux.feedback',note:'Telefone maior',at:'2026-09-24T10:00:00Z'}];
+const backup=service.createBackup(current,{source:'test',revision:3});
+assert.equal(service.validateBackup(backup).valid,true);
+const incoming={...backup,data:{...backup.data,leads:[{id:'L1',empresa:'Antigo',updatedAt:'2026-09-23T10:00:00Z'},{id:'L2',empresa:'Novo',updatedAt:'2026-09-24T11:00:00Z'}],operations:{...backup.data.operations,activityEvents:[{id:'E2',type:'ux.feedback',note:'Botão mais perto',at:'2026-09-24T11:00:00Z'}]}}};
+const merged=service.mergeBackup(current,incoming,model);
+assert.equal(merged.leads.length,2);
+assert.equal(merged.leads.find(item=>item.id==='L1').empresa,'Atual');
+assert.equal(merged.operations.activityEvents.length,2);
+assert.equal(service.validateBackup({}).valid,false);
+console.log('Data safety backup, validation and merge checks: PASS');

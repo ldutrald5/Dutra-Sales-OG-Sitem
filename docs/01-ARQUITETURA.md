@@ -1,5 +1,7 @@
 # Arquitetura
 
+> Proteção, sincronização, backups e restauração: consulte `docs/12-PROTECAO-E-SINCRONIZACAO.md`.
+
 ## Diagnóstico atual
 
 O Sistema OG é uma aplicação web PWA sem framework de interface. HTML, CSS e JavaScript executam no navegador; um servidor Node entrega os arquivos e sincroniza o estado. A mesma aplicação pode ser publicada em Cloudflare Workers/Assets com KV opcional.

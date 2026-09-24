@@ -8,6 +8,7 @@ const steps = [
   ['og:call-ai:test'],
   ['og:communication:test'],
   ['og:spreadsheet:test'],
+  ['og:data-safety:test'],
   ['og:product:test'],
   ['og:ops:test'],
   ['og:library:test'],

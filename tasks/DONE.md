@@ -64,4 +64,11 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 - **Segurança:** alegações pendentes/premissas são qualificadas, conhecimento usado fica rastreável e nenhuma abertura é marcada como envio.
 - **Validação:** `npm run og:communication:test` e `npm run validate`.
 
+## Continuidade de dados — sete proteções
+
+- **Data:** 2026-09-24.
+- **Implementado:** contrato para endereço permanente com KV, sincronização com conflito e merge, backups do servidor, dez snapshots automáticos no aparelho, exportação JSON, restauração não destrutiva e painel de sugestões.
+- **Validação:** `npm run og:data-safety:test` e `npm run validate`.
+- **Ativação externa pendente:** autenticar a conta Cloudflare, criar o KV e cadastrar o segredo de acesso.
+
 Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.

@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   let serverSyncTimer = null;
+  let localBackupTimer = null;
   let serverRevision = 0;
 
   // Carrega histórico e leads
@@ -209,10 +210,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setSyncStatus('Salvando…', 'busy');
     serverSyncTimer = setTimeout(async () => {
       try {
-        const response = await apiFetch('/api/state', {
+        let response = await apiFetch('/api/state', {
           method: 'PUT',
           body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: serverRevision })
         });
+        if(response.status===409){
+          const remote=await response.json();
+          const merged=OG_DATA_SAFETY.mergeBackup({leads:state.leads,history:state.history,operations:state.operations},{format:'sistema-og-backup',version:1,data:{leads:remote.leads||[],history:remote.history||[],operations:remote.operations||{}}},OG_OPERATIONS_MODEL);
+          state.leads=merged.leads;state.history=merged.history;state.operations=merged.operations;
+          response=await apiFetch('/api/state?merge=1',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0),forceMerge:true})});
+        }
         if (!response.ok) throw new Error('Servidor indisponível');
         const saved = await response.json();
         serverRevision = saved.revision || serverRevision;
@@ -3378,7 +3385,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const note = window.prompt('O que atrapalhou ou poderia ficar mais rápido?');
     if (!note?.trim()) return;
     state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: `EVT-UX-${Date.now().toString(36).toUpperCase()}`, type: 'ux.feedback', at: new Date().toISOString(), note: note.trim(), module: state.currentTab });
-    saveOperationsToStorage(); showNotification('Sugestão registrada para o backlog.', 'success');
+    saveOperationsToStorage(); renderDataSafety(); showNotification('Sugestão registrada para o backlog.', 'success');
   }
 
   function initProspecting() {
@@ -4754,6 +4761,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function saveLeadsToStorage() {
     try {
       localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
+      scheduleLocalBackup();
       scheduleServerSync();
     } catch (e) {
       console.error(e);
@@ -4763,7 +4771,31 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function saveOperationsToStorage() {
     state.operations.updatedAt = new Date().toISOString();
     localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+    scheduleLocalBackup();
     scheduleServerSync();
+  }
+
+  function currentBackup(){return OG_DATA_SAFETY.createBackup({leads:state.leads,history:state.history,operations:state.operations},{revision:serverRevision});}
+
+  function scheduleLocalBackup(){
+    clearTimeout(localBackupTimer);
+    localBackupTimer=setTimeout(()=>OG_DATA_SAFETY.saveLocalSnapshot(currentBackup()).then(renderDataSafety).catch(error=>console.warn('Backup automático indisponível',error)),1200);
+  }
+
+  function downloadJson(value,fileName){const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=fileName;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);}
+
+  async function renderDataSafety(){
+    const snapshots=document.getElementById('backup-snapshots'),suggestions=document.getElementById('suggestions-panel');
+    if(snapshots){try{const rows=await OG_DATA_SAFETY.listLocalSnapshots();snapshots.innerHTML=rows.slice(0,3).map(item=>`<div><span>${escapeHtml(new Date(item.createdAt).toLocaleString('pt-BR'))}</span><b>${item.backup.data.leads.length} clientes</b></div>`).join('')||'<p>Nenhuma cópia automática criada ainda.</p>';document.getElementById('backup-status-text').textContent=rows[0]?`Última cópia automática: ${new Date(rows[0].createdAt).toLocaleString('pt-BR')}. Mantemos as 10 mais recentes neste aparelho.`:'Preparando a primeira cópia automática deste aparelho.';}catch{snapshots.innerHTML='<p>Backup automático indisponível neste navegador.</p>';}}
+    if(suggestions){const items=(state.operations.activityEvents||[]).filter(item=>item.type==='ux.feedback');suggestions.innerHTML=items.length?items.map(item=>`<article><div><b>${escapeHtml(item.note||'Sugestão sem descrição')}</b><small>${escapeHtml(item.module||'sistema')} · ${escapeHtml(new Date(item.at).toLocaleString('pt-BR'))}</small></div><select data-suggestion-id="${escapeHtml(item.id)}"><option value="new" ${!item.status||item.status==='new'?'selected':''}>Nova</option><option value="in_progress" ${item.status==='in_progress'?'selected':''}>Em execução</option><option value="done" ${item.status==='done'?'selected':''}>Concluída</option></select></article>`).join(''):'<p>Nenhuma sugestão registrada nesta base.</p>';suggestions.querySelectorAll('[data-suggestion-id]').forEach(select=>select.addEventListener('change',()=>{const event=state.operations.activityEvents.find(item=>String(item.id)===select.dataset.suggestionId);if(event){event.status=select.value;event.updatedAt=new Date().toISOString();saveOperationsToStorage();showNotification('Status da sugestão atualizado.','success');}}));}
+  }
+
+  function initDataSafety(){
+    document.getElementById('backup-export')?.addEventListener('click',()=>{const backup=currentBackup();downloadJson(backup,`sistema-og-backup-${new Date().toISOString().slice(0,10)}.json`);OG_DATA_SAFETY.saveLocalSnapshot(backup).then(renderDataSafety).catch(()=>{});showNotification('Backup baixado. Guarde o arquivo em local seguro.','success');});
+    const input=document.getElementById('backup-import-file');document.getElementById('backup-import')?.addEventListener('click',()=>input?.click());
+    input?.addEventListener('change',async()=>{const file=input.files?.[0];if(!file)return;try{const backup=JSON.parse(await file.text()),check=OG_DATA_SAFETY.validateBackup(backup);if(!check.valid)throw new Error(check.errors.join(' '));if(!confirm(`Restaurar e mesclar ${check.counts.leads} clientes, ${check.counts.history} cotações e ${check.counts.events} eventos? Nenhum registro atual será apagado.`))return;const merged=OG_DATA_SAFETY.mergeBackup({leads:state.leads,history:state.history,operations:state.operations},backup,OG_OPERATIONS_MODEL);state.leads=merged.leads;state.history=merged.history;state.operations=merged.operations;localStorage.setItem('og_cotacoes_history',JSON.stringify(state.history));saveLeadsToStorage();saveOperationsToStorage();renderDayDashboard();renderOperationsFoundation();renderDataSafety();showNotification('Backup restaurado e mesclado.','success');}catch(error){showNotification(error.message||'Backup inválido.','error');}finally{input.value='';}});
+    apiFetch('/api/health').then(response=>response.json()).then(info=>{const element=document.getElementById('storage-mode-text');if(element){element.textContent=info.persistent?'Servidor permanente ativo · celular e computador compartilham a mesma base.':'Publicação temporária · use o backup até ativarmos a conta permanente.';element.dataset.mode=info.persistent?'ready':'warning';}}).catch(()=>{});
+    scheduleLocalBackup();renderDataSafety();
   }
 
   const LIBRARY_TYPE_LABELS = { video: 'Vídeo', image: 'Imagem', pdf: 'PDF', presentation: 'Apresentação', audio: 'Áudio', link: 'Link', script: 'Script', message: 'Mensagem' };
@@ -5276,6 +5308,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initCallAI();
   initMaterialLibrary();
   initPerformanceDashboard();
+  initDataSafety();
   initPremiumExperience();
   initCrmEvents();
   initItemPricingModal();

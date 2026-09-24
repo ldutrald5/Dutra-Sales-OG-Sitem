@@ -1142,6 +1142,17 @@
         <div class="operations-phase"><small>FASE ATUAL</small><strong>Performance & Funil</strong><span>Eventos reais, conversão e negócios parados</span></div>
       </section>
       <div id="operations-foundation" aria-live="polite"></div>
+      <section class="data-safety-grid" aria-label="Proteção e continuidade dos dados">
+        <article class="clean-card data-safety-card">
+          <div><span class="og-kicker">DADOS PROTEGIDOS</span><h2>Backup e restauração</h2><p id="storage-mode-text">Verificando a persistência do servidor…</p><p id="backup-status-text">Preparando a primeira cópia automática deste aparelho.</p></div>
+          <div class="data-safety-actions"><button id="backup-export" type="button" class="og-button og-button-primary">Baixar backup agora</button><button id="backup-import" type="button">Restaurar backup</button><input id="backup-import-file" type="file" accept="application/json,.json" class="hidden"></div>
+          <div id="backup-snapshots" class="backup-snapshots" aria-live="polite"></div>
+        </article>
+        <article class="clean-card data-safety-card">
+          <div><span class="og-kicker">MELHORIAS REGISTRADAS</span><h2>Sugestões do sistema</h2><p>Ideias enviadas pelo botão “Sugerir melhoria”, organizadas para execução.</p></div>
+          <div id="suggestions-panel" class="suggestions-panel" aria-live="polite"></div>
+        </article>
+      </section>
       <section id="performance-controls" class="performance-controls clean-card" aria-label="Filtros de performance">
         <label><span>Período</span><select id="performance-period"><option value="month">Este mês</option><option value="previous">Mês passado</option><option value="90days">Últimos 90 dias</option><option value="all">Todo o histórico</option></select></label>
         <label><span>Segmento</span><select id="performance-segment"><option value="all">Todos</option></select></label>
@@ -1295,6 +1306,7 @@
   <script src="services/call-ai-prompts.js"></script>
   <script src="services/ai-service.js"></script>
   <script src="services/communication-service.js"></script>
+  <script src="services/data-safety-service.js"></script>
   <script src="services/prospect-parser.js"></script>
   <script src="modules/sales-desk.js"></script>
   <script src="modules/prospecting-engine.js"></script>
