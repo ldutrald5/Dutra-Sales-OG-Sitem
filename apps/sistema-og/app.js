@@ -3963,6 +3963,35 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
   }
 
+  function initCrmExcelPreview() {
+    const trigger=document.getElementById('btn-crm-excel-preview');
+    const input=document.getElementById('crm-excel-file');
+    const panel=document.getElementById('crm-excel-preview-panel');
+    trigger?.addEventListener('click',()=>input.click());
+    document.getElementById('crm-excel-close')?.addEventListener('click',()=>panel.classList.add('hidden'));
+    input?.addEventListener('change',async()=>{
+      const file=input.files?.[0]; if(!file)return;
+      trigger.disabled=true; trigger.textContent='Lendo modelo…';
+      try{
+        const buffer=await file.arrayBuffer();
+        const workbook=OG_SPREADSHEET_IMPORT.readArrayBuffer(buffer);
+        const validation=OG_SPREADSHEET_IMPORT.validateWorkbook(workbook);
+        if(!validation.valid)throw new Error(`Modelo incompatível. Abas ausentes: ${validation.missing.join(', ')}`);
+        const rows=OG_SPREADSHEET_IMPORT.readCrmRows(workbook);
+        const preview=OG_SPREADSHEET_IMPORT.preview(rows,state.leads);
+        const digest=await crypto.subtle.digest('SHA-256',buffer.slice(0));
+        const hash=Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,12);
+        const counts=preview.reduce((acc,item)=>{acc[item.status]=(acc[item.status]||0)+1;return acc;},{});
+        document.getElementById('crm-excel-summary').textContent=`${file.name} · ${rows.length} registros · hash ${hash}`;
+        document.getElementById('crm-excel-counters').innerHTML=['NEW','UNCHANGED','SAFE_UPDATE','POSSIBLE_DUPLICATE','CONFLICT','INVALID','PROTECTED_IGNORED'].map(status=>`<div><small>${status}</small><b>${counts[status]||0}</b></div>`).join('');
+        document.getElementById('crm-excel-preview-body').innerHTML=preview.map(item=>`<tr><td>${item.row.sourceRow}</td><td>${escapeHtml(item.row.company||'—')}</td><td>${escapeHtml(item.row.externalCode||'—')}</td><td>${escapeHtml(item.row.phone||'—')}</td><td><span class="spreadsheet-state" data-state="${item.status}">${item.status}</span></td><td>${escapeHtml(item.matchKey?`${item.matchKey} · ${item.confidence}`:'—')}</td><td>${escapeHtml(item.reason)}</td></tr>`).join('');
+        panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});
+        showNotification('Preview concluído. Nenhum dado foi importado.','success');
+      }catch(error){showNotification(error.message||'Não foi possível ler o modelo Excel.','error');}
+      finally{trigger.disabled=false;trigger.textContent='Excel · Preview';input.value='';}
+    });
+  }
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -5190,6 +5219,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initProspecting();
   initCommandCenter();
   initQuickLead();
+  initCrmExcelPreview();
   initCommunication();
   initCallAI();
   initMaterialLibrary();

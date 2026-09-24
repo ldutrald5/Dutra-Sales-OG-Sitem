@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v22';
+const SW_VERSION = 'v23';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -38,6 +38,8 @@ const SHELL_URLS = [
   '/performance-engine.js',
   '/manifest.webmanifest',
   '/assets/vendor/tailwindcss.js',
+  '/assets/vendor/xlsx.full.min.js',
+  '/services/spreadsheet-import-service.js',
   '/assets/logo-olho-de-gato.jpg',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png'

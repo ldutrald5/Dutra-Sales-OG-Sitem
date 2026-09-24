@@ -606,6 +606,8 @@
           <button id="btn-crm-import-modal" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md">
             📥 Importar / OCR
           </button>
+          <button id="btn-crm-excel-preview" type="button" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-bold text-xs">Excel · Preview</button>
+          <input id="crm-excel-file" type="file" accept=".xlsx" class="hidden">
 
           <button type="button" data-quick-lead="crm" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
             ＋ Novo cliente
@@ -620,6 +622,13 @@
           </button>
         </div>
       </div>
+
+      <section id="crm-excel-preview-panel" class="clean-card p-4 hidden" aria-live="polite">
+        <div class="og-section-head"><div><span class="og-kicker">IMPORTAÇÃO SOMENTE LEITURA</span><h2>Preview do modelo Excel</h2><p id="crm-excel-summary">Nenhum arquivo analisado.</p></div><button id="crm-excel-close" type="button">Fechar</button></div>
+        <div id="crm-excel-counters" class="prospect-session-metrics"></div>
+        <div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Linha</th><th>Empresa</th><th>Código</th><th>Telefone</th><th>Estado</th><th>Correspondência</th><th>Motivo</th></tr></thead><tbody id="crm-excel-preview-body"></tbody></table></div>
+        <p class="spreadsheet-readonly-note">Nenhum dado foi importado. Esta etapa apenas lê, compara e mostra o preview.</p>
+      </section>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7 clean-card p-4 overflow-hidden flex flex-col justify-between">
@@ -1279,6 +1288,8 @@
   <script src="services/crm-service.js"></script>
   <script src="services/interaction-service.js"></script>
   <script src="services/whatsapp-service.js"></script>
+  <script src="assets/vendor/xlsx.full.min.js"></script>
+  <script src="services/spreadsheet-import-service.js"></script>
   <script src="services/call-ai-context.js"></script>
   <script src="services/knowledge-selector.js"></script>
   <script src="services/call-ai-prompts.js"></script>

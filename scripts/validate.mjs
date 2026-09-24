@@ -7,6 +7,7 @@ const steps = [
   ['og:prospecting:test'],
   ['og:call-ai:test'],
   ['og:communication:test'],
+  ['og:spreadsheet:test'],
   ['og:product:test'],
   ['og:ops:test'],
   ['og:library:test'],

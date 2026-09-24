@@ -40,6 +40,14 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 
 ## Convenção para novas conclusões
 
+## Integração Excel — primeira fatia somente leitura
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** botão `Excel · Preview` no CRM, validação do modelo, leitura de registros e classificação contra a base atual sem persistência.
+- **Proteções:** nenhuma escrita no workbook ou CRM; fórmulas, observações e estrutura são classificadas como protegidas.
+- **Validação:** fixture estrutural do CRM, preservação de códigos/telefones textuais, conflito de observação e caracterização direta do Pós-Vendas.
+- **Próximo passo:** validar com o arquivo CRM real antes de criar importação transacional.
+
 ## TASK-009 — Central de Comunicação e OG Sales Brain
 
 - **Data:** 2026-09-24.
