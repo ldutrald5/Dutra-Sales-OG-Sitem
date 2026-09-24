@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     history: [],
     operations: OG_OPERATIONS_MODEL.createEmptyOperations(),
     library: { query: '', type: 'all', status: 'active', audience: 'all', favoritesOnly: false },
+    performance: { period: 'month', segment: 'all', status: 'all', state: 'all', seller: 'all', origin: 'all' },
     leads: [],
     selectedLeadId: null,
     selectedLeadIds: new Set(),
@@ -3155,9 +3156,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (!note) return showNotification('Escreva uma nota curta antes de registrar.', 'info');
       const now = new Date().toISOString();
       lead.interactions.push({ id: `INT-${Date.now()}`, at: now, type: 'conversa', note });
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'conversation' });
       lead.lastContactAt = now;
       if (lead.status === 'novo') lead.status = 'contatado';
       saveLeadsToStorage();
+      saveOperationsToStorage();
       renderLeadsTable();
       renderLeadInspector();
       showNotification('Conversa registrada no histórico.', 'success');
@@ -3990,6 +3993,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const sessionId = state.callAI.sessionId;
     if (lead.interactions.some(item => item.sessionId === sessionId)) return showNotification('Esta sessão já foi registrada.', 'info');
     const now = new Date().toISOString();
+    const previousStatus = lead.status;
     lead.interactions.push({ id: `INT-${Date.now()}`, sessionId, at: now, type: 'call_ai', objective: state.callAI.objective, result, note: summary, signals: state.callAI.signals.map(item => item.signal) });
     if (result !== 'sem_contato') lead.lastContactAt = now;
     lead.nextAction = document.getElementById('call-ai-next-action').value.trim();
@@ -3997,7 +4001,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (result === 'proposta') lead.status = 'proposta_enviada';
     else if (result === 'negociacao') lead.status = 'negociacao';
     else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result });
+    if (lead.status !== previousStatus) state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'client.stage_changed', at: now, clientId: lead.id, fromStage: previousStatus, toStage: lead.status });
     saveLeadsToStorage();
+    saveOperationsToStorage();
     renderLeadsTable();
     document.getElementById('call-ai-review').classList.add('hidden');
     document.getElementById('call-ai-session-state').textContent = 'Sessão salva no CRM';
@@ -4510,10 +4517,75 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root.innerHTML = `
       <div class="operations-metrics">${metrics.map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${value}</strong><small>${escapeHtml(note)}</small></article>`).join('')}</div>
       <section class="operations-foundation-grid">
-        <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos usam coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Biblioteca Comercial ativa</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Vendas e comissões aguardam as próximas fases</b></div></article>
+        <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos usam coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Biblioteca e Performance ativas</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Vendas e comissões aguardam as próximas fases</b></div></article>
         <article class="clean-card operations-status-card"><span class="og-kicker">ATIVIDADE MAIS RECENTE</span><h2>${lastEvent ? escapeHtml(lastEvent.type) : 'Nenhum evento novo'}</h2><p>${lastEvent ? `${escapeHtml(lastEvent.clientId || '')} · ${escapeHtml(new Date(lastEvent.at).toLocaleString('pt-BR'))}` : 'Os novos cadastros e ações operacionais passarão a alimentar esta linha do tempo.'}</p><button type="button" data-operations-open-crm class="og-button og-button-primary">Abrir clientes</button></article>
       </section>`;
     root.querySelector('[data-operations-open-crm]')?.addEventListener('click', () => switchTab('crm'));
+    renderPerformanceDashboard();
+  }
+
+  function performancePeriodRange(period = state.performance.period, reference = new Date()) {
+    const end = new Date(reference);
+    end.setHours(23, 59, 59, 999);
+    if (period === 'all') return { from: new Date(0), to: end };
+    if (period === '90days') return { from: new Date(end.getTime() - 89 * 86400000), to: end };
+    if (period === 'previous') return { from: new Date(end.getFullYear(), end.getMonth() - 1, 1), to: new Date(end.getFullYear(), end.getMonth(), 0, 23, 59, 59, 999) };
+    return { from: new Date(end.getFullYear(), end.getMonth(), 1), to: end };
+  }
+
+  function performanceFilters(range) {
+    return { ...state.performance, from: range.from, to: range.to };
+  }
+
+  function formatMoneyCents(value) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0) / 100);
+  }
+
+  function performanceMetric(label, value, detail, formula, source, status = '') {
+    return `<article class="performance-metric" data-status="${status}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(detail)}</small><details><summary>Como foi calculado</summary><p><b>Fórmula:</b> ${escapeHtml(formula)}</p><p><b>Fonte:</b> ${escapeHtml(source)}</p></details></article>`;
+  }
+
+  function renderPerformanceDashboard() {
+    const root = document.getElementById('performance-dashboard');
+    if (!root) return;
+    const range = performancePeriodRange();
+    const result = OG_PERFORMANCE.calculate({ leads: state.leads, operations: state.operations, history: state.history }, performanceFilters(range));
+    const previousEnd = new Date(range.from.getTime() - 1);
+    const previousStart = state.performance.period === 'month' ? new Date(previousEnd.getFullYear(), previousEnd.getMonth(), 1) : new Date(previousEnd.getTime() - Math.max(1, range.to - range.from));
+    const previous = OG_PERFORMANCE.calculate({ leads: state.leads, operations: state.operations, history: state.history }, { ...performanceFilters({ from: previousStart, to: previousEnd }) });
+    const delta = result.activity.total - previous.activity.total;
+    const maxStage = Math.max(1, ...Object.values(result.stageCounts));
+    const conversionText = result.conversion.value === null ? 'Dados insuficientes' : `${result.conversion.value.toFixed(1)}%`;
+    root.innerHTML = `
+      <section class="performance-summary" aria-label="Resumo do período">
+        ${performanceMetric('Atividades confirmadas', String(result.activity.total), `${delta >= 0 ? '+' : ''}${delta} versus período anterior`, 'interações registradas + envios de material confirmados', 'Histórico CRM e MaterialShare')}
+        ${performanceMetric('Oportunidades', String(result.commercial.opportunities), 'Clientes ativos no recorte atual', 'clientes filtrados, exceto perdidos/standby', 'CRM atual')}
+        ${performanceMetric('Conversão do funil', conversionText, result.conversion.smallBase ? `Base pequena: ${result.conversion.denominator} oportunidades` : `${result.conversion.numerator} vendas em ${result.conversion.denominator} oportunidades`, 'clientes em Venda/Pós-venda ÷ oportunidades ativas', 'Status atual do CRM', result.conversion.value === null ? 'insufficient' : '')}
+        ${performanceMetric('Vendas registradas', result.limitations.revenue ? 'Dados insuficientes' : String(result.commercial.sales), result.limitations.revenue ? 'Nenhuma entidade Sale registrada no período' : formatMoneyCents(result.commercial.revenueCents), 'contagem e soma de Sale.totalCents', 'Coleção operacional Sales', result.limitations.revenue ? 'insufficient' : '')}
+      </section>
+      <section class="performance-grid">
+        <article class="clean-card performance-panel"><div class="performance-panel-head"><div><span class="og-kicker">FUNIL ATUAL</span><h2>Distribuição por etapa</h2></div><small>Fotografia do CRM; não altera etapas</small></div><div class="performance-funnel" role="img" aria-label="${escapeHtml(result.stages.map(stage => `${stage.label}: ${result.stageCounts[stage.id]}`).join('; '))}">${result.stages.map(stage => `<div><span>${escapeHtml(stage.label)}</span><b>${result.stageCounts[stage.id]}</b><i style="--stage-width:${(result.stageCounts[stage.id] / maxStage) * 100}%"></i></div>`).join('')}</div>${result.limitations.stageDuration ? '<p class="performance-limitation">Tempo por etapa ficará disponível após acumular eventos reais de mudança de etapa.</p>' : ''}</article>
+        <article class="clean-card performance-panel"><div class="performance-panel-head"><div><span class="og-kicker">NEGÓCIOS PARADOS</span><h2>Sem contato há 14 dias ou mais</h2></div><small>${result.stalled.length} identificados</small></div><div class="performance-stalled">${result.stalled.length ? result.stalled.slice(0, 8).map(item => `<button type="button" data-performance-client="${escapeHtml(item.id)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.nextAction || 'Próxima ação não definida')}</small></span><strong>${item.days === null ? 'Sem data' : `${item.days} dias`}</strong></button>`).join('') : '<div class="performance-empty">Nenhum negócio parado neste filtro.</div>'}</div></article>
+      </section>
+      <section class="clean-card performance-sources"><div><span class="og-kicker">QUALIDADE DOS DADOS</span><h2>O que sustenta este painel</h2></div><ul><li>${result.sources.clients} clientes filtrados</li><li>${result.sources.interactions} interações no período</li><li>${result.sources.confirmedShares} envios confirmados</li><li>${result.sources.sales} vendas registradas</li><li>${result.sources.commissions} comissões registradas</li></ul><p>WhatsApp aberto, conteúdo copiado e roteiro preparado não contam como contato, envio ou venda.</p></section>`;
+    root.querySelectorAll('[data-performance-client]').forEach(button => button.addEventListener('click', () => { state.selectedLeadId = button.dataset.performanceClient; switchTab('crm'); renderLeadsTable(); renderLeadInspector(); }));
+  }
+
+  function fillPerformanceSelect(id, values, labeler = value => value) {
+    const select = document.getElementById(id); if (!select) return;
+    const current = select.value || 'all';
+    select.innerHTML = `<option value="all">Todos</option>${values.filter(Boolean).sort().map(value => `<option value="${escapeHtml(value)}">${escapeHtml(labeler(value))}</option>`).join('')}`;
+    select.value = values.includes(current) ? current : 'all';
+  }
+
+  function initPerformanceDashboard() {
+    fillPerformanceSelect('performance-segment', [...new Set(state.leads.map(item => item.segmentId))], value => OG_DATA.segments.find(item => item.id === value)?.name || value);
+    fillPerformanceSelect('performance-status', [...OG_PERFORMANCE.STAGES.map(item => item.id), 'perdido'], value => OG_PERFORMANCE.STAGES.find(item => item.id === value)?.label || (value === 'perdido' ? 'Perdido / Standby' : value));
+    fillPerformanceSelect('performance-state', [...new Set(state.leads.map(item => OG_PERFORMANCE.stateFromCity(item.cidadeUf)))]) ;
+    fillPerformanceSelect('performance-seller', [...new Set(state.leads.map(item => item.vendedor))]);
+    fillPerformanceSelect('performance-origin', [...new Set(state.leads.map(item => item.origin || item.origem))]);
+    ['period', 'segment', 'status', 'state', 'seller', 'origin'].forEach(key => document.getElementById(`performance-${key}`)?.addEventListener('change', event => { state.performance[key] = event.target.value; renderPerformanceDashboard(); }));
+    renderPerformanceDashboard();
   }
 
   function syncVehicleGallerySelection() {
@@ -4637,6 +4709,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initQuickLead();
   initCallAI();
   initMaterialLibrary();
+  initPerformanceDashboard();
   initPremiumExperience();
   initCrmEvents();
   initItemPricingModal();

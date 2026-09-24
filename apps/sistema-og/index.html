@@ -1094,12 +1094,21 @@
     <div id="tab-operacoes" class="tab-content hidden space-y-6">
       <section class="operations-hero" aria-labelledby="operations-title">
         <div><span class="og-kicker">CENTRAL DE PERFORMANCE & OPERAÇÕES</span><h1 id="operations-title">Do trabalho comercial ao resultado.</h1><p>Uma visão única dos clientes, conversas, cotações e eventos que alimentarão performance, documentos e comissões.</p></div>
-        <div class="operations-phase"><small>FASE ATUAL</small><strong>Biblioteca Comercial</strong><span>Materiais, busca, filtros e prévia</span></div>
+        <div class="operations-phase"><small>FASE ATUAL</small><strong>Performance & Funil</strong><span>Eventos reais, conversão e negócios parados</span></div>
       </section>
       <div id="operations-foundation" aria-live="polite"></div>
+      <section id="performance-controls" class="performance-controls clean-card" aria-label="Filtros de performance">
+        <label><span>Período</span><select id="performance-period"><option value="month">Este mês</option><option value="previous">Mês passado</option><option value="90days">Últimos 90 dias</option><option value="all">Todo o histórico</option></select></label>
+        <label><span>Segmento</span><select id="performance-segment"><option value="all">Todos</option></select></label>
+        <label><span>Etapa</span><select id="performance-status"><option value="all">Todas</option></select></label>
+        <label><span>Estado</span><select id="performance-state"><option value="all">Todos</option></select></label>
+        <label><span>Vendedor</span><select id="performance-seller"><option value="all">Todos</option></select></label>
+        <label><span>Origem</span><select id="performance-origin"><option value="all">Todas</option></select></label>
+      </section>
+      <div id="performance-dashboard"></div>
       <section class="clean-card operations-roadmap" aria-label="Próximas fases">
-        <div><b>Entrega atual</b><span>Biblioteca Comercial: materiais, busca, filtros, favoritos, permissão e prévia local.</span></div>
-        <div><b>Preparado para depois</b><span>Performance, funil, vendas, documentos, planilhas e comissões usarão o mesmo modelo versionado.</span></div>
+        <div><b>Entrega atual</b><span>Performance e Funil: filtros, fórmulas, fontes, conversão e radar de negócios parados.</span></div>
+        <div><b>Preparado para depois</b><span>Vendas, documentos, planilhas e comissões usarão o mesmo modelo versionado.</span></div>
       </section>
     </div>
 
@@ -1237,6 +1246,7 @@
   <script src="operations-model.js"></script>
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>
+  <script src="performance-engine.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

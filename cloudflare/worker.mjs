@@ -24,7 +24,7 @@ export default {
       if (!isAuthorized(request, env)) return json({ error: 'Código de acesso necessário' }, 401);
 
       if (request.method === 'GET') {
-        if (!env.OG_DATA) return json({ revision: 0, updatedAt: null, leads: [], history: [], temporary: true });
+        if (!env.OG_DATA) return json({ revision: 0, updatedAt: null, leads: [], history: [], operations: null, temporary: true });
         const state = await env.OG_DATA.get('shared-state', 'json');
         return json(state || { revision: 0, updatedAt: null, leads: [], history: [] });
       }
@@ -38,7 +38,8 @@ export default {
           revision: Number(current.revision || 0) + 1,
           updatedAt: new Date().toISOString(),
           leads: Array.isArray(body.leads) ? body.leads.slice(0, 10000) : [],
-          history: Array.isArray(body.history) ? body.history.slice(0, 5000) : []
+          history: Array.isArray(body.history) ? body.history.slice(0, 5000) : [],
+          operations: body.operations && typeof body.operations === 'object' ? body.operations : null
         };
         if (env.OG_DATA) await env.OG_DATA.put('shared-state', JSON.stringify(next));
         return json(next);

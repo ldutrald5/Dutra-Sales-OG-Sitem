@@ -118,6 +118,8 @@ Fase 2 concluída; cliente canônico e interações migrados; regras comerciais 
 
 ## Fase 4 — Performance e Funil
 
+**Status:** Ready for Review — implementada na OG-17.
+
 ### Resultado
 
 Central de Performance & Operações baseada em eventos reais, com visão por período e distinção clara entre atividade, oportunidade, venda, faturamento e comissão.
@@ -133,12 +135,12 @@ Central de Performance & Operações baseada em eventos reais, com visão por pe
 
 ### Critérios de saída
 
-- [ ] Todos os indicadores exibem fórmula, período e fonte dos dados.
-- [ ] Abertura de WhatsApp não avança etapa nem conta contato concluído.
-- [ ] Dashboard não usa números simulados quando há dados reais.
-- [ ] Conversão evita divisão inválida e informa base pequena.
-- [ ] Funil permite identificar negócios parados sem alterar sua etapa automaticamente.
-- [ ] Visualizações possuem alternativa textual acessível.
+- [x] Todos os indicadores exibem fórmula, período e fonte dos dados.
+- [x] Abertura de WhatsApp não avança etapa nem conta contato concluído.
+- [x] Dashboard não usa números simulados quando há dados reais.
+- [x] Conversão evita divisão inválida e informa base pequena.
+- [x] Funil permite identificar negócios parados sem alterar sua etapa automaticamente.
+- [x] Visualizações possuem alternativa textual acessível.
 
 ### Dependências
 
