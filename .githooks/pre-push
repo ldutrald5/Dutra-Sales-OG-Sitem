@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+import { spawnSync } from 'node:child_process';
+const result = process.platform === 'win32' ? spawnSync(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', 'npm.cmd run validate'], { stdio: 'inherit' }) : spawnSync('npm', ['run', 'validate'], { stdio: 'inherit' });
+process.exit(result.status ?? 1);

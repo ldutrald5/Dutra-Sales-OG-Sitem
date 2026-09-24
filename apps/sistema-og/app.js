@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedLeadIds: new Set(),
     leadFilterStatus: 'all',
     leadSearchQuery: '',
+    salesDeskSearch: '',
     ocrImageBase64: null,
     ocrExtractedText: '',
     quoteImportImageBase64: null,
@@ -2894,17 +2895,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   let quickLeadOrigin = 'crm';
 
   function normalizeLead(lead) {
-    return {
-      ...lead,
-      priority: ['alta', 'media', 'baixa'].includes(lead.priority) ? lead.priority : 'media',
-      fleetSize: Number.isFinite(Number(lead.fleetSize)) ? Number(lead.fleetSize) : 0,
-      pain: typeof lead.pain === 'string' ? lead.pain : '',
-      decisionMaker: typeof lead.decisionMaker === 'string' ? lead.decisionMaker : '',
-      nextAction: typeof lead.nextAction === 'string' ? lead.nextAction : '',
-      followUpAt: typeof lead.followUpAt === 'string' ? lead.followUpAt : '',
-      lastContactAt: typeof lead.lastContactAt === 'string' ? lead.lastContactAt : '',
-      interactions: Array.isArray(lead.interactions) ? lead.interactions : []
-    };
+    return OG_CRM_SERVICE.normalizeLead(lead);
   }
 
   function createQuickLeadId() {
@@ -2938,21 +2929,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       event.preventDefault();
       const empresa = document.getElementById('quick-lead-company').value.trim();
       if (!empresa) return;
-      const lead = normalizeLead({
-        id: createQuickLeadId(),
+      const prospectInput = {
         empresa,
-        nome: document.getElementById('quick-lead-contact').value.trim() || empresa,
-        telefone: document.getElementById('quick-lead-phone').value.replace(/\D/g, ''),
+        nome: document.getElementById('quick-lead-contact').value.trim(),
+        telefone: document.getElementById('quick-lead-phone').value,
         cidadeUf: document.getElementById('quick-lead-city').value.trim(),
-        cnpj: '',
         segmentId: document.getElementById('quick-lead-segment').value,
-        status: 'novo',
         priority: document.getElementById('quick-lead-priority').value,
         nextAction: document.getElementById('quick-lead-next-action').value.trim(),
-        followUpAt: document.getElementById('quick-lead-follow-up').value,
-        observacoes: `Cadastro rápido em ${new Date().toLocaleDateString('pt-BR')}`,
-        createdDate: new Date().toISOString()
-      });
+        followUpAt: document.getElementById('quick-lead-follow-up').value
+      };
+      const duplicates = OG_CRM_SERVICE.findPossibleDuplicates(state.leads, prospectInput);
+      if (duplicates.length && !window.confirm(`Possível duplicidade: ${duplicates[0].empresa || duplicates[0].nome}. Deseja cadastrar mesmo assim?`)) {
+        state.selectedLeadId = duplicates[0].id;
+        closeQuickLead();
+        renderDayDashboard();
+        return;
+      }
+      const lead = OG_CRM_SERVICE.createProspect(prospectInput, { id: createQuickLeadId() });
       state.leads.unshift(lead);
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
         id: `EVT-${Date.now().toString(36).toUpperCase()}`,
@@ -2972,6 +2966,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         selectCallClient(lead.id);
       } else if (quickLeadOrigin === 'crm') {
         switchTab('crm');
+      } else {
+        switchTab('dia');
       }
       showNotification(`${empresa} foi adicionado ao sistema.`, 'success');
     });
@@ -3061,9 +3057,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('kpi-priority').textContent = groups.priority.length;
     document.getElementById('kpi-no-action').textContent = groups['no-action'].length;
 
-    const selected = (groups[dayFilter] || groups.all)
-      .slice()
-      .sort((a, b) => getOpportunityScore(b) - getOpportunityScore(a));
+    const selected = OG_SALES_DESK.selectQueue(state.leads, dayFilter, state.salesDeskSearch);
     document.querySelectorAll('.og-chip[data-day-filter]').forEach(button => {
       button.classList.toggle('active', button.dataset.dayFilter === dayFilter);
     });
@@ -3071,15 +3065,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!selected.length) {
       list.innerHTML = '<div class="og-empty">Nenhuma oportunidade neste filtro. Abra o CRM para cadastrar ou completar um cliente.</div>';
     } else {
-      list.innerHTML = selected.slice(0, 12).map(lead => `
-        <button class="og-opportunity" data-day-lead="${escapeHtml(lead.id)}">
-          <span><b>${escapeHtml(lead.empresa || lead.nome || 'Cliente sem nome')}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.status || 'novo')}</span></span>
-          <span><small>${escapeHtml(lead.nextAction || 'Definir o próximo passo')}</small><span>Prioridade ${escapeHtml(lead.priority)}</span></span>
-          <time>${escapeHtml(formatFollowUp(lead.followUpAt))}</time>
-        </button>`).join('');
-      list.querySelectorAll('[data-day-lead]').forEach(button => button.addEventListener('click', () => {
-        state.selectedLeadId = button.dataset.dayLead;
-        switchTab('crm');
+      if (!state.selectedLeadId || !state.leads.some(lead => lead.id === state.selectedLeadId)) state.selectedLeadId = selected[0]?.id || null;
+      list.innerHTML = selected.slice(0, 30).map(lead => OG_UI_COMPONENTS.clientRow(lead, {
+        selectedId: state.selectedLeadId,
+        lastInteraction: OG_SALES_DESK.lastInteraction(lead),
+        followUpLabel: formatFollowUp(lead.followUpAt)
+      })).join('');
+      list.querySelectorAll('[data-desk-select]').forEach(button => button.addEventListener('click', () => {
+        state.selectedLeadId = button.dataset.deskSelect;
+        renderDayDashboard();
+      }));
+      list.querySelectorAll('[data-desk-whatsapp]').forEach(button => button.addEventListener('click', event => {
+        event.stopPropagation();
+        const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.deskWhatsapp);
+        if (lead) openDeskWhatsApp(lead);
       }));
     }
 
@@ -3087,7 +3086,116 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('coach-title').textContent = coaching.title;
     document.getElementById('coach-message').textContent = coaching.message;
     document.getElementById('coach-prompts').innerHTML = coaching.prompts.map(item => `<div class="og-coach-prompt">${escapeHtml(item)}</div>`).join('');
+    renderSalesDeskClient();
     updateDayClock();
+  }
+
+  function persistSalesDeskActivity(lead, interaction, activityType) {
+    const now = interaction?.at || new Date().toISOString();
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+      id: interaction?.eventId || `EVT-${Date.now().toString(36).toUpperCase()}`,
+      type: activityType,
+      at: now,
+      clientId: lead.id,
+      interactionId: interaction?.id || null
+    });
+    saveLeadsToStorage();
+    saveOperationsToStorage();
+  }
+
+  function openDeskWhatsApp(lead, message = '') {
+    let link;
+    try { link = OG_WHATSAPP_SERVICE.buildLink(lead.telefone, message); }
+    catch { return showNotification('Cadastre um telefone brasileiro válido para abrir o WhatsApp.', 'warning'); }
+    const interaction = OG_INTERACTION_SERVICE.addInteraction(lead, { type: 'whatsapp_opened', note: message ? 'WhatsApp aberto com mensagem preparada.' : 'WhatsApp aberto pela Mesa de Vendas.', countAsContact: false });
+    persistSalesDeskActivity(lead, interaction, 'whatsapp.opened');
+    window.open(link, '_blank', 'noopener');
+    renderDayDashboard();
+  }
+
+  function deskTemplateVariables(lead, template) {
+    return {
+      primeiro_nome: (lead.nome || '').split(/\s+/)[0] || 'tudo bem',
+      empresa: lead.empresa || lead.nome || '',
+      vendedor: state.client.vendedor || 'Lucas, da Olho de Gato',
+      assunto: lead.nextAction || template.subject || 'a operação da sua frota'
+    };
+  }
+
+  function openDeskMessageComposer(lead, templateId = 'follow_up') {
+    const filled = OG_WHATSAPP_SERVICE.fillTemplate(templateId, deskTemplateVariables(lead, OG_WHATSAPP_SERVICE.getTemplate(templateId)));
+    const overlay = document.createElement('div');
+    overlay.className = 'sales-desk-modal';
+    overlay.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="desk-message-title" class="clean-card sales-desk-dialog"><header><div><span class="og-kicker">MENSAGEM SEM IA</span><h2 id="desk-message-title">Revisar antes de abrir o WhatsApp</h2></div><button type="button" data-desk-close aria-label="Fechar">✕</button></header><label class="og-field"><span>Modelo</span><select data-desk-template>${OG_WHATSAPP_SERVICE.TEMPLATES.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === templateId ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><label class="og-field"><span>Mensagem editável</span><textarea rows="8" data-desk-message>${escapeHtml(filled.text)}</textarea></label>${filled.missing.length ? `<p class="sales-desk-warning">Revise os campos pendentes: ${escapeHtml(filled.missing.join(', '))}</p>` : ''}<footer><button type="button" data-desk-ai disabled title="Integração planejada para uma próxima tarefa">✨ Personalizar com IA · em breve</button><button type="button" data-desk-open class="og-button og-button-primary">Abrir WhatsApp</button></footer></section>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('[data-desk-close]').addEventListener('click', close);
+    overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
+    overlay.querySelector('[data-desk-template]').addEventListener('change', event => {
+      const next = OG_WHATSAPP_SERVICE.fillTemplate(event.target.value, deskTemplateVariables(lead, OG_WHATSAPP_SERVICE.getTemplate(event.target.value)));
+      overlay.querySelector('[data-desk-message]').value = next.text;
+    });
+    overlay.querySelector('[data-desk-open]').addEventListener('click', () => {
+      const message = overlay.querySelector('[data-desk-message]').value.trim();
+      const prepared = OG_INTERACTION_SERVICE.addInteraction(lead, { type: 'message_prepared', note: `Mensagem preparada: ${overlay.querySelector('[data-desk-template]').selectedOptions[0].textContent}`, countAsContact: false });
+      persistSalesDeskActivity(lead, prepared, 'message.prepared');
+      close();
+      openDeskWhatsApp(lead, message);
+    });
+  }
+
+  function followUpValue(mode, specificValue = '') {
+    if (mode === 'none') return '';
+    if (mode === 'specific') return specificValue;
+    const date = new Date();
+    if (mode === 'tomorrow') date.setDate(date.getDate() + 1);
+    date.setHours(mode === 'today' ? Math.max(date.getHours() + 1, 9) : 9, 0, 0, 0);
+    const pad = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  function renderSalesDeskClient() {
+    const root = document.getElementById('sales-desk-client');
+    if (!root) return;
+    const lead = OG_CRM_SERVICE.getLeadById(state.leads, state.selectedLeadId);
+    if (!lead) {
+      root.innerHTML = '<div class="sales-desk-empty-state"><span class="og-kicker">CLIENTE ATUAL</span><h2>Selecione uma conta</h2><p>Escolha alguém da fila ou cadastre um prospect para começar.</p><button type="button" class="og-button og-button-primary" data-quick-lead="dia">＋ Novo prospect</button></div>';
+      root.querySelector('[data-quick-lead]')?.addEventListener('click', () => openQuickLead('dia'));
+      return;
+    }
+    const recent = OG_SALES_DESK.lastInteraction(lead);
+    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header><div class="sales-desk-primary-actions"><button type="button" data-client-whatsapp>WhatsApp</button><a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a><button type="button" data-client-call-ai>Call AI</button><button type="button" data-client-crm>Ficha completa</button></div><section class="sales-desk-facts"><div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div><div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Registre a primeira conversa')}</span></div></section><section class="sales-desk-register"><label class="og-field"><span>Resultado rápido</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label class="og-field"><span>Nota rápida</span><textarea id="desk-note" rows="3" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label><button type="button" id="desk-save-result" class="og-button og-button-primary">Registrar resultado e nota</button><div class="sales-desk-next"><label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label><label class="og-field"><span>Quando</span><select id="desk-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem próxima ação</option></select></label><label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label><button type="button" id="desk-save-next">Salvar próxima ação</button></div></section><details class="sales-desk-actions"><summary>Ações e comunicação</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details><section class="sales-desk-history"><h3>Histórico recente</h3>${OG_UI_COMPONENTS.timeline(lead.interactions)}</section>`;
+    root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
+    root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
+      state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
+      state.callAI.selectedLeadId = lead.id;
+      switchTab('call-ai');
+      selectCallClient(lead.id);
+    });
+    root.querySelector('[data-client-crm]').addEventListener('click', () => { state.selectedLeadId = lead.id; switchTab('crm'); });
+    root.querySelectorAll('[data-desk-template]').forEach(button => button.addEventListener('click', () => openDeskMessageComposer(lead, button.dataset.deskTemplate)));
+    root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => showNotification(`${button.dataset.futureAction}: entrada preparada para uma próxima tarefa.`, 'info')));
+    const followMode = root.querySelector('#desk-follow-mode');
+    followMode.addEventListener('change', () => root.querySelector('#desk-specific-wrap').classList.toggle('hidden', followMode.value !== 'specific'));
+    root.querySelector('#desk-save-result').addEventListener('click', () => {
+      const result = root.querySelector('#desk-result').value;
+      const note = root.querySelector('#desk-note').value.trim();
+      const interaction = OG_INTERACTION_SERVICE.recordResult(lead, result, note);
+      persistSalesDeskActivity(lead, interaction, 'interaction.result_recorded');
+      showNotification('Resultado registrado no histórico.', 'success');
+      renderDayDashboard();
+    });
+    root.querySelector('#desk-save-next').addEventListener('click', () => {
+      const mode = followMode.value;
+      const action = mode === 'none' ? '' : root.querySelector('#desk-next-action').value.trim();
+      const dueAt = followUpValue(mode, root.querySelector('#desk-specific-date').value);
+      if (mode !== 'none' && !action) return showNotification('Informe a próxima ação.', 'info');
+      if (mode === 'specific' && !dueAt) return showNotification('Informe a data específica.', 'info');
+      const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, action, dueAt);
+      persistSalesDeskActivity(lead, interaction, 'task.next_action_set');
+      showNotification('Próxima ação atualizada.', 'success');
+      renderDayDashboard();
+    });
   }
 
   function updateDayClock() {
@@ -3112,8 +3220,28 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       dayFilter = button.dataset.dayFilter;
       renderDayDashboard();
     }));
-    const openCrm = document.getElementById('btn-open-crm-from-day');
-    if (openCrm) openCrm.addEventListener('click', () => switchTab('crm'));
+    const search = document.getElementById('sales-desk-search');
+    let searchTimer = null;
+    search?.addEventListener('input', event => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { state.salesDeskSearch = event.target.value; renderDayDashboard(); }, 160);
+    });
+    document.addEventListener('keydown', event => {
+      const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+      if (event.key === 'Escape') {
+        document.querySelector('.sales-desk-modal')?.remove();
+        closeQuickLead();
+        return;
+      }
+      if (typing || state.currentTab !== 'dia') return;
+      if (event.key === '/') { event.preventDefault(); search?.focus(); }
+      if (event.key.toLowerCase() === 'n') { event.preventDefault(); openQuickLead('dia'); }
+      if (event.key.toLowerCase() === 'w') {
+        const lead = OG_CRM_SERVICE.getLeadById(state.leads, state.selectedLeadId);
+        if (lead) { event.preventDefault(); openDeskWhatsApp(lead); }
+      }
+      if (event.key.toLowerCase() === 'a') { event.preventDefault(); document.querySelector('.sales-desk-actions summary')?.click(); }
+    });
     setInterval(updateDayClock, 30000);
   }
 

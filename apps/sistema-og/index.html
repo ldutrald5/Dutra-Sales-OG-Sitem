@@ -205,10 +205,10 @@
         <button class="og-kpi" data-day-filter="no-action"><span>Sem próximo passo</span><strong id="kpi-no-action">0</strong><small>Risco de esfriar</small></button>
       </section>
 
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-8 clean-card p-5">
+      <section class="sales-desk-layout" aria-label="Mesa de Vendas">
+        <div class="clean-card p-5 sales-desk-queue">
           <div class="og-section-head">
-            <div><span class="og-kicker">SECRETÁRIO COMERCIAL</span><h2>Fila de ação</h2></div>
+            <div><span class="og-kicker">MESA DE VENDAS</span><h2>Fila de hoje</h2></div>
             <div class="og-filter-row" role="group" aria-label="Ações e filtros da fila">
               <button class="og-chip og-chip-add" type="button" data-quick-lead="dia">＋ Adicionar cliente</button>
               <button class="og-chip active" data-day-filter="all">Todos</button>
@@ -217,22 +217,14 @@
               <button class="og-chip" data-day-filter="priority">Alta</button>
             </div>
           </div>
+          <label class="sales-desk-search"><span class="sr-only">Pesquisar na fila</span><input id="sales-desk-search" type="search" placeholder="Pesquisar empresa, contato, telefone ou ação"></label>
           <div id="day-opportunity-list" class="og-opportunity-list"></div>
         </div>
 
-        <aside class="lg:col-span-4 space-y-4">
-          <div class="clean-card p-5 og-coach-card">
-            <span class="og-kicker">TREINADOR DE VENDAS</span>
-            <h2 id="coach-title">Seu foco de hoje</h2>
-            <p id="coach-message">O sistema usará os registros do CRM para apontar a lacuna comercial mais importante.</p>
-            <div id="coach-prompts" class="og-coach-prompts"></div>
-          </div>
-          <div class="clean-card p-5">
-            <span class="og-kicker">REGISTRO RÁPIDO</span>
-            <h2 class="text-base font-bold text-slate-100 mt-2">Terminou uma ligação?</h2>
-            <p class="text-xs text-slate-400 mt-1 mb-3">Abra o cliente e registre uma nota curta. O próximo passo volta para esta fila automaticamente.</p>
-            <button id="btn-open-crm-from-day" class="w-full px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition">Abrir CRM e registrar conversa</button>
-          </div>
+        <aside id="sales-desk-client" class="clean-card sales-desk-client" aria-live="polite"></aside>
+
+        <aside class="sales-desk-side space-y-4">
+          <div class="clean-card p-5 og-coach-card"><span class="og-kicker">PRÓXIMA MELHOR AÇÃO</span><h2 id="coach-title">Seu foco de hoje</h2><p id="coach-message">Selecione uma conta para trabalhar.</p><div id="coach-prompts" class="og-coach-prompts"></div></div>
         </aside>
       </section>
     </div>
@@ -1173,12 +1165,8 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label class="og-field"><span>Empresa *</span><input id="quick-lead-company" required maxlength="120" placeholder="Nome da empresa ou cliente"></label>
         <label class="og-field"><span>Contato</span><input id="quick-lead-contact" maxlength="100" placeholder="Nome da pessoa"></label>
-        <label class="og-field"><span>Telefone / WhatsApp</span><input id="quick-lead-phone" inputmode="tel" maxlength="24" placeholder="(44) 99999-9999"></label>
-        <label class="og-field"><span>Cidade / UF</span><input id="quick-lead-city" maxlength="100" placeholder="Maringá - PR"></label>
-        <label class="og-field"><span>Segmento</span><select id="quick-lead-segment"></select></label>
-        <label class="og-field"><span>Prioridade</span><select id="quick-lead-priority"><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select></label>
-        <label class="og-field og-field-full"><span>Próxima ação</span><input id="quick-lead-next-action" maxlength="180" placeholder="Ex.: ligar para entender a frota"></label>
-        <label class="og-field og-field-full"><span>Próximo retorno</span><input id="quick-lead-follow-up" type="datetime-local"></label>
+        <label class="og-field og-field-full"><span>Telefone / WhatsApp recomendado</span><input id="quick-lead-phone" inputmode="tel" maxlength="24" placeholder="(44) 99999-9999"></label>
+        <details class="og-field og-field-full quick-lead-more"><summary>Adicionar detalhes agora, se quiser</summary><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"><label class="og-field"><span>Cidade / UF</span><input id="quick-lead-city" maxlength="100" placeholder="Maringá - PR"></label><label class="og-field"><span>Segmento</span><select id="quick-lead-segment"></select></label><label class="og-field"><span>Prioridade</span><select id="quick-lead-priority"><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select></label><label class="og-field"><span>Próximo retorno</span><input id="quick-lead-follow-up" type="datetime-local"></label><label class="og-field og-field-full"><span>Próxima ação</span><input id="quick-lead-next-action" maxlength="180" placeholder="Ex.: ligar para entender a frota"></label></div></details>
       </div>
       <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t border-slate-800 pt-4">
         <button id="quick-lead-cancel" type="button" class="px-4 py-2.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
@@ -1244,6 +1232,12 @@
   <!-- Scripts da Aplicação -->
   <script src="data.js"></script>
   <script src="operations-model.js"></script>
+  <script src="services/crm-service.js"></script>
+  <script src="services/interaction-service.js"></script>
+  <script src="services/whatsapp-service.js"></script>
+  <script src="services/call-ai-context.js"></script>
+  <script src="modules/sales-desk.js"></script>
+  <script src="components/ui-components.js"></script>
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>
   <script src="performance-engine.js"></script>

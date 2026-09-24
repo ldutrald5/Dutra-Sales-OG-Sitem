@@ -1,5 +1,7 @@
 # Olho de Gato (OG) — Versão Mobile 📱
 
+> **CONGELADA PARA NOVAS FUNCIONALIDADES.** A aplicação principal em `../index.html` é a experiência oficial responsiva. Esta pasta permanece temporariamente para compatibilidade e conserva fluxos legados de cotação rápida, consultor, mensagens e catálogo. Novas features, incluindo a Mesa de Vendas, devem ser implementadas somente na aplicação principal.
+
 Esta pasta contém a versão do sistema **Olho de Gato (OG)** adaptada e otimizada para dispositivos móveis (smartphones Android, iOS e tablets).
 
 ---

@@ -70,4 +70,8 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 - Introduza banco gerenciado apenas quando autenticação, concorrência e backup justificarem a mudança.
 - Registre decisões significativas em ADR ou neste documento.
 
+## Incremento TASK-001
+
+A Mesa de Vendas passou a usar serviços UMD pequenos e testáveis para compatibilidade do CRM, interações, WhatsApp e contexto do Call AI. Eles operam sobre `state.leads` e não criam uma segunda persistência. Os hooks versionados em `.githooks/` usam Node diretamente e o comando `npm run validate`, evitando a dependência anterior de Bash no Windows. A experiência legada em `/mobile` está congelada; a aplicação principal responsiva recebe as novas funcionalidades.
+
 Detalhamento existente: [fundação operacional](architecture/og-operations-foundation.md), [mapa de produto](architecture/sistema-og-product-map.md) e [copiloto](architecture/sistema-og-copiloto.md).

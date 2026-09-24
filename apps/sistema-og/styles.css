@@ -492,6 +492,80 @@ body {
 .og-opportunity span { margin-top: .2rem; color: var(--og-muted); font-size: .7rem; }
 .og-opportunity small { color: #a9b5c6; font-size: .68rem; }
 .og-opportunity time { color: var(--og-brand); font-size: .68rem; font-weight: 750; white-space: nowrap; }
+
+/* Mesa de Vendas — execução diária */
+.sales-desk-layout { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(380px, 1.25fr) minmax(230px, .65fr); gap: 1rem; align-items: start; }
+.sales-desk-queue, .sales-desk-client, .sales-desk-side { min-width: 0; }
+.sales-desk-queue { max-height: 780px; overflow: auto; }
+.sales-desk-search { display: block; margin: .8rem 0; }
+.sales-desk-search input { width: 100%; padding: .75rem .85rem; border: 1px solid var(--og-border); border-radius: .75rem; background: #090e17; color: var(--og-text); font-size: .75rem; }
+.sales-desk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .55rem; padding: .45rem; border: 1px solid var(--og-border); border-radius: .9rem; background: #0c1320; transition: 160ms ease; }
+.sales-desk-row.selected { border-color: var(--og-brand); background: #171a17; box-shadow: inset 3px 0 var(--og-brand); }
+.sales-desk-select { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr) auto; align-items: center; gap: .65rem; min-width: 0; padding: .5rem; text-align: left; }
+.sales-desk-select span, .sales-desk-select b, .sales-desk-select strong, .sales-desk-select small { display: block; min-width: 0; }
+.sales-desk-select b { color: var(--og-text); font-size: .8rem; }
+.sales-desk-select strong { color: #dbe3ee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; }
+.sales-desk-select small { margin-top: .18rem; color: var(--og-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .64rem; }
+.sales-desk-select time { color: var(--og-brand); white-space: nowrap; font-size: .64rem; }
+.sales-desk-whatsapp { align-self: center; padding: .55rem .65rem; border: 1px solid rgba(34,197,94,.4); border-radius: .65rem; color: #86efac; background: rgba(34,197,94,.12); font-size: .65rem; font-weight: 800; }
+.sales-desk-client { position: sticky; top: 7rem; padding: 1.1rem; max-height: calc(100vh - 8rem); overflow: auto; }
+.sales-desk-client-head { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .9rem; border-bottom: 1px solid var(--og-border); }
+.sales-desk-client-head h2 { margin-top: .25rem; color: var(--og-text); font-size: 1.15rem; font-weight: 850; }
+.sales-desk-client-head p { color: var(--og-muted); font-size: .72rem; }
+.sales-desk-status { align-self: start; padding: .35rem .55rem; border: 1px solid rgba(246,201,69,.35); border-radius: 999px; color: var(--og-brand); font-size: .62rem; font-weight: 800; text-transform: uppercase; }
+.sales-desk-primary-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem; margin: .9rem 0; }
+.sales-desk-primary-actions button, .sales-desk-primary-actions a { display: grid; place-items: center; min-height: 42px; padding: .45rem; border: 1px solid var(--og-border); border-radius: .65rem; background: #111827; color: #e5e7eb; font-size: .65rem; font-weight: 800; text-align: center; }
+.sales-desk-primary-actions [data-client-whatsapp] { border-color: rgba(34,197,94,.45); color: #86efac; }
+.sales-desk-primary-actions [data-client-call-ai] { border-color: rgba(246,201,69,.45); color: var(--og-brand); }
+.sales-desk-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+.sales-desk-facts > div { padding: .7rem; border: 1px solid var(--og-border); border-radius: .7rem; background: #090e17; }
+.sales-desk-facts small, .sales-desk-facts strong, .sales-desk-facts span { display: block; }
+.sales-desk-facts small { color: var(--og-muted); font-size: .6rem; text-transform: uppercase; }
+.sales-desk-facts strong { margin: .25rem 0; color: var(--og-text); font-size: .72rem; }
+.sales-desk-facts span { color: #94a3b8; font-size: .64rem; line-height: 1.35; }
+.sales-desk-register { display: grid; gap: .65rem; margin-top: .9rem; padding-top: .9rem; border-top: 1px solid var(--og-border); }
+.sales-desk-next { display: grid; grid-template-columns: 1fr .7fr; gap: .55rem; padding-top: .7rem; border-top: 1px solid var(--og-border); }
+.sales-desk-next button { align-self: end; min-height: 42px; border-radius: .65rem; background: #273244; color: white; font-size: .7rem; font-weight: 800; }
+.sales-desk-actions { margin-top: .9rem; border-top: 1px solid var(--og-border); padding-top: .8rem; }
+.sales-desk-actions summary { cursor: pointer; color: var(--og-brand); font-size: .72rem; font-weight: 800; }
+.sales-desk-actions > div { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .65rem; }
+.sales-desk-actions button { padding: .5rem .6rem; border: 1px solid var(--og-border); border-radius: .6rem; background: #111827; color: #d4dbe5; font-size: .63rem; }
+.sales-desk-history { margin-top: 1rem; }
+.sales-desk-history h3 { margin-bottom: .6rem; color: var(--og-text); font-size: .75rem; font-weight: 800; }
+.sales-desk-timeline-item { padding: .65rem 0; border-top: 1px solid var(--og-border); }
+.sales-desk-timeline-item time { color: var(--og-muted); font-size: .58rem; }
+.sales-desk-timeline-item b { display: block; color: var(--og-brand); font-size: .63rem; }
+.sales-desk-timeline-item p { color: #cbd5e1; font-size: .68rem; line-height: 1.4; }
+.sales-desk-empty, .sales-desk-empty-state { padding: 2rem 1rem; color: var(--og-muted); text-align: center; }
+.sales-desk-empty-state h2 { margin: .5rem 0; color: var(--og-text); font-weight: 800; }
+.sales-desk-empty-state button { margin-top: 1rem; }
+.sales-desk-modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 1rem; background: rgba(2,6,12,.88); backdrop-filter: blur(8px); }
+.sales-desk-dialog { width: min(620px, 100%); padding: 1.2rem; box-shadow: 0 28px 80px rgba(0,0,0,.5); }
+.sales-desk-dialog header, .sales-desk-dialog footer { display: flex; justify-content: space-between; align-items: center; gap: .8rem; }
+.sales-desk-dialog header { margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--og-border); }
+.sales-desk-dialog h2 { color: var(--og-text); font-size: 1rem; font-weight: 800; }
+.sales-desk-dialog .og-field { margin-top: .7rem; }
+.sales-desk-dialog footer { margin-top: 1rem; }
+.sales-desk-dialog footer button:disabled { opacity: .55; cursor: not-allowed; }
+.sales-desk-warning { margin-top: .5rem; color: #fbbf24; font-size: .65rem; }
+
+@media (max-width: 1250px) {
+  .sales-desk-layout { grid-template-columns: minmax(280px, .85fr) minmax(380px, 1.15fr); }
+  .sales-desk-side { grid-column: 1 / -1; }
+}
+
+@media (max-width: 850px) {
+  .sales-desk-layout { grid-template-columns: 1fr; }
+  .sales-desk-client { position: static; max-height: none; }
+  .sales-desk-queue { max-height: none; }
+  .sales-desk-select { grid-template-columns: 1fr; }
+  .sales-desk-primary-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+  .sales-desk-facts, .sales-desk-next { grid-template-columns: 1fr; }
+  .sales-desk-row { grid-template-columns: 1fr auto; }
+}
 .og-empty { padding: 2.2rem 1rem; border: 1px dashed var(--og-border); border-radius: 1rem; color: var(--og-muted); text-align: center; font-size: .78rem; }
 
 .og-coach-card { background: linear-gradient(155deg, rgba(246, 201, 69, .1), rgba(17, 24, 39, 1) 45%); }

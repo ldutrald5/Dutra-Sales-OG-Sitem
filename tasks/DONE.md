@@ -14,6 +14,15 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 | OG-17 | Performance e funil baseados em eventos reais | `performance-engine.js`, `docs/stories/OG-17-performance-funil-eventos-reais.md` |
 | Infra | PWA offline, servidor local e opção Cloudflare | `service-worker.js`, `server.mjs`, `cloudflare/worker.mjs` |
 
+## TASK-001 — Mesa de Vendas: estrutura base
+
+- **Data:** 2026-09-24.
+- **Mudança observável:** fila pesquisável, cliente ativo no mesmo espaço, WhatsApp em um clique, cinco templates editáveis sem IA, resultado e nota rápidos, próxima ação, atalhos e entrada do Call AI com contexto compacto.
+- **Compatibilidade:** `state.leads`, IDs, histórico, localStorage e sincronização existentes foram preservados; `/mobile` foi congelado sem remoção.
+- **Arquivos principais:** `modules/sales-desk.js`, `services/*`, `components/ui-components.js`, `index.html`, `app.js` e `styles.css`.
+- **Validação:** `npm run og:sales-desk:test` e `npm run validate`.
+- **Limites:** confirmação real de envio, e-mail, IA de personalização e Proposta Premium permanecem para tarefas próprias.
+
 ## Convenção para novas conclusões
 
 Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.

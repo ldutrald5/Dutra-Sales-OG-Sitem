@@ -9,7 +9,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/05-MESA-DE-VENDAS.md`, `docs/03-DESIGN-SYSTEM.md`, `docs/04-CRM.md`, `apps/sistema-og/index.html`, `styles.css`, `app.js`.
 - **Critério de aceite:** fila e seleção de cliente funcionam; painel preserva contexto; desktop e celular cobrem o fluxo; dados antigos permanecem íntegros.
 - **Dependências:** nenhuma funcional nova; usar o modelo atual.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-24; evidência em `tasks/DONE.md`.
 
 ## TASK-002 — Prospect Quick Create
 
