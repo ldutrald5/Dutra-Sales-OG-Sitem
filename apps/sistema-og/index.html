@@ -984,6 +984,21 @@
         <button type="button" data-quick-lead="call-ai" class="og-button og-button-ghost">＋ Cliente novo</button>
       </section>
 
+      <section id="call-ai-copilot" class="call-ai-copilot hidden" data-size="compact" aria-label="Central Call AI contextual">
+        <header class="call-ai-copilot-head">
+          <div><span class="og-kicker">COPILOTO COMERCIAL CONTEXTUAL</span><h2 id="call-ai-copilot-account">Selecione uma conta</h2><p id="call-ai-copilot-meta"></p></div>
+          <button id="call-ai-size-toggle" type="button">Expandir</button>
+        </header>
+        <div id="call-ai-intents" class="call-ai-intents" role="tablist" aria-label="Modos comerciais"></div>
+        <div class="call-ai-command">
+          <label for="call-ai-live-input">O que o cliente disse ou o que você precisa?</label>
+          <textarea id="call-ai-live-input" rows="3" placeholder="Ex.: Cliente falou que está cortando custos."></textarea>
+          <div><span id="call-ai-cost-hint">Nenhuma chamada feita</span><button id="call-ai-generate" type="button" class="og-button og-button-primary">Gerar orientação</button></div>
+        </div>
+        <div id="call-ai-central-state" class="call-ai-central-state" data-state="idle">Escolha um modo. A IA só será acionada quando você pedir.</div>
+        <article id="call-ai-structured-result" class="call-ai-structured-result hidden" aria-live="polite"></article>
+      </section>
+
       <div id="call-ai-empty" class="call-ai-empty">
         <strong>Selecione um cliente para começar</strong>
         <span>Depois de escolher o cliente e clicar em “Preparar roteiro”, aparecem contexto, teleprompter em 8 etapas, objeções, anotações e gravação.</span>
@@ -1245,6 +1260,9 @@
   <script src="services/interaction-service.js"></script>
   <script src="services/whatsapp-service.js"></script>
   <script src="services/call-ai-context.js"></script>
+  <script src="services/knowledge-selector.js"></script>
+  <script src="services/call-ai-prompts.js"></script>
+  <script src="services/ai-service.js"></script>
   <script src="services/prospect-parser.js"></script>
   <script src="modules/sales-desk.js"></script>
   <script src="modules/prospecting-engine.js"></script>

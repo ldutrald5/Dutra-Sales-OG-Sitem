@@ -33,8 +33,9 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 ## TASK-008 — Central Call AI
 
 - **Data:** 2026-09-24.
-- **Mudança observável:** Call AI abre a conta ativa da Mesa ou Prospecção, exibe contexto compacto, mantém revisão antes do CRM e retorna ao fluxo operacional de origem.
-- **Custo:** busca local limitada; nenhuma IA é usada para fila, parser, métricas ou templates.
+- **Mudança observável:** Central contextual com 11 modos comerciais, visual compacto/expandido, resposta estruturada, pós-ligação revisável, feedback e ações confirmadas; a conta ativa acompanha Mesa e Prospecção sem vazamento.
+- **Arquitetura:** contexto mínimo e orçamento central, seletor de conhecimento por intenção, prompts centralizados e `ai-service` independente de fornecedor com cache, métricas e fallback local.
+- **Custo:** abrir Mesa, selecionar conta, abrir Call AI e usar template continuam com zero chamadas; somente gerar orientação ou personalizar solicita inteligência.
 - **Validação:** `npm run og:call-ai:test` e `npm run validate`.
 
 ## Convenção para novas conclusões

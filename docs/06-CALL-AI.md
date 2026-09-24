@@ -45,3 +45,13 @@ Não enviar o banco completo. O montador de contexto seleciona somente campos e 
 2. Reutilizar Call AI dentro da Mesa de Vendas.
 3. Produzir resumo e extrações revisáveis como IA econômica.
 4. Reservar análise estratégica profunda para solicitação explícita.
+
+## Central integrada — TASK-008
+
+- A Mesa e o Modo Prospecção abrem a mesma Central com a conta ativa.
+- Onze intenções comerciais compartilham contexto, prompts e serviço de IA centralizados.
+- Abrir a tela, selecionar uma conta ou usar template não chama IA; geração ocorre somente após ação explícita.
+- O contexto limita histórico, omite telefone/CNPJ quando desnecessários e troca integralmente ao mudar de conta.
+- Sem provedor configurado, respostas seguras locais mantêm a operação disponível e informam que não houve chamada externa.
+- Respostas são estruturadas e só viram nota, próxima ação ou alteração de CRM após confirmação do vendedor.
+- A personalização de templates reutiliza o mesmo motor e sempre retorna para uma prévia editável.

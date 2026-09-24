@@ -118,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
       notes: '',
       signals: [],
       sources: [],
+      intent: 'prepare_call',
+      centralResponse: null,
       sessionId: null,
       fontSize: 1,
       recording: { recorder: null, streams: [], chunks: [], audioContext: null, url: null, startedAt: null }
@@ -3128,7 +3130,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const filled = OG_WHATSAPP_SERVICE.fillTemplate(templateId, deskTemplateVariables(lead, OG_WHATSAPP_SERVICE.getTemplate(templateId)));
     const overlay = document.createElement('div');
     overlay.className = 'sales-desk-modal';
-    overlay.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="desk-message-title" class="clean-card sales-desk-dialog"><header><div><span class="og-kicker">MENSAGEM SEM IA</span><h2 id="desk-message-title">Revisar antes de abrir o WhatsApp</h2></div><button type="button" data-desk-close aria-label="Fechar">✕</button></header><label class="og-field"><span>Modelo</span><select data-desk-template>${OG_WHATSAPP_SERVICE.TEMPLATES.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === templateId ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><label class="og-field"><span>Mensagem editável</span><textarea rows="8" data-desk-message>${escapeHtml(filled.text)}</textarea></label>${filled.missing.length ? `<p class="sales-desk-warning">Revise os campos pendentes: ${escapeHtml(filled.missing.join(', '))}</p>` : ''}<footer><button type="button" data-desk-ai disabled title="Integração planejada para uma próxima tarefa">✨ Personalizar com IA · em breve</button><button type="button" data-desk-open class="og-button og-button-primary">Abrir WhatsApp</button></footer></section>`;
+    overlay.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="desk-message-title" class="clean-card sales-desk-dialog"><header><div><span class="og-kicker">TEMPLATE + IA OPCIONAL</span><h2 id="desk-message-title">Revisar antes de abrir o WhatsApp</h2></div><button type="button" data-desk-close aria-label="Fechar">✕</button></header><label class="og-field"><span>Modelo</span><select data-desk-template>${OG_WHATSAPP_SERVICE.TEMPLATES.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === templateId ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><label class="og-field"><span>Mensagem editável</span><textarea rows="8" data-desk-message>${escapeHtml(filled.text)}</textarea></label>${filled.missing.length ? `<p class="sales-desk-warning">Revise os campos pendentes: ${escapeHtml(filled.missing.join(', '))}</p>` : ''}<footer><button type="button" data-desk-ai>✨ Personalizar com IA</button><button type="button" data-desk-open class="og-button og-button-primary">Abrir WhatsApp</button></footer></section>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     overlay.querySelector('[data-desk-close]').addEventListener('click', close);
@@ -3136,6 +3138,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     overlay.querySelector('[data-desk-template]').addEventListener('change', event => {
       const next = OG_WHATSAPP_SERVICE.fillTemplate(event.target.value, deskTemplateVariables(lead, OG_WHATSAPP_SERVICE.getTemplate(event.target.value)));
       overlay.querySelector('[data-desk-message]').value = next.text;
+    });
+    overlay.querySelector('[data-desk-ai]').addEventListener('click', async event => {
+      const button = event.currentTarget; const textarea = overlay.querySelector('[data-desk-message]');
+      button.disabled = true; button.textContent = 'Personalizando…';
+      const context = OG_CALL_AI_CONTEXT.build(lead, { intent:'personalize_message' });
+      const request = OG_CALL_AI_PROMPTS.build('personalize_message', context, textarea.value, []);
+      const response = await OG_AI_SERVICE.generate(request);
+      textarea.value = response.recommendedResponse || textarea.value;
+      button.disabled = false; button.textContent = '✨ Personalizar novamente';
     });
     overlay.querySelector('[data-desk-open]').addEventListener('click', () => {
       const message = overlay.querySelector('[data-desk-message]').value.trim();
@@ -4058,6 +4069,63 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     expansao: 'Expansão', indicacao: 'Pedido de indicação'
   };
 
+  function resetCallAICentralForLead(lead) {
+    state.callAI.intent = 'prepare_call';
+    state.callAI.centralResponse = null;
+    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent });
+    const input = document.getElementById('call-ai-live-input');
+    if (input) input.value = '';
+    const result = document.getElementById('call-ai-structured-result');
+    result?.classList.add('hidden');
+    if (result) result.innerHTML = '';
+    const status = document.getElementById('call-ai-central-state');
+    if (status) { status.dataset.state = 'idle'; status.textContent = 'Escolha um modo. A IA só será acionada quando você pedir.'; }
+  }
+
+  function renderCallAICentral() {
+    const lead = callLead();
+    const root = document.getElementById('call-ai-copilot');
+    if (!root || !lead) { root?.classList.add('hidden'); return; }
+    root.classList.remove('hidden');
+    document.getElementById('call-ai-copilot-account').textContent = lead.empresa || lead.nome || 'Conta sem nome';
+    const recent = (lead.interactions || []).slice(-1)[0];
+    document.getElementById('call-ai-copilot-meta').textContent = [lead.nome, lead.cargo, lead.status, recent?.note ? `Último: ${recent.note}` : '', lead.nextAction ? `Próxima: ${lead.nextAction}` : ''].filter(Boolean).join(' · ');
+    document.getElementById('call-ai-intents').innerHTML = Object.entries(OG_CALL_AI_PROMPTS.INTENTS).filter(([id]) => id !== 'personalize_message').map(([id, item]) => `<button type="button" role="tab" aria-selected="${id === state.callAI.intent}" class="${id === state.callAI.intent ? 'active' : ''}" data-call-intent="${id}"><span>${item.icon}</span>${escapeHtml(item.label)}</button>`).join('');
+  }
+
+  function renderCallAIStructuredResponse(response) {
+    const target = document.getElementById('call-ai-structured-result');
+    if (!target) return;
+    const block = (label, value, className = '') => value ? `<section class="${className}"><span>${label}</span><p>${escapeHtml(value).replace(/\n/g, '<br>')}</p></section>` : '';
+    target.innerHTML = `${block('RESUMO', response.summary)}${block('RESPONDA', response.recommendedResponse, 'primary')}${block('PERGUNTE', response.question)}${block('OBJETIVO', response.objective)}${block('PRÓXIMO MOVIMENTO', response.suggestedNextAction)}${response.crmSuggestion ? `<section class="call-ai-crm-preview"><span>PREVIEW DO CRM</span><p>${escapeHtml(response.crmSuggestion.summary || 'Revise os campos antes de salvar.')}</p></section>` : ''}<footer><button type="button" data-ai-copy>Copiar</button><button type="button" data-ai-save-note>Salvar como nota</button><button type="button" data-ai-next-action>Criar próxima ação</button><button type="button" data-ai-useful>👍 Útil</button><button type="button" data-ai-not-useful>👎 Não útil</button></footer><small>${response.source === 'safe_local_fallback' ? 'Modo seguro local · sem consumo de IA externa' : response.cached ? 'Resposta reutilizada do cache' : 'Resposta do provedor configurado'}</small>`;
+    target.classList.remove('hidden');
+  }
+
+  async function runCallAIIntent() {
+    const lead = callLead();
+    if (!lead) return showNotification('Selecione uma conta antes de usar o Call AI.', 'info');
+    const intent = state.callAI.intent;
+    const input = document.getElementById('call-ai-live-input')?.value.trim() || '';
+    const status = document.getElementById('call-ai-central-state');
+    const button = document.getElementById('call-ai-generate');
+    status.dataset.state = 'loading'; status.textContent = 'Preparando contexto mínimo e orientação…'; button.disabled = true;
+    const context = OG_CALL_AI_CONTEXT.build(lead, { intent });
+    state.callAI.context = context;
+    let knowledge = [];
+    try {
+      const response = await apiFetch('/api/knowledge/search', { method:'POST', body:JSON.stringify({ query:OG_KNOWLEDGE_SELECTOR.query(intent, context, input), tags:OG_KNOWLEDGE_SELECTOR.select(intent), limit:OG_CALL_AI_CONTEXT.BUDGET.maxKnowledgeSections }) });
+      if (response.ok) knowledge = (await response.json()).results || [];
+    } catch (_) { /* modo seguro local continua disponível */ }
+    const request = OG_CALL_AI_PROMPTS.build(intent, context, input, knowledge.map(item => ({ id:item.id, title:item.title, text:item.text, status:item.status })));
+    const response = await OG_AI_SERVICE.generate(request, { cacheKey: intent === 'post_call' || input ? '' : OG_CALL_AI_CONTEXT.cacheKey(context, intent) });
+    if (callLead()?.id !== lead.id) return;
+    state.callAI.centralResponse = response;
+    renderCallAIStructuredResponse(response);
+    status.dataset.state = 'success'; status.textContent = `${OG_CALL_AI_PROMPTS.INTENTS[intent].label} pronta para revisão.`;
+    document.getElementById('call-ai-cost-hint').textContent = response.source === 'safe_local_fallback' ? 'Modo local · zero chamada externa' : `Nível ${request.modelTier} · contexto ${JSON.stringify(request).length} caracteres`;
+    button.disabled = false;
+  }
+
   function normalizeCallSearch(value) {
     return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   }
@@ -4109,6 +4177,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const lead = state.leads.find(item => String(item.id) === String(id));
     if (!lead) return;
     state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
+    resetCallAICentralForLead(lead);
     const objective = document.getElementById('call-ai-objective');
     if (objective) objective.value = state.callAI.objective;
     const input = document.getElementById('call-ai-client-search');
@@ -4117,6 +4186,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     input?.setAttribute('aria-expanded', 'false');
     document.getElementById('call-ai-prepare')?.removeAttribute('disabled');
     renderCallAIContext();
+    renderCallAICentral();
   }
 
   function factRow(label, value, status = 'confirmed', source = 'CRM') {
@@ -4459,6 +4529,50 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
     });
     document.getElementById('call-ai-objective')?.addEventListener('change', event => { state.callAI.objective = event.target.value; });
+    document.getElementById('call-ai-intents')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-call-intent]');
+      if (!button) return;
+      state.callAI.intent = button.dataset.callIntent;
+      renderCallAICentral();
+      const input = document.getElementById('call-ai-live-input');
+      const placeholders = { live_call:'Ex.: falou que está cortando custos', handle_objection:'Ex.: Está caro', reach_decision_maker:'Ex.: Estou falando com a recepção', post_call:'Ex.: Carlos gostou, 80 caminhões, pediu apresentação e retornar sexta' };
+      input.placeholder = placeholders[state.callAI.intent] || 'Inclua somente o contexto novo, se necessário.';
+      input.focus();
+    });
+    document.getElementById('call-ai-generate')?.addEventListener('click', runCallAIIntent);
+    document.getElementById('call-ai-size-toggle')?.addEventListener('click', event => {
+      const root = document.getElementById('call-ai-copilot');
+      const expanded = root.dataset.size !== 'expanded';
+      root.dataset.size = expanded ? 'expanded' : 'compact';
+      event.currentTarget.textContent = expanded ? 'Compactar' : 'Expandir';
+    });
+    document.getElementById('call-ai-structured-result')?.addEventListener('click', async event => {
+      const lead = callLead(); const response = state.callAI.centralResponse; if (!lead || !response) return;
+      if (event.target.closest('[data-ai-copy]')) { await navigator.clipboard.writeText(response.recommendedResponse || response.suggestedNextAction || response.summary); showNotification('Orientação copiada.', 'success'); }
+      if (event.target.closest('[data-ai-save-note]')) {
+        if (response.crmSuggestion) {
+          document.getElementById('call-ai-notes').value = response.crmSuggestion.summary || '';
+          openCallAIReview();
+        } else {
+          const interaction = OG_INTERACTION_SERVICE.addInteraction(lead, { type:'nota', note:response.summary || response.recommendedResponse, source:'call_ai_confirmed' });
+          persistSalesDeskActivity(lead, interaction, 'call_ai.note_confirmed');
+          showNotification('Nota do Call AI salva após sua confirmação.', 'success');
+        }
+      }
+      if (event.target.closest('[data-ai-next-action]')) {
+        const suggested = response.suggestedNextAction || lead.nextAction || '';
+        const description = window.prompt('Confirme ou edite a próxima ação:', suggested);
+        if (!description) return;
+        const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, description, lead.followUpAt || '');
+        persistSalesDeskActivity(lead, interaction, 'call_ai.next_action_confirmed');
+        renderCallAIContext(); renderCallAICentral(); showNotification('Próxima ação confirmada.', 'success');
+      }
+      if (event.target.closest('[data-ai-useful], [data-ai-not-useful]')) {
+        const useful = Boolean(event.target.closest('[data-ai-useful]'));
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:newLibraryId('evt'), type:'call_ai.feedback', at:new Date().toISOString(), clientId:lead.id, intent:state.callAI.intent, useful });
+        saveOperationsToStorage(); showNotification('Feedback registrado.', 'success');
+      }
+    });
     document.getElementById('call-ai-prepare')?.addEventListener('click', prepareCallAIScript);
     document.getElementById('call-ai-change-client')?.addEventListener('click', () => { input.focus(); input.select(); });
     document.getElementById('call-ai-prev')?.addEventListener('click', () => { saveCurrentCallSpeech(); state.callAI.step = Math.max(0, state.callAI.step - 1); renderCallAIStep(); });
