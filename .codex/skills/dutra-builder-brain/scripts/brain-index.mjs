@@ -19,7 +19,7 @@ for (const [t,a] of [...byType.entries()].sort()) md.push(`| ${t} | ${a.length} 
 function section(title, arr, extra=''){
   md.push('',`## ${title}`,'');
   if (!arr.length) { md.push('_None._'); return; }
-  for (const r of arr) md.push(`- **${r.id} — ${r.title}** (${r.status}/${r.confidence})${extra ? extra+r[extra] : ''}  \n  ${r.statement}`);
+  for (const r of arr) md.push(`- **${r.id} — ${r.title}** (${r.status}/${r.confidence})${extra ? extra+r[extra] : ''}`,`  ${r.statement}`);
 }
 section('Active decisions',activeDec);
 section('Open questions',open);
