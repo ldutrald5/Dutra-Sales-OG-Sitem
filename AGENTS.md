@@ -14,31 +14,31 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 <!-- AIOX-MANAGED-START: quality -->
 ## Quality Gates
 
-- Rode `npm run lint`
-- Rode `npm run typecheck`
-- Rode `npm test`
+- Rode `npm run lint` (checagem sintática real do Sistema OG)
+- Rode `npm test` (suíte completa, equivalente a `npm run validate`)
+- Rode `npm run og:brain:check` quando alterar decisões, arquitetura ou o Builder Brain
+- Rode `npm run release:gate` antes de propor uma release
 - Atualize checklist e file list da story antes de concluir
 <!-- AIOX-MANAGED-END: quality -->
 
 <!-- AIOX-MANAGED-START: codebase -->
 ## Project Map
 
-- Core framework: `.aiox-core/`
-- CLI entrypoints: `bin/`
-- Shared packages: `packages/`
-- Tests: `tests/`
-- Docs: `docs/`
+- Aplicação comercial: `apps/sistema-og/`
+- Backend local: `apps/sistema-og/server.mjs`
+- Backend Cloudflare: `cloudflare/worker.mjs`
+- Testes e gates: `scripts/test_*.mjs`, `scripts/validate.mjs`, `scripts/release-gate.mjs`
+- Builder Brain: `.codex/skills/dutra-builder-brain/`, `docs/second-brain/`
+- Framework AIOX: `.aiox-core/`
+- Documentação: `docs/`
 <!-- AIOX-MANAGED-END: codebase -->
 
 <!-- AIOX-MANAGED-START: commands -->
 ## Common Commands
 
-- `npm run sync:ide`
-- `npm run sync:ide:check`
-- `npm run sync:skills:codex`
-- `npm run sync:skills:codex:global` (opcional; neste repo o padrao e local-first)
-- `npm run validate:structure`
-- `npm run validate:agents`
+- `npm run validate`
+- `npm run og:brain:refresh`
+- `npm run release:gate`
 <!-- AIOX-MANAGED-END: commands -->
 
 ## Comandos do Sistema OG

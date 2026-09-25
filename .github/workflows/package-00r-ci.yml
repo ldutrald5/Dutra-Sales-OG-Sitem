@@ -1,0 +1,25 @@
+name: Package 00R CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Lockfile íntegro
+        run: git diff --exit-code -- package-lock.json
+      - run: npm run validate
+      - run: npm run og:brain:check
+      - run: npm run og:security:test
+      - run: npm audit --audit-level=high
+      - run: npm run release:gate

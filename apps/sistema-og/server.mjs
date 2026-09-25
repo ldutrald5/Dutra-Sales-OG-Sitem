@@ -13,7 +13,11 @@ const dataDir = path.join(root, '.data');
 const dataFile = path.join(dataDir, 'shared-state.json');
 const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const port = Number(process.env.OG_PORT || 4321);
-const host = process.env.OG_HOST || '0.0.0.0';
+const host = process.env.OG_HOST || '127.0.0.1';
+const localAccessToken = String(process.env.OG_LOCAL_ACCESS_TOKEN || '');
+const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
+const writeWindows = new Map();
+if (lanMode && localAccessToken.length < 16) throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no modo LAN.');
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -33,7 +37,9 @@ function sendJson(res, status, value) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
-    'X-Content-Type-Options': 'nosniff'
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY'
   });
   res.end(JSON.stringify(value));
 }
@@ -45,6 +51,31 @@ function readSharedState() {
   } catch {
     return { revision: 0, updatedAt: null, leads: [], history: [], operations: operationsModel.createEmptyOperations() };
   }
+}
+
+function isAuthorized(req) {
+  if (!lanMode) return true;
+  return req.headers.authorization === `Bearer ${localAccessToken}`;
+}
+
+function allowWrite(req) {
+  const key = req.socket.remoteAddress || 'unknown', now = Date.now();
+  const recent = (writeWindows.get(key) || []).filter(time => now - time < 60_000);
+  if (recent.length >= 30) return false;
+  recent.push(now); writeWindows.set(key, recent); return true;
+}
+
+function validateStatePayload(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('Estado inválido.');
+  if (!Number.isInteger(Number(body.revision)) || Number(body.revision) < 0) throw new Error('Revisão inválida.');
+  if (!Array.isArray(body.leads) || body.leads.length > 10000) throw new Error('Lista de clientes inválida.');
+  if (!Array.isArray(body.history) || body.history.length > 5000) throw new Error('Histórico inválido.');
+  for (const item of [...body.leads, ...body.history]) {
+    if (!item || typeof item !== 'object' || Array.isArray(item) || !item.id || String(item.id).length > 160) throw new Error('Registro inválido.');
+    if (Object.keys(item).some(key => ['__proto__','prototype','constructor'].includes(key))) throw new Error('Chave não permitida.');
+  }
+  if (body.operations != null && (typeof body.operations !== 'object' || Array.isArray(body.operations))) throw new Error('Operações inválidas.');
+  return true;
 }
 
 function readKnowledge() {
@@ -106,91 +137,6 @@ function cleanArray(value, max) {
   return Array.isArray(value) ? value.slice(0, max) : [];
 }
 
-function leadTime(lead) {
-  const candidates = [lead?.updatedAt, lead?.lastContactAt, lead?.createdDate, lead?.followUpAt];
-  for (const value of candidates) {
-    const t = Date.parse(value || '');
-    if (!Number.isNaN(t)) return t;
-  }
-  return 0;
-}
-
-function unionById(a = [], b = [], idKey = 'id') {
-  const map = new Map();
-  for (const item of [...a, ...b]) {
-    if (!item || item[idKey] == null) continue;
-    const key = String(item[idKey]);
-    if (!map.has(key)) map.set(key, item);
-  }
-  return [...map.values()];
-}
-
-function pickScalar(newer, older, key) {
-  const n = newer?.[key];
-  const o = older?.[key];
-  if (n !== undefined && n !== null && n !== '') return n;
-  if (o !== undefined && o !== null && o !== '') return o;
-  return n ?? o ?? '';
-}
-
-function mergeLead(a, b) {
-  const aT = leadTime(a);
-  const bT = leadTime(b);
-  const newer = aT >= bT ? a : b;
-  const older = aT >= bT ? b : a;
-  const scalarKeys = [
-    'nome', 'empresa', 'telefone', 'cnpj', 'cidadeUf', 'segmentId', 'status',
-    'priority', 'pain', 'decisionMaker', 'nextAction', 'followUpAt', 'lastContactAt',
-    'observacoes', 'createdDate', 'updatedAt'
-  ];
-  const merged = { ...older, ...newer };
-  for (const key of scalarKeys) {
-    merged[key] = pickScalar(newer, older, key);
-  }
-  merged.fleetSize = Number.isFinite(Number(newer.fleetSize)) && Number(newer.fleetSize) > 0
-    ? Number(newer.fleetSize)
-    : (Number.isFinite(Number(older.fleetSize)) ? Number(older.fleetSize) : 0);
-  merged.interactions = unionById(a.interactions || [], b.interactions || [], 'id')
-    .sort((x, y) => Date.parse(x.at || 0) - Date.parse(y.at || 0));
-  if (!merged.source) merged.source = newer.source || older.source;
-  merged.updatedAt = new Date(Math.max(aT, bT, Date.now())).toISOString();
-  return merged;
-}
-
-function mergeLeads(local = [], remote = []) {
-  const map = new Map();
-  for (const lead of remote) {
-    if (lead?.id != null) map.set(String(lead.id), lead);
-  }
-  for (const lead of local) {
-    if (lead?.id == null) continue;
-    const key = String(lead.id);
-    map.set(key, map.has(key) ? mergeLead(map.get(key), lead) : lead);
-  }
-  return [...map.values()].slice(0, 10000);
-}
-
-function mergeHistory(local = [], remote = []) {
-  return unionById(local, remote, 'id')
-    .sort((a, b) => Date.parse(b.date || 0) - Date.parse(a.date || 0))
-    .slice(0, 5000);
-}
-
-function mergeOperations(local = {}, remote = {}) {
-  const newer = operationsModel.migrateOperations(local);
-  const older = operationsModel.migrateOperations(remote);
-  const merged = operationsModel.createEmptyOperations();
-  for (const key of operationsModel.ENTITY_KEYS) merged[key] = unionById(newer[key], older[key], 'id');
-  merged.createdAt = older.createdAt || newer.createdAt;
-  merged.updatedAt = new Date().toISOString();
-  merged.migrationLog = unionById(
-    newer.migrationLog.map((item, index) => ({ id: `${item.toVersion}-${item.at || index}`, ...item })),
-    older.migrationLog.map((item, index) => ({ id: `${item.toVersion}-${item.at || index}`, ...item })),
-    'id'
-  ).map(({ id, ...item }) => item);
-  return merged;
-}
-
 async function readBody(req) {
   const chunks = [];
   let size = 0;
@@ -205,19 +151,21 @@ async function readBody(req) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
+  if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
+
   if (url.pathname === '/api/state' && req.method === 'GET') {
     return sendJson(res, 200, readSharedState());
   }
 
   if (url.pathname === '/api/state' && req.method === 'PUT') {
     try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error: 'Muitas gravações. Aguarde um minuto.' });
       const body = await readBody(req);
+      validateStatePayload(body);
       const current = readSharedState();
       const clientRevision = Number(body.revision);
       const serverRevision = Number(current.revision || 0);
-      const forceMerge = body.forceMerge === true || url.searchParams.get('merge') === '1';
-
-      if (Number.isFinite(clientRevision) && clientRevision !== serverRevision && !forceMerge) {
+      if (clientRevision !== serverRevision) {
         return sendJson(res, 409, {
           error: 'revision_conflict',
           message: 'Base desatualizada. Faça merge e tente de novo.',
@@ -229,16 +177,12 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const leads = mergeLeads(body.leads, current.leads || []);
-      const history = mergeHistory(body.history, current.history || []);
-      const operations = mergeOperations(body.operations, current.operations || {});
-
       const next = {
         revision: serverRevision + 1,
         updatedAt: new Date().toISOString(),
-        leads: cleanArray(leads, 10000),
-        history: cleanArray(history, 5000),
-        operations
+        leads: cleanArray(body.leads, 10000),
+        history: cleanArray(body.history, 5000),
+        operations: operationsModel.migrateOperations(body.operations || {})
       };
       writeSharedState(next);
       return sendJson(res, 200, next);
@@ -318,7 +262,8 @@ function buildAccessInfo() {
     desktop: `http://127.0.0.1:${port}`,
     phoneUrls,
     primaryPhoneUrl: phoneUrls[0] || null,
-    tip: 'No celular use a mesma Wi-Fi do PC. O Google Drive nao executa o sistema — use o link abaixo e Adicionar a tela inicial.'
+    protected: lanMode,
+    tip: 'No celular use a mesma Wi-Fi do PC e o código temporário definido ao iniciar o modo LAN.'
   };
 }
 

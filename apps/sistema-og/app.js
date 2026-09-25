@@ -178,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function cloudAccessToken(forceAsk = false) {
-    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost' || /^192\.168\./.test(location.hostname)) return '';
-    let token = forceAsk ? '' : localStorage.getItem('og_cloud_access_token') || '';
+    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') return '';
+    let token = forceAsk ? '' : sessionStorage.getItem('og_cloud_access_token') || '';
     if (!token) {
       token = window.prompt('Digite o código de acesso do Sistema OG:')?.trim() || '';
-      if (token) localStorage.setItem('og_cloud_access_token', token);
+      if (token) sessionStorage.setItem('og_cloud_access_token', token);
     }
     return token;
   }
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function apiFetch(url, options = {}) {
     let response = await fetch(url, { ...options, headers: { ...apiHeaders(Boolean(options.body)), ...(options.headers || {}) } });
     if (response.status === 401 && location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
-      localStorage.removeItem('og_cloud_access_token');
+      sessionStorage.removeItem('og_cloud_access_token');
       const token = cloudAccessToken(true);
       if (token) response = await fetch(url, { ...options, headers: { ...apiHeaders(Boolean(options.body)), ...(options.headers || {}) } });
     }
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const remote=await response.json();
           const merged=OG_DATA_SAFETY.mergeBackup({leads:state.leads,history:state.history,operations:state.operations},{format:'sistema-og-backup',version:1,data:{leads:remote.leads||[],history:remote.history||[],operations:remote.operations||{}}},OG_OPERATIONS_MODEL);
           state.leads=merged.leads;state.history=merged.history;state.operations=merged.operations;
-          response=await apiFetch('/api/state?merge=1',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0),forceMerge:true})});
+          response=await apiFetch('/api/state',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0)})});
         }
         if (!response.ok) throw new Error('Servidor indisponível');
         const saved = await response.json();
@@ -4017,7 +4017,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       trigger.disabled=true; trigger.textContent='Lendo modelo…';
       try{
         const buffer=await file.arrayBuffer();
-        const workbook=OG_SPREADSHEET_IMPORT.readArrayBuffer(buffer);
+        const workbook=await OG_SPREADSHEET_IMPORT.readArrayBuffer(buffer,{name:file.name,type:file.type,size:file.size});
         const validation=OG_SPREADSHEET_IMPORT.validateWorkbook(workbook);
         if(!validation.valid)throw new Error(`Modelo incompatível. Abas ausentes: ${validation.missing.join(', ')}`);
         const rows=OG_SPREADSHEET_IMPORT.readCrmRows(workbook);

@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v25';
+const SW_VERSION = 'v26';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -40,6 +40,7 @@ const SHELL_URLS = [
   '/manifest.webmanifest',
   '/assets/vendor/tailwindcss.js',
   '/assets/vendor/xlsx.full.min.js',
+  '/workers/spreadsheet-worker.js',
   '/services/spreadsheet-import-service.js',
   '/assets/logo-olho-de-gato.jpg',
   '/assets/icons/icon-192.png',
@@ -137,7 +138,7 @@ async function clearOutbox() {
 async function flushOutbox() {
   const pending = await readOutbox();
   if (!pending || !pending.body) return true;
-  const body = { ...pending.body, forceMerge: true };
+  const body = { ...pending.body };
   const response = await fetch(pending.url || '/api/state', {
     method: pending.method || 'PUT',
     headers: pending.headers || { 'Content-Type': 'application/json' },
