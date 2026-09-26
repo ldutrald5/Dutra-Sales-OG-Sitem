@@ -42,7 +42,7 @@
 - `forceMerge` foi removido do app, service worker e backends.
 - Conflitos retornam `409` e exigem reconciliação seguida da revisão atual.
 
-Risco residual: o token Cloudflare ainda é compartilhado e não representa identidade individual. Isso exige Auth no Package 01R. Valores antigos eventualmente existentes no `localStorage` não são lidos nem apagados automaticamente, preservando a regra de não modificar dados locais nesta etapa.
+Risco residual: o token Cloudflare ainda é compartilhado e não representa identidade individual. Isso exige Auth no Package 02R — Supabase Auth + Organization Pilot. Valores antigos eventualmente existentes no `localStorage` não são lidos nem apagados automaticamente, preservando a regra de não modificar dados locais nesta etapa.
 
 ## XLSX
 
@@ -106,7 +106,7 @@ A regressão foi avaliada pela suíte completa existente: Mesa, Prospecção, Ca
 
 ## Remediação da auditoria externa pré-merge
 
-- `OQ-ENV-001` foi resolvida, sem apagar histórico, usando a evidência de Node 24.21.0/npm 11.20.0, `npm ci` sem drift, CI e release gate aprovados.
+- `OQ-ENV-001` foi resolvida, sem apagar histórico, usando a evidência de Node 24.21.0/npm 11.19.0, `npm ci` sem drift, CI e release gate aprovados.
 - A sequência documental foi reconciliada como 01R — Canonical Domain Foundation; 02R — Supabase Auth + Organization Pilot; 03R — Company/Contact + Company 360 Beta; 04R — Sync Bridge & Conflict UX; 05R — Legacy Reconciliation / migração controlada. Nenhum pacote futuro foi implementado.
 - O Cloudflare Worker passou a medir o `ArrayBuffer` real antes do parse JSON, mantendo a rejeição 413 para payloads acima de 5 MB mesmo com `Content-Length` ausente ou manipulado. Foram adicionados testes de regressão para os dois casos.
 - Não houve alteração em dados reais, `.data`, localStorage, IndexedDB, configuração remota, deploy ou `main`.
