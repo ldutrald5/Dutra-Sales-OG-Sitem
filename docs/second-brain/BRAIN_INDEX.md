@@ -33,8 +33,6 @@ Generated from 37 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Open questions
 
-- **OQ-ENV-001 — Reproducible supported runtime for release certification** (open/high)
-  Package 01 implementation environment was Node 22/npm 10 while the supported contract targets Node 24/npm 11+, and clean dependency installation did not complete; release certification remains blocked until tested in the supported environment.
 - **OQ-PKG02-001 — Package 02 operational auth bootstrap details** (open/medium)
   Exact bootstrap/session/organization-membership implementation details must be confirmed against the chosen Supabase project/environment before enabling auth paths.
 

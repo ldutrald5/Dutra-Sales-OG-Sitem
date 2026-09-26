@@ -9,3 +9,7 @@
 7. O token compartilhado Cloudflare é uma ponte compatível, não identidade. Perfis e autorização aguardam o Package 01R.
 8. XLSX permanece funcional em isolamento no navegador; a substituição futura requer compatibilidade comprovada antes da retirada do bundle vendorizado.
 9. `derived_from`, `supersedes` e fontes do Builder Brain preservam a origem de decisões e evitam copiar conclusões sem evidência.
+
+## Sequência reconciliada pós-00R
+
+A sequência oficial para os próximos pacotes é: **01R — Canonical Domain Foundation; 02R — Supabase Auth + Organization Pilot; 03R — Company/Contact + Company 360 Beta; 04R — Sync Bridge & Conflict UX; 05R — Legacy Reconciliation / migração controlada**. Esta declaração é documental; não autoriza implementar qualquer pacote futuro durante o Package 00R.

@@ -17,6 +17,12 @@ const headers={authorization:'Bearer 0123456789abcdef','content-type':'applicati
 response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers,body:JSON.stringify({revision:0,leads:[],history:[],operations:null})}),env);assert.equal(response.status,200);
 response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers,body:JSON.stringify({revision:0,leads:[],history:[],operations:null,forceMerge:true})}),env);assert.equal(response.status,409);
 response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers,body:'{"revision":1,"leads":"bad","history":[]}'}),env);assert.equal(response.status,400);
+const oversized=JSON.stringify({revision:0,leads:[],history:[],padding:'x'.repeat(5_000_001)});
+const oversizedBytes=new TextEncoder().encode(oversized);
+const noLengthHeaders=new Headers({authorization:'Bearer 0123456789abcdef','content-type':'application/json'});
+response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers:noLengthHeaders,body:oversizedBytes}),env);assert.equal(response.status,413);
+const forgedLengthHeaders=new Headers({authorization:'Bearer 0123456789abcdef','content-type':'application/json','content-length':'1'});
+response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers:forgedLengthHeaders,body:oversizedBytes}),env);assert.equal(response.status,413);
 const temp={OG_TEMP_MODE:'true',OG_ACCESS_TOKEN:'0123456789abcdef',ASSETS:env.ASSETS};
 response=await worker.fetch(new Request('https://example.test/api/state',{method:'PUT',headers,body:JSON.stringify({revision:0,leads:[],history:[]})}),temp);assert.equal(response.status,503);
 console.log('Security baseline tests: PASS');

@@ -7,7 +7,7 @@ Baseline: `main@655d5243c6227aadbe441eef2d878a4f08106dd3`.
 | CRM, Mesa de Vendas, Prospecção, Call AI e Comunicação | já existente no GitHub | Preservado e coberto pela suíte existente. |
 | Evolução incremental e compatibilidade legada | decisão ainda válida | Mantida como regra de arquitetura. |
 | Builder Brain V2 | ainda faltante | Incorporado como skill local, JSONL, índice, métricas, schemas, ciclos e checker. |
-| Supabase, Auth e Company 360 | ainda faltante | Adiado para Package 01R; nenhuma migration ou flag foi ativada. |
+| Sequência futura | referência ambígua | Reconciliada como 01R — Canonical Domain Foundation; 02R — Supabase Auth + Organization Pilot; 03R — Company/Contact + Company 360 Beta; 04R — Sync Bridge & Conflict UX; 05R — Legacy Reconciliation / migração controlada. Nenhuma migration/flag foi ativada em 00R. |
 | Changesets descritos nos relatórios 02/03 | incompatível e sujeito a redesenho | Não importados; descrevem uma linha paralela sem garantia de compatibilidade com o baseline. |
 | Arquitetura V1 e Plano Mestre | parcialmente superado | Direção preservada; sequência será revalidada a partir do código atual. |
 | `xlsx@0.18.5` npm + bundle vendorizado | obsoleto/risco | Dependência npm removida; bundle isolado em Web Worker com limites defensivos. |

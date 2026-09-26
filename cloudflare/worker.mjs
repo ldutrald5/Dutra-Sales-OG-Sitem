@@ -14,7 +14,7 @@ export default{async fetch(request,env){const url=new URL(request.url),temporary
       if(temporary||!env.OG_DATA)return json({error:'Prévia temporária é somente leitura'},503);
       if(!allowWrite(request))return json({error:'Muitas gravações. Aguarde um minuto.'},429);
       const contentLength=Number(request.headers.get('content-length')||0);if(contentLength>5_000_000)return json({error:'Payload muito grande'},413);
-      let body;try{body=await request.json();validatePayload(body);}catch(error){return json({error:error?.message||'Conteúdo inválido'},400);}
+      let body;try{const raw=await request.arrayBuffer();if(raw.byteLength>5_000_000)return json({error:'Payload muito grande'},413);body=JSON.parse(new TextDecoder().decode(raw));validatePayload(body);}catch(error){if(error instanceof Response)return error;return json({error:error?.message||'Conteúdo inválido'},400);}
       const current=await env.OG_DATA.get('shared-state','json')||{revision:0,leads:[],history:[],operations:null};const clientRevision=Number(body.revision),serverRevision=Number(current.revision||0);
       if(clientRevision!==serverRevision)return json({error:'revision_conflict',revision:serverRevision,updatedAt:current.updatedAt,leads:current.leads||[],history:current.history||[],operations:current.operations||null},409);
       const next={revision:serverRevision+1,updatedAt:new Date().toISOString(),leads:body.leads,history:body.history,operations:body.operations||null};await keepServerBackup(env,current);await env.OG_DATA.put('shared-state',JSON.stringify(next));return json(next);

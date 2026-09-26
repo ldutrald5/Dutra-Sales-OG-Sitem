@@ -19,7 +19,7 @@
 - Evolução incremental do frontend e do CRM atual.
 - GitHub como fonte de verdade; artefatos externos usados apenas como evidência e requisitos.
 - Compatibilidade dos fluxos comerciais existentes.
-- Supabase, Auth, migrations, Company 360 e feature flags canônicas adiados para Package 01R.
+- A sequência reconciliada é: 01R — Canonical Domain Foundation; 02R — Supabase Auth + Organization Pilot; 03R — Company/Contact + Company 360 Beta; 04R — Sync Bridge & Conflict UX; 05R — Legacy Reconciliation / migração controlada. Nenhum pacote futuro é implementado nesta etapa.
 - Nenhum dado comercial real migrado ou alterado.
 
 ## Decisões descartadas ou redesenhadas
@@ -103,6 +103,13 @@ A regressão foi avaliada pela suíte completa existente: Mesa, Prospecção, Ca
 - Governança: `AGENTS.md`, `EXECUTION_CONTEXT.md`, `CONTEXT_MANIFEST.md`, reconciliação, decisões, ADR XLSX e Definition of Done.
 - Brain: `.codex/skills/dutra-builder-brain/`, `docs/second-brain/`, guia.
 - CI: `.github/workflows/package-00r-ci.yml`.
+
+## Remediação da auditoria externa pré-merge
+
+- `OQ-ENV-001` foi resolvida, sem apagar histórico, usando a evidência de Node 24.21.0/npm 11.20.0, `npm ci` sem drift, CI e release gate aprovados.
+- A sequência documental foi reconciliada como 01R — Canonical Domain Foundation; 02R — Supabase Auth + Organization Pilot; 03R — Company/Contact + Company 360 Beta; 04R — Sync Bridge & Conflict UX; 05R — Legacy Reconciliation / migração controlada. Nenhum pacote futuro foi implementado.
+- O Cloudflare Worker passou a medir o `ArrayBuffer` real antes do parse JSON, mantendo a rejeição 413 para payloads acima de 5 MB mesmo com `Content-Length` ausente ou manipulado. Foram adicionados testes de regressão para os dois casos.
+- Não houve alteração em dados reais, `.data`, localStorage, IndexedDB, configuração remota, deploy ou `main`.
 
 ## Rollback
 
