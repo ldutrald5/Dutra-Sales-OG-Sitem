@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import domain from '../apps/sistema-og/domain/canonical-domain.js';
+import operationsModel from '../apps/sistema-og/operations-model.js';
 
 const now = '2026-09-26T12:00:00.000Z';
 const company = domain.createCompany({ id: 'COMP-1', name: 'Transportadora Exemplo', legacyLeadId: 'LEAD-1', cnpj: '12.345.678/0001-90' }, { now });
@@ -26,5 +27,27 @@ assert.throws(() => domain.createCompany({ id: 'COMP-X' }, { now }), /name/);
 assert.throws(() => domain.createContact({ id: 'CONT-X', name: 'Sem empresa' }, { now }), /companyId/);
 assert.throws(() => domain.createOpportunity({ id: 'OPP-X' }, { now }), /companyId/);
 assert.throws(() => domain.createTask({ id: 'TASK-X', companyId: 'COMP-1' }, { now }), /title/);
+
+const operationsV2 = operationsModel.migrateOperations({
+  schemaVersion: 1,
+  contacts: [{ id: 'LEGACY-CONT-1', name: 'Contato legado sem companyId' }],
+  activityEvents: [{ id: 'LEGACY-EVT-1', type: 'legacy', at: now }]
+}, { now });
+assert.equal(operationsV2.schemaVersion, 2);
+assert.equal(operationsV2.contacts.length, 1, 'Coleção contacts legada deve continuar intacta');
+assert.deepEqual(operationsV2.companies, [], '01R não deve migrar leads automaticamente');
+assert.deepEqual(operationsV2.opportunities, []);
+assert.deepEqual(operationsV2.activities, []);
+assert.deepEqual(operationsV2.tasks, []);
+
+const canonicalGraph = {
+  schemaVersion: domain.SCHEMA_VERSION,
+  companies: [company],
+  contacts: [contact],
+  opportunities: [opportunity],
+  activities: [activity],
+  tasks: [task]
+};
+assert.equal(domain.validateGraph(canonicalGraph).valid, true);
 
 console.log('Canonical domain contract test: PASS');
