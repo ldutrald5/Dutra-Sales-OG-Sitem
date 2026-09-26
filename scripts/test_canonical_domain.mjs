@@ -23,6 +23,10 @@ const orphan = { ...graph, contacts: [{ ...contact, id: 'CONT-2', companyId: 'MI
 assert.equal(domain.validateGraph(orphan).valid, false);
 assert.match(domain.validateGraph(orphan).errors.join('\n'), /companyId inexistente/);
 
+const orphanContactActivity = { ...graph, activities: [{ ...activity, id: 'ACT-2', contactId: 'MISSING' }] };
+assert.equal(domain.validateGraph(orphanContactActivity).valid, false);
+assert.match(domain.validateGraph(orphanContactActivity).errors.join('\n'), /contactId inexistente/);
+
 assert.throws(() => domain.createCompany({ id: 'COMP-X' }, { now }), /name/);
 assert.throws(() => domain.createContact({ id: 'CONT-X', name: 'Sem empresa' }, { now }), /companyId/);
 assert.throws(() => domain.createOpportunity({ id: 'OPP-X' }, { now }), /companyId/);
