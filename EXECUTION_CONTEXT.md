@@ -1,32 +1,32 @@
-# Execution Context — Baseline pós-Package 00R
+# Execution Context — Baseline pós-Package 01R
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline estável: `2735e01ad36510f4549e1e844b00d7ba583d047a`
-- Package 00R: incorporado ao `main`
+- Baseline estável: `4e062cf1228a407eccc688b7b00254ef44bf3ded`
+- Packages 00R e 01R: incorporados ao `main`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
-- Estado: reconciliação, governança, contenção XLSX, hardening, CI e release gate concluídos no baseline.
-- Próximo package planejado: **01R — Canonical Domain Foundation**.
-- Fora do escopo deste fechamento: implementação do 01R, Supabase, Auth, migrations de domínio, Company 360, migração de dados reais e deploy.
+- Estado estável: segurança/release baseline + Canonical Domain Foundation/operations schema V2.
+- Package em execução: **02R — Supabase Auth + Organization Pilot**.
+- Fora do escopo do 02R: Company 360, migração de dados reais, corte do acesso legado e deploy.
 
 ## Sequência reconciliada
 
-1. 01R — Canonical Domain Foundation
-2. 02R — Supabase Auth + Organization Pilot
+1. 01R — Canonical Domain Foundation — **MERGED**
+2. 02R — Supabase Auth + Organization Pilot — **EM EXECUÇÃO**
 3. 03R — Company/Contact + Company 360 Beta
 4. 04R — Sync Bridge & Conflict UX
 5. 05R — Legacy Reconciliation / migração controlada
 
-Esta sequência registra planejamento; não autoriza implementação automática do próximo package.
+## Estado do 02R
 
-## Fontes auxiliares
+A branch `package-02r-auth-organization-pilot` introduz migration versionada para organizations/profiles/organization_members com RLS, bootstrap de sessão protegido por feature flag e uma fronteira de auth-state somente leitura. A feature permanece desligada e o acesso legado continua operacional.
 
-Builder Brain V2, Arquitetura V1, Plano Mestre e relatórios históricos são fontes de decisão e evidência. O código do GitHub continua sendo a fonte de verdade. Changesets históricos não são incorporados automaticamente.
+`OQ-PKG02-001` permanece aberta: CI pode validar contratos e regressões, mas migration/Auth/RLS só serão considerados comprovados remotamente após ensaio contra um projeto Supabase piloto.
 
 ## Restrições de dados
 
-O Package 00R não migrou nem alterou dados comerciais reais, `localStorage`, IndexedDB ou `apps/sistema-og/.data`. O token de acesso Cloudflare passou de armazenamento persistente para sessão sem apagar valores antigos automaticamente.
+01R não migrou dados reais. 02R também não está autorizado a transformar leads, localStorage, IndexedDB, JSON/KV ou criar memberships a partir de dados existentes.
 
 ## Regra de avanço
 
-O 01R só deve começar a partir do `main` estável após o fechamento administrativo do 00R. Cada package segue: branch isolada → implementação mínima → testes → gate → auditoria → merge autorizado → novo baseline → STOP.
+Cada package segue: branch isolada → implementação mínima → testes → gate → auditoria → merge autorizado → novo baseline → STOP. Merge do 02R não significa ativação do piloto remoto; a ativação exige validação ambiental explícita.
