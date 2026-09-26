@@ -51,12 +51,13 @@
     if (profileError) throw profileError;
     if (membershipError) throw membershipError;
     const memberships = (Array.isArray(rows) ? rows : []).map(normalizeMembership).filter(Boolean);
+    const uniqueOrganizationIds = [...new Set(memberships.map(item => item.organizationId))];
     return {
       authenticated: true,
       user: { id: user.id, email: clean(user.email) || null },
       profile: profile || null,
       memberships,
-      activeOrganizationId: memberships.length === 1 ? memberships[0].organizationId : null
+      activeOrganizationId: uniqueOrganizationIds.length === 1 ? uniqueOrganizationIds[0] : null
     };
   }
   async function bootstrap(options = {}) {
