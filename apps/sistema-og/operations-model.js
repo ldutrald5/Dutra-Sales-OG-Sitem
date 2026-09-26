@@ -5,9 +5,9 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createOperationsModel() {
   'use strict';
 
-  const SCHEMA_VERSION = 1;
+  const SCHEMA_VERSION = 2;
   const ENTITY_KEYS = Object.freeze([
-    'contacts', 'callSessions', 'materials', 'materialShares', 'materialPackages',
+    'companies', 'contacts', 'opportunities', 'activities', 'tasks', 'callSessions', 'materials', 'materialShares', 'materialPackages',
     'quotes', 'quoteTemplates', 'messageTemplates', 'documentTemplates',
     'generatedDocuments', 'sales', 'commissions', 'partners', 'transporters',
     'transporterCoverage', 'users', 'goals', 'activityEvents'

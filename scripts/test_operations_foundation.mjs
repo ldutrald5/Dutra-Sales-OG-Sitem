@@ -12,8 +12,24 @@ const [html, app, server, sw] = await Promise.all([
 ]);
 
 const migrated = model.migrateOperations({}, { now: '2026-09-23T12:00:00.000Z' });
-assert.equal(migrated.schemaVersion, 1);
+assert.equal(migrated.schemaVersion, 2);
+for (const key of ['companies', 'contacts', 'opportunities', 'activities', 'tasks']) assert.deepEqual(migrated[key], [], `${key} deve nascer vazio`);
 assert.equal(model.validateOperations(migrated).valid, true);
+const legacyV1 = {
+  schemaVersion: 1,
+  createdAt: '2026-09-22T12:00:00.000Z',
+  updatedAt: '2026-09-22T12:00:00.000Z',
+  migrationLog: [{ fromVersion: 0, toVersion: 1, at: '2026-09-22T12:00:00.000Z', mode: 'additive' }],
+  contacts: [{ id: 'legacy-contact-1', name: 'Contato legado' }],
+  activityEvents: [{ id: 'legacy-event-1', type: 'legacy.test', at: '2026-09-22T12:00:00.000Z' }]
+};
+const migratedV1 = model.migrateOperations(legacyV1, { now: '2026-09-23T12:00:00.000Z' });
+assert.equal(migratedV1.schemaVersion, 2);
+assert.equal(migratedV1.contacts.length, 1, 'Contato legado deve ser preservado');
+assert.equal(migratedV1.activityEvents.length, 1, 'Evento legado deve ser preservado');
+assert.deepEqual(migratedV1.companies, [], 'Migração não deve criar empresas a partir de leads/contatos');
+assert.ok(migratedV1.migrationLog.some(item => item.fromVersion === 1 && item.toVersion === 2), 'Migração 1→2 deve ser registrada');
+
 const migratedAgain = model.migrateOperations(migrated, { now: '2026-09-24T12:00:00.000Z' });
 assert.deepEqual(migratedAgain, migrated, 'Migração deve ser estruturalmente idempotente');
 const withActivity = model.appendActivity(migrated, { id: 'evt-1', type: 'client.created', at: '2026-09-23T12:00:00.000Z', clientId: 'lead-1' });
