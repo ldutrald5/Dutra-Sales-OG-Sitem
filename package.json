@@ -9,7 +9,7 @@
     "aiox:doctor": "aiox-core doctor",
     "aiox:config-check": "aiox-core config validate",
     "og:start": "node apps/sistema-og/server.mjs",
-    "og:start:lan": "node apps/sistema-og/server.mjs",
+    "og:start:lan": "node scripts/start-og-lan.mjs",
     "og:cloud:dev": "wrangler dev",
     "og:cloud:deploy": "wrangler deploy",
     "og:assets": "node scripts/optimize-og-assets.mjs",
@@ -17,15 +17,24 @@
     "og:communication:test": "node scripts/test_communication_center.mjs",
     "og:spreadsheet:test": "node scripts/test_spreadsheet_import.mjs",
     "og:data-safety:test": "node scripts/test_data_safety.mjs",
+    "og:backup-restore:test": "node scripts/test_backup_restore.mjs",
     "og:product:test": "node scripts/test_product_evolution.mjs",
     "og:ops": "node scripts/og-operations.mjs",
     "og:ops:test": "node scripts/test_operations_foundation.mjs",
     "og:library:test": "node scripts/test_material_library.mjs",
     "og:packages:test": "node scripts/test_material_packages.mjs",
     "og:performance:test": "node scripts/test_performance_dashboard.mjs",
+    "og:security:test": "node scripts/test_security_baseline.mjs",
+    "og:brain:index": "node .codex/skills/dutra-builder-brain/scripts/brain-index.mjs",
+    "og:brain:metrics": "node .codex/skills/dutra-builder-brain/scripts/brain-metrics.mjs",
+    "og:brain:check": "node .codex/skills/dutra-builder-brain/scripts/brain-check.mjs",
+    "og:brain:refresh": "npm run og:brain:index && npm run og:brain:metrics && npm run og:brain:check",
+    "release:gate": "node scripts/release-gate.mjs",
+    "lint": "npm run og:check",
+    "test": "npm run validate",
     "og:sales-desk:test": "node scripts/test_sales_desk.mjs",
     "og:prospecting:test": "node scripts/test_prospecting_engine.mjs",
-    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check cloudflare/worker.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/services/knowledge-selector.js && node --check apps/sistema-og/services/call-ai-prompts.js && node --check apps/sistema-og/services/ai-service.js && node --check apps/sistema-og/services/communication-service.js && node --check apps/sistema-og/services/data-safety-service.js && node --check apps/sistema-og/services/spreadsheet-import-service.js && node --check apps/sistema-og/services/prospect-parser.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/modules/prospecting-engine.js && node --check apps/sistema-og/components/ui-components.js",
+    "og:check": "node --check apps/sistema-og/app.js && node --check apps/sistema-og/data.js && node --check apps/sistema-og/server.mjs && node --check cloudflare/worker.mjs && node --check apps/sistema-og/workers/spreadsheet-worker.js && node --check scripts/start-og-lan.mjs && node --check scripts/release-gate.mjs && node --check apps/sistema-og/services/crm-service.js && node --check apps/sistema-og/services/interaction-service.js && node --check apps/sistema-og/services/whatsapp-service.js && node --check apps/sistema-og/services/call-ai-context.js && node --check apps/sistema-og/services/knowledge-selector.js && node --check apps/sistema-og/services/call-ai-prompts.js && node --check apps/sistema-og/services/ai-service.js && node --check apps/sistema-og/services/communication-service.js && node --check apps/sistema-og/services/data-safety-service.js && node --check apps/sistema-og/services/spreadsheet-import-service.js && node --check apps/sistema-og/services/prospect-parser.js && node --check apps/sistema-og/modules/sales-desk.js && node --check apps/sistema-og/modules/prospecting-engine.js && node --check apps/sistema-og/components/ui-components.js",
     "validate": "node scripts/validate.mjs",
     "hooks:setup": "node scripts/setup-git-hooks.mjs",
     "prepare": "node scripts/setup-git-hooks.mjs"
@@ -38,8 +47,5 @@
   "engines": {
     "node": ">=24 <25",
     "npm": ">=11"
-  },
-  "dependencies": {
-    "xlsx": "^0.18.5"
   }
 }

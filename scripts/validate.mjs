@@ -1,29 +1,7 @@
-import { spawnSync } from 'node:child_process';
+import {spawn} from 'node:child_process';
 import process from 'node:process';
-
-const steps = [
-  ['og:check'],
-  ['og:sales-desk:test'],
-  ['og:prospecting:test'],
-  ['og:call-ai:test'],
-  ['og:communication:test'],
-  ['og:spreadsheet:test'],
-  ['og:data-safety:test'],
-  ['og:product:test'],
-  ['og:ops:test'],
-  ['og:library:test'],
-  ['og:packages:test'],
-  ['og:performance:test'],
-  ['aiox:config-check']
-];
-
-for (const [script] of steps) {
-  console.log(`\n[validate] npm run ${script}`);
-  const result = process.platform === 'win32'
-    ? spawnSync(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', `npm.cmd run ${script}`], { stdio: 'inherit', shell: false })
-    : spawnSync('npm', ['run', script], { stdio: 'inherit', shell: false });
-  if (result.error) console.error(result.error.message);
-  if (result.status !== 0) process.exit(result.status || 1);
-}
-
-console.log('\nValidation suite: PASS');
+const scripts=['og:check','og:sales-desk:test','og:prospecting:test','og:call-ai:test','og:communication:test','og:spreadsheet:test','og:data-safety:test','og:backup-restore:test','og:product:test','og:ops:test','og:library:test','og:packages:test','og:performance:test','og:security:test','og:brain:check','release:gate','aiox:config-check'];
+function run(script){return new Promise(resolve=>{const command=process.platform==='win32'?(process.env.ComSpec||'cmd.exe'):'npm',args=process.platform==='win32'?['/d','/s','/c',`npm.cmd run ${script}`]:['run',script];const child=spawn(command,args,{stdio:['ignore','pipe','pipe'],shell:false});let output='';child.stdout.on('data',d=>output+=d);child.stderr.on('data',d=>output+=d);child.on('error',error=>resolve({script,code:1,output:`${output}\n${error.message}`}));child.on('close',code=>resolve({script,code:code||0,output}));});}
+const results=await Promise.all(scripts.map(run));
+for(const result of results){console.log(`\n[validate] npm run ${result.script}`);process.stdout.write(result.output);console.log(`[validate] ${result.script}: ${result.code===0?'PASS':'FAIL'}`);}
+const failed=results.filter(result=>result.code!==0);if(failed.length){console.error(`\nValidation suite: FAIL (${failed.map(x=>x.script).join(', ')})`);process.exit(1);}console.log('\nValidation suite: PASS');
