@@ -105,9 +105,13 @@
       }
     }
     const companyIds = new Set(companies.map(item => String(item.id)));
+    const contactIds = new Set(contacts.map(item => String(item.id)));
     const opportunityIds = new Set(opportunities.map(item => String(item.id)));
     for (const [key, items] of Object.entries({ contacts, opportunities, activities, tasks })) {
       for (const item of items) if (!companyIds.has(String(item.companyId))) errors.push(`${key} ${item.id || '?'} referencia companyId inexistente`);
+    }
+    for (const item of activities) {
+      if (item.contactId && !contactIds.has(String(item.contactId))) errors.push(`activity ${item.id || '?'} referencia contactId inexistente`);
     }
     for (const item of [...activities, ...tasks]) {
       if (item.opportunityId && !opportunityIds.has(String(item.opportunityId))) errors.push(`${item.entityType || 'registro'} ${item.id || '?'} referencia opportunityId inexistente`);
