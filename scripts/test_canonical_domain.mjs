@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import domain from '../apps/sistema-og/domain/canonical-domain.js';
+
+const now = '2026-09-26T12:00:00.000Z';
+const company = domain.createCompany({ id: 'COMP-1', name: 'Transportadora Exemplo', legacyLeadId: 'LEAD-1', cnpj: '12.345.678/0001-90' }, { now });
+const contact = domain.createContact({ id: 'CONT-1', companyId: company.id, name: 'João', phone: '(44) 99999-0000', isDecisionMaker: true }, { now });
+const opportunity = domain.createOpportunity({ id: 'OPP-1', companyId: company.id, title: 'Frota principal', valueCents: 150000 }, { now });
+const activity = domain.createActivity({ id: 'ACT-1', companyId: company.id, contactId: contact.id, opportunityId: opportunity.id, type: 'call', summary: 'Diagnóstico' }, { now });
+const task = domain.createTask({ id: 'TASK-1', companyId: company.id, opportunityId: opportunity.id, title: 'Retornar proposta', dueAt: '2026-09-27T15:00:00-03:00' }, { now });
+
+assert.equal(company.legacyLeadId, 'LEAD-1');
+assert.equal(company.cnpj, '12345678000190');
+assert.equal(contact.phone, '44999990000');
+assert.equal(opportunity.valueCents, 150000);
+assert.equal(activity.occurredAt, now);
+assert.equal(task.dueAt, '2026-09-27T18:00:00.000Z');
+
+const graph = { ...domain.createEmptyGraph(), companies: [company], contacts: [contact], opportunities: [opportunity], activities: [activity], tasks: [task] };
+assert.deepEqual(domain.validateGraph(graph), { valid: true, errors: [] });
+
+const orphan = { ...graph, contacts: [{ ...contact, id: 'CONT-2', companyId: 'MISSING' }] };
+assert.equal(domain.validateGraph(orphan).valid, false);
+assert.match(domain.validateGraph(orphan).errors.join('\n'), /companyId inexistente/);
+
+assert.throws(() => domain.createCompany({ id: 'COMP-X' }, { now }), /name/);
+assert.throws(() => domain.createContact({ id: 'CONT-X', name: 'Sem empresa' }, { now }), /companyId/);
+assert.throws(() => domain.createOpportunity({ id: 'OPP-X' }, { now }), /companyId/);
+assert.throws(() => domain.createTask({ id: 'TASK-X', companyId: 'COMP-1' }, { now }), /title/);
+
+console.log('Canonical domain contract test: PASS');
