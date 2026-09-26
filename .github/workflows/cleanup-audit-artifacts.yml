@@ -1,0 +1,154 @@
+name: Cleanup Audit Artifacts
+
+on:
+  schedule:
+    # Every Sunday at 03:30 UTC.
+    - cron: '30 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      keep_days:
+        description: 'Keep audit artifacts newer than this many days'
+        required: false
+        default: '30'
+        type: string
+      dry_run:
+        description: 'Report candidates without deleting them'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cleanup-audit-artifacts-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Remove stale audit artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Clean stale Package 00R artifacts
+        id: cleanup
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP_DAYS: ${{ inputs.keep_days || '30' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$KEEP_DAYS" =~ ^[0-9]+$ ]] || [ "$KEEP_DAYS" -lt 1 ]; then
+            echo "KEEP_DAYS must be a positive integer" >&2
+            exit 1
+          fi
+
+          cutoff_epoch="$(date -u -d "${KEEP_DAYS} days ago" +%s)"
+          cutoff_iso="$(date -u -d "@${cutoff_epoch}" --iso-8601=seconds)"
+          summary_file="$RUNNER_TEMP/package-00r-artifact-cleanup.md"
+          candidates=0
+          deleted=0
+          retained=0
+          ignored=0
+          failed=0
+
+          {
+            echo "# Package 00R Artifact Cleanup"
+            echo
+            echo "- Repository: \`${GITHUB_REPOSITORY}\`"
+            echo "- Run: [#${GITHUB_RUN_NUMBER}](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo "- Execution: \`${GITHUB_EVENT_NAME}\`"
+            echo "- Policy: preserve audit artifacts newer than \`${KEEP_DAYS}\` days"
+            echo "- Cutoff UTC: \`${cutoff_iso}\`"
+            echo "- Mode: \`${DRY_RUN}\`"
+            echo
+            echo "| Action | Artifact | Created | Details |"
+            echo "|---|---|---|---|"
+          } > "$summary_file"
+
+          while IFS=$'\t' read -r artifact_id artifact_name created_at expired; do
+            [ -n "$artifact_id" ] || continue
+
+            case "$artifact_name" in
+              package-00r-audit-*)
+                created_epoch="$(date -u -d "$created_at" +%s)"
+                if [ "$created_epoch" -lt "$cutoff_epoch" ]; then
+                  candidates=$((candidates + 1))
+                  if [ "$DRY_RUN" = "true" ]; then
+                    echo "| DRY RUN | \`${artifact_name}\` | \`${created_at}\` | would delete ID \`${artifact_id}\` |" >> "$summary_file"
+                  else
+                    if gh api --method DELETE \
+                      -H 'Accept: application/vnd.github+json' \
+                      "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}"; then
+                      deleted=$((deleted + 1))
+                      echo "| DELETED | \`${artifact_name}\` | \`${created_at}\` | ID \`${artifact_id}\` |" >> "$summary_file"
+                    else
+                      failed=$((failed + 1))
+                      echo "| ERROR | \`${artifact_name}\` | \`${created_at}\` | failed to delete ID \`${artifact_id}\` |" >> "$summary_file"
+                    fi
+                  fi
+                else
+                  retained=$((retained + 1))
+                  echo "| RETAINED | \`${artifact_name}\` | \`${created_at}\` | newer than cutoff |" >> "$summary_file"
+                fi
+                ;;
+              package-00r-release-evidence-*)
+                retained=$((retained + 1))
+                echo "| RETAINED | \`${artifact_name}\` | \`${created_at}\` | formal release evidence excluded from cleanup |" >> "$summary_file"
+                ;;
+              *)
+                ignored=$((ignored + 1))
+                ;;
+            esac
+          done < <(
+            gh api --paginate \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+              --jq '.artifacts[] | [.id, .name, .created_at, .expired] | @tsv'
+          )
+
+          {
+            echo
+            echo "## Totals"
+            echo
+            echo "- Candidates older than cutoff: **${candidates}**"
+            echo "- Deleted: **${deleted}**"
+            echo "- Retained: **${retained}**"
+            echo "- Ignored outside cleanup scope: **${ignored}**"
+            echo "- Deletion errors: **${failed}**"
+          } >> "$summary_file"
+
+          cat "$summary_file" >> "$GITHUB_STEP_SUMMARY"
+          echo "summary_file=$summary_file" >> "$GITHUB_OUTPUT"
+          echo "deleted=$deleted" >> "$GITHUB_OUTPUT"
+          echo "candidates=$candidates" >> "$GITHUB_OUTPUT"
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+
+          if [ "$failed" -gt 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload cleanup summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-00r-cleanup-summary-${{ github.run_number }}
+          path: ${{ steps.cleanup.outputs.summary_file }}
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Publish cleanup result
+        if: always()
+        run: |
+          {
+            echo
+            echo "## Cleanup result"
+            echo "- Candidates: \`${{ steps.cleanup.outputs.candidates || '0' }}\`"
+            echo "- Deleted: \`${{ steps.cleanup.outputs.deleted || '0' }}\`"
+            echo "- Errors: \`${{ steps.cleanup.outputs.failed || '0' }}\`"
+            echo "- Summary artifact: \`package-00r-cleanup-summary-${GITHUB_RUN_NUMBER}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
