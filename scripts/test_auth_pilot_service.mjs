@@ -49,6 +49,23 @@ const blocked = await authPilot.bootstrap({ storage: configured, createClient: (
 assert.equal(blocked.mode, 'blocked');
 assert.equal(blocked.reason, 'membership_missing');
 
+const multiOrgClient = makeClient('https://example.supabase.co', 'public-test-key');
+multiOrgClient.from = table => {
+  const query = {
+    select(){ return query; }, eq(){ return query; },
+    maybeSingle: async () => ({ data: table === 'profiles' ? { id: 'USER-1' } : null, error: null }),
+    then(resolve){ return Promise.resolve({ data: table === 'organization_members' ? [
+      { organization_id: 'ORG-1', role: 'owner', status: 'active' },
+      { organization_id: 'ORG-2', role: 'member', status: 'active' }
+    ] : [], error: null }).then(resolve); }
+  };
+  return query;
+};
+const multiOrg = await authPilot.bootstrap({ storage: configured, createClient: () => multiOrgClient });
+assert.equal(multiOrg.mode, 'blocked');
+assert.equal(multiOrg.reason, 'organization_selection_required');
+
+
 const signedOutClient = { auth: { getUser: async () => ({ data: { user: null }, error: null }) }, from(){ throw new Error('não deve consultar tabelas sem usuário'); } };
 const signedOut = await authPilot.bootstrap({ storage: configured, createClient: () => signedOutClient });
 assert.equal(signedOut.mode, 'auth_required');
