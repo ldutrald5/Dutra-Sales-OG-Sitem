@@ -29,6 +29,14 @@ assert.equal(conflictingCode.matched,0);
 assert.equal(conflictingCode.ambiguous,1);
 assert.equal(conflictingCode.leads[1].importMeta.seedConflictingCodeMatch,true);
 
+const compatibleCode = mergeSeedLeads(
+  [{ id:'CODE-C', empresa:'TIRAFINATRANSPORTESLTDA', internalCode:'009359' }],
+  [{ id:'CODE-D', empresa:'TIRAFINA TRANSPORTES LTDA', internalCode:'9359', email:'contato@example.com' }]
+);
+assert.equal(compatibleCode.leads.length,1,'mesmo código com grafia compatível deve conciliar');
+assert.equal(compatibleCode.matched,1);
+assert.equal(compatibleCode.leads[0].email,'contato@example.com');
+
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-'));
 const volume=path.join(tmp,'volume');
 fs.mkdirSync(volume,{recursive:true});
