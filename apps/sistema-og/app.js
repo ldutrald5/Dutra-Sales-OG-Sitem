@@ -3587,6 +3587,286 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 
+  function clientCodeLabel(lead) {
+    return String(lead?.internalCode || '').trim();
+  }
+
+  function clientSheetStatusOptions(current) {
+    return (OG_DATA.leadStatuses || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('');
+  }
+
+  function clientSheetSegmentOptions(current) {
+    return (OG_DATA.segments || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('');
+  }
+
+  function clientSheetExtraPhoneRow(item = {}) {
+    return `<div class="client-sheet-repeat-row" data-extra-phone-row>
+      <input data-extra-label value="${escapeHtml(item.label || '')}" placeholder="Ex.: Financeiro">
+      <input data-extra-phone value="${escapeHtml(item.phone || '')}" inputmode="tel" placeholder="(44) 99999-9999">
+      <button type="button" data-remove-repeat aria-label="Remover telefone">×</button>
+    </div>`;
+  }
+
+  function clientSheetReferralRow(item = {}) {
+    return `<div class="client-sheet-referral-row" data-referral-row>
+      <input data-referral-name value="${escapeHtml(item.name || '')}" placeholder="Nome">
+      <input data-referral-company value="${escapeHtml(item.company || '')}" placeholder="Empresa">
+      <input data-referral-phone value="${escapeHtml(item.phone || '')}" inputmode="tel" placeholder="Telefone">
+      <input data-referral-note value="${escapeHtml(item.note || '')}" placeholder="Observação / relação">
+      <button type="button" data-remove-repeat aria-label="Remover indicação">×</button>
+    </div>`;
+  }
+
+  function closeClientSheet() {
+    document.getElementById('client-sheet-overlay')?.remove();
+  }
+
+  function openClientSheet(leadId) {
+    const lead = OG_CRM_SERVICE.getLeadById(state.leads, leadId);
+    if (!lead) return;
+    closeClientSheet();
+    state.selectedLeadId = lead.id;
+    const code = clientCodeLabel(lead);
+    const recent = OG_SALES_DESK.lastInteraction(lead);
+    const overlay = document.createElement('div');
+    overlay.id = 'client-sheet-overlay';
+    overlay.className = 'client-sheet-overlay';
+    overlay.innerHTML = `
+      <aside class="client-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="client-sheet-title">
+        <header class="client-sheet-header">
+          <div>
+            <span class="og-kicker">FICHA DO CLIENTE</span>
+            <h2 id="client-sheet-title">${escapeHtml(lead.empresa || lead.nome || 'Cliente')}</h2>
+            <div class="client-sheet-badges">
+              <span class="client-sheet-code" data-has-code="${code ? 'true' : 'false'}">${code ? 'Código OG · ' + escapeHtml(code) : 'Sem código OG'}</span>
+              <span class="client-sheet-status-badge">${escapeHtml((OG_DATA.leadStatuses || []).find(item => item.id === lead.status)?.label || lead.status || 'Novo')}</span>
+            </div>
+            <small class="client-sheet-code-help">O Código OG identifica o cadastro no sistema da empresa. Ter código não significa que já comprou.</small>
+          </div>
+          <button type="button" class="client-sheet-close" data-client-sheet-close aria-label="Fechar ficha">×</button>
+        </header>
+
+        <div class="client-sheet-quick-actions">
+          <button type="button" data-sheet-whatsapp>WhatsApp</button>
+          <a href="tel:${escapeHtml(lead.telefone || '')}">Ligar</a>
+          <button type="button" data-sheet-call-ai>Call AI</button>
+          <button type="button" data-sheet-quote>Cotar</button>
+        </div>
+
+        <div class="client-sheet-summary">
+          <div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div>
+          <div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Nenhuma conversa registrada')}</span></div>
+        </div>
+
+        <form id="client-sheet-form" class="client-sheet-form">
+          <section>
+            <div class="client-sheet-section-title"><div><span>DADOS PRINCIPAIS</span><small>Edite aqui sem sair da sua rotina.</small></div></div>
+            <div class="client-sheet-grid">
+              <label class="span-2">Empresa<input name="empresa" value="${escapeHtml(lead.empresa || '')}" required></label>
+              <label>Contato principal<input name="nome" value="${escapeHtml(lead.nome || '')}"></label>
+              <label>Código OG<input name="internalCode" value="${escapeHtml(code)}" inputmode="numeric" placeholder="Ex.: 4626261"><small>Digite o código gerado no sistema OG. Não é gerado automaticamente aqui.</small></label>
+              <label>Telefone principal<input name="telefone" value="${escapeHtml(lead.telefone || '')}" inputmode="tel"></label>
+              <label>E-mail<input name="email" type="email" value="${escapeHtml(lead.email || '')}"></label>
+              <label>CNPJ<input name="cnpj" value="${escapeHtml(lead.cnpj || '')}" inputmode="numeric"></label>
+              <label>Cidade / UF<input name="cidadeUf" value="${escapeHtml(lead.cidadeUf || '')}"></label>
+              <label>Segmento<select name="segmentId">${clientSheetSegmentOptions(lead.segmentId)}</select></label>
+              <label>Status comercial<select name="status">${clientSheetStatusOptions(lead.status)}</select></label>
+              <label>Prioridade<select name="priority"><option value="alta" ${lead.priority === 'alta' ? 'selected' : ''}>Alta</option><option value="media" ${lead.priority === 'media' ? 'selected' : ''}>Média</option><option value="baixa" ${lead.priority === 'baixa' ? 'selected' : ''}>Baixa</option></select></label>
+            </div>
+          </section>
+
+          <section>
+            <div class="client-sheet-section-title"><div><span>TELEFONES</span><small>Principal acima; adicione outros números sem perder nenhum contato.</small></div><button type="button" data-add-extra-phone>＋ Número</button></div>
+            <div class="client-sheet-repeat-list" data-extra-phone-list>
+              ${(lead.additionalPhones || []).map(clientSheetExtraPhoneRow).join('') || '<p class="client-sheet-empty-repeat" data-empty-extra>Nenhum número adicional.</p>'}
+            </div>
+          </section>
+
+          <section>
+            <div class="client-sheet-section-title"><div><span>OPERAÇÃO COMERCIAL</span><small>O que preciso saber antes de ligar.</small></div></div>
+            <div class="client-sheet-grid">
+              <label>Decisor<input name="decisionMaker" value="${escapeHtml(lead.decisionMaker || '')}" placeholder="Nome / cargo"></label>
+              <label>Frota estimada<input name="fleetSize" type="number" min="0" value="${Number(lead.fleetSize || 0)}"></label>
+              <label class="span-2">Dor principal<textarea name="pain" rows="2" placeholder="Problema confirmado na operação">${escapeHtml(lead.pain || '')}</textarea></label>
+              <label class="span-2">Objeções<textarea name="objections" rows="2" placeholder="Uma por linha">${escapeHtml((lead.objections || []).join('\n'))}</textarea></label>
+              <label>Próxima ação<input name="nextAction" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para o gestor"></label>
+              <label>Data do retorno<input name="followUpAt" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label>
+              <label class="span-2">Observações<textarea name="observacoes" rows="4" placeholder="Informações úteis, contexto, detalhes do cliente">${escapeHtml(lead.observacoes || '')}</textarea></label>
+            </div>
+          </section>
+
+          <section>
+            <div class="client-sheet-section-title"><div><span>INDICAÇÕES</span><small>Registre quem esse cliente indicou para você abordar depois.</small></div><button type="button" data-add-referral>＋ Indicação</button></div>
+            <div class="client-sheet-repeat-list" data-referral-list>
+              ${(lead.referrals || []).map(clientSheetReferralRow).join('') || '<p class="client-sheet-empty-repeat" data-empty-referral>Nenhuma indicação registrada.</p>'}
+            </div>
+          </section>
+
+          <div class="client-sheet-warning ${lead.status === 'fechado' && !code ? '' : 'hidden'}" data-code-warning>
+            Venda marcada como fechada sem Código OG. Cadastre o cliente no sistema da empresa e informe o código aqui quando ele for gerado.
+          </div>
+
+          <footer class="client-sheet-footer">
+            <button type="button" data-client-sheet-close>Cancelar</button>
+            <button type="submit" class="og-button og-button-primary">Salvar ficha</button>
+          </footer>
+        </form>
+      </aside>`;
+    document.body.appendChild(overlay);
+
+    const panel = overlay.querySelector('.client-sheet-panel');
+    const form = overlay.querySelector('#client-sheet-form');
+    const extraList = overlay.querySelector('[data-extra-phone-list]');
+    const referralList = overlay.querySelector('[data-referral-list]');
+
+    overlay.querySelectorAll('[data-client-sheet-close]').forEach(button => button.addEventListener('click', closeClientSheet));
+    overlay.addEventListener('click', event => { if (event.target === overlay) closeClientSheet(); });
+    panel.addEventListener('click', event => event.stopPropagation());
+
+    const bindRemovers = root => root.querySelectorAll('[data-remove-repeat]').forEach(button => {
+      button.onclick = () => {
+        button.closest('[data-extra-phone-row], [data-referral-row]')?.remove();
+      };
+    });
+    bindRemovers(overlay);
+
+    overlay.querySelector('[data-add-extra-phone]')?.addEventListener('click', () => {
+      extraList.querySelector('[data-empty-extra]')?.remove();
+      extraList.insertAdjacentHTML('beforeend', clientSheetExtraPhoneRow());
+      bindRemovers(extraList);
+      extraList.querySelector('[data-extra-phone-row]:last-child [data-extra-phone]')?.focus();
+    });
+    overlay.querySelector('[data-add-referral]')?.addEventListener('click', () => {
+      referralList.querySelector('[data-empty-referral]')?.remove();
+      referralList.insertAdjacentHTML('beforeend', clientSheetReferralRow());
+      bindRemovers(referralList);
+      referralList.querySelector('[data-referral-row]:last-child [data-referral-name]')?.focus();
+    });
+
+    overlay.querySelector('[data-sheet-whatsapp]')?.addEventListener('click', () => openDeskWhatsApp(OG_CRM_SERVICE.getLeadById(state.leads, lead.id) || lead));
+    overlay.querySelector('[data-sheet-call-ai]')?.addEventListener('click', () => {
+      closeClientSheet();
+      state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
+      state.callAI.returnTab = state.currentTab || 'dia';
+      state.callAI.selectedLeadId = lead.id;
+      switchTab('call-ai');
+      selectCallClient(lead.id);
+    });
+    overlay.querySelector('[data-sheet-quote]')?.addEventListener('click', () => {
+      state.client.nome = lead.nome || '';
+      state.client.empresa = lead.empresa || '';
+      state.client.cnpj = lead.cnpj || '';
+      state.client.telefone = lead.telefone || '';
+      state.client.cidadeUf = lead.cidadeUf || '';
+      state.client.segmentId = lead.segmentId || 'transportadora';
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      setVal('client-name', state.client.nome);
+      setVal('client-company', state.client.empresa);
+      setVal('client-cnpj', state.client.cnpj);
+      setVal('client-phone', state.client.telefone);
+      setVal('client-city', state.client.cidadeUf);
+      closeClientSheet();
+      switchTab('cotacao');
+      recalculateQuote();
+    });
+
+    form.addEventListener('change', event => {
+      if (event.target.name === 'status') {
+        const codeValue = form.elements.internalCode?.value.trim();
+        overlay.querySelector('[data-code-warning]')?.classList.toggle('hidden', event.target.value !== 'fechado' || Boolean(codeValue));
+      }
+      if (event.target.name === 'internalCode') {
+        overlay.querySelector('[data-code-warning]')?.classList.toggle('hidden', form.elements.status?.value !== 'fechado' || Boolean(event.target.value.trim()));
+      }
+    });
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const internalCode = String(data.get('internalCode') || '').trim();
+      const conflict = OG_CRM_SERVICE.findInternalCodeConflict(state.leads, internalCode, lead.id);
+      if (conflict) {
+        showNotification(`Código OG já usado por ${conflict.empresa || conflict.nome}. Revise antes de salvar.`, 'warning');
+        return;
+      }
+      const additionalPhones = [...overlay.querySelectorAll('[data-extra-phone-row]')].map(row => ({
+        label: row.querySelector('[data-extra-label]')?.value || '',
+        phone: row.querySelector('[data-extra-phone]')?.value || '',
+        whatsapp: true
+      }));
+      const referrals = [...overlay.querySelectorAll('[data-referral-row]')].map(row => ({
+        name: row.querySelector('[data-referral-name]')?.value || '',
+        company: row.querySelector('[data-referral-company]')?.value || '',
+        phone: row.querySelector('[data-referral-phone]')?.value || '',
+        note: row.querySelector('[data-referral-note]')?.value || ''
+      }));
+      const before = OG_CRM_SERVICE.normalizeLead(lead);
+      let updated;
+      try {
+        updated = OG_CRM_SERVICE.updateLeadProfile(lead, {
+          empresa: data.get('empresa'),
+          nome: data.get('nome'),
+          internalCode,
+          telefone: data.get('telefone'),
+          additionalPhones,
+          email: data.get('email'),
+          cnpj: data.get('cnpj'),
+          cidadeUf: data.get('cidadeUf'),
+          segmentId: data.get('segmentId'),
+          status: data.get('status'),
+          priority: data.get('priority'),
+          decisionMaker: data.get('decisionMaker'),
+          fleetSize: Number(data.get('fleetSize') || 0),
+          pain: data.get('pain'),
+          objections: String(data.get('objections') || '').split(/\r?\n|,/).map(item => item.trim()).filter(Boolean),
+          nextAction: data.get('nextAction'),
+          followUpAt: data.get('followUpAt'),
+          referrals,
+          observacoes: data.get('observacoes')
+        });
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível salvar a ficha.', 'warning');
+        return;
+      }
+      const changedFields = OG_CRM_SERVICE.diffProfile(before, updated);
+      if (!changedFields.length) {
+        showNotification('Nenhuma alteração na ficha.', 'info');
+        return;
+      }
+      const index = state.leads.findIndex(item => String(item.id) === String(lead.id));
+      state.leads.splice(index, 1, updated);
+      const now = new Date().toISOString();
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+        id: newLibraryId('evt'),
+        type: 'client.profile.updated',
+        at: now,
+        clientId: lead.id,
+        changedFields,
+        source: 'client-sheet'
+      });
+      if (String(before.internalCode || '') !== String(updated.internalCode || '')) {
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+          id: newLibraryId('evt'),
+          type: 'client.og_code.updated',
+          at: now,
+          clientId: lead.id,
+          previousCode: before.internalCode || null,
+          internalCode: updated.internalCode || null,
+          note: 'Código de cadastro OG; independente do status de compra.'
+        });
+      }
+      saveLeadsToStorage();
+      saveOperationsToStorage();
+      renderDayDashboard();
+      renderCrmModule();
+      closeClientSheet();
+      openClientSheet(updated.id);
+      showNotification(`Ficha salva · ${changedFields.length} campo(s) atualizado(s).`, 'success');
+    });
+
+    setTimeout(() => form.elements.empresa?.focus(), 40);
+  }
+
   function renderSalesDeskClient() {
     const root = document.getElementById('sales-desk-client');
     if (!root) return;
@@ -3606,7 +3886,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       switchTab('call-ai');
       selectCallClient(lead.id);
     });
-    root.querySelector('[data-client-crm]').addEventListener('click', () => { state.selectedLeadId = lead.id; switchTab('crm'); });
+    root.querySelector('[data-client-crm]').addEventListener('click', () => openClientSheet(lead.id));
     root.querySelectorAll('[data-desk-template]').forEach(button => button.addEventListener('click', () => openDeskMessageComposer(lead, button.dataset.deskTemplate)));
     root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => {
       if (button.dataset.futureAction === 'E-mail') return openCommunicationForLead(lead);
