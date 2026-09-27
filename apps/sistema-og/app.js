@@ -226,8 +226,19 @@ document.addEventListener('DOMContentLoaded', () => {
     banner.setAttribute('role', 'alert');
     banner.innerHTML = `
       <div><strong>⚠ Alterações em outro dispositivo</strong><span>Local r${conflict.local.revision} · Servidor r${conflict.remote.revision} · ${different} divergente(s), ${localOnly} só local, ${remoteOnly} só servidor.</span></div>
-      <div class="og-sync-conflict-actions"><button type="button" data-sync-review>Revisar sem sobrescrever</button><button type="button" data-sync-server>Usar versão do servidor</button></div>`;
+      <div class="og-sync-conflict-actions"><button type="button" data-sync-details>Ver divergências</button><button type="button" data-sync-review>Preparar conciliação</button><button type="button" data-sync-server>Usar versão do servidor</button></div>`;
     document.body.prepend(banner);
+    banner.querySelector('[data-sync-details]')?.addEventListener('click', () => {
+      const rows = OG_SYNC_CONFLICT.differences(conflict);
+      document.getElementById('og-sync-conflict-detail')?.remove();
+      const panel = document.createElement('section');
+      panel.id = 'og-sync-conflict-detail';
+      panel.className = 'og-sync-conflict-detail';
+      const kind = { different: 'DIVERGENTE', only_local: 'SÓ NESTE APARELHO', only_remote: 'SÓ NO SERVIDOR' };
+      panel.innerHTML = `<header><div><strong>Revisão de conflitos</strong><span>${rows.length} registro(s) exigem atenção antes do próximo envio.</span></div><button type="button" data-close-conflicts>Fechar</button></header><div class="og-sync-conflict-list">${rows.slice(0, 100).map(row => `<article><div><b>${escapeHtml(row.label || row.id)}</b><small>${escapeHtml(row.type)} · ${kind[row.kind] || row.kind}</small></div><span>${row.fields?.length ? 'Campos: ' + row.fields.map(escapeHtml).join(', ') : 'Registro existe em apenas uma versão'}</span></article>`).join('') || '<p>Nenhuma divergência por ID encontrada.</p>'}</div>`;
+      document.body.appendChild(panel);
+      panel.querySelector('[data-close-conflicts]')?.addEventListener('click', () => panel.remove());
+    });
     banner.querySelector('[data-sync-review]')?.addEventListener('click', () => {
       const review = OG_SYNC_CONFLICT.mergeForReview(conflict, OG_DATA_SAFETY, OG_OPERATIONS_MODEL);
       const ok = confirm('Preparar uma versão conciliada neste aparelho? Nada será enviado ao servidor até você confirmar novamente.');
@@ -239,9 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
       localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+      sessionStorage.setItem('og_sync_review_pending', JSON.stringify({ preparedAt: new Date().toISOString(), baseRevision: review.revision }));
       clearSyncConflict();
-      setSyncStatus('Revisão local preparada', 'busy');
-      showNotification('Versão conciliada preparada somente neste aparelho. Revise os dados antes de sincronizar.', 'warning');
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showNotification('Conciliação preparada neste aparelho. Revise e use “Enviar revisão” quando estiver pronto.', 'warning');
+      showSyncReviewBanner();
       renderDayDashboard();
       if (state.currentTab === 'crm') renderCrmModule();
     });
@@ -261,8 +274,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function pendingSyncReview() {
+    try { return JSON.parse(sessionStorage.getItem('og_sync_review_pending') || 'null'); }
+    catch { return null; }
+  }
+
+  function showSyncReviewBanner() {
+    if (!pendingSyncReview() || document.getElementById('og-sync-review-banner')) return;
+    const banner = document.createElement('aside');
+    banner.id = 'og-sync-review-banner';
+    banner.className = 'og-sync-review-banner';
+    banner.innerHTML = '<div><strong>Conciliação preparada localmente</strong><span>Nenhum dado conciliado foi enviado ainda.</span></div><button type="button" data-send-review>Enviar revisão</button>';
+    document.body.prepend(banner);
+    banner.querySelector('[data-send-review]')?.addEventListener('click', async () => {
+      if (!confirm('Enviar agora a versão conciliada usando a revisão atual do servidor?')) return;
+      const pending = pendingSyncReview();
+      try {
+        const response = await apiFetch('/api/state', { method: 'PUT', body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision }) });
+        if (response.status === 409) {
+          sessionStorage.removeItem('og_sync_review_pending');
+          banner.remove();
+          const remote = await response.json();
+          const conflict = OG_SYNC_CONFLICT.createConflict({ leads: state.leads, history: state.history, operations: state.operations }, pending.baseRevision, remote);
+          sessionStorage.setItem('og_sync_conflict', JSON.stringify(conflict));
+          showSyncConflictBanner(conflict);
+          setSyncStatus('Novo conflito detectado', 'conflict');
+          return;
+        }
+        if (!response.ok) throw new Error('Servidor indisponível');
+        const saved = await response.json();
+        serverRevision = Number(saved.revision || pending.baseRevision);
+        sessionStorage.removeItem('og_sync_review_pending');
+        banner.remove();
+        setSyncStatus('Sincronizado', 'ok');
+        showNotification('Revisão conciliada sincronizada.', 'success');
+      } catch { setSyncStatus('Revisão aguardando envio', 'offline'); }
+    });
+  }
+
   function scheduleServerSync() {
     clearTimeout(serverSyncTimer);
+    if (pendingSyncReview()) {
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showSyncReviewBanner();
+      return;
+    }
     if (pendingSyncConflict()) {
       setSyncStatus('Conflito de sincronização', 'conflict');
       showSyncConflictBanner();
