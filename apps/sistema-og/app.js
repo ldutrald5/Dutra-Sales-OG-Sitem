@@ -3708,6 +3708,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <section class="company-360-beta company-360-beta-empty" aria-label="Company 360 Beta">
           <div><span class="og-kicker">COMPANY 360 · BETA</span><strong>Conta ainda não reconciliada</strong></div>
           <p>Este lead continua no modelo legado. Nenhuma Company canônica será criada automaticamente.</p>
+          <button type="button" class="company-360-action" data-company360-create>Revisar e criar Company</button>
         </section>`;
     }
     const view = service.buildCompany360(operations, company.id);
@@ -3730,7 +3731,49 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div><small>CONTATOS</small><ul>${contactNames || '<li><span>Nenhum contato canônico</span></li>'}</ul></div>
           <div><small>OPORTUNIDADES ABERTAS</small><ul>${opportunityNames || '<li><span>Nenhuma oportunidade aberta</span></li>'}</ul></div>
         </div>
+        <div class="company-360-actions"><button type="button" class="company-360-action" data-company360-edit>Editar Company</button><button type="button" class="company-360-action" data-company360-contact>＋ Contato</button></div>
       </section>`;
+  }
+
+  function bindCompany360BetaPanel(lead) {
+    const root = document.getElementById('crm-lead-inspector');
+    if (!root || !window.OG_CANONICAL_EDITOR || !window.OG_CANONICAL_DOMAIN) return;
+    const persist = result => {
+      state.operations = result.graph;
+      saveOperationsToStorage();
+      renderLeadInspector();
+      showNotification('Company 360 atualizada.', 'success');
+    };
+    root.querySelector('[data-company360-create]')?.addEventListener('click', () => {
+      const name = prompt('Confirme o nome da empresa:', lead.empresa || lead.nome || '');
+      if (!name?.trim()) return;
+      const cnpj = prompt('CNPJ da empresa (opcional):', lead.cnpj || '') ?? '';
+      if (!confirm(`Criar Company canônica para "${name.trim()}" e vinculá-la somente ao lead ${lead.id}?`)) return;
+      try {
+        persist(OG_CANONICAL_EDITOR.saveCompany(state.operations, { id: newLibraryId('company'), name, cnpj, legacyLeadId: lead.id, segment: lead.segmentId || null, status: 'prospect' }, { domain: OG_CANONICAL_DOMAIN }));
+      } catch (error) { showNotification(error.message, 'warning'); }
+    });
+    root.querySelector('[data-company360-edit]')?.addEventListener('click', () => {
+      const company = (state.operations.companies || []).find(item => item?.entityType === 'company' && String(item.legacyLeadId || '') === String(lead.id));
+      if (!company) return;
+      const name = prompt('Nome da Company:', company.name || '');
+      if (!name?.trim()) return;
+      const cnpj = prompt('CNPJ:', company.cnpj || '') ?? '';
+      try { persist(OG_CANONICAL_EDITOR.saveCompany(state.operations, { id: company.id, name, cnpj, legacyLeadId: company.legacyLeadId, segment: company.segment, status: company.status }, { domain: OG_CANONICAL_DOMAIN })); }
+      catch (error) { showNotification(error.message, 'warning'); }
+    });
+    root.querySelector('[data-company360-contact]')?.addEventListener('click', () => {
+      const company = (state.operations.companies || []).find(item => item?.entityType === 'company' && String(item.legacyLeadId || '') === String(lead.id));
+      if (!company) return;
+      const name = prompt('Nome do contato:');
+      if (!name?.trim()) return;
+      const role = prompt('Cargo / papel:', '') ?? '';
+      const phone = prompt('Telefone:', '') ?? '';
+      const email = prompt('E-mail:', '') ?? '';
+      const isDecisionMaker = confirm('Este contato é decisor?');
+      try { persist(OG_CANONICAL_EDITOR.saveContact(state.operations, { id: newLibraryId('contact'), companyId: company.id, name, role, phone, email, isDecisionMaker }, { domain: OG_CANONICAL_DOMAIN })); }
+      catch (error) { showNotification(error.message, 'warning'); }
+    });
   }
 
   function renderLeadInspector() {
@@ -3819,6 +3862,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     `;
 
     inspector.insertAdjacentHTML('beforeend', buildCompany360BetaPanel(lead));
+    bindCompany360BetaPanel(lead);
     inspector.insertAdjacentHTML('beforeend', buildCommercialPanel(lead));
     bindCommercialPanel(lead);
     inspector.insertAdjacentHTML('beforeend', buildClientMaterialsPanel(lead, 'crm'));
