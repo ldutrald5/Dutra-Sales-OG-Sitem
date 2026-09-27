@@ -14,7 +14,7 @@ const updated = editor.saveCompany(created.graph, { id: 'C1', name: 'Dutra Trans
 assert.equal(updated.company.name, 'Dutra Transportes SA');
 assert.equal(updated.graph.companies.length, 1);
 
-assert.equal(updated.company.createdAt, now, 'createdAt original deve ser preservado');
+assert.equal(updated.company.createdAt, new Date(now).toISOString(), 'createdAt original deve ser preservado');
 assert.equal(updated.company.updatedAt, '2026-09-27T12:00:00.000Z', 'updatedAt deve avançar na edição');
 
 const invalidExisting = { ...updated.graph, contacts: [{ id: 'BROKEN', name: 'Legado sem entityType/companyId' }] };
