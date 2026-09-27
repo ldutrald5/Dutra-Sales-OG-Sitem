@@ -27,13 +27,15 @@ O servidor ganhou `/health` sem autenticação, limitado ao estado de prontidão
 
 ## Configuração Railway
 
-`railway.json` define:
-- builder Railpack;
-- start command `npm run og:start:hosted`;
-- healthcheck `/health`;
-- restart on failure.
+A auditoria de documentação oficial feita após o primeiro merge do 06R identificou uma mudança relevante do Railway: `railway.json` / Config as Code foi descontinuado para serviços novos. O hotfix atual remove esse arquivo e usa o caminho compatível com serviços novos:
 
-O volume deve ser montado pelo Railway. Quando presente, o runtime usa automaticamente `RAILWAY_VOLUME_MOUNT_PATH`.
+- `package.json -> scripts.start = "npm run og:start:hosted"`, permitindo detecção zero-config do Railpack;
+- healthcheck `/health` configurado no serviço Railway durante a criação/publicação;
+- segredo `OG_ACCESS_TOKEN` configurado no ambiente Railway;
+- domínio público gerado no serviço;
+- volume opcional/recomendado anexado pelo Railway; o runtime usa automaticamente `RAILWAY_VOLUME_MOUNT_PATH`.
+
+Não existe mais dependência de `railway.json` para o primeiro deploy.
 
 ## Segurança e limites
 
@@ -56,10 +58,11 @@ Novo gate `og:hosted:test`:
 - valida o shell HTML;
 - valida o diretório persistente configurável.
 
-`og:security:test` também passou a verificar:
+`og:security:test` também verifica:
 - token forte obrigatório;
 - `0.0.0.0` restrito ao entrypoint hospedado;
-- start command/healthcheck do Railway.
+- script `start` padrão apontando para o runtime hospedado;
+- ausência do `railway.json` legado no root.
 
 Primeiro CI do pacote: workflow run `36287750590` — **SUCCESS** em:
 - `npm ci`;
@@ -98,3 +101,8 @@ O 06R só fecha quando:
 ## Publicação externa
 
 A instalação/conexão do Railway no ChatGPT foi iniciada pelo usuário. O repositório está preparado para deploy. A etapa externa de criar o projeto/serviço/domínio Railway ainda precisa ocorrer antes de chamar o 06R de publicado.
+
+
+## Hotfix de compatibilidade Railway
+
+Depois do merge inicial da PR #11, a documentação Railway vigente em setembro de 2026 confirmou que serviços novos não podem mais adotar Config as Code legado. O hotfix remove `railway.json` e troca para o contrato atual de detecção via script `start` + configuração do serviço/Agent/CLI Railway. Este hotfix precisa passar pelos mesmos gates antes do deploy externo.
