@@ -8,13 +8,13 @@ Não há banco relacional. O navegador é a fonte operacional local e usa:
 |---|---|---|
 | localStorage | `og_leads_crm` | Contas/leads e interações incorporadas |
 | localStorage | `og_cotacoes_history` | Histórico e snapshots de cotações |
-| localStorage | `og_operations_state` | Envelope operacional `schemaVersion: 1` |
+| localStorage | `og_operations_state` | Envelope operacional `schemaVersion: 2` |
 | IndexedDB | `og-commercial-library` | Arquivos da Biblioteca Comercial |
 | IndexedDB/service worker | outbox | Sincronizações pendentes |
 | Servidor local | `.data/shared-state.json` | Espelho privado com revisão |
 | Cloudflare | KV opcional | Estado compartilhado remoto |
 
-O envelope operacional possui as coleções `contacts`, `callSessions`, `materials`, `materialShares`, `materialPackages`, `quotes`, `quoteTemplates`, `messageTemplates`, `documentTemplates`, `generatedDocuments`, `sales`, `commissions`, `partners`, `transporters`, `transporterCoverage`, `users`, `goals` e `activityEvents`. Nem todas estão preenchidas pelas telas atuais.
+O envelope operacional V2 adiciona `companies`, `contacts`, `opportunities`, `activities` e `tasks` à frente das coleções legadas. Ele também possui `contacts`, `callSessions`, `materials`, `materialShares`, `materialPackages`, `quotes`, `quoteTemplates`, `messageTemplates`, `documentTemplates`, `generatedDocuments`, `sales`, `commissions`, `partners`, `transporters`, `transporterCoverage`, `users`, `goals` e `activityEvents`. Nem todas estão preenchidas pelas telas atuais.
 
 ## Entidade central atual
 
@@ -49,7 +49,7 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 
 ## Lacunas
 
-- Normalização de Company/Contact/Opportunity.
+- Reconciliação em massa do legado para Company/Contact/Opportunity ainda não foi executada.
 - Backup e restauração visíveis ao usuário.
 - Conflito por campo e idempotência integral.
 - Políticas de retenção e descarte de áudio.

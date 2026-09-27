@@ -2,11 +2,13 @@
 
 ## Resultado atual
 
-**PACKAGE 02R — IMPLEMENTADO EM BRANCH; AGUARDANDO CI E VALIDAÇÃO REMOTA DO PILOTO**
+**PACKAGE 02R — MERGED; FUNDAÇÃO LOCAL/CI CONCLUÍDA, VALIDAÇÃO REMOTA DO PILOTO PENDENTE**
 
 ## Baseline e escopo
 
-- Base: `main@4e062cf1228a407eccc688b7b00254ef44bf3ded`
+- Base de implementação: `main@4e062cf1228a407eccc688b7b00254ef44bf3ded`
+- Merge no main: `89e3eff4c78149659cfe3ac6b86f187b14d0297c`
+- CI de merge: workflow run `36280476976` — SUCCESS
 - Branch: `package-02r-auth-organization-pilot`
 - Objetivo: fundação de identidade Supabase Auth, fronteira de Organization e autorização multi-tenant sem substituir o acesso legado.
 - Fora do escopo: Company 360, migração de leads/clientes, corte do token Cloudflare, deploy e ativação obrigatória de login.
