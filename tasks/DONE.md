@@ -106,3 +106,15 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Segurança:** nenhum cliente real foi versionado no Git; o motor não altera estágio comercial sozinho.
 - **Validação:** `og:lead-intelligence:test` incluído na suíte; primeira execução de CI bloqueou uma regressão de contrato textual do Código OG e a execução seguinte passou após correção.
 - **Arquivos principais:** `modules/lead-intelligence.js`, `services/crm-service.js`, `app.js`, `index.html`, `styles.css`, `scripts/test_lead_intelligence.mjs`.
+
+
+## CIC-01 — Next Best Action + Score Explicável
+
+- **Data:** 2026-09-27.
+- **Mudança observável:** a mesma priorização determinística que ordena a carteira passa a explicar os fatores do score; a Ficha Universal mostra o Próximo Movimento com ação, prazo, motivo, objetivo e resultado esperado; o Call AI recebe somente o contexto confirmado/reutilizável.
+- **Contratos centrais:** `OG_LEAD_INTELLIGENCE.score()` permanece a única fonte de score; `interaction-service.setNextAction()` continua sendo a mutação de próxima ação; `crm-service` mantém normalização compatível; Mesa/Meu Dia, Ficha e Call AI delegam a esses contratos em vez de criar regras paralelas.
+- **Integridade contextual:** trocar a descrição da próxima ação invalida contexto dependente; trocar somente a data preserva; estados terminais não recebem ação inventada; cache/contexto precisa variar com os campos comerciais que mudam a orientação.
+- **Testes:** regressões cobrem score/fatores, Mesa/Meu Dia, Ficha Universal, Call AI, invalidação/preservação de contexto e caminhos alternativos de UI. O fechamento exige `npm run validate`, `npm run og:brain:refresh`, `npm run og:brain:check` e os gates de segurança/audit/release aplicáveis.
+- **Arquivos principais:** `modules/lead-intelligence.js`, `modules/sales-desk.js`, `services/interaction-service.js`, `services/crm-service.js`, `services/call-ai-context.js`, `app.js`, testes e story CIC-01.
+- **Limites preservados:** não inclui CIC-02, briefing “o que não falar”, diagnóstico contextual, referral/expansão, automação de envio ou novo score por IA.
+- **Auditoria:** auditoria final do CIC-01 aprovada antes deste closeout; PR #23 deve permanecer aberto e sem merge.
