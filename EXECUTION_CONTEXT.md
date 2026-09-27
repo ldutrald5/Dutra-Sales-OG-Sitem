@@ -34,7 +34,10 @@ Controles:
 - `RAILWAY_PUBLIC_DOMAIN` gera URLs HTTPS corretas;
 - `RAILWAY_VOLUME_MOUNT_PATH` pode fornecer persistência;
 - smoke test hospedado integra `npm run validate`;
-- security gate cobre entrypoint/config Railway.
+- `package.json` expõe `start -> npm run og:start:hosted` para Railpack zero-config;
+- `railway.json` legado foi removido após auditoria da documentação Railway vigente;
+- healthcheck `/health`, domínio, segredo e volume são configurados no serviço Railway durante a publicação;
+- security gate cobre o contrato do runtime hospedado.
 
 ## Limite arquitetural
 
@@ -55,7 +58,7 @@ O 06R registra:
 
 ## Estado externo Railway
 
-O Railway foi instalado/conectado pelo usuário para permitir a publicação. O código/config está pronto, porém a publicação só pode ser declarada concluída depois de existir:
+O Railway foi instalado/conectado pelo usuário para permitir a publicação. O runtime foi atualizado para o fluxo aceito por serviços Railway novos; a publicação só pode ser declarada concluída depois de existir:
 - projeto/serviço Railway;
 - segredo `OG_ACCESS_TOKEN`;
 - domínio público HTTPS;
