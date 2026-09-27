@@ -205,8 +205,69 @@ document.addEventListener('DOMContentLoaded', () => {
     return response;
   }
 
+  function pendingSyncConflict() {
+    try { return JSON.parse(sessionStorage.getItem('og_sync_conflict') || 'null'); }
+    catch { return null; }
+  }
+
+  function clearSyncConflict() {
+    sessionStorage.removeItem('og_sync_conflict');
+    document.getElementById('og-sync-conflict-banner')?.remove();
+  }
+
+  function showSyncConflictBanner(conflict = pendingSyncConflict()) {
+    if (!conflict || document.getElementById('og-sync-conflict-banner')) return;
+    const localOnly = conflict.summary?.leads?.onlyLocal || 0;
+    const remoteOnly = conflict.summary?.leads?.onlyRemote || 0;
+    const different = conflict.summary?.leads?.different || 0;
+    const banner = document.createElement('aside');
+    banner.id = 'og-sync-conflict-banner';
+    banner.className = 'og-sync-conflict-banner';
+    banner.setAttribute('role', 'alert');
+    banner.innerHTML = `
+      <div><strong>⚠ Alterações em outro dispositivo</strong><span>Local r${conflict.local.revision} · Servidor r${conflict.remote.revision} · ${different} divergente(s), ${localOnly} só local, ${remoteOnly} só servidor.</span></div>
+      <div class="og-sync-conflict-actions"><button type="button" data-sync-review>Revisar sem sobrescrever</button><button type="button" data-sync-server>Usar versão do servidor</button></div>`;
+    document.body.prepend(banner);
+    banner.querySelector('[data-sync-review]')?.addEventListener('click', () => {
+      const review = OG_SYNC_CONFLICT.mergeForReview(conflict, OG_DATA_SAFETY, OG_OPERATIONS_MODEL);
+      const ok = confirm('Preparar uma versão conciliada neste aparelho? Nada será enviado ao servidor até você confirmar novamente.');
+      if (!ok) return;
+      state.leads = (review.leads || []).map(normalizeLead);
+      state.history = review.history || [];
+      state.operations = OG_OPERATIONS_MODEL.migrateOperations(review.operations || {});
+      serverRevision = review.revision;
+      localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
+      localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
+      localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+      clearSyncConflict();
+      setSyncStatus('Revisão local preparada', 'busy');
+      showNotification('Versão conciliada preparada somente neste aparelho. Revise os dados antes de sincronizar.', 'warning');
+      renderDayDashboard();
+      if (state.currentTab === 'crm') renderCrmModule();
+    });
+    banner.querySelector('[data-sync-server]')?.addEventListener('click', () => {
+      if (!confirm('Descartar as alterações locais conflitantes e carregar a versão atual do servidor?')) return;
+      state.leads = (conflict.remote.leads || []).map(normalizeLead);
+      state.history = conflict.remote.history || [];
+      state.operations = OG_OPERATIONS_MODEL.migrateOperations(conflict.remote.operations || {});
+      serverRevision = conflict.remote.revision;
+      localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
+      localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
+      localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+      clearSyncConflict();
+      setSyncStatus('Servidor carregado', 'ok');
+      renderDayDashboard();
+      if (state.currentTab === 'crm') renderCrmModule();
+    });
+  }
+
   function scheduleServerSync() {
     clearTimeout(serverSyncTimer);
+    if (pendingSyncConflict()) {
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner();
+      return;
+    }
     setSyncStatus('Salvando…', 'busy');
     serverSyncTimer = setTimeout(async () => {
       try {
@@ -214,11 +275,17 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'PUT',
           body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: serverRevision })
         });
-        if(response.status===409){
-          const remote=await response.json();
-          const merged=OG_DATA_SAFETY.mergeBackup({leads:state.leads,history:state.history,operations:state.operations},{format:'sistema-og-backup',version:1,data:{leads:remote.leads||[],history:remote.history||[],operations:remote.operations||{}}},OG_OPERATIONS_MODEL);
-          state.leads=merged.leads;state.history=merged.history;state.operations=merged.operations;
-          response=await apiFetch('/api/state',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0)})});
+        if (response.status === 409) {
+          const remote = await response.json();
+          const conflict = OG_SYNC_CONFLICT.createConflict(
+            { leads: state.leads, history: state.history, operations: state.operations },
+            serverRevision,
+            remote
+          );
+          sessionStorage.setItem('og_sync_conflict', JSON.stringify(conflict));
+          setSyncStatus('Conflito de sincronização', 'conflict');
+          showSyncConflictBanner(conflict);
+          return;
         }
         if (!response.ok) throw new Error('Servidor indisponível');
         const saved = await response.json();
