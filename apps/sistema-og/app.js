@@ -5475,8 +5475,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const previousStatus = lead.status;
     lead.interactions.push({ id: `INT-${Date.now()}`, sessionId, at: now, type: 'call_ai', objective: state.callAI.objective, result, note: summary, signals: state.callAI.signals.map(item => item.signal) });
     if (result !== 'sem_contato') lead.lastContactAt = now;
-    lead.nextAction = document.getElementById('call-ai-next-action').value.trim();
-    lead.followUpAt = document.getElementById('call-ai-follow-up').value;
+    const reviewedNextAction = document.getElementById('call-ai-next-action').value.trim();
+    const reviewedFollowUp = document.getElementById('call-ai-follow-up').value;
+    if (reviewedNextAction !== String(lead.nextAction || '').trim() || reviewedFollowUp !== String(lead.followUpAt || '').trim()) {
+      OG_INTERACTION_SERVICE.setNextAction(lead, reviewedNextAction, reviewedFollowUp, { now });
+    }
     if (result === 'proposta') lead.status = 'proposta_enviada';
     else if (result === 'negociacao') lead.status = 'negociacao';
     else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';

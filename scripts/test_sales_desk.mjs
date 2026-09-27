@@ -58,6 +58,13 @@ assert.equal(prospect.nextActionReason, '');
 assert.equal(prospect.nextActionObjective, '');
 assert.equal(prospect.nextActionExpectedResult, '');
 
+const noInterestLead = crm.createProspect({ empresa:'Sem Interesse', nome:'Maria' }, { id:'L3', now:'2026-09-24T12:00:00.000Z' });
+noInterestLead.conversationStage = 'interested';
+interactions.recordResult(noInterestLead, 'sem_interesse', 'Cliente informou que não tem interesse agora.', { now:'2026-09-24T14:04:00.000Z' });
+assert.equal(noInterestLead.status, 'perdido');
+assert.equal(intelligence.nextBestAction(noInterestLead, new Date('2026-09-24T15:00:00.000Z')).action, '', 'resultado sem interesse não pode gerar ação genérica');
+assert.equal(intelligence.conversationStage(noInterestLead), 'not_interested', 'status perdido deve neutralizar estágio antigo para a inteligência');
+
 const queue = desk.selectQueue([legacy, prospect], 'all', 'nova', new Date('2026-09-24T15:00:00.000Z'));
 assert.equal(queue.length, 1);
 assert.equal(queue[0].id, 'L2');

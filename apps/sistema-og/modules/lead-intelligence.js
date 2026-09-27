@@ -38,6 +38,7 @@
   }
 
   function conversationStage(lead = {}) {
+    if (key(lead.status) === 'perdido') return 'not_interested';
     const explicit = key(lead.conversationStage);
     if (byId(CONVERSATION_STAGES, explicit)) return explicit;
     if (lead.status === 'proposta_enviada') return 'proposal';

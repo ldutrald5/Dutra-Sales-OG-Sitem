@@ -38,6 +38,12 @@ assert.equal(noAction.action,'','sem interesse não deve receber ação inventad
 assert.equal(noAction.actionRequired,false,'sem interesse deve permanecer em estado neutro');
 assert.equal(noAction.reason,'Situação: Sem interesse');
 
+const lostWithStaleStage={priority:'alta',status:'perdido',conversationStage:'interested',nextAction:''};
+assert.equal(intelligence.conversationStage(lostWithStaleStage),'not_interested','status perdido deve prevalecer sobre situação de conversa obsoleta');
+const lostNext=intelligence.nextBestAction(lostWithStaleStage,now);
+assert.equal(lostNext.action,'','status perdido não pode receber ação genérica');
+assert.equal(lostNext.actionRequired,false);
+
 const customerNoAction=intelligence.nextBestAction({priority:'baixa',conversationStage:'customer'},now);
 assert.equal(customerNoAction.action,'','cliente sem ação explícita não deve receber ação genérica');
 assert.equal(customerNoAction.actionRequired,false);
