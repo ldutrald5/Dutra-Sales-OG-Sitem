@@ -10,11 +10,11 @@ Não há banco relacional. O navegador é a fonte operacional local e usa:
 | localStorage | `og_cotacoes_history` | Histórico e snapshots de cotações |
 | localStorage | `og_operations_state` | Envelope operacional `schemaVersion: 2` |
 | IndexedDB | `og-commercial-library` | Arquivos da Biblioteca Comercial |
-| IndexedDB/service worker | outbox | Sincronizações pendentes |
+| IndexedDB `sistema-og-sync` | `outbox` + `recovery` | Estado pendente de sincronização, conflitos e revisão; envio ocorre no foreground autenticado |
 | Servidor local | `.data/shared-state.json` | Espelho privado com revisão |
 | Cloudflare | KV opcional | Estado compartilhado remoto |
 
-O envelope operacional V2 adiciona `companies`, `contacts`, `opportunities`, `activities` e `tasks` à frente das coleções legadas. Ele também possui `contacts`, `callSessions`, `materials`, `materialShares`, `materialPackages`, `quotes`, `quoteTemplates`, `messageTemplates`, `documentTemplates`, `generatedDocuments`, `sales`, `commissions`, `partners`, `transporters`, `transporterCoverage`, `users`, `goals` e `activityEvents`. Nem todas estão preenchidas pelas telas atuais.
+O envelope operacional V2 adiciona `companies`, `contacts`, `opportunities`, `activities` e `tasks` à frente das coleções legadas. A coleção `contacts` é temporariamente mista: registros canônicos usam `entityType: 'contact'`; registros legados sem `entityType` permanecem preservados e não são reinterpretados automaticamente. Ele também possui `callSessions`, `materials`, `materialShares`, `materialPackages`, `quotes`, `quoteTemplates`, `messageTemplates`, `documentTemplates`, `generatedDocuments`, `sales`, `commissions`, `partners`, `transporters`, `transporterCoverage`, `users`, `goals` e `activityEvents`. Nem todas estão preenchidas pelas telas atuais.
 
 ## Entidade central atual
 
@@ -41,7 +41,7 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 
 - IDs estáveis e únicos; referências inválidas vão para revisão.
 - Datas persistidas em ISO 8601; agenda conserva fuso quando necessário.
-- Valores monetários em centavos e moeda explícita.
+- Valores monetários em centavos e moeda explícita; agregações não podem somar moedas diferentes.
 - Preparado, aberto, enviado, vendido, faturado e pago são estados distintos.
 - Áudio e arquivos ficam por referência e não entram no JSON principal.
 - Campos importados mantêm origem, data e confirmação.
@@ -51,7 +51,7 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 
 - Reconciliação em massa do legado para Company/Contact/Opportunity ainda não foi executada.
 - Backup e restauração visíveis ao usuário.
-- Conflito por campo e idempotência integral.
+- Resolução manual por campo ainda não existe: o 04R mostra campos divergentes e usa merge determinístico por registro para preparar revisão humana.
 - Políticas de retenção e descarte de áudio.
 - Autenticação, papéis e trilha por usuário.
 - Índices/consultas para crescimento do volume.
