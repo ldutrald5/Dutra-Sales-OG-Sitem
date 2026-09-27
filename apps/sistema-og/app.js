@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
+  let legacyReconciliationPlan = null;
   let serverSyncInFlight = false;
   let serverSyncGeneration = 0;
 
@@ -5591,6 +5592,207 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (String(state.callAI.selectedLeadId) === String(lead.id)) renderCallAIContext();
   }
 
+  const LEGACY_RECONCILIATION_ROLLBACK_MARKER = 'og_legacy_reconciliation_rollback';
+
+  function reconciliationStatusLabel(status) {
+    return ({ linked: 'Já vinculado', review: 'Revisar correspondência', ambiguous: 'Ambíguo', proposed: 'Nova Company', blocked: 'Bloqueado', invalid: 'Inválido' })[status] || status;
+  }
+
+  function readLegacyRollbackMarker() {
+    try { return JSON.parse(localStorage.getItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER) || 'null'); }
+    catch { return null; }
+  }
+
+  async function createLegacyReconciliationCheckpoint(plan) {
+    const source = `legacy-reconciliation:${plan.createdAt}`;
+    const backup = OG_DATA_SAFETY.createBackup(
+      { leads: state.leads, history: state.history, operations: state.operations },
+      { source, revision: serverRevision }
+    );
+    await OG_DATA_SAFETY.saveLocalSnapshot(backup);
+    localStorage.setItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER, JSON.stringify({
+      createdAt: backup.createdAt,
+      source: backup.source,
+      planCreatedAt: plan.createdAt
+    }));
+    return backup;
+  }
+
+  async function rollbackLegacyReconciliation() {
+    if (pendingSyncConflict() || pendingSyncReview() || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) {
+      showNotification('Resolva primeiro a sincronização pendente antes do rollback.', 'warning');
+      return;
+    }
+    const marker = readLegacyRollbackMarker();
+    if (!marker?.report) {
+      showNotification('Nenhuma aplicação 05R com rollback gerenciado está disponível.', 'info');
+      return;
+    }
+    let snapshot = null;
+    try {
+      const rows = await OG_DATA_SAFETY.listLocalSnapshots();
+      snapshot = rows.find(item => item?.backup?.createdAt === marker.createdAt && item?.backup?.source === marker.source) || null;
+    } catch (error) {
+      console.warn('Falha ao localizar checkpoint de reconciliação.', error);
+    }
+    if (!snapshot?.backup?.data?.operations) {
+      showNotification('Checkpoint de rollback não foi encontrado neste aparelho.', 'warning');
+      return;
+    }
+    if (!confirm('Desfazer somente as Companies/Contacts alteradas pela última aplicação 05R? Se algum desses registros recebeu edições ou relações depois da reconciliação, o rollback será bloqueado para não apagar trabalho novo.')) return;
+    try {
+      const rolled = OG_LEGACY_RECONCILIATION.rollbackApplied(
+        state.operations,
+        snapshot.backup.data.operations,
+        marker.report,
+        {
+          domain: OG_CANONICAL_DOMAIN,
+          idFactory: kind => newLibraryId(kind === 'event' ? 'evt' : kind),
+          now: new Date().toISOString()
+        }
+      );
+      state.operations = rolled.graph;
+      localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
+      legacyReconciliationPlan = null;
+      saveOperationsToStorage();
+      renderOperationsFoundation();
+      renderDayDashboard();
+      if (state.currentTab === 'crm') renderCrmModule();
+      showNotification(`Rollback seletivo concluído para ${rolled.report.total} reconciliação(ões), sem restaurar o restante do CRM.`, 'success');
+    } catch (error) {
+      console.warn('Rollback 05R bloqueado.', error);
+      showNotification('Rollback bloqueado para proteger alterações posteriores. Revise o console técnico ou o plano exportado.', 'warning');
+    }
+  }
+
+  function renderLegacyReconciliationPanel() {
+    const marker = readLegacyRollbackMarker();
+    if (!legacyReconciliationPlan) {
+      return `
+        <section class="clean-card reconciliation-card">
+          <div class="reconciliation-head">
+            <div><span class="og-kicker">PACKAGE 05R · RECONCILIAÇÃO CONTROLADA</span><h2>Lead legado → Company/Contact canônicos</h2><p>Primeiro gere uma prévia somente leitura. Nada é criado, ligado ou removido até você selecionar registros e confirmar a aplicação.</p></div>
+            <div class="reconciliation-actions"><button type="button" data-reconcile-generate class="og-button og-button-primary">Gerar prévia dry-run</button>${marker ? '<button type="button" data-reconcile-rollback class="og-button og-button-ghost">Desfazer última aplicação</button>' : ''}</div>
+          </div>
+          <div class="reconciliation-safety"><span>✓ Sem migração em massa</span><span>✓ CNPJ exige revisão humana</span><span>✓ Checkpoint obrigatório antes de aplicar</span><span>✓ Rollback local disponível</span></div>
+        </section>`;
+    }
+    const plan = legacyReconciliationPlan;
+    const rowPriority = { review: 0, ambiguous: 1, proposed: 2, blocked: 3, invalid: 4 };
+    const visibleRows = plan.rows.filter(row => row.status !== 'linked').sort((a, b) => (rowPriority[a.status] ?? 9) - (rowPriority[b.status] ?? 9)).slice(0, 100);
+    const companyMap = new Map((state.operations.companies || []).filter(item => item?.entityType === 'company').map(item => [String(item.id), item]));
+    const leadMap = new Map(state.leads.map(item => [String(item.id), item]));
+    const count = key => Number(plan.counts?.[key] || 0);
+    const rowsHtml = visibleRows.map(row => {
+      const lead = leadMap.get(String(row.leadId)) || {};
+      const actionable = ['proposed', 'review', 'ambiguous'].includes(row.status);
+      const hasContact = Boolean(String(lead.decisionMaker || lead.nome || lead.telefone || '').trim());
+      const candidates = (row.candidates || []).map(candidate => {
+        const company = companyMap.get(String(candidate.companyId));
+        const signal = (candidate.signals || []).join(' + ') || 'sem sinal';
+        const occupied = candidate.occupiedByLeadId && String(candidate.occupiedByLeadId) !== String(row.leadId);
+        const suffix = occupied ? ` · já ligado a ${candidate.occupiedByLeadId}` : '';
+        return `<option value="${escapeHtml(candidate.companyId)}" ${occupied ? 'disabled' : ''}>${escapeHtml(company?.name || candidate.companyId)} · ${escapeHtml(signal + suffix)}</option>`;
+      }).join('');
+      const decision = row.status === 'proposed'
+        ? `<span class="reconciliation-target">Criar: <b>${escapeHtml(row.proposal?.company?.name || lead.empresa || lead.nome || row.leadId)}</b></span>`
+        : ['review', 'ambiguous'].includes(row.status)
+          ? `<label class="reconciliation-target">Vincular em <select data-reconcile-company="${escapeHtml(row.leadId)}"><option value="">Escolha a Company…</option>${candidates}</select></label>`
+          : `<span class="reconciliation-target">${escapeHtml(row.reason || 'Revisão manual necessária')}</span>`;
+      return `
+        <article class="reconciliation-row" data-status="${escapeHtml(row.status)}">
+          <label class="reconciliation-select"><input type="checkbox" data-reconcile-select="${escapeHtml(row.leadId)}" ${actionable ? '' : 'disabled'}><span></span></label>
+          <div class="reconciliation-main"><div><b>${escapeHtml(lead.empresa || lead.nome || row.leadId || 'Sem identificação')}</b><small>${escapeHtml(row.leadId || '')} · ${escapeHtml(reconciliationStatusLabel(row.status))}</small></div>${decision}</div>
+          <div class="reconciliation-meta"><span>${lead.cnpj ? 'CNPJ ' + escapeHtml(lead.cnpj) : 'Sem CNPJ'}</span>${row.warnings?.includes('invalid_cnpj_not_promoted') ? '<em>CNPJ legado incompleto não será promovido</em>' : ''}${hasContact && actionable ? `<label><input type="checkbox" data-reconcile-contact="${escapeHtml(row.leadId)}"> incluir contato</label>` : ''}</div>
+        </article>`;
+    }).join('');
+    return `
+      <section class="clean-card reconciliation-card">
+        <div class="reconciliation-head">
+          <div><span class="og-kicker">PACKAGE 05R · PRÉVIA DRY-RUN</span><h2>${plan.total} leads analisados sem alterar dados</h2><p>Selecione somente os registros que você revisou. Ambíguos exigem escolha explícita da Company.</p></div>
+          <div class="reconciliation-actions"><button type="button" data-reconcile-regenerate class="og-button og-button-ghost">Regerar prévia</button><button type="button" data-reconcile-export class="og-button og-button-ghost">Exportar plano</button>${marker ? '<button type="button" data-reconcile-rollback class="og-button og-button-ghost">Desfazer última aplicação</button>' : ''}</div>
+        </div>
+        <div class="reconciliation-counts"><span>Já ligados <b>${count('linked')}</b></span><span>Revisar correspondência <b>${count('review')}</b></span><span>Ambíguos <b>${count('ambiguous')}</b></span><span>Novas Companies <b>${count('proposed')}</b></span><span>Bloqueados <b>${count('blocked') + count('invalid')}</b></span></div>
+        <div class="reconciliation-list">${rowsHtml || '<p class="reconciliation-empty">Nenhum registro pendente de reconciliação.</p>'}</div>
+        ${plan.rows.filter(row => row.status !== 'linked').length > 100 ? '<p class="reconciliation-limit">Prévia visual limitada aos primeiros 100 pendentes. O plano exportado contém todos.</p>' : ''}
+        <div class="reconciliation-footer"><span>Nenhuma seleção vem marcada por padrão.</span><button type="button" data-reconcile-apply class="og-button og-button-primary">Aplicar selecionados com checkpoint</button></div>
+      </section>`;
+  }
+
+  function bindLegacyReconciliationPanel(root) {
+    const generate = () => {
+      legacyReconciliationPlan = OG_LEGACY_RECONCILIATION.buildPlan(state.leads, state.operations);
+      renderOperationsFoundation();
+      showNotification('Prévia 05R gerada. Nenhum dado foi alterado.', 'success');
+    };
+    root.querySelector('[data-reconcile-generate]')?.addEventListener('click', generate);
+    root.querySelector('[data-reconcile-regenerate]')?.addEventListener('click', generate);
+    root.querySelector('[data-reconcile-export]')?.addEventListener('click', () => {
+      if (!legacyReconciliationPlan) return;
+      downloadJson(legacyReconciliationPlan, `reconciliacao-05r-dry-run-${new Date().toISOString().slice(0, 10)}.json`);
+    });
+    root.querySelectorAll('[data-reconcile-rollback]').forEach(button => button.addEventListener('click', () => rollbackLegacyReconciliation()));
+
+    root.querySelector('[data-reconcile-apply]')?.addEventListener('click', async () => {
+      if (!legacyReconciliationPlan) return;
+      if (pendingSyncConflict() || pendingSyncReview() || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) {
+        showNotification('Resolva primeiro a sincronização pendente antes de reconciliar.', 'warning');
+        return;
+      }
+      const selected = [...root.querySelectorAll('[data-reconcile-select]:checked')].map(input => String(input.dataset.reconcileSelect));
+      if (!selected.length) {
+        showNotification('Selecione pelo menos um registro revisado.', 'warning');
+        return;
+      }
+      const approvals = [];
+      for (const leadId of selected) {
+        const row = legacyReconciliationPlan.rows.find(item => String(item.leadId) === leadId);
+        if (!row || !['proposed', 'review', 'ambiguous'].includes(row.status)) continue;
+        const contactInput = [...root.querySelectorAll('[data-reconcile-contact]')].find(input => String(input.dataset.reconcileContact) === leadId);
+        if (row.status === 'proposed') approvals.push({ leadId, action: 'create_company', includeContact: Boolean(contactInput?.checked), confirmed: true });
+        else {
+          const select = [...root.querySelectorAll('[data-reconcile-company]')].find(input => String(input.dataset.reconcileCompany) === leadId);
+          const companyId = String(select?.value || '');
+          if (!companyId) {
+            showNotification('Escolha uma Company candidata para cada registro selecionado antes de aplicar.', 'warning');
+            return;
+          }
+          approvals.push({ leadId, action: 'link_company', companyId, includeContact: Boolean(contactInput?.checked), confirmed: true });
+        }
+      }
+      if (!approvals.length) return;
+      if (!confirm(`Aplicar ${approvals.length} reconciliação(ões) revisada(s)? Um checkpoint completo será salvo antes de qualquer alteração e poderá ser restaurado.`)) return;
+      let applyCommitted = false;
+      try {
+        await createLegacyReconciliationCheckpoint(legacyReconciliationPlan);
+        const applied = OG_LEGACY_RECONCILIATION.applyApproved(
+          state.leads,
+          state.operations,
+          legacyReconciliationPlan,
+          approvals,
+          {
+            domain: OG_CANONICAL_DOMAIN,
+            idFactory: kind => newLibraryId(kind === 'event' ? 'evt' : kind),
+            now: new Date().toISOString()
+          }
+        );
+        const checkpointMarker = readLegacyRollbackMarker() || {};
+        localStorage.setItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER, JSON.stringify({ ...checkpointMarker, appliedAt: applied.report.appliedAt, report: applied.report }));
+        state.operations = applied.graph;
+        legacyReconciliationPlan = null;
+        saveOperationsToStorage();
+        applyCommitted = true;
+        renderOperationsFoundation();
+        if (state.currentTab === 'crm') renderCrmModule();
+        showNotification(`${applied.report.total} reconciliação(ões) aplicada(s) com checkpoint disponível para rollback.`, 'success');
+      } catch (error) {
+        if (!applyCommitted) localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
+        console.error('Reconciliação 05R falhou.', error);
+        showNotification('Reconciliação não aplicada. Gere novamente a prévia e revise os registros selecionados.', 'warning');
+      }
+    });
+  }
+
   function renderOperationsFoundation() {
     const root = document.getElementById('operations-foundation');
     if (!root) return;
@@ -5608,8 +5810,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <section class="operations-foundation-grid">
         <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos usam coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Biblioteca e Performance ativas</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Vendas e comissões aguardam as próximas fases</b></div></article>
         <article class="clean-card operations-status-card"><span class="og-kicker">ATIVIDADE MAIS RECENTE</span><h2>${lastEvent ? escapeHtml(lastEvent.type) : 'Nenhum evento novo'}</h2><p>${lastEvent ? `${escapeHtml(lastEvent.clientId || '')} · ${escapeHtml(new Date(lastEvent.at).toLocaleString('pt-BR'))}` : 'Os novos cadastros e ações operacionais passarão a alimentar esta linha do tempo.'}</p><button type="button" data-operations-open-crm class="og-button og-button-primary">Abrir clientes</button></article>
-      </section>`;
+      </section>
+      ${renderLegacyReconciliationPanel()}`;
     root.querySelector('[data-operations-open-crm]')?.addEventListener('click', () => switchTab('crm'));
+    bindLegacyReconciliationPanel(root);
     renderPerformanceDashboard();
   }
 
