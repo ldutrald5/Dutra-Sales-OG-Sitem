@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try { activeSyncReview = await OG_SYNC_BRIDGE.loadReview(); } catch { activeSyncReview = null; }
     }
 
-    if (!activeSyncConflict && conflictMarker) {
+    if (!activeSyncConflict && conflictMarker && !conflictMarker.resolved) {
       try {
         const response = await apiFetch('/api/state', { cache: 'no-store' });
         if (response.ok) {
@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch {}
     }
 
-    if (!activeSyncReview && reviewMarker) {
+    if (!activeSyncReview && reviewMarker && !reviewMarker.resolved) {
       activeSyncReview = { preparedAt: reviewMarker.preparedAt, baseRevision: Number(reviewMarker.baseRevision || 0) };
       try { await OG_SYNC_BRIDGE.saveReview(activeSyncReview); } catch {}
     }
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     syncRecoveryReady = true;
-    if (conflictMarker && !activeSyncConflict) {
+    if (conflictMarker && !conflictMarker.resolved && !activeSyncConflict) {
       setSyncStatus('Conflito aguardando conexão', 'offline');
       return;
     }
