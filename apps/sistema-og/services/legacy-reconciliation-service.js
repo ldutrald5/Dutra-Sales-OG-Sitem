@@ -10,7 +10,8 @@
   function canonicalContacts(graph){return list(graph?.contacts).filter(x=>x?.entityType==='contact'&&clean(x.id));}
   function companySignals(lead,company){
     const matches=[];
-    if(digits(lead?.cnpj)&&digits(lead.cnpj)===digits(company?.cnpj))matches.push('cnpj');
+    const leadCnpj=digits(lead?.cnpj),companyCnpj=digits(company?.cnpj);
+    if(leadCnpj.length===14&&companyCnpj.length===14&&leadCnpj===companyCnpj)matches.push('cnpj');
     if(comparable(lead?.empresa||lead?.nome)&&comparable(lead?.empresa||lead?.nome)===comparable(company?.name))matches.push('name');
     return matches;
   }
@@ -70,8 +71,7 @@
       const lead=leadMap.get(leadId);if(!lead)throw new Error(`Lead não encontrado: ${leadId}`);
       const planned=list(plan.rows).find(row=>row.leadId===leadId);if(!planned)throw new Error(`Lead fora do plano: ${leadId}`);
       const current=inspectLead(lead,next);
-      let company=null,action=clean(approval.action),contact=null,contactSkipped=null;
-      if(action==='create_company'){
+      let company=null,action=clean(approval.action),contact=null,contactSkipped=null,beforeCompany=null;
         if(current.status!=='proposed')throw new Error(`Lead ${leadId} não está mais elegível para criar Company (${current.status}). Gere nova prévia.`);
         company=domain.createCompany({id:idFactory('company',leadId),...current.proposal.company},{now});
         next.companies.push(company);
@@ -84,6 +84,7 @@
         const index=next.companies.findIndex(item=>item?.entityType==='company'&&clean(item.id)===companyId);
         if(index<0)throw new Error(`Company não encontrada: ${companyId}`);
         const existing=next.companies[index];
+        beforeCompany=clone(existing);
         if(clean(existing.legacyLeadId)&&clean(existing.legacyLeadId)!==leadId)throw new Error(`Company ${companyId} já está vinculada a outro lead.`);
         company=domain.createCompany({...existing,legacyLeadId:leadId},{now});
         next.companies[index]=company;
@@ -97,11 +98,49 @@
       }
       const event={id:idFactory('event',leadId),type:'legacy.reconciliation.applied',at:now,clientId:leadId,companyId:company.id,action,contactId:contact?.id||null,contactSkippedDuplicateId:contactSkipped};
       next.activityEvents.unshift(event);
-      results.push({leadId,action,companyId:company.id,contactId:contact?.id||null,contactSkippedDuplicateId:contactSkipped});
+      results.push({leadId,action,companyId:company.id,contactId:contact?.id||null,contactSkippedDuplicateId:contactSkipped,eventId:event.id,beforeCompany,afterCompany:clone(company),afterContact:contact?clone(contact):null});
     }
     const validation=domain.validateGraph(next);if(!validation.valid)throw new Error(validation.errors.join('; '));
     next.updatedAt=now;
     return {graph:next,report:Object.freeze({mode:'controlled_apply',appliedAt:now,total:results.length,results:Object.freeze(results)})};
   }
-  return{inspectLead,buildPlan,validatePlan,applyApproved};
+  function sameRecord(left,right){return JSON.stringify(left??null)===JSON.stringify(right??null);}
+  function rollbackApplied(graph={},checkpointGraph={},report,options={}){
+    const domain=options.domain,idFactory=options.idFactory;
+    if(report?.mode!=='controlled_apply'||!Array.isArray(report?.results))throw new Error('Relatório de aplicação inválido.');
+    if(!domain?.validateGraph)throw new Error('Canonical Domain indisponível.');
+    if(typeof idFactory!=='function')throw new Error('idFactory é obrigatório.');
+    const now=new Date(options.now||Date.now()).toISOString(),next=clone(graph||{})||{},before=clone(checkpointGraph||{})||{};
+    for(const key of ['companies','contacts','opportunities','activities','tasks','activityEvents'])next[key]=list(next[key]);
+    const blocked=[];
+    for(const result of [...report.results].reverse()){
+      const companyIndex=next.companies.findIndex(item=>item?.entityType==='company'&&clean(item.id)===clean(result.companyId));
+      const currentCompany=companyIndex>=0?next.companies[companyIndex]:null;
+      if(!currentCompany||!sameRecord(currentCompany,result.afterCompany)){blocked.push(`${result.leadId}: Company mudou após a reconciliação`);continue;}
+      if(result.contactId){
+        const contactIndex=next.contacts.findIndex(item=>item?.entityType==='contact'&&clean(item.id)===clean(result.contactId));
+        const currentContact=contactIndex>=0?next.contacts[contactIndex]:null;
+        if(!currentContact||!sameRecord(currentContact,result.afterContact)){blocked.push(`${result.leadId}: Contact mudou após a reconciliação`);continue;}
+      }
+      if(result.action==='create_company'){
+        const foreignContacts=canonicalContacts(next).filter(item=>clean(item.companyId)===clean(result.companyId)&&clean(item.id)!==clean(result.contactId));
+        const refs=[...list(next.opportunities),...list(next.activities),...list(next.tasks)].filter(item=>clean(item.companyId)===clean(result.companyId));
+        if(foreignContacts.length||refs.length){blocked.push(`${result.leadId}: Company recebeu relações após a reconciliação`);continue;}
+        if(result.contactId)next.contacts=next.contacts.filter(item=>clean(item.id)!==clean(result.contactId));
+        next.companies.splice(companyIndex,1);
+      }else if(result.action==='link_company'){
+        const original=list(before.companies).find(item=>item?.entityType==='company'&&clean(item.id)===clean(result.companyId));
+        if(!original||!sameRecord(original,result.beforeCompany)){blocked.push(`${result.leadId}: checkpoint da Company não confere`);continue;}
+        if(result.contactId)next.contacts=next.contacts.filter(item=>clean(item.id)!==clean(result.contactId));
+        next.companies.splice(companyIndex,1,clone(original));
+      }else{blocked.push(`${result.leadId}: ação desconhecida`);}
+      next.activityEvents=next.activityEvents.filter(item=>clean(item.id)!==clean(result.eventId));
+    }
+    if(blocked.length)throw new Error(`Rollback bloqueado para proteger alterações posteriores: ${blocked.join('; ')}`);
+    next.activityEvents.unshift({id:idFactory('event','rollback'),type:'legacy.reconciliation.rolled_back',at:now,appliedAt:report.appliedAt,rolledBackLeadIds:report.results.map(item=>item.leadId)});
+    const validation=domain.validateGraph(next);if(!validation.valid)throw new Error(validation.errors.join('; '));
+    next.updatedAt=now;
+    return {graph:next,report:Object.freeze({mode:'controlled_rollback',rolledBackAt:now,total:report.results.length,leadIds:Object.freeze(report.results.map(item=>item.leadId))})};
+  }
+  return{inspectLead,buildPlan,validatePlan,applyApproved,rollbackApplied};
 }));
