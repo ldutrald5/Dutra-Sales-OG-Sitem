@@ -9,8 +9,8 @@
 - Package em execução: **05R — Legacy Reconciliation / migração controlada**
 - Branch: `package-05r-legacy-reconciliation`
 - PR: **#9** — draft até concluir o gate final do head documental
-- Head de implementação/hardening validado: `0a2998556b7d85cb7e46c3d9a1de307ec6cd26c1`
-- CI de implementação: workflow run `36284704946` — **SUCCESS**
+- Head de implementação/hardening + segurança validado: `c8bfa90c4f84d4d9957e59df463a8345678b0601`
+- CI de implementação/hardening + segurança: workflow run `36285040392` — **SUCCESS**; o head documental final ainda deve passar pelo mesmo gate
 - Um run anterior (`36284662308`) falhou somente no novo teste 05R por ordem de inicialização de fixture; corrigido antes do SUCCESS.
 - Fora do escopo do 05R: remoção de `lead.id`, migração automática de Opportunities/Tasks/Activities legados, ativação obrigatória do Supabase remoto e cutover big-bang.
 
