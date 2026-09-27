@@ -131,13 +131,16 @@
     const timing = breakdown.factors.find(item => item.id.startsWith('followup_'));
     const stage = breakdown.factors.find(item => item.id === 'conversation');
     const priority = breakdown.factors.find(item => item.id === 'priority');
+    const explicitAction = clean(lead.nextAction);
+    const noActionStage = ['not_interested', 'customer', 'loyal_customer'].includes(conversationStage(lead));
     return Object.freeze({
-      action: clean(lead.nextAction) || 'Definir próxima ação',
+      action: explicitAction || (noActionStage ? '' : 'Definir próxima ação'),
       dueAt: clean(lead.followUpAt),
       reason: clean(lead.nextActionReason) || timing?.label || stage?.label || priority?.label || '',
       objective: clean(lead.nextActionObjective),
       expectedResult: clean(lead.nextActionExpectedResult),
-      explicitAction: Boolean(clean(lead.nextAction)),
+      explicitAction: Boolean(explicitAction),
+      actionRequired: Boolean(explicitAction) || !noActionStage,
       score: breakdown.total,
       importance: importanceBand(lead, now),
       factors: breakdown.factors

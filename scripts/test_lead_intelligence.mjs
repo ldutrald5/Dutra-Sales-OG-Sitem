@@ -33,6 +33,15 @@ const fallback=intelligence.nextBestAction({priority:'alta',conversationStage:'p
 assert.equal(fallback.action,'Definir próxima ação');
 assert.equal(fallback.reason,'Retorno vencido','fallback deve explicar apenas fatos determinísticos já presentes');
 
+const noAction=intelligence.nextBestAction({priority:'baixa',conversationStage:'not_interested'},now);
+assert.equal(noAction.action,'','sem interesse não deve receber ação inventada');
+assert.equal(noAction.actionRequired,false,'sem interesse deve permanecer em estado neutro');
+assert.equal(noAction.reason,'Situação: Sem interesse');
+
+const customerNoAction=intelligence.nextBestAction({priority:'baixa',conversationStage:'customer'},now);
+assert.equal(customerNoAction.action,'','cliente sem ação explícita não deve receber ação genérica');
+assert.equal(customerNoAction.actionRequired,false);
+
 const rows=[
   {id:'1',priority:'media',conversationStage:'first_contact',sourceLabel:'Lista A'},
   {id:'2',priorityBand:'urgente',priority:'alta',conversationStage:'negotiation',sourceLabel:'Carteira',followUpAt:'2026-09-27T09:00:00-03:00'},

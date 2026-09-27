@@ -77,8 +77,11 @@ Esses itens pertencem a pacotes posteriores.
 - [x] Call AI recebe os novos campos.
 - [x] `setNextAction` preserva chamadas legadas e aceita metadados opcionais.
 - [x] Testes determinísticos cobrem score, fatores, fallback e contexto.
-- [ ] CI/gates do PR.
-- [ ] Auditoria independente.
+- [x] FIX de auditoria: Mesa/Meu Dia delega ao score canônico sem pesos duplicados.
+- [x] FIX de auditoria: trocar a descrição da ação invalida contexto antigo; trocar só a data preserva.
+- [x] FIX de auditoria: estados sem ação explícita não recebem “Definir próxima ação”.
+- [ ] CI/gates após o FIX.
+- [ ] Auditoria final independente.
 - [ ] Closeout do Builder Brain após aprovação.
 
 ## Rollback

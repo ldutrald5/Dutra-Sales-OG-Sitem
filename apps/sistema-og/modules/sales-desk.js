@@ -1,18 +1,18 @@
 (function attachSalesDesk(root, factory) {
-  const api = factory();
+  const api = factory(root);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.OG_SALES_DESK = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createSalesDesk() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createSalesDesk(root) {
   'use strict';
   function lastInteraction(lead) { return (lead.interactions || []).slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')))[0] || null; }
+  function intelligence() {
+    if (root?.OG_LEAD_INTELLIGENCE?.score) return root.OG_LEAD_INTELLIGENCE;
+    if (typeof require === 'function') return require('./lead-intelligence.js');
+    throw new Error('Motor de inteligência de leads indisponível');
+  }
   function score(lead, now = Date.now()) {
-    let value = lead.priority === 'alta' ? 40 : lead.priority === 'media' ? 20 : 0;
-    const due = lead.followUpAt ? new Date(lead.followUpAt).getTime() : null;
-    if (due && due < now) value += 50;
-    else if (due && due - now < 86400000) value += 35;
-    if (!lead.nextAction) value += 18;
-    if (lead.status === 'negociacao') value += 20;
-    return value;
+    const reference = now instanceof Date ? now : new Date(now);
+    return intelligence().score(lead, reference);
   }
   function selectQueue(leads, filter = 'all', query = '', now = new Date()) {
     const today = now.toISOString().slice(0, 10);
@@ -30,7 +30,7 @@
       if (filter === 'priority') return lead.priority === 'alta';
       if (filter === 'no-action') return !String(lead.nextAction || '').trim();
       return true;
-    }).sort((a, b) => score(b, now.getTime()) - score(a, now.getTime()));
+    }).sort((a, b) => score(b, now) - score(a, now));
   }
   return { lastInteraction, score, selectQueue };
 }));

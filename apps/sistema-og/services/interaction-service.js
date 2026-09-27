@@ -72,20 +72,29 @@
       nextActionObjective: lead.nextActionObjective || '',
       nextActionExpectedResult: lead.nextActionExpectedResult || ''
     };
-    lead.nextAction = String(nextAction || '').trim();
+    const nextDescription = String(nextAction || '').trim();
+    const actionChanged = nextDescription !== previous.nextAction;
+    lead.nextAction = nextDescription;
     lead.followUpAt = String(followUpAt || '').trim();
 
     const hasReason = Object.hasOwn(options, 'reason') || Object.hasOwn(options, 'nextActionReason');
     const hasObjective = Object.hasOwn(options, 'objective') || Object.hasOwn(options, 'nextActionObjective');
     const hasExpected = Object.hasOwn(options, 'expectedResult') || Object.hasOwn(options, 'nextActionExpectedResult');
-    if (hasReason) lead.nextActionReason = String(options.reason ?? options.nextActionReason ?? '').trim();
-    if (hasObjective) lead.nextActionObjective = String(options.objective ?? options.nextActionObjective ?? '').trim();
-    if (hasExpected) lead.nextActionExpectedResult = String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim();
+
+    if (actionChanged) {
+      lead.nextActionReason = hasReason ? String(options.reason ?? options.nextActionReason ?? '').trim() : '';
+      lead.nextActionObjective = hasObjective ? String(options.objective ?? options.nextActionObjective ?? '').trim() : '';
+      lead.nextActionExpectedResult = hasExpected ? String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim() : '';
+    } else {
+      if (hasReason) lead.nextActionReason = String(options.reason ?? options.nextActionReason ?? '').trim();
+      if (hasObjective) lead.nextActionObjective = String(options.objective ?? options.nextActionObjective ?? '').trim();
+      if (hasExpected) lead.nextActionExpectedResult = String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim();
+    }
 
     const changedFields = ['nextAction', 'followUpAt'];
-    if (hasReason) changedFields.push('nextActionReason');
-    if (hasObjective) changedFields.push('nextActionObjective');
-    if (hasExpected) changedFields.push('nextActionExpectedResult');
+    if (actionChanged || hasReason) changedFields.push('nextActionReason');
+    if (actionChanged || hasObjective) changedFields.push('nextActionObjective');
+    if (actionChanged || hasExpected) changedFields.push('nextActionExpectedResult');
     changedFields.push('interactions');
 
     const label = lead.nextAction ? `${lead.nextAction}${lead.followUpAt ? ` · ${lead.followUpAt}` : ''}` : 'Sem próxima ação';
