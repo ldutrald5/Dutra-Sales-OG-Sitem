@@ -76,7 +76,7 @@ assert.deepEqual(
 
 const context = callContext.build(prospect);
 assert.equal(context.company.id, 'L2');
-assert.equal(context.recentInteractions.length, 3);
+assert.equal(context.recentInteractions.length, 5, 'as duas mudanças de próxima ação também devem permanecer no histórico recente');
 assert.equal(context.nextAction.reason, '');
 assert.equal(context.nextAction.objective, '');
 assert.equal(context.nextAction.expectedResult, '');
