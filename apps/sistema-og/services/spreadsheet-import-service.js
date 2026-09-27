@@ -78,9 +78,11 @@
     const header=rows[6]||[];
     const mismatches=CRM_HEADERS.map((expected,index)=>({expected,actual:String(header[index]||'')})).filter(item=>norm(item.expected)!==norm(item.actual));
     if(mismatches.length)throw new Error(`Cabeçalho CRM divergente em ${mismatches.length} coluna(s).`);
-    return rows.slice(7).filter(row=>row.some(value=>String(value).trim())).map((row,index)=>({
-      sourceRow:index+8,externalCode:String(row[0]??''),company:String(row[1]??''),phone:String(row[2]??''),status:String(row[3]??''),temperature:String(row[4]??''),nextAction:String(row[5]??''),nextActionAt:row[6]||'',priority:String(row[7]??''),lastInteraction:row[8]||'',summary:String(row[9]??''),potential:String(row[10]??''),type:String(row[11]??''),origin:String(row[12]??''),channel:String(row[13]??''),referral:String(row[14]??''),notes:String(row[15]??''),score:row[16],document:String(row[17]??''),legalName:String(row[18]??''),personType:String(row[19]??''),city:String(row[20]??''),primaryContact:String(row[21]??''),contactCount:row[22]
-    }));
+    const mapping=suggestMapping(header);
+    return rows.slice(7).filter(row=>row.some(value=>String(value).trim())).map((row,index)=>{
+      const mapped=rowFromValues(row,mapping,index+8);
+      return{...mapped,lastInteraction:row[8]||'',type:mapped.segment||String(row[11]??''),channel:String(row[13]??''),score:row[16],legalName:String(row[18]??''),personType:String(row[19]??''),contactCount:row[22]};
+    });
   }
 
   function parseCsvText(text){
