@@ -5661,7 +5661,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       showNotification(`Rollback seletivo concluído para ${rolled.report.total} reconciliação(ões), sem restaurar o restante do CRM.`, 'success');
     } catch (error) {
       console.warn('Rollback 05R bloqueado.', error);
-      showNotification(`Rollback bloqueado: ${error.message}`, 'warning');
+      showNotification('Rollback bloqueado para proteger alterações posteriores. Revise o console técnico ou o plano exportado.', 'warning');
     }
   }
 
@@ -5754,7 +5754,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           const select = [...root.querySelectorAll('[data-reconcile-company]')].find(input => String(input.dataset.reconcileCompany) === leadId);
           const companyId = String(select?.value || '');
           if (!companyId) {
-            showNotification(`Escolha a Company para ${leadId} antes de aplicar.`, 'warning');
+            showNotification('Escolha uma Company candidata para cada registro selecionado antes de aplicar.', 'warning');
             return;
           }
           approvals.push({ leadId, action: 'link_company', companyId, includeContact: Boolean(contactInput?.checked), confirmed: true });
@@ -5788,7 +5788,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       } catch (error) {
         if (!applyCommitted) localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
         console.error('Reconciliação 05R falhou.', error);
-        showNotification(`Reconciliação não aplicada: ${error.message}`, 'warning');
+        showNotification('Reconciliação não aplicada. Gere novamente a prévia e revise os registros selecionados.', 'warning');
       }
     });
   }
