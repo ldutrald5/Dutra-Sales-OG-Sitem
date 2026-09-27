@@ -249,8 +249,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function clearSyncConflict() {
     activeSyncConflict = null;
-    localStorage.removeItem(SYNC_CONFLICT_MARKER);
-    try { await OG_SYNC_BRIDGE.clearConflict(); } catch {}
+    localStorage.setItem(SYNC_CONFLICT_MARKER, JSON.stringify({ resolved: true, resolvedAt: new Date().toISOString() }));
+    try {
+      await OG_SYNC_BRIDGE.clearConflict();
+      localStorage.removeItem(SYNC_CONFLICT_MARKER);
+    } catch (error) {
+      console.warn('Limpeza do conflito será repetida na próxima abertura.', error);
+    }
     document.getElementById('og-sync-conflict-banner')?.remove();
     document.getElementById('og-sync-conflict-detail')?.remove();
   }
@@ -268,8 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function clearSyncReview() {
     activeSyncReview = null;
-    localStorage.removeItem(SYNC_REVIEW_MARKER);
-    try { await OG_SYNC_BRIDGE.clearReview(); } catch {}
+    localStorage.setItem(SYNC_REVIEW_MARKER, JSON.stringify({ resolved: true, resolvedAt: new Date().toISOString() }));
+    try {
+      await OG_SYNC_BRIDGE.clearReview();
+      localStorage.removeItem(SYNC_REVIEW_MARKER);
+    } catch (error) {
+      console.warn('Limpeza da revisão será repetida na próxima abertura.', error);
+    }
     document.getElementById('og-sync-review-banner')?.remove();
   }
 
@@ -527,8 +537,26 @@ document.addEventListener('DOMContentLoaded', () => {
     syncRecoveryReady = false;
     const conflictMarker = readSmallMarker(SYNC_CONFLICT_MARKER);
     const reviewMarker = readSmallMarker(SYNC_REVIEW_MARKER);
-    try { activeSyncConflict = await OG_SYNC_BRIDGE.loadConflict(); } catch { activeSyncConflict = null; }
-    try { activeSyncReview = await OG_SYNC_BRIDGE.loadReview(); } catch { activeSyncReview = null; }
+
+    if (conflictMarker?.resolved) {
+      activeSyncConflict = null;
+      try {
+        await OG_SYNC_BRIDGE.clearConflict();
+        localStorage.removeItem(SYNC_CONFLICT_MARKER);
+      } catch {}
+    } else {
+      try { activeSyncConflict = await OG_SYNC_BRIDGE.loadConflict(); } catch { activeSyncConflict = null; }
+    }
+
+    if (reviewMarker?.resolved) {
+      activeSyncReview = null;
+      try {
+        await OG_SYNC_BRIDGE.clearReview();
+        localStorage.removeItem(SYNC_REVIEW_MARKER);
+      } catch {}
+    } else {
+      try { activeSyncReview = await OG_SYNC_BRIDGE.loadReview(); } catch { activeSyncReview = null; }
+    }
 
     if (!activeSyncConflict && conflictMarker) {
       try {
@@ -585,6 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
       showSyncConflictBanner();
       return;
     }
+    if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+      await restoreSyncRecovery();
+      if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+        setSyncStatus('Revisão pendente aguardando recuperação', 'offline');
+        return;
+      }
+    }
     if (pendingSyncReview()) {
       setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
       showSyncReviewBanner();
@@ -626,6 +661,11 @@ document.addEventListener('DOMContentLoaded', () => {
       showSyncConflictBanner(conflict);
     });
   }
+
+  window.addEventListener('storage', event => {
+    if (![SYNC_CONFLICT_MARKER, SYNC_REVIEW_MARKER].includes(event.key)) return;
+    restoreSyncRecovery().catch(error => console.warn('Falha ao reconciliar estado entre abas.', error));
+  });
 
   // Navegação de Abas
   const tabs = document.querySelectorAll('.nav-tab');
