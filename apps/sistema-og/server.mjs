@@ -265,6 +265,19 @@ function localAddresses() {
 }
 
 function buildAccessInfo() {
+  const publicDomain = String(process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (publicDomain) {
+    const publicUrl = `https://${publicDomain}`;
+    return {
+      port,
+      desktop: publicUrl,
+      phoneUrls: [publicUrl],
+      primaryPhoneUrl: publicUrl,
+      protected: true,
+      hosted: true,
+      tip: 'Use o mesmo endereço HTTPS no computador e no celular. O código de acesso é solicitado por sessão.'
+    };
+  }
   const addresses = localAddresses();
   const phoneUrls = addresses.map(ip => `http://${ip}:${port}`);
   return {
@@ -273,6 +286,7 @@ function buildAccessInfo() {
     phoneUrls,
     primaryPhoneUrl: phoneUrls[0] || null,
     protected: lanMode,
+    hosted: false,
     tip: 'No celular use a mesma Wi-Fi do PC e o código temporário definido ao iniciar o modo LAN.'
   };
 }
