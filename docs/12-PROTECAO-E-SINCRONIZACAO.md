@@ -24,8 +24,8 @@ Executar `wrangler login`, criar o namespace KV, substituir `SUBSTITUIR_PELO_ID_
 O runtime local-first pode ser publicado como **prévia HTTPS protegida** no Railway sem transformar o JSON local em banco definitivo.
 
 Requisitos do serviço:
-- start command: `npm run og:start:hosted`;
-- healthcheck: `/health`;
+- o Railpack detecta o script padrão `npm start`, que encaminha para `npm run og:start:hosted`;
+- healthcheck do serviço: `/health`;
 - segredo `OG_ACCESS_TOKEN` com pelo menos 16 caracteres;
 - domínio público Railway gerado para o serviço;
 - volume persistente recomendado, montado em um caminho que o Railway expõe como `RAILWAY_VOLUME_MOUNT_PATH`.
@@ -33,3 +33,8 @@ Requisitos do serviço:
 O entrypoint hospedado usa o `PORT` fornecido pelo Railway, escuta em `0.0.0.0` e mantém `/api/*` protegido por Bearer token. O endpoint `/health` não exige autenticação e serve somente para o healthcheck da plataforma.
 
 **Importante:** esse deploy é uma camada de preview/acesso remoto. A direção arquitetural continua sendo Supabase Postgres/Auth como verdade relacional oficial; não tratar o arquivo JSON hospedado como substituto dessa etapa.
+
+
+### Nota Railway 2026
+
+Para serviços Railway novos, não usar `railway.json`/Config as Code como fonte de configuração. O repositório expõe um script `start` padrão para deploy zero-config; healthcheck, domínio, segredo e volume são definidos no serviço Railway (ou via Railway Agent/CLI/IaC quando disponível).
