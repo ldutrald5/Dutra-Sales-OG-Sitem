@@ -65,11 +65,31 @@
   }
 
   function setNextAction(lead, nextAction, followUpAt, options = {}) {
-    const previous = { nextAction: lead.nextAction || '', followUpAt: lead.followUpAt || '' };
+    const previous = {
+      nextAction: lead.nextAction || '',
+      followUpAt: lead.followUpAt || '',
+      nextActionReason: lead.nextActionReason || '',
+      nextActionObjective: lead.nextActionObjective || '',
+      nextActionExpectedResult: lead.nextActionExpectedResult || ''
+    };
     lead.nextAction = String(nextAction || '').trim();
     lead.followUpAt = String(followUpAt || '').trim();
+
+    const hasReason = Object.hasOwn(options, 'reason') || Object.hasOwn(options, 'nextActionReason');
+    const hasObjective = Object.hasOwn(options, 'objective') || Object.hasOwn(options, 'nextActionObjective');
+    const hasExpected = Object.hasOwn(options, 'expectedResult') || Object.hasOwn(options, 'nextActionExpectedResult');
+    if (hasReason) lead.nextActionReason = String(options.reason ?? options.nextActionReason ?? '').trim();
+    if (hasObjective) lead.nextActionObjective = String(options.objective ?? options.nextActionObjective ?? '').trim();
+    if (hasExpected) lead.nextActionExpectedResult = String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim();
+
+    const changedFields = ['nextAction', 'followUpAt'];
+    if (hasReason) changedFields.push('nextActionReason');
+    if (hasObjective) changedFields.push('nextActionObjective');
+    if (hasExpected) changedFields.push('nextActionExpectedResult');
+    changedFields.push('interactions');
+
     const label = lead.nextAction ? `${lead.nextAction}${lead.followUpAt ? ` · ${lead.followUpAt}` : ''}` : 'Sem próxima ação';
-    return addInteraction(lead, { type: 'proxima_acao', note: label, countAsContact: false, changedFields: ['nextAction', 'followUpAt', 'interactions'], previous }, options);
+    return addInteraction(lead, { type: 'proxima_acao', note: label, countAsContact: false, changedFields, previous }, options);
   }
 
   return { RESULT_DEFINITIONS, addInteraction, recordResult, setNextAction };

@@ -14,8 +14,24 @@ const explicit={id:'C',conversationStage:'waiting_response',priority:'alta',inte
 assert.equal(intelligence.conversationStage(explicit),'waiting_response','estado explícito deve prevalecer');
 
 assert.equal(intelligence.priorityBand({priority:'alta',priorityBand:'urgente'}),'urgente');
-assert.ok(intelligence.score({priorityBand:'urgente',conversationStage:'negotiation',followUpAt:'2026-09-27T09:00:00-03:00',temperature:'quente',potential:'alto'},now) >
-  intelligence.score({priority:'media',conversationStage:'first_contact'},now));
+const priorityCase={priorityBand:'urgente',conversationStage:'negotiation',followUpAt:'2026-09-27T09:00:00-03:00',temperature:'quente',potential:'alto',nextAction:'Ligar para o gestor',nextActionReason:'Proposta enviada e retorno combinado',nextActionObjective:'Descobrir o bloqueio',nextActionExpectedResult:'Definir avanço ou nova data'};
+assert.ok(intelligence.score(priorityCase,now) > intelligence.score({priority:'media',conversationStage:'first_contact'},now));
+const breakdown=intelligence.scoreBreakdown(priorityCase,now);
+assert.equal(breakdown.total,intelligence.score(priorityCase,now),'score e explicação devem usar a mesma fonte');
+assert.ok(breakdown.factors.some(item=>item.id==='followup_overdue'&&item.points===50),'retorno vencido deve ser explicável');
+assert.ok(breakdown.factors.some(item=>item.id==='priority'&&item.points===100),'prioridade urgente deve ser explicável');
+assert.ok(breakdown.factors.some(item=>item.id==='conversation'&&item.points===35),'negociação deve ser explicável');
+
+const nextBest=intelligence.nextBestAction(priorityCase,now);
+assert.equal(nextBest.action,'Ligar para o gestor');
+assert.equal(nextBest.reason,'Proposta enviada e retorno combinado');
+assert.equal(nextBest.objective,'Descobrir o bloqueio');
+assert.equal(nextBest.expectedResult,'Definir avanço ou nova data');
+assert.equal(nextBest.score,breakdown.total);
+
+const fallback=intelligence.nextBestAction({priority:'alta',conversationStage:'proposal',followUpAt:'2026-09-27T09:00:00-03:00'},now);
+assert.equal(fallback.action,'Definir próxima ação');
+assert.equal(fallback.reason,'Retorno vencido','fallback deve explicar apenas fatos determinísticos já presentes');
 
 const rows=[
   {id:'1',priority:'media',conversationStage:'first_contact',sourceLabel:'Lista A'},

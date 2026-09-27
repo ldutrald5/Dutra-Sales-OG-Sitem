@@ -33,9 +33,17 @@ assert.equal(note.entityId, 'L2');
 assert.equal(prospect.interactions.length, 1);
 interactions.recordResult(prospect, 'negociacao', '', { now: '2026-09-24T14:00:00.000Z' });
 assert.equal(prospect.status, 'negociacao');
-interactions.setNextAction(prospect, 'Ligar para João', '2026-09-25T09:00', { now: '2026-09-24T14:01:00.000Z' });
+interactions.setNextAction(prospect, 'Ligar para João', '2026-09-25T09:00', {
+  now: '2026-09-24T14:01:00.000Z',
+  reason: 'Retorno combinado após negociação',
+  objective: 'Confirmar o próximo passo',
+  expectedResult: 'Nova data ou avanço confirmado'
+});
 assert.equal(prospect.nextAction, 'Ligar para João');
 assert.equal(prospect.followUpAt, '2026-09-25T09:00');
+assert.equal(prospect.nextActionReason, 'Retorno combinado após negociação');
+assert.equal(prospect.nextActionObjective, 'Confirmar o próximo passo');
+assert.equal(prospect.nextActionExpectedResult, 'Nova data ou avanço confirmado');
 
 const queue = desk.selectQueue([legacy, prospect], 'all', 'nova', new Date('2026-09-24T15:00:00.000Z'));
 assert.equal(queue.length, 1);
@@ -44,6 +52,9 @@ assert.equal(queue[0].id, 'L2');
 const context = callContext.build(prospect);
 assert.equal(context.company.id, 'L2');
 assert.equal(context.recentInteractions.length, 3);
+assert.equal(context.nextAction.reason, 'Retorno combinado após negociação');
+assert.equal(context.nextAction.objective, 'Confirmar o próximo passo');
+assert.equal(context.nextAction.expectedResult, 'Nova data ou avanço confirmado');
 assert.equal(Object.hasOwn(context, 'knowledge'), false);
 
 const appSource = fs.readFileSync(new URL('../apps/sistema-og/app.js', import.meta.url), 'utf8');

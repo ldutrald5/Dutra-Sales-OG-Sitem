@@ -26,7 +26,13 @@
       contact: { id: lead.contactId || '', name: compactText(lead.nome, 120), role: compactText(lead.cargo || lead.decisionMaker, 100), ...(needsPhone ? { phone: compactText(lead.telefone, 30) } : {}) },
       stage: compactText(lead.status || 'novo', 60), accountSummary: buildAccountSummary(lead), recentInteractions,
       objections: Array.isArray(lead.objections) ? lead.objections.slice(0, 5).map(item => compactText(item, 240)) : [],
-      nextAction: { description: compactText(lead.nextAction, 240), dueAt: lead.followUpAt || '' },
+      nextAction: {
+        description: compactText(lead.nextAction, 240),
+        dueAt: lead.followUpAt || '',
+        reason: compactText(lead.nextActionReason, 360),
+        objective: compactText(lead.nextActionObjective, 360),
+        expectedResult: compactText(lead.nextActionExpectedResult, 360)
+      },
       relevantOpportunity: (lead.opportunities || []).find(item => item.status !== 'closed') || null
     };
     if (JSON.stringify(context).length > BUDGET.maxContextChars) context.recentInteractions = context.recentInteractions.slice(-3);

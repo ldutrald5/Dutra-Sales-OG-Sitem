@@ -3486,16 +3486,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function getOpportunityScore(lead) {
-    let score = lead.priority === 'alta' ? 40 : lead.priority === 'media' ? 20 : 0;
-    if (lead.followUpAt) {
-      const distance = new Date(lead.followUpAt).getTime() - Date.now();
-      if (distance < 0) score += 50;
-      else if (distance < 86400000) score += 35;
-    }
-    if (!lead.nextAction) score += 18;
-    if (lead.status === 'negociacao') score += 20;
-    if (lead.status === 'proposta_enviada') score += 15;
-    return score;
+    return OG_LEAD_INTELLIGENCE.score(lead);
   }
 
   function getCoachContent(groups) {
@@ -3710,6 +3701,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const conversation = OG_LEAD_INTELLIGENCE.stageDefinition(lead);
     const priorityDef = OG_LEAD_INTELLIGENCE.priorityDefinition(lead);
     const source = OG_LEAD_INTELLIGENCE.sourceLabel(lead);
+    const nextBest = OG_LEAD_INTELLIGENCE.nextBestAction(lead);
+    const scoreExplanation = OG_LEAD_INTELLIGENCE.scoreBreakdown(lead);
     const overlay = document.createElement('div');
     overlay.id = 'client-sheet-overlay';
     overlay.className = 'client-sheet-overlay';
@@ -3742,6 +3735,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div>
           <div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Nenhuma conversa registrada')}</span></div>
         </div>
+
+        <section class="client-sheet-next-move" aria-label="Próximo movimento comercial">
+          <div class="client-sheet-section-title"><div><span>PRÓXIMO MOVIMENTO</span><small>Mesma inteligência da fila, com prioridade explicada.</small></div><strong class="client-sheet-score">${scoreExplanation.total} pts</strong></div>
+          <div class="client-sheet-next-move-grid">
+            <div><small>Ação</small><strong>${escapeHtml(nextBest.action)}</strong><span>${escapeHtml(formatFollowUp(nextBest.dueAt))}</span></div>
+            <div><small>Motivo</small><strong>${escapeHtml(nextBest.reason || 'Ainda não registrado')}</strong><span>Motivo explícito tem preferência sobre a regra automática.</span></div>
+            <div><small>Objetivo</small><strong>${escapeHtml(nextBest.objective || 'Ainda não registrado')}</strong><span>O que esta ação precisa conquistar.</span></div>
+            <div><small>Resultado esperado</small><strong>${escapeHtml(nextBest.expectedResult || 'Ainda não registrado')}</strong><span>Critério para saber se houve avanço.</span></div>
+          </div>
+          <div class="client-sheet-score-factors">
+            ${scoreExplanation.factors.map(factor => `<span data-score-factor="${escapeHtml(factor.id)}"><b>${factor.points > 0 ? '+' : ''}${factor.points}</b> ${escapeHtml(factor.label)}</span>`).join('')}
+          </div>
+        </section>
 
         <form id="client-sheet-form" class="client-sheet-form">
           <section>
@@ -3779,6 +3785,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
               <label class="span-2">Objeções<textarea name="objections" rows="2" placeholder="Uma por linha">${escapeHtml((lead.objections || []).join('\n'))}</textarea></label>
               <label>Próxima ação<input name="nextAction" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para o gestor"></label>
               <label>Data do retorno<input name="followUpAt" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label>
+              <label class="span-2">Motivo do follow-up<input name="nextActionReason" value="${escapeHtml(lead.nextActionReason || '')}" placeholder="Ex.: proposta enviada e retorno combinado para hoje"></label>
+              <label class="span-2">Objetivo da próxima ação<input name="nextActionObjective" value="${escapeHtml(lead.nextActionObjective || '')}" placeholder="Ex.: descobrir se o bloqueio é técnico, financeiro ou aprovação interna"></label>
+              <label class="span-2">Resultado esperado<input name="nextActionExpectedResult" value="${escapeHtml(lead.nextActionExpectedResult || '')}" placeholder="Ex.: definir avanço, objeção concreta ou nova data de decisão"></label>
               <label class="span-2">Observações<textarea name="observacoes" rows="4" placeholder="Informações úteis, contexto, detalhes do cliente">${escapeHtml(lead.observacoes || '')}</textarea></label>
             </div>
           </section>
@@ -3938,6 +3947,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           objections: String(data.get('objections') || '').split(/\r?\n|,/).map(item => item.trim()).filter(Boolean),
           nextAction: data.get('nextAction'),
           followUpAt: data.get('followUpAt'),
+          nextActionReason: data.get('nextActionReason'),
+          nextActionObjective: data.get('nextActionObjective'),
+          nextActionExpectedResult: data.get('nextActionExpectedResult'),
           referrals,
           observacoes: data.get('observacoes')
         });
