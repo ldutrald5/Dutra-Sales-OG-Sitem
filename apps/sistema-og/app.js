@@ -422,6 +422,10 @@ document.addEventListener('DOMContentLoaded', () => {
       setSyncStatus('Preparando sincronização…', 'busy');
       return;
     }
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+      setSyncStatus('Recuperação de conflito pendente', 'conflict');
+      return;
+    }
     if (pendingSyncReview()) {
       setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
       showSyncReviewBanner();
@@ -500,6 +504,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     syncRecoveryReady = true;
+    if (conflictMarker && !activeSyncConflict) {
+      setSyncStatus('Conflito aguardando conexão', 'offline');
+      return;
+    }
     if (activeSyncConflict) {
       setSyncStatus('Conflito de sincronização', 'conflict');
       showSyncConflictBanner(activeSyncConflict);
@@ -513,6 +521,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!syncRecoveryReady) {
       setSyncStatus('Preparando sincronização…', 'busy');
       return;
+    }
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+      await restoreSyncRecovery();
+      if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+        setSyncStatus('Conflito aguardando conexão', 'offline');
+        return;
+      }
     }
     if (pendingSyncConflict()) {
       setSyncStatus('Conflito de sincronização', 'conflict');
