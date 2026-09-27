@@ -6,6 +6,18 @@ O CRM usa `state.leads` como cadastro mestre operacional. Cada lead mantém dado
 
 Entradas existentes incluem cadastro manual/rápido, importadores, OCR revisável e atualizações feitas em fluxos do Call AI. A sincronização preserva uma cópia local e um espelho compartilhado quando disponível.
 
+## Fila inteligente de Leads & Transcrição
+
+A lista principal é uma visão ordenada de `state.leads`, não outra base. A interface separa deliberadamente:
+
+- **status comercial**: etapa do funil;
+- **situação da conversa**: primeiro contato, já conversei, não respondeu, aguardando resposta, interessado, proposta, negociação, cliente, cliente fidelizado ou sem interesse;
+- **origem/lista**: de onde o registro veio;
+- **prioridade**: urgente, alta, média ou baixa;
+- **temperatura e potencial**: sinais comerciais usados somente para organização.
+
+A ordenação é determinística: prioridade, retorno vencido/próximo, situação da conversa, temperatura e potencial. A pontuação nunca muda automaticamente o status do cliente. Dados antigos sem os novos campos continuam funcionando por fallback.
+
 ## Regras de produto
 
 - Conta/empresa é a raiz; contatos pertencem à conta.
