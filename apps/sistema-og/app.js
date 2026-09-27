@@ -3702,6 +3702,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
             </div>
           </section>
 
+          <section class="client-sheet-context-section">
+            <div class="client-sheet-section-title"><div><span>HISTÓRICO RECENTE</span><small>Últimas conversas registradas nesta conta.</small></div></div>
+            <div class="client-sheet-history">${OG_UI_COMPONENTS.timeline(lead.interactions || [])}</div>
+          </section>
+
+          <div class="client-sheet-extended">
+            ${buildCompany360BetaPanel(lead)}
+            ${buildClientMaterialsPanel(lead, 'client-sheet')}
+          </div>
+
           <div class="client-sheet-warning ${lead.status === 'fechado' && !code ? '' : 'hidden'}" data-code-warning>
             Venda marcada como fechada sem Código OG. Cadastre o cliente no sistema da empresa e informe o código aqui quando ele for gerado.
           </div>
@@ -3863,6 +3873,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       openClientSheet(updated.id);
       showNotification(`Ficha salva · ${changedFields.length} campo(s) atualizado(s).`, 'success');
     });
+
+    bindCompany360BetaPanel(lead, overlay);
+    bindClientMaterialsPanel(overlay, lead);
 
     setTimeout(() => form.elements.empresa?.focus(), 40);
   }
@@ -4429,13 +4442,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </section>`;
   }
 
-  function bindCompany360BetaPanel(lead) {
-    const root = document.getElementById('crm-lead-inspector');
+  function bindCompany360BetaPanel(lead, providedRoot = null) {
+    const root = providedRoot || document.getElementById('crm-lead-inspector');
     if (!root || !window.OG_CANONICAL_EDITOR || !window.OG_CANONICAL_DOMAIN) return;
     const persist = result => {
       state.operations = result.graph;
       saveOperationsToStorage();
-      renderLeadInspector();
+      if (root.closest?.('.client-sheet-panel')) openClientSheet(lead.id);
+      else renderLeadInspector();
       showNotification('Company 360 atualizada.', 'success');
     };
     root.querySelector('[data-company360-create]')?.addEventListener('click', () => {
