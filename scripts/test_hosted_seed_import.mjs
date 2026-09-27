@@ -20,6 +20,15 @@ assert.equal(merged.leads[0].observacoes,'Humana','texto humano existente deve p
 assert.equal(merged.leads[0].cidadeUf,'Maringá/PR','campo vazio pode ser enriquecido');
 assert.deepEqual(merged.leads[0].interactions,[{id:'I1'}],'interações existentes não podem ser inventadas/substituídas');
 
+const conflictingCode = mergeSeedLeads(
+  [{ id:'CODE-A', empresa:'JOSE CARLOS', internalCode:'8374' }],
+  [{ id:'CODE-B', empresa:'VERBO DA VIDA TRANSPORTES RODOVIARIOS LTDA', internalCode:'008374' }]
+);
+assert.equal(conflictingCode.leads.length,2,'mesmo código com empresas incompatíveis deve ficar separado para revisão');
+assert.equal(conflictingCode.matched,0);
+assert.equal(conflictingCode.ambiguous,1);
+assert.equal(conflictingCode.leads[1].importMeta.seedConflictingCodeMatch,true);
+
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-'));
 const volume=path.join(tmp,'volume');
 fs.mkdirSync(volume,{recursive:true});
