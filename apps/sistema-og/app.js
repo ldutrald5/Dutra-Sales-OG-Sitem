@@ -4918,25 +4918,58 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   let crmExcelReview = null;
 
   function spreadsheetDecisionOptions(change) {
-    const blankCurrent = !String(change.current || '').trim();
-    const selected = change.protected ? 'keep' : (blankCurrent ? 'excel' : 'keep');
+    const selected = change.protected ? 'keep' : 'excel';
     const choices = [
       ['keep', 'Manter sistema'],
-      ['excel', 'Usar Excel'],
+      ['excel', 'Usar planilha'],
       ...(change.protected ? [['append', 'Juntar os dois']] : []),
       ['ignore', 'Ignorar campo']
     ];
     return choices.map(([value, label]) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`).join('');
   }
 
+  function spreadsheetStatusLabel(status) {
+    return {
+      NEW: 'Novo',
+      SAFE_UPDATE: 'Atualização',
+      POSSIBLE_DUPLICATE: 'Duplicidade',
+      CONFLICT: 'Revisar',
+      INVALID: 'Inválido',
+      UNCHANGED: 'Sem alteração'
+    }[status] || status;
+  }
+
+  function spreadsheetActionOptions(item) {
+    const hasTarget = Boolean(item.matchedLeadId || item.candidates?.length);
+    return [
+      ['ignore', 'Ignorar'],
+      ['create', 'Criar novo'],
+      ...(hasTarget ? [['update', 'Atualizar existente']] : [])
+    ].map(([value,label]) => `<option value="${value}">${label}</option>`).join('');
+  }
+
+  function spreadsheetCandidateSelector(item) {
+    const candidates = item.candidates || [];
+    if (!candidates.length) return '';
+    if (candidates.length === 1) return `<input type="hidden" data-sheet-row="${item.row.sourceRow}" data-sheet-target value="${escapeHtml(candidates[0].leadId)}"><small class="spreadsheet-target-note">Alvo: ${escapeHtml(candidates[0].company || candidates[0].leadId)} · ${escapeHtml((candidates[0].reasons || []).join(' + '))}</small>`;
+    return `<label class="spreadsheet-row-decision">Cliente existente<select data-sheet-row="${item.row.sourceRow}" data-sheet-target>${candidates.map(candidate => `<option value="${escapeHtml(candidate.leadId)}">${escapeHtml(candidate.company || candidate.leadId)} · ${escapeHtml((candidate.reasons || []).join(' + '))}</option>`).join('')}</select></label>`;
+  }
+
   function renderCrmExcelReview(preview) {
     const body = document.getElementById('crm-excel-preview-body');
+    if (!body) return;
     body.innerHTML = preview.map(item => {
-      const match = item.matchKey ? `${item.matchKey} · ${item.confidence}` : '—';
-      let decisions = '<span class="spreadsheet-muted">Sem alteração</span>';
-      if (item.status === 'NEW') decisions = `<label class="spreadsheet-row-decision">Destino<select data-sheet-row="${item.row.sourceRow}" data-sheet-action><option value="ignore">Não importar</option><option value="import">Importar novo cliente</option></select></label>`;
-      else if (item.changes?.length) decisions = `<div class="spreadsheet-field-list">${item.changes.map(change => `<label class="spreadsheet-field"><span><b>${escapeHtml(change.label || change.field)}</b><small>Sistema: ${escapeHtml(change.current || 'vazio')}</small><small>Excel: ${escapeHtml(change.incoming || 'vazio')}</small></span><select data-sheet-row="${item.row.sourceRow}" data-sheet-field="${escapeHtml(change.field)}">${spreadsheetDecisionOptions(change)}</select></label>`).join('')}</div>`;
-      return `<tr><td>${item.row.sourceRow}</td><td><b>${escapeHtml(item.row.company || '—')}</b><small>${escapeHtml(item.row.externalCode || item.row.phone || '')}</small></td><td><span class="spreadsheet-state" data-state="${item.status}">${item.status}</span><small>${escapeHtml(item.reason)}</small></td><td>${escapeHtml(match)}</td><td>${decisions}</td></tr>`;
+      const match = item.matchKey
+        ? `${item.matchKey} · ${item.confidence}`
+        : item.candidates?.length
+          ? item.candidates.map(candidate => `${candidate.company || candidate.leadId} (${(candidate.reasons || []).join(' + ')})`).join(' · ')
+          : '—';
+      const actions = item.status === 'INVALID'
+        ? '<span class="spreadsheet-muted">Não pode ser importado</span>'
+        : item.status === 'UNCHANGED'
+          ? '<span class="spreadsheet-muted">Já está igual à base</span>'
+          : `<div class="spreadsheet-decision-stack"><label class="spreadsheet-row-decision">Ação<select data-sheet-row="${item.row.sourceRow}" data-sheet-action>${spreadsheetActionOptions(item)}</select></label>${spreadsheetCandidateSelector(item)}${item.changes?.length ? `<details class="spreadsheet-field-review"><summary>Revisar ${item.changes.length} campo(s)</summary><div class="spreadsheet-field-list">${item.changes.map(change => `<label class="spreadsheet-field"><span><b>${escapeHtml(change.label || change.field)}</b><small>Sistema: ${escapeHtml(change.current || 'vazio')}</small><small>Planilha: ${escapeHtml(change.incoming || 'vazio')}</small></span><select data-sheet-row="${item.row.sourceRow}" data-sheet-field="${escapeHtml(change.field)}">${spreadsheetDecisionOptions(change)}</select></label>`).join('')}</div></details>` : ''}</div>`;
+      return `<tr><td>${item.row.sourceRow}</td><td><b>${escapeHtml(item.row.company || item.row.primaryContact || '—')}</b><small>${escapeHtml(item.row.externalCode || item.row.document || item.row.phone || '')}</small></td><td><span class="spreadsheet-state" data-state="${item.status}">${escapeHtml(spreadsheetStatusLabel(item.status))}</span><small>${escapeHtml(item.reason)}</small></td><td>${escapeHtml(match)}</td><td>${actions}</td></tr>`;
     }).join('');
   }
 
@@ -4944,11 +4977,71 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const decisions = {};
     document.querySelectorAll('#crm-excel-preview-body [data-sheet-row]').forEach(input => {
       const row = input.dataset.sheetRow;
-      decisions[row] ||= { action: 'review', fields: {} };
+      decisions[row] ||= { action: 'ignore', fields: {} };
       if (input.dataset.sheetAction !== undefined) decisions[row].action = input.value;
+      if (input.dataset.sheetTarget !== undefined) decisions[row].targetLeadId = input.value;
       if (input.dataset.sheetField) decisions[row].fields[input.dataset.sheetField] = input.value;
     });
     return decisions;
+  }
+
+  function renderCrmImportMapping(source) {
+    const panel = document.getElementById('crm-import-mapping');
+    const root = document.getElementById('crm-import-mapping-fields');
+    const note = document.getElementById('crm-import-mapping-note');
+    if (!panel || !root) return;
+    if (source?.canonical) {
+      panel.classList.add('hidden');
+      root.innerHTML = '';
+      return;
+    }
+    panel.classList.remove('hidden');
+    if (note) note.textContent = source?.mapped
+      ? `${source.mapped} campo(s) reconhecido(s) automaticamente na aba ${source.sheetName}.`
+      : `Nenhum campo foi reconhecido automaticamente na aba ${source?.sheetName || 'selecionada'}. Faça o mapeamento abaixo.`;
+    const headers = source?.headers || [];
+    root.innerHTML = OG_SPREADSHEET_IMPORT.FIELD_DEFS.map(def => {
+      const selected = source.mapping?.[def.key];
+      return `<label><span>${escapeHtml(def.label)}</span><select data-import-map-field="${escapeHtml(def.key)}"><option value="">Não importar</option>${headers.map((header,index) => `<option value="${index}" ${Number(selected) === index ? 'selected' : ''}>${escapeHtml(header || `Coluna ${index + 1}`)}</option>`).join('')}</select></label>`;
+    }).join('');
+  }
+
+  function collectCrmImportMapping() {
+    const mapping = {};
+    document.querySelectorAll('#crm-import-mapping-fields [data-import-map-field]').forEach(select => {
+      if (select.value !== '') mapping[select.dataset.importMapField] = Number(select.value);
+    });
+    return mapping;
+  }
+
+  function renderCrmImportSummary(preview, fileName, hash) {
+    const summary = OG_SPREADSHEET_IMPORT.summarizePreview(preview);
+    const summaryEl = document.getElementById('crm-excel-summary');
+    const counters = document.getElementById('crm-excel-counters');
+    if (summaryEl) summaryEl.textContent = `${fileName} · ${summary.total} registro(s) · hash ${hash}`;
+    if (counters) counters.innerHTML = [
+      ['Novos', summary.newCount],
+      ['Atualizações', summary.updateCount],
+      ['Duplicados / revisar', summary.duplicateCount],
+      ['Inválidos', summary.invalidCount],
+      ['Sem alteração', summary.unchangedCount]
+    ].map(([label,value]) => `<div><small>${label}</small><b>${value}</b></div>`).join('');
+    return summary;
+  }
+
+  function refreshCrmImportPreview(mappingOverride) {
+    if (!crmExcelReview?.workbook || !crmExcelReview?.source) return;
+    const rows = OG_SPREADSHEET_IMPORT.rowsFromSource(crmExcelReview.workbook, crmExcelReview.source, mappingOverride);
+    const preview = OG_SPREADSHEET_IMPORT.preview(rows, state.leads);
+    crmExcelReview.rows = rows;
+    crmExcelReview.preview = preview;
+    crmExcelReview.mapping = mappingOverride || crmExcelReview.source.mapping || {};
+    renderCrmExcelReview(preview);
+    renderCrmImportSummary(preview, crmExcelReview.fileName, crmExcelReview.hash);
+    const apply = document.getElementById('crm-excel-apply');
+    if (apply) apply.disabled = preview.length === 0;
+    const note = document.getElementById('crm-excel-review-note');
+    if (note) note.textContent = 'Nada foi gravado. Escolha Criar novo, Atualizar existente ou Ignorar em cada linha e confirme no final.';
   }
 
   function initCrmExcelPreview() {
@@ -4957,42 +5050,77 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const panel=document.getElementById('crm-excel-preview-panel');
     trigger?.addEventListener('click',()=>input.click());
     document.getElementById('crm-excel-close')?.addEventListener('click',()=>panel.classList.add('hidden'));
+
     input?.addEventListener('change',async()=>{
-      const file=input.files?.[0]; if(!file)return;
-      trigger.disabled=true; trigger.textContent='Lendo modelo…';
+      const file=input.files?.[0];
+      if(!file)return;
+      trigger.disabled=true;
+      trigger.textContent='Lendo planilha…';
       try{
-        const buffer=await file.arrayBuffer();
-        const workbook=await OG_SPREADSHEET_IMPORT.readArrayBuffer(buffer,{name:file.name,type:file.type,size:file.size});
-        const validation=OG_SPREADSHEET_IMPORT.validateWorkbook(workbook);
-        if(!validation.valid)throw new Error(`Modelo incompatível. Abas ausentes: ${validation.missing.join(', ')}`);
-        const rows=OG_SPREADSHEET_IMPORT.readCrmRows(workbook);
-        const preview=OG_SPREADSHEET_IMPORT.preview(rows,state.leads);
-        const digest=await crypto.subtle.digest('SHA-256',buffer.slice(0));
+        const bytes=await file.arrayBuffer();
+        const digest=await crypto.subtle.digest('SHA-256',bytes.slice(0));
         const hash=Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,12);
-        const counts=preview.reduce((acc,item)=>{acc[item.status]=(acc[item.status]||0)+1;return acc;},{});
-        document.getElementById('crm-excel-summary').textContent=`${file.name} · ${rows.length} registros · hash ${hash}`;
-        document.getElementById('crm-excel-counters').innerHTML=['NEW','UNCHANGED','SAFE_UPDATE','POSSIBLE_DUPLICATE','CONFLICT','INVALID','PROTECTED_IGNORED'].map(status=>`<div><small>${status}</small><b>${counts[status]||0}</b></div>`).join('');
-        crmExcelReview={preview,hash,fileName:file.name,analyzedAt:new Date().toISOString()};
-        renderCrmExcelReview(preview);
-        document.getElementById('crm-excel-apply').disabled=false;
-        panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});
-        showNotification('Comparação concluída. Suas alterações atuais foram preservadas por padrão.','success');
-      }catch(error){showNotification(error.message||'Não foi possível ler o modelo Excel.','error');}
-      finally{trigger.disabled=false;trigger.textContent='Excel · Preview';input.value='';}
+        const workbook=/\.csv$/i.test(file.name)
+          ? OG_SPREADSHEET_IMPORT.csvToWorkbook(await file.text())
+          : await OG_SPREADSHEET_IMPORT.readArrayBuffer(bytes,{name:file.name,type:file.type,size:file.size});
+        const source=OG_SPREADSHEET_IMPORT.detectTabularSource(workbook);
+        crmExcelReview={workbook,source,hash,fileName:file.name,analyzedAt:new Date().toISOString(),preview:[],rows:[],mapping:source.mapping||{}};
+        renderCrmImportMapping(source);
+        refreshCrmImportPreview(source.mapping);
+        panel.classList.remove('hidden');
+        panel.scrollIntoView({behavior:'smooth',block:'start'});
+        showNotification('Preview pronto. Nada foi gravado ainda.','success');
+      }catch(error){
+        crmExcelReview=null;
+        showNotification(error.message||'Não foi possível ler a planilha.','error');
+      }finally{
+        trigger.disabled=false;
+        trigger.textContent='⬆ Importar planilha';
+        input.value='';
+      }
     });
+
+    document.getElementById('crm-import-remap-preview')?.addEventListener('click',()=>{
+      if(!crmExcelReview)return;
+      refreshCrmImportPreview(collectCrmImportMapping());
+      showNotification('Mapeamento atualizado. Revise o preview antes de confirmar.','info');
+    });
+
     document.getElementById('crm-excel-apply')?.addEventListener('click',()=>{
       if(!crmExcelReview)return;
       const decisions=collectCrmExcelDecisions();
-      const result=OG_SPREADSHEET_IMPORT.applyPreview(crmExcelReview.preview,state.leads,decisions,{idFactory:(row,index)=>`LEAD-XLSX-${Date.now().toString(36).toUpperCase()}-${index}`,now:new Date().toISOString()});
-      if(!result.applied)return showNotification('Nenhuma alteração foi selecionada para aplicar.','info');
+      const selectedActions=Object.values(decisions).filter(decision=>decision.action==='create'||decision.action==='update').length;
+      if(!selectedActions)return showNotification('Escolha pelo menos uma linha para criar ou atualizar.','info');
+
+      const result=OG_SPREADSHEET_IMPORT.applyPreview(
+        crmExcelReview.preview,
+        state.leads,
+        decisions,
+        {idFactory:(row,index)=>`LEAD-SHEET-${Date.now().toString(36).toUpperCase()}-${index}`,now:new Date().toISOString()}
+      );
+      if(!result.applied)return showNotification('As decisões escolhidas não geraram alteração na base.','info');
+
+      const created=result.audit.filter(item=>item.type==='spreadsheet_client_created').length;
+      const updated=result.audit.filter(item=>item.type==='spreadsheet_client_updated').length;
       const changedFields=result.audit.reduce((total,item)=>total+(item.changedFields?.length||0),0);
-      if(!window.confirm(`Aplicar ${result.applied} registro(s) e ${changedFields} campo(s)? Um registro de auditoria será criado.`))return;
-      state.leads=result.leads;
-      result.audit.forEach((item,index)=>{state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:`xlsx_${crmExcelReview.hash}_${item.sourceRow}_${index}`,type:item.type,at:new Date().toISOString(),clientId:item.leadId,metadata:{sourceFile:crmExcelReview.fileName,sourceHash:crmExcelReview.hash,sourceRow:item.sourceRow,changedFields:item.changedFields}});});
-      saveLeadsToStorage();saveOperationsToStorage();renderCrmModule();
-      document.getElementById('crm-excel-review-note').textContent=`Aplicação concluída: ${result.applied} registro(s), com trilha de auditoria e origem ${crmExcelReview.hash}.`;
+      if(!window.confirm(`Confirmar importação?\n\nCriar: ${created}\nAtualizar: ${updated}\nCampos alterados: ${changedFields}\n\nA base atual do DUTRA OS continuará sendo a fonte mestre.`))return;
+
+      state.leads=result.leads.map(lead=>normalizeLead(lead));
+      result.audit.forEach((item,index)=>{
+        state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{
+          id:`sheet_${crmExcelReview.hash}_${item.sourceRow}_${index}`,
+          type:item.type,
+          at:new Date().toISOString(),
+          clientId:item.leadId,
+          metadata:{sourceFile:crmExcelReview.fileName,sourceHash:crmExcelReview.hash,sourceRow:item.sourceRow,changedFields:item.changedFields}
+        });
+      });
+      saveLeadsToStorage();
+      saveOperationsToStorage();
+      renderCrmModule();
+      document.getElementById('crm-excel-review-note').textContent=`Importação concluída: ${created} novo(s) e ${updated} atualização(ões). Origem registrada com hash ${crmExcelReview.hash}.`;
       document.getElementById('crm-excel-apply').disabled=true;
-      showNotification('Decisões aplicadas com segurança.','success');
+      showNotification(`Importação concluída: ${created} novo(s), ${updated} atualizado(s).`,'success');
     });
   }
 
