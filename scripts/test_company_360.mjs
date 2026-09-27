@@ -35,6 +35,8 @@ assert.deepEqual(view.decisionMakers.map(item => item.id), ['CT1']);
 assert.deepEqual(view.opportunities.map(item => item.id), ['O3', 'O2', 'O1']);
 assert.deepEqual(view.openOpportunities.map(item => item.id), ['O3', 'O1']);
 assert.equal(view.summary.pipelineValueCents, 100000);
+assert.equal(view.summary.pipelineCurrency, 'BRL');
+assert.deepEqual(view.summary.pipelineValueByCurrency, { BRL: 100000 });
 assert.equal(view.summary.lastActivityAt, '2026-09-24T10:00:00Z');
 assert.equal(view.summary.nextTaskAt, '2026-09-26T10:00:00Z');
 assert.deepEqual(view.openTasks.map(item => item.id), ['T1', 'T3']);
@@ -44,6 +46,18 @@ assert.equal(Object.isFrozen(view.contacts), true);
 assert.equal(company360.buildCompany360(graph, 'missing'), null);
 assert.throws(() => company360.buildCompany360(graph, ''), /companyId é obrigatório/);
 assert.deepEqual(company360.listCompanies360(graph).map(item => item.company.id), ['C1', 'C2']);
+
+const mixedCurrencyGraph = {
+  ...graph,
+  opportunities: [
+    ...graph.opportunities,
+    { id: 'O4', entityType: 'opportunity', companyId: 'C1', stage: 'open', valueCents: 5000, currency: 'USD', updatedAt: '2026-09-23T10:00:00Z' }
+  ]
+};
+const mixedCurrencyView = company360.buildCompany360(mixedCurrencyGraph, 'C1');
+assert.equal(mixedCurrencyView.summary.pipelineValueCents, null, 'Pipeline agregado não deve somar moedas diferentes');
+assert.equal(mixedCurrencyView.summary.pipelineCurrency, null);
+assert.deepEqual(mixedCurrencyView.summary.pipelineValueByCurrency, { USD: 5000, BRL: 100000 });
 
 const legacyOnly = { companies: [], contacts: [{ id: 'OLD', name: 'Não converter' }], opportunities: [], activities: [], tasks: [] };
 assert.deepEqual(company360.listCompanies360(legacyOnly), []);
