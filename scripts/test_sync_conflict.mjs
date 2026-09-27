@@ -20,6 +20,13 @@ assert.notEqual(conflict.local.leads,local.leads,'snapshot deve ser cópia');
 local.leads[0].empresa='Mutado depois';
 assert.equal(conflict.local.leads[0].empresa,'Local','conflito deve preservar snapshot local');
 
+
+const diffs=sync.differences(conflict);
+assert.ok(diffs.some(row=>row.type==='leads'&&row.id==='L1'&&row.kind==='different'&&row.fields.includes('empresa')));
+assert.ok(diffs.some(row=>row.type==='leads'&&row.id==='L2'&&row.kind==='only_local'));
+assert.ok(diffs.some(row=>row.type==='leads'&&row.id==='L3'&&row.kind==='only_remote'));
+assert.ok(diffs.some(row=>row.type==='companies'&&row.id==='C1'&&row.kind==='different'&&row.fields.includes('name')));
+
 const review=sync.mergeForReview(conflict,safety,model);
 assert.equal(review.revision,8,'merge para revisão usa revisão remota atual');
 assert.deepEqual(new Set(review.leads.map(x=>x.id)),new Set(['L1','L2','L3']));
