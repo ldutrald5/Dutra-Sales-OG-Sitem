@@ -1,20 +1,20 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 5 |
-| cycle | 6 |
-| decision | 9 |
+| cycle | 7 |
+| decision | 10 |
 | experiment | 1 |
 | idea | 3 |
 | knowledge | 3 |
 | open_question | 2 |
 | pattern | 11 |
-| source | 11 |
+| source | 12 |
 
 ## Active decisions
 
@@ -36,6 +36,8 @@ Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Legacy lead data may enter canonical Company/Contact only through dry-run classification, explicit user selection, checkpoint, revalidation against current state and controlled apply; weak/ambiguous matches never become canonical truth automatically.
 - **DEC-HOST-06R-001 — HTTPS hosting is a protected preview, not a persistence architecture shortcut** (active/high)
   Expose the current DUTRA OS over HTTPS only through a protected hosted entrypoint with strong access token, healthcheck and persistent volume support; do not reinterpret the transition JSON state as the final canonical database or bypass the planned Supabase validation.
+- **DEC-LEADS-OG18-001 — Keep conversation state, pipeline status and source as separate lead dimensions** (active/high)
+  Smart lists are projections of one state.leads base. Conversation state, commercial pipeline status, source/list and priority remain independent fields; deterministic scoring may order work but never changes commercial truth automatically.
 
 ## Open questions
 
@@ -84,6 +86,8 @@ Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
 - **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (implemented/high)
   Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
+- **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
+  OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
@@ -96,8 +100,7 @@ Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Turns Architecture V1 into small reversible packages across Foundation and Commercial Product tracks.
 - **SRC-PKG01-001 — Implementation Package 01 report** (implemented/high)
   Foundation Bootstrap & Safety Gate implementation report including tests, environment blockers, rollback and intentionally deferred behavior.
-- **SRC-BRAIN-REVIEW-001 — DUTRA Builder Brain design review** (validated/high)
-  Structured review identified adoption, semantic validation, proportionality, metrics, provenance, human indexing and license-triage improvements for Builder Brain.
+
 ## Retrieval workflow
 
 1. Start here.
