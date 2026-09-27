@@ -69,4 +69,22 @@ assert.doesNotMatch(html,/id="crm-lead-inspector"/,'inspector antigo não deve c
 assert.match(css,/\.client-sheet-overlay/,'estilos da ficha lateral ausentes');
 assert.match(css,/\.crm-client-row/,'novo CRM visual ausente');
 
+assert.match(app,/function initUniversalClientSheetAccess\(\)/,'acesso transversal à ficha deve existir');
+assert.match(app,/data-open-client-sheet=.*data-prospect|data-prospect.*data-open-client-sheet/s,'prospecção deve expor ficha do cliente');
+assert.match(app,/call-ai-account-row.*data-open-client-sheet/s,'Call AI deve expor ficha do cliente selecionado');
+assert.match(app,/communication-context.*data-open-client-sheet/s,'Comunicação deve expor ficha do cliente selecionado');
+assert.match(app,/performance-stalled.*data-open-client-sheet/s,'Performance deve abrir ficha sem obrigar ida ao CRM');
+assert.doesNotMatch(app,/data-performance-client.*switchTab\('crm'\)/s,'Performance não deve depender de navegar ao CRM para abrir cliente');
+assert.match(app,/data-command-lead.*openClientSheet/s,'Command Center deve abrir ficha do resultado');
+assert.match(app,/function resolveHistoryLead\(item\)/,'Histórico deve resolver identidade do cliente');
+assert.match(app,/clientId:\s*relatedLead\?\.id/,'novas cotações devem preservar clientId no histórico');
+assert.match(app,/function refreshQuoteClientSheetAccess\(\)/,'Cotação deve resolver cliente ativo para acesso à ficha');
+assert.match(app,/cnpj\.length === 14/,'resolução transversal por CNPJ exige identificador completo');
+assert.match(app,/reconciliation-main.*data-open-client-sheet/s,'Reconciliação deve permitir abrir ficha do lead');
+assert.match(html,/id="quote-open-client-sheet"/,'Cotação deve mostrar acesso contextual à ficha');
+assert.match(css,/\.client-sheet-inline-link/,'estilo de acesso transversal à ficha ausente');
+assert.match(css,/\.history-client-link/,'histórico deve destacar cliente clicável');
+assert.match(css,/\.call-ai-account-row/,'Call AI deve acomodar botão de ficha');
+
+
 console.log('Client sheet + CRM workspace tests: PASS');
