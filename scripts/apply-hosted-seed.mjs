@@ -11,7 +11,33 @@ const codeKey = value => {
   return raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 const isEmpty = value => value == null || value === '' || (Array.isArray(value) && value.length === 0);
+const comparableName = value => clean(value)
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/\b(ltda|me|eireli|sa|s a|epp)\b/g, ' ')
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
 const safeSeedId = value => clean(value).replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 120);
+
+function codeOnlyCollision(existing, imported) {
+  const existingCode = codeKey(existing?.internalCode || existing?.codigo);
+  const importedCode = codeKey(imported?.internalCode || imported?.codigo);
+  if (!existingCode || !importedCode || existingCode !== importedCode) return false;
+
+  const sharedNonCodeKey = leadKeys(existing).some(key => !key.startsWith('code:') && leadKeys(imported).includes(key));
+  if (sharedNonCodeKey) return false;
+
+  const a = comparableName(existing?.empresa || existing?.nome);
+  const b = comparableName(imported?.empresa || imported?.nome);
+  if (!a || !b) return false;
+  if (a === b || a.includes(b) || b.includes(a)) return false;
+
+  const aTokens = new Set(a.split(/\s+/).filter(token => token.length >= 4));
+  const bTokens = new Set(b.split(/\s+/).filter(token => token.length >= 4));
+  const overlap = [...aTokens].filter(token => bTokens.has(token));
+  return overlap.length === 0;
+}
 
 function stateRevision(state) {
   const value = Number(state?.revision || 0);
@@ -120,16 +146,22 @@ export function mergeSeedLeads(existingLeads = [], importedLeads = []) {
 
     if (candidateIndexes.size === 1) {
       const [idx] = candidateIndexes;
-      output[idx] = mergeLead(output[idx], imported);
-      matched += 1;
-      rebuildIndex();
-      continue;
+      if (!codeOnlyCollision(output[idx], imported)) {
+        output[idx] = mergeLead(output[idx], imported);
+        matched += 1;
+        rebuildIndex();
+        continue;
+      }
     }
 
     const idExists = output.some(item => String(item.id) === String(imported.id));
     const next = idExists ? { ...imported, id: `${imported.id}-SEED-${added + 1}` } : { ...imported };
-    if (candidateIndexes.size > 1) {
-      next.importMeta = { ...(next.importMeta || {}), seedAmbiguousStrongMatch: true };
+    if (candidateIndexes.size > 1 || (candidateIndexes.size === 1 && codeOnlyCollision(output[[...candidateIndexes][0]], imported))) {
+      next.importMeta = {
+        ...(next.importMeta || {}),
+        seedAmbiguousStrongMatch: true,
+        seedConflictingCodeMatch: candidateIndexes.size === 1
+      };
       ambiguous += 1;
     }
     output.push(next);
