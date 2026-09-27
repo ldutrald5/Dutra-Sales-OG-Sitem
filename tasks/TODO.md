@@ -104,4 +104,4 @@ Próxima recomendação: **TASK-010 — Templates comerciais e governança**.
 - **Arquivos relevantes:** `apps/sistema-og/modules/lead-intelligence.js`, `services/crm-service.js`, `app.js`, `index.html`, `styles.css`, `docs/stories/OG-18-fila-inteligente-leads.md`.
 - **Critério de aceite:** uma única base; filtros combináveis; urgentes e retornos vencidos sobem na fila; ficha preserva status comercial separado da situação da conversa; dados legados continuam compatíveis.
 - **Dependências:** TASK-007 e base de sincronização existente.
-- **Status:** em andamento.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md` e PR #21.
