@@ -24,6 +24,7 @@
     requireDomain(options.domain);
     const next = clone(graph || {});
     next.companies = list(next.companies);
+    for (const key of ['contacts', 'opportunities', 'activities', 'tasks']) next[key] = list(next[key]);
     ensureUniqueLegacyLead(next.companies, input?.legacyLeadId, input?.id);
     const existingIndex = next.companies.findIndex(item => clean(item.id) === clean(input?.id));
     const previous = existingIndex >= 0 ? next.companies[existingIndex] : null;
@@ -38,7 +39,7 @@
   function saveContact(graph, input, options = {}) {
     requireDomain(options.domain);
     const next = clone(graph || {});
-    next.contacts = list(next.contacts);
+    for (const key of ['companies', 'contacts', 'opportunities', 'activities', 'tasks']) next[key] = list(next[key]);
     const existingIndex = next.contacts.findIndex(item => item?.entityType === 'contact' && clean(item.id) === clean(input?.id));
     const previous = existingIndex >= 0 ? next.contacts[existingIndex] : null;
     const contact = options.domain.createContact({ ...previous, ...input }, { now: options.now });
