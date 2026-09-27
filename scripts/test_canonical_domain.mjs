@@ -54,4 +54,9 @@ const canonicalGraph = {
 };
 assert.equal(domain.validateGraph(canonicalGraph).valid, true);
 
+const mixedContactGraph = { ...canonicalGraph, contacts: [{ id: 'LEGACY-CONT-2', name: 'Legado preservado' }, contact] };
+assert.equal(domain.validateGraph(mixedContactGraph).valid, true, 'Contato legado sem entityType não deve bloquear escrita canônica');
+const explicitWrongTypeGraph = { ...canonicalGraph, contacts: [{ id: 'WRONG-TYPE', entityType: 'company', name: 'Inválido' }] };
+assert.equal(domain.validateGraph(explicitWrongTypeGraph).valid, false, 'entityType explícito incorreto continua inválido');
+
 console.log('Canonical domain contract test: PASS');
