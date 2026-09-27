@@ -4,6 +4,7 @@
   const digits=v=>clean(v).replace(/\D/g,'');
   const comparable=v=>clean(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
   const list=v=>Array.isArray(v)?v:[];
+  const clone=v=>JSON.parse(JSON.stringify(v??null));
 
   function canonicalCompanies(graph){return list(graph?.companies).filter(x=>x?.entityType==='company'&&clean(x.id));}
   function canonicalContacts(graph){return list(graph?.contacts).filter(x=>x?.entityType==='contact'&&clean(x.id));}
@@ -46,5 +47,59 @@
     for(const row of list(plan?.rows)){if(!row.leadId)continue;if(ids.has(row.leadId))errors.push(`leadId duplicado no plano: ${row.leadId}`);ids.add(row.leadId);}
     return {valid:errors.length===0,errors};
   }
-  return{inspectLead,buildPlan,validatePlan};
+  function duplicateContact(graph,companyId,proposal){
+    if(!proposal)return null;
+    const phone=digits(proposal.phone),name=comparable(proposal.name);
+    return canonicalContacts(graph).find(item=>clean(item.companyId)===clean(companyId)&&((phone&&digits(item.phone)===phone)||(name&&comparable(item.name)===name)))||null;
+  }
+  function applyApproved(leads=[],graph={},plan,approvals=[],options={}){
+    const checked=validatePlan(plan);if(!checked.valid)throw new Error(checked.errors.join(' '));
+    const domain=options.domain,idFactory=options.idFactory;
+    if(!domain?.createCompany||!domain?.createContact||!domain?.validateGraph)throw new Error('Canonical Domain indisponível.');
+    if(typeof idFactory!=='function')throw new Error('idFactory é obrigatório.');
+    const now=new Date(options.now||Date.now()).toISOString();
+    const next=clone(graph||{})||{};
+    for(const key of ['companies','contacts','opportunities','activities','tasks','activityEvents'])next[key]=list(next[key]);
+    const leadMap=new Map(list(leads).filter(x=>x?.id).map(x=>[clean(x.id),x]));
+    const approvedIds=new Set(),results=[];
+    for(const approval of list(approvals)){
+      const leadId=clean(approval?.leadId);
+      if(!leadId||approvedIds.has(leadId))throw new Error(`Aprovação inválida ou duplicada: ${leadId||'?'}`);
+      approvedIds.add(leadId);
+      if(approval.confirmed!==true)throw new Error(`Reconciliação de ${leadId} exige confirmação explícita.`);
+      const lead=leadMap.get(leadId);if(!lead)throw new Error(`Lead não encontrado: ${leadId}`);
+      const planned=list(plan.rows).find(row=>row.leadId===leadId);if(!planned)throw new Error(`Lead fora do plano: ${leadId}`);
+      const current=inspectLead(lead,next);
+      let company=null,action=clean(approval.action),contact=null,contactSkipped=null;
+      if(action==='create_company'){
+        if(current.status!=='proposed')throw new Error(`Lead ${leadId} não está mais elegível para criar Company (${current.status}). Gere nova prévia.`);
+        company=domain.createCompany({id:idFactory('company',leadId),...current.proposal.company},{now});
+        next.companies.push(company);
+      }else if(action==='link_company'){
+        if(!['review','ambiguous'].includes(current.status))throw new Error(`Lead ${leadId} não está mais elegível para vínculo (${current.status}). Gere nova prévia.`);
+        const companyId=clean(approval.companyId);
+        if(!current.candidates.some(item=>clean(item.companyId)===companyId))throw new Error(`Company ${companyId||'?'} não é candidata atual para ${leadId}.`);
+        const index=next.companies.findIndex(item=>item?.entityType==='company'&&clean(item.id)===companyId);
+        if(index<0)throw new Error(`Company não encontrada: ${companyId}`);
+        const existing=next.companies[index];
+        if(clean(existing.legacyLeadId)&&clean(existing.legacyLeadId)!==leadId)throw new Error(`Company ${companyId} já está vinculada a outro lead.`);
+        company=domain.createCompany({...existing,legacyLeadId:leadId},{now});
+        next.companies[index]=company;
+      }else throw new Error(`Ação não permitida para ${leadId}: ${action||'?'}`);
+
+      const proposal=contactProposal(lead);
+      if(approval.includeContact===true&&proposal){
+        const duplicate=duplicateContact(next,company.id,proposal);
+        if(duplicate)contactSkipped=duplicate.id;
+        else{contact=domain.createContact({id:idFactory('contact',leadId),companyId:company.id,...proposal},{now});next.contacts.push(contact);}
+      }
+      const event={id:idFactory('event',leadId),type:'legacy.reconciliation.applied',at:now,clientId:leadId,companyId:company.id,action,contactId:contact?.id||null,contactSkippedDuplicateId:contactSkipped};
+      next.activityEvents.unshift(event);
+      results.push({leadId,action,companyId:company.id,contactId:contact?.id||null,contactSkippedDuplicateId:contactSkipped});
+    }
+    const validation=domain.validateGraph(next);if(!validation.valid)throw new Error(validation.errors.join('; '));
+    next.updatedAt=now;
+    return {graph:next,report:Object.freeze({mode:'controlled_apply',appliedAt:now,total:results.length,results:Object.freeze(results)})};
+  }
+  return{inspectLead,buildPlan,validatePlan,applyApproved};
 }));
