@@ -13,7 +13,7 @@
 | Open questions resolved | 1/2 |
 | Correctly blocked cycles/releases recorded | 1 |
 | Median tracked cycle time | 1.8 h |
-| Sources in brain | 8 |
+| Sources in brain | 9 |
 
 ## Interpretation
 
