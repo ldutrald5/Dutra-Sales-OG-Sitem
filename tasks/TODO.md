@@ -2,6 +2,10 @@
 
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.
 
+**Fonte operacional de backlog:** este arquivo continua sendo o backlog operacional do Sistema OG. Documentos de contexto, Brain ou `CURRENT.md` não substituem esta fila nem autorizam trabalho por conta própria.
+
+**Cockpit Operacional / Painel Hoje:** permanece somente como candidato até priorização formal. Ele só passa a trabalho executável quando for explicitamente priorizado e registrado como task/package autorizado; até lá, não altera a ordem operacional abaixo.
+
 ## TASK-001 — Mesa de Vendas: estrutura base
 
 - **Objetivo:** consolidar fila, conta ativa e painel contextual como interface diária.
