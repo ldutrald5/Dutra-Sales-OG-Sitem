@@ -104,8 +104,9 @@
         seen.add(scoped);
       }
     }
+    const expectedTypes = { companies: 'company', contacts: 'contact', opportunities: 'opportunity', activities: 'activity', tasks: 'task' };
     for (const [key, items] of Object.entries(collections)) {
-      for (const item of items) if (item?.entityType !== key.replace(/ies$/, 'y').replace(/s$/, '')) errors.push(`${key} ${item?.id || '?'} possui entityType inválido`);
+      for (const item of items) if (item?.entityType !== expectedTypes[key]) errors.push(`${key} ${item?.id || '?'} possui entityType inválido`);
     }
     const legacyLeadIds = new Set();
     for (const company of companies) {
