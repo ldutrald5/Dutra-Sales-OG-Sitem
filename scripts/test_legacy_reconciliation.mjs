@@ -21,6 +21,10 @@ const review=svc.inspectLead(leads[1],graph);assert.equal(review.status,'review'
 assert.equal(svc.inspectLead(leads[2],graph).status,'ambiguous');
 const proposed=svc.inspectLead(leads[3],graph);assert.equal(proposed.status,'proposed');assert.equal(proposed.proposal.company.legacyLeadId,'L4');assert.equal(proposed.proposal.company.cnpj,'33333333000133');assert.equal(proposed.proposal.contact.isDecisionMaker,true);
 assert.equal(svc.inspectLead(leads[4],graph).status,'blocked');
+const invalidCnpjLead={id:'L-INVALID-CNPJ',empresa:'Sem Correspondência',cnpj:'123'};
+const invalidCnpjGraph={companies:[{id:'C-INVALID',entityType:'company',name:'Outro Nome',legacyLeadId:null,cnpj:'123'}],contacts:[]};
+assert.equal(svc.inspectLead(invalidCnpjLead,invalidCnpjGraph).status,'proposed','CNPJ incompleto não pode ser sinal forte');
+
 const plan=svc.buildPlan(leads,graph);assert.equal(plan.mode,'dry_run');assert.equal(plan.total,5);assert.deepEqual(plan.counts,{linked:1,review:1,ambiguous:1,proposed:1,blocked:1});assert.equal(svc.validatePlan(plan).valid,true);
 assert.equal(svc.validatePlan({mode:'apply',rows:[]}).valid,false);
 assert.equal(svc.validatePlan({mode:'dry_run',rows:[{leadId:'L1'},{leadId:'L1'}]}).valid,false);
@@ -52,6 +56,23 @@ assert.throws(()=>svc.applyApproved([reviewLead],reviewWithWeakCandidateGraph,re
 
 const staleGraph={...applyGraph,companies:[...applyGraph.companies,{id:'C5',entityType:'company',name:'Empresa Nova',legacyLeadId:null,cnpj:'33333333000133',createdAt:'2026-09-27T00:00:00.000Z',updatedAt:'2026-09-27T00:00:00.000Z'}]};
 assert.throws(()=>svc.applyApproved(leads,staleGraph,applyPlan,[{leadId:'L4',action:'create_company',confirmed:true}],{domain,idFactory,now:'2026-09-27T01:00:00Z'}),/não está mais elegível.*Gere nova prévia/);
+
+
+const rolled=svc.rollbackApplied(applied.graph,applyGraph,applied.report,{domain,idFactory,now:'2026-09-27T01:05:00Z'});
+assert.equal(rolled.report.total,2);
+assert.equal(rolled.graph.companies.find(x=>x.id==='C2').legacyLeadId,null,'rollback deve restaurar vínculo anterior');
+assert.equal(rolled.graph.companies.some(x=>x.id===createdCompany.id),false,'rollback deve remover Company criada');
+assert.equal(rolled.graph.contacts.some(x=>x.id===createdContact.id),false,'rollback deve remover Contact criado pela aplicação');
+assert.equal(rolled.graph.activityEvents.some(x=>x.type==='legacy.reconciliation.applied'),false,'eventos da aplicação revertida devem sair');
+assert.equal(rolled.graph.activityEvents.some(x=>x.type==='legacy.reconciliation.rolled_back'),true,'rollback deve deixar auditoria');
+
+const changedAfterApply=JSON.parse(JSON.stringify(applied.graph));
+changedAfterApply.companies.find(x=>x.id==='C2').name='Editada depois';
+assert.throws(()=>svc.rollbackApplied(changedAfterApply,applyGraph,applied.report,{domain,idFactory,now:'2026-09-27T01:06:00Z'}),/Rollback bloqueado.*mudou após/);
+
+const relatedAfterApply=JSON.parse(JSON.stringify(applied.graph));
+relatedAfterApply.tasks.push({id:'T-AFTER',entityType:'task',companyId:createdCompany.id,title:'Trabalho posterior',status:'open',dueAt:null,createdAt:'2026-09-27T01:02:00.000Z',updatedAt:'2026-09-27T01:02:00.000Z'});
+assert.throws(()=>svc.rollbackApplied(relatedAfterApply,applyGraph,applied.report,{domain,idFactory,now:'2026-09-27T01:06:00Z'}),/Rollback bloqueado.*recebeu relações/);
 
 const duplicateContactGraph={...applyGraph,contacts:[{id:'CT-EXIST',entityType:'contact',companyId:'C2',name:'Outro',phone:'44999990000',role:'contact',email:null,isDecisionMaker:false,createdAt:'2026-09-27T00:00:00.000Z',updatedAt:'2026-09-27T00:00:00.000Z'}]};
 const leadWithContact={...leads[1],nome:'Contato CNPJ',telefone:'44 99999-0000'};
