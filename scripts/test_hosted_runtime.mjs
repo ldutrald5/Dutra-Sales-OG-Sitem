@@ -43,8 +43,9 @@ const child = spawn(process.execPath, ['scripts/start-og-hosted.mjs'], {
   env: {
     ...process.env,
     PORT: String(port),
-    OG_DATA_DIR: dataDir,
-    OG_LOCAL_ACCESS_TOKEN: token
+    RAILWAY_VOLUME_MOUNT_PATH: dataDir,
+    RAILWAY_PUBLIC_DOMAIN: 'sistema-og-preview.up.railway.app',
+    OG_ACCESS_TOKEN: token
   },
   stdio: ['ignore', 'pipe', 'pipe']
 });
@@ -66,6 +67,19 @@ try {
   const state = await response.json();
   assert.equal(state.revision, 0);
   assert.ok(state.operations && typeof state.operations === 'object');
+
+  response = await fetch(`http://127.0.0.1:${port}/api/access`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  assert.equal(response.status, 200);
+  const access = await response.json();
+  assert.equal(access.hosted, true);
+  assert.equal(access.desktop, 'https://sistema-og-preview.up.railway.app');
+  assert.equal(access.primaryPhoneUrl, 'https://sistema-og-preview.up.railway.app');
+
+  response = await fetch(`http://127.0.0.1:${port}/`);
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /Sistema OG|DUTRA/i);
 
   assert.ok(fs.existsSync(dataDir), 'diretório persistente configurável deve existir');
   console.log('Hosted runtime smoke test: PASS');
