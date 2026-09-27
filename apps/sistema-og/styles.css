@@ -1030,3 +1030,17 @@ body {
 .client-sheet-history .sales-desk-timeline-item:first-child{border-top:0}
 .client-sheet-extended{display:grid;gap:.65rem}
 @media(prefers-reduced-motion:reduce){.client-sheet-panel{animation:none!important}.crm-client-row,.crm-open-button,.crm-code-button{transition:none!important}}
+
+
+/* TASK-007 refinement — one ficha, reachable wherever a client is shown */
+.client-sheet-inline-link{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:.42rem .62rem;border:1px solid rgba(255,222,23,.32);border-radius:.55rem;background:rgba(255,222,23,.07);color:#ffe75c;font-size:.58rem;font-weight:900;line-height:1;white-space:nowrap}
+.client-sheet-inline-link:hover{border-color:rgba(255,222,23,.62);background:rgba(255,222,23,.13)}
+.client-context-with-sheet,.call-ai-account-row{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem}
+.client-context-with-sheet>div{min-width:0;display:grid;gap:.12rem}.client-context-with-sheet strong,.client-context-with-sheet span,.client-context-with-sheet small{display:block}
+.call-ai-account-row .call-ai-account{flex:1;min-width:0}
+.quote-client-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:.55rem;flex-wrap:wrap}
+.history-client-link{display:flex;align-items:baseline;gap:.3rem;flex-wrap:wrap;color:#f8fafc;text-align:left}
+.history-client-link strong{font-size:.875rem}.history-client-link span{color:#94a3b8;font-size:.7rem;font-weight:500}.history-client-link small{color:#facc15;font-size:.58rem;font-weight:800}
+.history-client-link:hover strong{text-decoration:underline;text-decoration-color:rgba(250,204,21,.55);text-underline-offset:3px}
+.reconciliation-main>.client-sheet-inline-link{flex:0 0 auto}
+@media(max-width:640px){.client-context-with-sheet,.call-ai-account-row{align-items:stretch;flex-direction:column}.client-sheet-inline-link{min-height:44px}.quote-client-header-actions{align-items:flex-end;flex-direction:column}.prospect-queue-list article{grid-template-columns:minmax(0,1fr) 1fr 1fr}.prospect-queue-list article>button:first-child{grid-column:1/-1}.reconciliation-main>.client-sheet-inline-link{width:100%}}

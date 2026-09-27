@@ -709,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (tabId === 'dia') renderDayDashboard();
+    else if (tabId === 'cotacao') refreshQuoteClientSheetAccess();
     else if (tabId === 'prospeccao') renderProspecting();
     else if (tabId === 'historico') renderHistory();
     else if (tabId === 'catalogo') renderCatalog();
@@ -2246,11 +2247,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function saveQuoteToHistory(quoteData) {
+    const relatedLead = findLeadForClientData(state.client);
     const newQuote = {
       id: 'COT-' + Date.now().toString().slice(-6),
       date: new Date().toISOString(),
-      clientName: state.client.nome || 'Cliente sem nome',
-      clientCompany: state.client.empresa || '',
+      clientId: relatedLead?.id || null,
+      clientInternalCode: relatedLead?.internalCode || null,
+      clientName: state.client.nome || relatedLead?.nome || 'Cliente sem nome',
+      clientCompany: state.client.empresa || relatedLead?.empresa || '',
       totalValue: quoteData.totalFinalVenda,
       totalPecas: quoteData.totalPecas,
       payload: JSON.parse(JSON.stringify(state))
@@ -2262,12 +2266,6 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     try {
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
       scheduleServerSync();
-      const phoneKey = (state.client.telefone || '').replace(/\D/g, '');
-      const companyKey = (state.client.empresa || '').trim().toLowerCase();
-      const relatedLead = state.leads.find(lead =>
-        (phoneKey && (lead.telefone || '').replace(/\D/g, '') === phoneKey) ||
-        (companyKey && (lead.empresa || '').trim().toLowerCase() === companyKey)
-      );
       if (relatedLead) {
         relatedLead.interactions = Array.isArray(relatedLead.interactions) ? relatedLead.interactions : [];
         relatedLead.interactions.push({
@@ -2742,12 +2740,60 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // ENLACES DOS INPUTS DO CLIENTE E CONDIÇÕES
   // =========================================================================
 
+  function findLeadForClientData(client = {}) {
+    const digits = value => String(value || '').replace(/\D/g, '');
+    const text = value => String(value || '').trim().toLocaleLowerCase('pt-BR');
+    const cnpj = digits(client.cnpj);
+    const phone = digits(client.telefone);
+    const code = text(client.internalCode);
+    const company = text(client.empresa);
+    const strong = state.leads.filter(lead =>
+      (code && text(lead.internalCode) === code) ||
+      (cnpj.length === 14 && digits(lead.cnpj) === cnpj) ||
+      (phone.length >= 10 && digits(lead.telefone) === phone)
+    );
+    if (strong.length === 1) return strong[0];
+    if (strong.length > 1) return null;
+    if (!company) return null;
+    const byCompany = state.leads.filter(lead => text(lead.empresa || lead.nome) === company);
+    return byCompany.length === 1 ? byCompany[0] : null;
+  }
+
+  function resolveHistoryLead(item) {
+    if (!item) return null;
+    if (item.clientId) {
+      const direct = OG_CRM_SERVICE.getLeadById(state.leads, item.clientId);
+      if (direct) return direct;
+    }
+    return findLeadForClientData(item.payload?.client || {
+      empresa: item.clientCompany,
+      nome: item.clientName,
+      internalCode: item.clientInternalCode
+    });
+  }
+
+  function refreshQuoteClientSheetAccess() {
+    const button = document.getElementById('quote-open-client-sheet');
+    if (!button) return;
+    const lead = findLeadForClientData(state.client);
+    button.classList.toggle('hidden', !lead);
+    button.disabled = !lead;
+    if (lead) {
+      button.dataset.openClientSheet = lead.id;
+      button.textContent = `Ficha · ${clientCodeLabel(lead) || lead.empresa || lead.nome || 'cliente'}`;
+    } else {
+      delete button.dataset.openClientSheet;
+      button.textContent = 'Ficha do cliente';
+    }
+  }
+
   function initClientInputs() {
     const bindInput = (id, key) => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('input', (e) => {
         state.client[key] = e.target.value;
+        refreshQuoteClientSheetAccess();
         recalculateQuote();
       });
     };
@@ -2789,6 +2835,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     state.history.forEach((h, idx) => {
       const d = new Date(h.date);
       const dateFormatted = d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const relatedLead = resolveHistoryLead(h);
       const card = document.createElement('div');
       card.className = 'clean-card p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4';
 
@@ -2798,7 +2845,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             ${h.id}
           </div>
           <div>
-            <div class="font-bold text-slate-100">${h.clientName} ${h.clientCompany ? `<span class="text-xs font-normal text-slate-400">(${h.clientCompany})</span>` : ''}</div>
+            ${relatedLead ? `<button type="button" class="history-client-link" data-open-client-sheet="${escapeHtml(relatedLead.id)}"><strong>${escapeHtml(h.clientName || relatedLead.nome || 'Cliente')}</strong>${h.clientCompany ? `<span>(${escapeHtml(h.clientCompany)})</span>` : ''}<small>abrir ficha</small></button>` : `<div class="font-bold text-slate-100">${escapeHtml(h.clientName || 'Cliente')} ${h.clientCompany ? `<span class="text-xs font-normal text-slate-400">(${escapeHtml(h.clientCompany)})</span>` : ''}</div>`}
             <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
               <span>📦 ${h.totalPecas} peças</span> •
               <span>📅 ${dateFormatted}</span>
@@ -2811,6 +2858,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             <div class="text-lg font-bold text-amber-400">R$ ${h.totalValue.toFixed(2)}</div>
           </div>
           <div class="flex items-center gap-1.5">
+            ${relatedLead ? `<button type="button" data-open-client-sheet="${escapeHtml(relatedLead.id)}" class="btn-client-hist px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25 text-xs font-bold">Ficha</button>` : ''}
             <button data-load="${idx}" class="btn-load-hist px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 transition font-bold">
               Carregar
             </button>
@@ -3619,6 +3667,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   let clientSheetReturnFocus = null;
 
+  function initUniversalClientSheetAccess() {
+    document.addEventListener('click', event => {
+      const trigger = event.target.closest?.('[data-open-client-sheet]');
+      if (!trigger) return;
+      const leadId = String(trigger.dataset.openClientSheet || '').trim();
+      if (!leadId) return;
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, leadId);
+      event.preventDefault();
+      event.stopPropagation();
+      if (!lead) {
+        showNotification('Este cliente não está mais disponível na base atual.', 'warning');
+        return;
+      }
+      state.selectedLeadId = lead.id;
+      openClientSheet(lead.id);
+    });
+  }
+
   function closeClientSheet() {
     document.getElementById('client-sheet-overlay')?.remove();
     const target = clientSheetReturnFocus;
@@ -3795,6 +3861,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       setVal('client-cnpj', state.client.cnpj);
       setVal('client-phone', state.client.telefone);
       setVal('client-city', state.client.cidadeUf);
+      refreshQuoteClientSheetAccess();
       closeClientSheet();
       switchTab('cotacao');
       recalculateQuote();
@@ -4068,7 +4135,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function renderProspectQueue(root) {
     const queue = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
-    root.innerHTML = `<section class="clean-card prospect-queue"><header><div><span class="og-kicker">AINDA NÃO PROSPECTADOS</span><h2>${queue.length} aguardando primeira ação</h2></div><button type="button" id="start-prospect-session" class="og-button og-button-primary">▶ Prospectar agora</button></header><div class="prospect-filters"><select data-prospect-filter="origin"><option value="all">Todas as origens</option>${uniqueLeadValues('sourceChannel').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="batch"><option value="all">Todos os lotes</option>${uniqueLeadValues('batchTag').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="priority"><option value="all">Todas as prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div><div class="prospect-queue-list">${queue.length ? queue.map(lead => `<article><button type="button" data-prospect-open="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</span><small>${escapeHtml(lead.internalCode || 'Sem código')} · ${escapeHtml(lead.sourceChannel || 'Sem origem')} · ${escapeHtml(lead.batchTag || 'Sem lote')}</small></button><a href="tel:${escapeHtml(lead.telefone)}">Ligar</a><button type="button" data-prospect-wa="${escapeHtml(lead.id)}">WhatsApp</button></article>`).join('') : '<div class="sales-desk-empty">Fila concluída para estes filtros.</div>'}</div></section>`;
+    root.innerHTML = `<section class="clean-card prospect-queue"><header><div><span class="og-kicker">AINDA NÃO PROSPECTADOS</span><h2>${queue.length} aguardando primeira ação</h2></div><button type="button" id="start-prospect-session" class="og-button og-button-primary">▶ Prospectar agora</button></header><div class="prospect-filters"><select data-prospect-filter="origin"><option value="all">Todas as origens</option>${uniqueLeadValues('sourceChannel').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="batch"><option value="all">Todos os lotes</option>${uniqueLeadValues('batchTag').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="priority"><option value="all">Todas as prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div><div class="prospect-queue-list">${queue.length ? queue.map(lead => `<article><button type="button" data-prospect-open="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</span><small>${escapeHtml(lead.internalCode || 'Sem código')} · ${escapeHtml(lead.sourceChannel || 'Sem origem')} · ${escapeHtml(lead.batchTag || 'Sem lote')}</small></button><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}">Ligar</a><button type="button" data-prospect-wa="${escapeHtml(lead.id)}">WhatsApp</button></article>`).join('') : '<div class="sales-desk-empty">Fila concluída para estes filtros.</div>'}</div></section>`;
     root.querySelectorAll('[data-prospect-filter]').forEach(select => { select.value = state.prospecting.filters[select.dataset.prospectFilter]; select.addEventListener('change', () => { state.prospecting.filters[select.dataset.prospectFilter] = select.value; renderProspecting(); }); });
     root.querySelectorAll('[data-prospect-open]').forEach(button => button.addEventListener('click', () => { state.prospecting.currentId = button.dataset.prospectOpen; setProspectingView('focus'); }));
     root.querySelectorAll('[data-prospect-wa]').forEach(button => button.addEventListener('click', () => { const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.prospectWa); if (lead) { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); } }));
@@ -4084,7 +4151,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!lead) { root.innerHTML = '<section class="clean-card prospect-finished"><h2>Fila concluída</h2><p>Não há prospects pendentes nestes filtros.</p><button type="button" data-back-inbox>Adicionar mais prospects</button></section>'; root.querySelector('[data-back-inbox]')?.addEventListener('click', () => setProspectingView('inbox')); return; }
     const position = Math.max(1, queue.findIndex(item => item.id === lead.id) + 1);
     const suggestion = OG_PROSPECTING.nextBestAction(lead);
-    root.innerHTML = `<section class="prospect-session-metrics"><div><small>Prospectados hoje</small><b>${metrics.processed}</b></div><div><small>Restantes</small><b>${queue.length}</b></div><div><small>Interessados</small><b>${metrics.interested}</b></div><div><small>Orçamentos</small><b>${metrics.quotes}</b></div><div><small>Não atendeu</small><b>${metrics.noAnswers}</b></div></section><section class="clean-card prospect-focus"><header><div><span class="og-kicker">PROSPECÇÃO · ${position} / ${queue.length}</span><h1>${escapeHtml(lead.empresa)}</h1><p>${escapeHtml(lead.nome || 'Contato não informado')} ${lead.cargo ? `· ${escapeHtml(lead.cargo)}` : ''}</p></div><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></header><div class="prospect-identity"><span>📱 ${escapeHtml(formatPhone(lead.telefone))}</span><span>CNPJ ${escapeHtml(OG_PROSPECT_PARSER.cnpjFormat(lead.cnpj) || 'não informado')}</span><span>Código ${escapeHtml(lead.internalCode || 'não informado')}</span><span>Origem ${escapeHtml(lead.sourceChannel || 'não informada')}</span></div><div class="prospect-next-best"><span>💡 Próxima ação sugerida</span><b>${escapeHtml(suggestion.label)}</b><small>${escapeHtml(suggestion.reason)}</small></div><div class="prospect-focus-actions"><a href="tel:${escapeHtml(lead.telefone)}" data-session-call>📞 Ligar</a><button type="button" data-session-whatsapp>💬 WhatsApp</button><button type="button" data-session-call-ai>Call AI</button><button type="button" data-session-skip>Pular</button><button type="button" data-session-delay>Adiar</button></div><div class="prospect-result-grid"><label>Resultado<select id="prospect-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label>Nota rápida<textarea id="prospect-note" rows="3" placeholder="O que aconteceu?"></textarea></label><label>Próxima ação<input id="prospect-next-action" placeholder="Ex.: enviar apresentação"></label><label>Quando<select id="prospect-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem ação</option></select></label><label id="prospect-date-wrap" class="hidden">Data<input id="prospect-specific-date" type="datetime-local"></label></div><button type="button" id="prospect-save-next" class="og-button og-button-primary prospect-save-next">Salvar e próximo →</button></section>`;
+    root.innerHTML = `<section class="prospect-session-metrics"><div><small>Prospectados hoje</small><b>${metrics.processed}</b></div><div><small>Restantes</small><b>${queue.length}</b></div><div><small>Interessados</small><b>${metrics.interested}</b></div><div><small>Orçamentos</small><b>${metrics.quotes}</b></div><div><small>Não atendeu</small><b>${metrics.noAnswers}</b></div></section><section class="clean-card prospect-focus"><header><div><span class="og-kicker">PROSPECÇÃO · ${position} / ${queue.length}</span><h1>${escapeHtml(lead.empresa)}</h1><p>${escapeHtml(lead.nome || 'Contato não informado')} ${lead.cargo ? `· ${escapeHtml(lead.cargo)}` : ''}</p></div><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></header><div class="prospect-identity"><span>📱 ${escapeHtml(formatPhone(lead.telefone))}</span><span>CNPJ ${escapeHtml(OG_PROSPECT_PARSER.cnpjFormat(lead.cnpj) || 'não informado')}</span><span>Código ${escapeHtml(lead.internalCode || 'não informado')}</span><span>Origem ${escapeHtml(lead.sourceChannel || 'não informada')}</span></div><div class="prospect-next-best"><span>💡 Próxima ação sugerida</span><b>${escapeHtml(suggestion.label)}</b><small>${escapeHtml(suggestion.reason)}</small></div><div class="prospect-focus-actions"><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}" data-session-call>📞 Ligar</a><button type="button" data-session-whatsapp>💬 WhatsApp</button><button type="button" data-session-call-ai>Call AI</button><button type="button" data-session-skip>Pular</button><button type="button" data-session-delay>Adiar</button></div><div class="prospect-result-grid"><label>Resultado<select id="prospect-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label>Nota rápida<textarea id="prospect-note" rows="3" placeholder="O que aconteceu?"></textarea></label><label>Próxima ação<input id="prospect-next-action" placeholder="Ex.: enviar apresentação"></label><label>Quando<select id="prospect-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem ação</option></select></label><label id="prospect-date-wrap" class="hidden">Data<input id="prospect-specific-date" type="datetime-local"></label></div><button type="button" id="prospect-save-next" class="og-button og-button-primary prospect-save-next">Salvar e próximo →</button></section>`;
     root.querySelector('[data-session-call]')?.addEventListener('click', () => state.prospecting.session.events.push({ type: 'attempt', channel: 'call', at: new Date().toISOString(), leadId: lead.id }));
     root.querySelector('[data-session-whatsapp]').addEventListener('click', () => { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); });
     root.querySelector('[data-session-call-ai]').addEventListener('click', () => { state.callAI.context = OG_CALL_AI_CONTEXT.build(lead); state.callAI.returnTab = 'prospeccao'; state.callAI.selectedLeadId = lead.id; switchTab('call-ai'); selectCallClient(lead.id); });
@@ -4131,7 +4198,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const commands = [{ id: 'new', label: '＋ Novo prospect', match: 'novo' }, { id: 'desk', label: 'Abrir Mesa de Vendas', match: 'mesa' }, { id: 'prospecting', label: 'Abrir Modo Prospecção', match: 'prospecção prospectar caixa' }].filter(item => !q || item.match.includes(q));
       overlay.querySelector('#command-results').innerHTML = `${commands.map(item => `<button type="button" data-command="${item.id}">${item.label}</button>`).join('')}${matches.map(lead => `<button type="button" data-command-lead="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || '')} · ${escapeHtml(formatPhone(lead.telefone))} · ${escapeHtml(lead.internalCode || '')}</span></button>`).join('') || (!commands.length ? '<p>Nenhum resultado. Você pode interpretar o texto como comando.</p>' : '')}`;
       overlay.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', () => { const command = button.dataset.command; closeCommandCenter(); if (command === 'new') openQuickLead('dia'); if (command === 'desk') switchTab('dia'); if (command === 'prospecting') { switchTab('prospeccao'); setProspectingView('queue'); } }));
-      overlay.querySelectorAll('[data-command-lead]').forEach(button => button.addEventListener('click', () => { state.selectedLeadId = button.dataset.commandLead; closeCommandCenter(); switchTab('dia'); renderDayDashboard(); }));
+      overlay.querySelectorAll('[data-command-lead]').forEach(button => button.addEventListener('click', () => { const leadId = button.dataset.commandLead; closeCommandCenter(); openClientSheet(leadId); }));
     };
     input.addEventListener('input', render); render(); input.focus();
     overlay.addEventListener('click', event => { if (event.target === overlay) closeCommandCenter(); });
@@ -4404,12 +4471,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         renderLeadsTable();
       });
 
-      tr.querySelectorAll('[data-open-client-sheet]').forEach(button => button.addEventListener('click', event => {
-        event.stopPropagation();
-        state.selectedLeadId = lead.id;
-        renderLeadsTable();
-        openClientSheet(lead.id);
-      }));
       tr.addEventListener('click', event => {
         if (event.target.closest('input,button,a,select')) return;
         state.selectedLeadId = lead.id;
@@ -4987,7 +5048,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('communication-recipient').value=state.communication.channel==='email'?(lead?.email||''):(lead?.telefone||'');
     document.getElementById('communication-subject-wrap').classList.toggle('hidden',state.communication.channel!=='email');
     document.getElementById('communication-open').textContent=state.communication.channel==='whatsapp'?'Abrir WhatsApp':state.communication.channel==='email'?'Copiar e-mail':'Abrir ponto de entrada';
-    document.getElementById('communication-context').innerHTML=lead?`<strong>${escapeHtml(lead.empresa||lead.nome)}</strong><span>${escapeHtml([lead.nome,lead.cargo,lead.status].filter(Boolean).join(' · '))}</span><small>${escapeHtml(lead.pain||'Dor não registrada')} · ${escapeHtml(lead.nextAction||'Sem próxima ação')}</small>`:'Selecione um cliente.';
+    document.getElementById('communication-context').innerHTML=lead?`<div class="client-context-with-sheet"><div><strong>${escapeHtml(lead.empresa||lead.nome)}</strong><span>${escapeHtml([lead.nome,lead.cargo,lead.status].filter(Boolean).join(' · '))}</span><small>${escapeHtml(lead.pain||'Dor não registrada')} · ${escapeHtml(lead.nextAction||'Sem próxima ação')}</small></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>`:'Selecione um cliente.';
     renderCommunicationTemplate(true);
   }
   async function personalizeCommunication(){
@@ -5165,7 +5226,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     state.callAI.context = compact;
     const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
-      <div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div>
+      <div class="call-ai-account-row"><div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>
       ${factRow('Segmento', lead.segmentId, lead.segmentId ? 'confirmed' : 'missing')}
       ${factRow('Frota', lead.fleetSize ? `${lead.fleetSize} veículos` : '', lead.fleetSize ? 'confirmed' : 'missing')}
       ${factRow('Decisor', lead.decisionMaker, lead.decisionMaker ? 'confirmed' : 'missing')}
@@ -6010,7 +6071,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return `
         <article class="reconciliation-row" data-status="${escapeHtml(row.status)}">
           <label class="reconciliation-select"><input type="checkbox" data-reconcile-select="${escapeHtml(row.leadId)}" ${actionable ? '' : 'disabled'}><span></span></label>
-          <div class="reconciliation-main"><div><b>${escapeHtml(lead.empresa || lead.nome || row.leadId || 'Sem identificação')}</b><small>${escapeHtml(row.leadId || '')} · ${escapeHtml(reconciliationStatusLabel(row.status))}</small></div>${decision}</div>
+          <div class="reconciliation-main"><div><b>${escapeHtml(lead.empresa || lead.nome || row.leadId || 'Sem identificação')}</b><small>${escapeHtml(row.leadId || '')} · ${escapeHtml(reconciliationStatusLabel(row.status))}</small></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(row.leadId || '')}">Ficha</button>${decision}</div>
           <div class="reconciliation-meta"><span>${lead.cnpj ? 'CNPJ ' + escapeHtml(lead.cnpj) : 'Sem CNPJ'}</span>${row.warnings?.includes('invalid_cnpj_not_promoted') ? '<em>CNPJ legado incompleto não será promovido</em>' : ''}${hasContact && actionable ? `<label><input type="checkbox" data-reconcile-contact="${escapeHtml(row.leadId)}"> incluir contato</label>` : ''}</div>
         </article>`;
     }).join('');
@@ -6166,10 +6227,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </section>
       <section class="performance-grid">
         <article class="clean-card performance-panel"><div class="performance-panel-head"><div><span class="og-kicker">FUNIL ATUAL</span><h2>Distribuição por etapa</h2></div><small>Fotografia do CRM; não altera etapas</small></div><div class="performance-funnel" role="img" aria-label="${escapeHtml(result.stages.map(stage => `${stage.label}: ${result.stageCounts[stage.id]}`).join('; '))}">${result.stages.map(stage => `<div><span>${escapeHtml(stage.label)}</span><b>${result.stageCounts[stage.id]}</b><i style="--stage-width:${(result.stageCounts[stage.id] / maxStage) * 100}%"></i></div>`).join('')}</div>${result.limitations.stageDuration ? '<p class="performance-limitation">Tempo por etapa ficará disponível após acumular eventos reais de mudança de etapa.</p>' : ''}</article>
-        <article class="clean-card performance-panel"><div class="performance-panel-head"><div><span class="og-kicker">NEGÓCIOS PARADOS</span><h2>Sem contato há 14 dias ou mais</h2></div><small>${result.stalled.length} identificados</small></div><div class="performance-stalled">${result.stalled.length ? result.stalled.slice(0, 8).map(item => `<button type="button" data-performance-client="${escapeHtml(item.id)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.nextAction || 'Próxima ação não definida')}</small></span><strong>${item.days === null ? 'Sem data' : `${item.days} dias`}</strong></button>`).join('') : '<div class="performance-empty">Nenhum negócio parado neste filtro.</div>'}</div></article>
+        <article class="clean-card performance-panel"><div class="performance-panel-head"><div><span class="og-kicker">NEGÓCIOS PARADOS</span><h2>Sem contato há 14 dias ou mais</h2></div><small>${result.stalled.length} identificados</small></div><div class="performance-stalled">${result.stalled.length ? result.stalled.slice(0, 8).map(item => `<button type="button" data-open-client-sheet="${escapeHtml(item.id)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.nextAction || 'Próxima ação não definida')}</small></span><strong>${item.days === null ? 'Sem data' : `${item.days} dias`}</strong></button>`).join('') : '<div class="performance-empty">Nenhum negócio parado neste filtro.</div>'}</div></article>
       </section>
       <section class="clean-card performance-sources"><div><span class="og-kicker">QUALIDADE DOS DADOS</span><h2>O que sustenta este painel</h2></div><ul><li>${result.sources.clients} clientes filtrados</li><li>${result.sources.interactions} interações no período</li><li>${result.sources.confirmedShares} envios confirmados</li><li>${result.sources.sales} vendas registradas</li><li>${result.sources.commissions} comissões registradas</li></ul><p>WhatsApp aberto, conteúdo copiado e roteiro preparado não contam como contato, envio ou venda.</p></section>`;
-    root.querySelectorAll('[data-performance-client]').forEach(button => button.addEventListener('click', () => { state.selectedLeadId = button.dataset.performanceClient; switchTab('crm'); renderLeadsTable(); renderLeadInspector(); }));
   }
 
   function fillPerformanceSelect(id, values, labeler = value => value) {
@@ -6305,6 +6365,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   // Inicializações
+  initUniversalClientSheetAccess();
   initClientInputs();
   initMultiVehicleEngine();
   initQuoteImport();

@@ -76,10 +76,10 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 ## TASK-007 — Painel lateral do cliente
 
 - **Data:** 2026-09-27.
-- **Mudança observável:** “Ficha completa” em Meu Dia e a lista do CRM abrem a mesma ficha lateral; o vendedor pode editar empresa, contato, Código OG, telefones extras, e-mail, CNPJ, cidade/UF, segmento, status, prioridade, decisor, frota, dor, objeções, próxima ação, observações e indicações sem abandonar a tela.
+- **Mudança observável:** existe uma única ficha lateral do cliente, reutilizada por todas as superfícies comerciais que exibem ou selecionam uma conta. Meu Dia, CRM, Prospecção, Call AI, Comunicação, Cotação, Histórico, Performance/Operações, Command Center e reconciliação oferecem acesso direto à mesma ficha; o vendedor pode editar empresa, contato, Código OG, telefones extras, e-mail, CNPJ, cidade/UF, segmento, status, prioridade, decisor, frota, dor, objeções, próxima ação, observações e indicações sem criar uma segunda cópia do cliente.
 - **Semântica do Código OG:** `internalCode` é código de cadastro no sistema da empresa e não significa compra; o DUTRA OS não gera código fictício e bloqueia duplicidade.
 - **Busca:** Código OG passa a localizar a conta em CRM, Meu Dia e Call AI.
-- **Continuidade:** histórico, Company 360 e materiais continuam acessíveis dentro da ficha; `lead.id`, sincronização e backups existentes foram preservados.
+- **Continuidade:** histórico, Company 360 e materiais continuam acessíveis dentro da ficha; `lead.id`, sincronização e backups existentes foram preservados. A regra transversal é: **se uma superfície mostra um cliente identificado, ela deve oferecer acesso à ficha mestre sem obrigar navegação de ida e volta ao CRM.**
 - **UX:** CRM foi simplificado para lista pesquisável + ficha lateral; ferramentas de importação foram rebaixadas para menu secundário; no celular a lista vira cartões e a ficha ocupa a tela com foco preso, Escape e alvos de toque mínimos.
 - **Auditoria:** alterações registram `client.profile.updated`; mudança de código registra `client.og_code.updated`.
 - **Validação:** `npm run og:client-sheet:test`, `npm run validate`, security/audit/release gate em CI.
