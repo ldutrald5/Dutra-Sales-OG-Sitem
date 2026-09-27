@@ -62,10 +62,12 @@ A exportação sempre lê o estado atual do DUTRA OS no momento do clique, inclu
 
 Os campos extras exportados também são reconhecidos no round-trip pelo importador quando o XLSX gerado volta ao sistema.
 
-### Etapa visual ainda separada
+### Acabamento visual do CRM Master
 
-O Bloco 2 entrega estrutura, dados e round-trip. A reprodução fiel do acabamento preto/amarelo, fórmulas e demais detalhes visuais do `CRM OG dr` permanece para o bloco seguinte, trabalhando sobre o contrato canônico já registrado.
+O exportador agora reproduz a identidade visual do modelo canônico `CRM OG dr`: preto `#171717`, amarelo `#F5C518`, tipografia Aptos/Aptos Display, títulos escuros com destaque amarelo, cabeçalhos pretos, linhas alternadas claras e sinalização semântica para prioridade/status. A aba `📋 CRM` mantém o cabeçalho na linha 7 e as quatro abas continuam no mesmo desenho operacional do modelo.
+
+A geração visual é feita dentro do Web Worker por um builder OOXML próprio. Isso evita bloquear a interface e não depende de uma cópia antiga com dados reais de clientes.
 
 ## Próxima fase
 
-Aplicar o acabamento do CRM Master canônico na exportação, preservando a arquitetura atual: `state.leads` continua fonte de verdade e o XLSX continua sendo somente entrada/saída e backup portátil.
+Validar a experiência publicada no navegador e, depois, avançar para refinamentos adicionais do template (fórmulas/validações específicas que fizerem sentido), mantendo `state.leads` como única fonte de verdade.
