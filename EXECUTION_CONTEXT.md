@@ -1,74 +1,69 @@
-# Execution Context — Baseline pós-Package 05R
+# Execution Context — Package 06R em validação/publicação
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline estável de produto: `dad8edb2c3196f0c6e91b15489f685e87d90711d`
+- Baseline estável: `30a3516a95a2385cd3a1ff6fae1b16f69b761409`
 - Packages 00R, 01R, 02R, 03R, 04R e 05R: incorporados ao `main`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
-- Package 05R: **MERGED**
-- PR 05R: **#9**
-- Head final da PR: `1a60ae69fbf005b6dd9513d4578fc5233f0f745b`
-- CI final da PR: workflow run `36285077211` — **SUCCESS**
-- Merge squash 05R: `dad8edb2c3196f0c6e91b15489f685e87d90711d`
-- Próximo package: **NÃO AUTORIZADO AINDA**; deve nascer de nova auditoria do estado real.
-- `lead.id` continua ativo como identidade/ponte durante a transição.
+- Package em execução: **06R — HTTPS Preview Deployment**
+- Branch: `package-06r-https-preview`
+- PR: **#11** — draft durante o gate final
+- CI inicial do package: workflow run `36287750590` — **SUCCESS**
+- Objetivo: publicar o DUTRA OS em HTTPS protegido para visualização/uso em PC e celular sem promover o JSON transitório a banco canônico.
 
-## Sequência concluída
+## Sequência reconciliada
 
 1. 01R — Canonical Domain Foundation — **MERGED**
 2. 02R — Supabase Auth + Organization Pilot — **MERGED; piloto remoto pendente**
 3. 03R — Company/Contact + Company 360 Beta — **MERGED**
 4. 04R — Sync Bridge & Conflict UX — **MERGED**
 5. 05R — Legacy Reconciliation / migração controlada — **MERGED**
+6. 06R — HTTPS Preview Deployment — **EM VALIDAÇÃO/PUBLICAÇÃO**
 
-## Estado técnico após 05R
+## Estado técnico do 06R
 
-O sistema agora possui um caminho explícito e reversível entre `lead.id` legado e Company/Contact canônicos:
+O repositório possui agora um entrypoint hospedado separado do fluxo local:
 
-`dry-run → revisão humana → seleção explícita → checkpoint → revalidação → aplicação controlada → sync revision-aware → rollback seletivo`.
+`Railway → PORT/0.0.0.0 → start-og-hosted → server.mjs → DUTRA OS`.
 
-O 05R incorporou:
-- classificação sem mutação em `linked/review/ambiguous/proposed/blocked/invalid`;
-- `legacyLeadId` como ponte explícita soberana;
-- CNPJ completo como sinal forte, mas nunca auto-aplicado;
-- match único por nome tratado como revisão, não criação automática;
-- candidatas ocupadas por outro lead bloqueadas;
-- CNPJ legado incompleto não promovido ao canônico;
-- proteção contra plano obsoleto;
-- dedupe de Contact;
-- checkpoint obrigatório;
-- rollback seletivo que não restaura todo o CRM por cima de trabalho posterior;
-- bloqueio do rollback quando entidades afetadas foram editadas ou receberam novas relações;
-- trilha de auditoria em `activityEvents`;
-- integração com a sincronização revision-authoritative do 04R;
-- UI controlada em Performance & Operações;
-- PWA v30 com o planner no shell offline.
+Controles:
+- token forte obrigatório antes do boot;
+- `OG_ACCESS_TOKEN` aceito como segredo do ambiente;
+- `/health` sem dados e sem autenticação;
+- `/api/*` continua protegido;
+- `RAILWAY_PUBLIC_DOMAIN` gera URLs HTTPS corretas;
+- `RAILWAY_VOLUME_MOUNT_PATH` pode fornecer persistência;
+- smoke test hospedado integra `npm run validate`;
+- security gate cobre entrypoint/config Railway.
 
-Nenhum commit, CI ou dry-run do 05R executou migração de dados comerciais reais. Uma mutação canônica só ocorre por ação explícita do usuário na aplicação.
+## Limite arquitetural
 
-## Pendências reais após 05R
+Este package resolve **acesso HTTPS**, não a arquitetura canônica final de persistência.
 
-Ainda não foram resolvidos:
-- remoção de `lead.id` como identidade operacional;
-- migração controlada de Opportunities/Tasks/Contacts/interações legadas aninhadas;
-- resolução campo-a-campo de divergências de Company;
-- substituição do full-state JSON como ponte de transição;
-- validação/ativação remota do Supabase Auth/Organization;
-- evolução do contrato de CNPJ além do formato numérico atual.
-
-`OQ-PKG02-001` permanece aberta: migration/Auth/RLS remotos exigem ensaio em projeto Supabase piloto antes de ativação.
+Mesmo se um volume Railway for anexado:
+- o full-state JSON continua ponte de transição;
+- Supabase Postgres/Auth continua direção arquitetural oficial;
+- OQ-PKG02-001 permanece aberta;
+- nenhuma migração de dados reais ocorre automaticamente.
 
 ## Builder Brain
 
-O 05R registra:
-- `SRC-PKG05R-001`;
-- `DEC-MIG-05R-001`;
-- `PAT-MIG-001`;
-- `ANTI-MIG-001`;
-- `CYCLE-PKG05R-001`.
+O 06R registra:
+- `SRC-PKG06R-001`;
+- `DEC-HOST-06R-001`;
+- `PAT-HOST-001`.
+
+## Estado externo Railway
+
+O Railway foi instalado/conectado pelo usuário para permitir a publicação. O código/config está pronto, porém a publicação só pode ser declarada concluída depois de existir:
+- projeto/serviço Railway;
+- segredo `OG_ACCESS_TOKEN`;
+- domínio público HTTPS;
+- deploy saudável;
+- verificação real de `/health` e da interface online.
 
 ## Regra de avanço
 
-Fluxo obrigatório: branch isolada → implementação → testes → gate → auditoria → documentação/Brain → merge protegido → closeout → STOP.
+Fluxo obrigatório: implementação → testes → CI → auditoria → documentação/Brain → CI final → merge protegido → deploy externo → verificação HTTPS → closeout → STOP.
 
-Este branch `chore/05r-closeout` contém somente fechamento administrativo/Brain pós-merge. Depois do CI/merge deste closeout, encerrar o 05R. Não iniciar 06R, remover legado nem ativar Supabase automaticamente.
+Não declarar 06R concluído apenas porque o código foi mergeado. A URL online verificada é parte do Definition of Done.

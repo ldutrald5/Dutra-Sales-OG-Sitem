@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(root, '.data');
+const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
 const dataFile = path.join(dataDir, 'shared-state.json');
 const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const port = Number(process.env.OG_PORT || 4321);
@@ -151,6 +151,16 @@ async function readBody(req) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
+  if (url.pathname === '/health' && (req.method === 'GET' || req.method === 'HEAD')) {
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    if (req.method === 'HEAD') return res.end();
+    return res.end(JSON.stringify({ ok: true, service: 'sistema-og' }));
+  }
+
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
 
   if (url.pathname === '/api/state' && req.method === 'GET') {
@@ -255,6 +265,19 @@ function localAddresses() {
 }
 
 function buildAccessInfo() {
+  const publicDomain = String(process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (publicDomain) {
+    const publicUrl = `https://${publicDomain}`;
+    return {
+      port,
+      desktop: publicUrl,
+      phoneUrls: [publicUrl],
+      primaryPhoneUrl: publicUrl,
+      protected: true,
+      hosted: true,
+      tip: 'Use o mesmo endereço HTTPS no computador e no celular. O código de acesso é solicitado por sessão.'
+    };
+  }
   const addresses = localAddresses();
   const phoneUrls = addresses.map(ip => `http://${ip}:${port}`);
   return {
@@ -263,6 +286,7 @@ function buildAccessInfo() {
     phoneUrls,
     primaryPhoneUrl: phoneUrls[0] || null,
     protected: lanMode,
+    hosted: false,
     tip: 'No celular use a mesma Wi-Fi do PC e o código temporário definido ao iniciar o modo LAN.'
   };
 }
