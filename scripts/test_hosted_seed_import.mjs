@@ -37,6 +37,14 @@ assert.equal(compatibleCode.leads.length,1,'mesmo código com grafia compatível
 assert.equal(compatibleCode.matched,1);
 assert.equal(compatibleCode.leads[0].email,'contato@example.com');
 
+const compatibleContactIdentity = mergeSeedLeads(
+  [{ id:'CODE-E', empresa:'CÉSAR MULLER', internalCode:'13486' }],
+  [{ id:'CODE-F', empresa:'COM BEBIDAS CEOLATO L', nome:'CÉSAR MULLER', internalCode:'13486', email:'compras@example.com' }]
+);
+assert.equal(compatibleContactIdentity.leads.length,1,'contato conhecido com mesmo código deve conciliar com a empresa');
+assert.equal(compatibleContactIdentity.matched,1);
+assert.equal(compatibleContactIdentity.leads[0].email,'compras@example.com');
+
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-'));
 const volume=path.join(tmp,'volume');
 fs.mkdirSync(volume,{recursive:true});
