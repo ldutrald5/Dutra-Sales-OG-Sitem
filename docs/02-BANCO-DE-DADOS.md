@@ -18,7 +18,7 @@ O envelope operacional V2 adiciona `companies`, `contacts`, `opportunities`, `ac
 
 ## Entidade central atual
 
-O objeto lead reúne empresa, contato principal, telefone, segmento, frota, status, prioridade, dor, decisor, próxima ação, follow-up e interações. `lead.id` deve continuar estável até uma migração explícita e validada.
+O objeto lead reúne empresa, contato principal, telefone principal, `additionalPhones[]`, `internalCode` (Código OG), `referrals[]`, segmento, frota, status, prioridade, dor, decisor, próxima ação, follow-up e interações. `lead.id` deve continuar estável até uma migração explícita e validada. `internalCode` é um identificador de cadastro externo e **não** representa venda, faturamento ou pagamento.
 
 ## Modelo conceitual de destino
 
@@ -42,7 +42,7 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 - IDs estáveis e únicos; referências inválidas vão para revisão.
 - Datas persistidas em ISO 8601; agenda conserva fuso quando necessário.
 - Valores monetários em centavos e moeda explícita; agregações não podem somar moedas diferentes.
-- Preparado, aberto, enviado, vendido, faturado e pago são estados distintos.
+- Preparado, aberto, enviado, vendido, faturado e pago são estados distintos.\n- Ter `internalCode`/Código OG e ter comprado são estados independentes.\n- Código OG informado pelo usuário deve ser único na base operacional; o sistema não gera valor fictício.
 - Áudio e arquivos ficam por referência e não entram no JSON principal.
 - Campos importados mantêm origem, data e confirmação.
 - Exclusões futuras usam tombstone e backup; nunca apagar dados automaticamente.
