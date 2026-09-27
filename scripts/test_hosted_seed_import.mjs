@@ -37,6 +37,14 @@ assert.equal(compatibleCode.leads.length,1,'mesmo código com grafia compatível
 assert.equal(compatibleCode.matched,1);
 assert.equal(compatibleCode.leads[0].email,'contato@example.com');
 
+const compatibleContactIdentity = mergeSeedLeads(
+  [{ id:'CODE-E', empresa:'CÉSAR MULLER', internalCode:'13486' }],
+  [{ id:'CODE-F', empresa:'COM BEBIDAS CEOLATO L', nome:'CÉSAR MULLER', internalCode:'13486', email:'compras@example.com' }]
+);
+assert.equal(compatibleContactIdentity.leads.length,1,'contato conhecido com mesmo código deve conciliar com a empresa');
+assert.equal(compatibleContactIdentity.matched,1);
+assert.equal(compatibleContactIdentity.leads[0].email,'compras@example.com');
+
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-'));
 const volume=path.join(tmp,'volume');
 fs.mkdirSync(volume,{recursive:true});
@@ -54,13 +62,13 @@ const payload={
   reviewSummary:{orphanContacts:1}
 };
 const b64=zlib.gzipSync(Buffer.from(JSON.stringify(payload))).toString('base64');
-const env={RAILWAY_VOLUME_MOUNT_PATH:volume,OG_DATA_DIR:path.join(volume,'sistema-og'),OG_STATE_SEED_GZIP_B64_1:b64.slice(0,Math.ceil(b64.length/2)),OG_STATE_SEED_GZIP_B64_2:b64.slice(Math.ceil(b64.length/2))};
+const env={RAILWAY_VOLUME_MOUNT_PATH:volume,OG_STATE_SEED_GZIP_B64_1:b64.slice(0,Math.ceil(b64.length/2)),OG_STATE_SEED_GZIP_B64_2:b64.slice(Math.ceil(b64.length/2))};
 const applied=applyHostedSeed({env});
 assert.equal(applied.status,'applied');
 assert.equal(applied.baseRevision,1);
 assert.equal(applied.finalLeadCount,2);
 assert.equal(applied.revision,2);
-const state=JSON.parse(fs.readFileSync(path.join(volume,'sistema-og','shared-state.json'),'utf8'));
+const state=JSON.parse(fs.readFileSync(path.join(volume,'shared-state.json'),'utf8'));
 assert.equal(state.leads.length,2);
 assert.equal(state.leads[0].id,'OLD1');
 assert.equal(state.leads[1].id,'NEW1');
@@ -68,6 +76,31 @@ assert.equal(state.operations.activityEvents[0].id,'E1');
 assert.ok(fs.existsSync(applied.backupFile),'backup pré-seed deve existir');
 const second=applyHostedSeed({env});
 assert.equal(second.status,'already_applied','seed deve ser idempotente');
-assert.equal(JSON.parse(fs.readFileSync(path.join(volume,'sistema-og','shared-state.json'),'utf8')).revision,2,'reboot não reaplica seed');
+assert.equal(JSON.parse(fs.readFileSync(path.join(volume,'shared-state.json'),'utf8')).revision,2,'reboot não reaplica seed');
 
 console.log('Hosted seed import tests: PASS');
+
+
+const tmpRoot=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-root-'));
+const currentRootState={
+  revision:6,updatedAt:'2026-09-27T15:43:05.963Z',
+  leads:[{id:'LIVE1',empresa:'Lead vivo',telefone:'44999991111'}],
+  history:[],
+  operations:{schemaVersion:2,activityEvents:[{id:'LIVE-EVT'}]}
+};
+fs.writeFileSync(path.join(tmpRoot,'shared-state.json'),JSON.stringify(currentRootState,null,2));
+const payloadRoot={
+  seedId:'crm-og-root-test',
+  sourceSha256:'root',
+  leads:[{id:'NEW2',empresa:'Cliente Novo',telefone:'44988882222',conversationStage:'first_contact'}]
+};
+const b64Root=zlib.gzipSync(Buffer.from(JSON.stringify(payloadRoot))).toString('base64');
+const rootResult=applyHostedSeed({env:{RAILWAY_VOLUME_MOUNT_PATH:tmpRoot,OG_STATE_SEED_GZIP_B64:b64Root}});
+assert.equal(rootResult.baseRevision,6,'estado persistente atual deve ser preservado');
+assert.equal(rootResult.finalLeadCount,2);
+const rootState=JSON.parse(fs.readFileSync(path.join(tmpRoot,'shared-state.json'),'utf8'));
+assert.equal(rootState.revision,7);
+assert.equal(rootState.leads[0].id,'LIVE1');
+assert.equal(rootState.operations.activityEvents[0].id,'LIVE-EVT');
+
+console.log('Hosted seed volume-root compatibility: PASS');

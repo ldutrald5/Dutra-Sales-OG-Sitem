@@ -28,14 +28,25 @@ function codeOnlyCollision(existing, imported) {
   const sharedNonCodeKey = leadKeys(existing).some(key => !key.startsWith('code:') && leadKeys(imported).includes(key));
   if (sharedNonCodeKey) return false;
 
-  const a = comparableName(existing?.empresa || existing?.nome);
-  const b = comparableName(imported?.empresa || imported?.nome);
+  const existingNames = [existing?.empresa, existing?.nome, existing?.decisionMaker].map(comparableName).filter(Boolean);
+  const importedNames = [imported?.empresa, imported?.nome, imported?.decisionMaker].map(comparableName).filter(Boolean);
+  for (const left of existingNames) {
+    const compactLeft = left.replace(/[^a-z0-9]/g, '');
+    for (const right of importedNames) {
+      const compactRight = right.replace(/[^a-z0-9]/g, '');
+      if (left === right || left.includes(right) || right.includes(left) ||
+          compactLeft === compactRight || compactLeft.includes(compactRight) || compactRight.includes(compactLeft)) {
+        return false;
+      }
+    }
+  }
+
+  const a = existingNames[0] || '';
+  const b = importedNames[0] || '';
   if (!a || !b) return false;
-  if (a === b || a.includes(b) || b.includes(a)) return false;
 
   const compactA = a.replace(/[^a-z0-9]/g, '');
   const compactB = b.replace(/[^a-z0-9]/g, '');
-  if (compactA === compactB || compactA.includes(compactB) || compactB.includes(compactA)) return false;
 
   let sharedPrefix = 0;
   while (sharedPrefix < Math.min(compactA.length, compactB.length) && compactA[sharedPrefix] === compactB[sharedPrefix]) sharedPrefix += 1;
@@ -224,7 +235,7 @@ export function applyHostedSeed(options = {}) {
   const payload = decodeSeed(encoded);
   const seedId = safeSeedId(payload.seedId);
   const volumeRoot = clean(env.RAILWAY_VOLUME_MOUNT_PATH);
-  const dataDir = path.resolve(clean(env.OG_DATA_DIR) || (volumeRoot ? path.join(volumeRoot, 'sistema-og') : '/data/sistema-og'));
+  const dataDir = path.resolve(clean(env.OG_DATA_DIR) || volumeRoot || '/data');
   const dataFile = path.join(dataDir, 'shared-state.json');
   const markerDir = path.join(dataDir, '.seed-history');
   const markerFile = path.join(markerDir, `${seedId}.json`);

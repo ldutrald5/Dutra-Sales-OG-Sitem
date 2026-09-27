@@ -15,7 +15,7 @@ if (pin) process.env.OG_LOCAL_ACCESS_PIN = pin;
 process.env.OG_HOST = process.env.OG_HOST || '0.0.0.0';
 process.env.OG_PORT = String(port);
 const volumeMount = String(process.env.RAILWAY_VOLUME_MOUNT_PATH || '').trim().replace(/\/+$/, '');
-process.env.OG_DATA_DIR = process.env.OG_DATA_DIR || (volumeMount ? `${volumeMount}/sistema-og` : '/data/sistema-og');
+process.env.OG_DATA_DIR = process.env.OG_DATA_DIR || volumeMount || '/data';
 
 const { applyHostedSeed } = await import('./apply-hosted-seed.mjs');
 const seedResult = applyHostedSeed({ env: process.env });
