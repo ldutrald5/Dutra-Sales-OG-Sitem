@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const require=createRequire(import.meta.url);
 const service=require('../apps/sistema-og/services/spreadsheet-export-service.js');
+const importer=require('../apps/sistema-og/services/spreadsheet-import-service.js');
 
 assert.equal(service.CRM_HEADERS.length,23);
 assert.equal(service.EXPORT_HEADERS[0],'Código cliente');
@@ -37,6 +38,28 @@ assert.equal(payload.crmRows[0][29],'preço | prazo');
 assert.equal(payload.contactRows.length,2);
 assert.match(payload.contactRows[0].join(' '),/João/);
 assert.match(payload.contactRows[1].join(' '),/Maria/);
+
+const crmWorkbook={
+  SheetNames:importer.CRM_SHEETS.slice(),
+  sheets:{
+    '🚀 HOJE':[['fixture']],
+    '📋 CRM':[
+      ['DUTRA OS — CRM MASTER'],['Escopo'],['Gerado'],['Total'],['Fonte'],[],
+      payload.headers,
+      payload.crmRows[0]
+    ],
+    '📥 LISTA':[['fixture']],
+    '👥 CONTATOS':[['fixture']]
+  }
+};
+const roundTrip=importer.readCrmRows(crmWorkbook)[0];
+assert.equal(roundTrip.externalCode,'0012');
+assert.equal(roundTrip.company,'Rodolog Transportes');
+assert.equal(roundTrip.conversationStage,'waiting_response');
+assert.equal(roundTrip.decisionMaker,'João');
+assert.equal(roundTrip.fleetSize,'30');
+assert.equal(roundTrip.pain,'Desgaste irregular');
+assert.equal(roundTrip.objections,'preço | prazo');
 assert.equal(service.safeFilename('all','2026-09-27T12:34:56.000Z'),'DUTRA_OS_Leads_Todos_20260927123456.xlsx');
 assert.equal(service.safeFilename('current','2026-09-27T12:34:56.000Z'),'DUTRA_OS_Leads_Visao_Atual_20260927123456.xlsx');
 assert.throws(()=>service.buildPayload(new Array(service.MAX_EXPORT_ROWS+1).fill({})),/limitada/);
