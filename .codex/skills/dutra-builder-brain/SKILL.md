@@ -81,8 +81,9 @@ A new external reference is **input**, not authority.
 9. For architecture/planning use `reference/04-architecture-and-planning.md`.
 10. For implementation use `reference/05-implementation-package.md` and `reference/06-quality-gates.md`.
 11. For possible code reuse, apply `reference/08-license-and-reuse.md` before recommending reuse.
-12. STANDARD/STRUCTURAL closeout must refresh the human index and metrics, then run the brain checker.
-13. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
+12. For live access, hosted runtime, deployment, domains, logs, environment variables, service health or mobile access, route to `.codex/skills/dutra-runtime-operator/SKILL.md` and use live infrastructure tools instead of relying on remembered deployment state.
+13. STANDARD/STRUCTURAL closeout must refresh the human index and metrics, then run the brain checker.
+14. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
 
 ## The professional loop
 
@@ -267,3 +268,25 @@ Do not automatically execute the next major stage unless authorized or already i
 - `reference/08-license-and-reuse.md` — license/reuse triage for external code.
 - `examples/dutra-os-journey.md` — real example that produced this method.
 - `examples/brain-records.md` — one concrete JSONL example per record type.
+
+
+## Live runtime and infrastructure rule
+
+The Builder Brain owns architecture and product-engineering reasoning, but it must not pretend that live infrastructure state is static.
+
+For any request such as:
+
+- "acesse o sistema";
+- "coloque online";
+- "abra no celular";
+- "qual é o link atual?";
+- "verifique o deploy/status/logs/domínio";
+- "reinicie/republique";
+- "configure o Railway";
+- "o sistema caiu?";
+
+load `.codex/skills/dutra-runtime-operator/SKILL.md`.
+
+That runtime skill must inspect the current runtime manifest and query the connected infrastructure provider when available. Repository documentation is a locator and safety contract, not proof that a deployment is currently healthy.
+
+Never place access-token values, credentials, API keys, private cookies or passwords in this skill, Git history, second-brain records or runtime documentation.
