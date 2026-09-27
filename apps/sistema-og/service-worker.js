@@ -150,7 +150,12 @@ async function flushOutbox() {
     headers: pending.headers || { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (response.status === 409) throw new Error('Background sync: conflito de revision');
+  if (response.status === 409) {
+    const remote = await response.json().catch(() => ({}));
+    const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    clientsList.forEach(client => client.postMessage({ type: 'OG_SYNC_CONFLICT', pending: body, remote }));
+    return false;
+  }
   if (!response.ok) throw new Error(`Background sync falhou: ${response.status}`);
   await clearOutbox();
   const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
