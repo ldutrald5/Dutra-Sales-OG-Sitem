@@ -3877,7 +3877,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const recent = OG_SALES_DESK.lastInteraction(lead);
-    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header><div class="sales-desk-primary-actions"><button type="button" data-client-whatsapp>WhatsApp</button><a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a><button type="button" data-client-call-ai>Call AI</button><button type="button" data-client-crm>Ficha completa</button></div><section class="sales-desk-facts"><div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div><div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Registre a primeira conversa')}</span></div></section><section class="sales-desk-register"><label class="og-field"><span>Resultado rápido</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label class="og-field"><span>Nota rápida</span><textarea id="desk-note" rows="3" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label><button type="button" id="desk-save-result" class="og-button og-button-primary">Registrar resultado e nota</button><div class="sales-desk-next"><label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label><label class="og-field"><span>Quando</span><select id="desk-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem próxima ação</option></select></label><label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label><button type="button" id="desk-save-next">Salvar próxima ação</button></div></section><details class="sales-desk-actions"><summary>Ações e comunicação</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details><section class="sales-desk-history"><h3>Histórico recente</h3>${OG_UI_COMPONENTS.timeline(lead.interactions)}</section>`;
+    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header><div class="sales-desk-primary-actions"><button type="button" data-client-whatsapp>WhatsApp</button><a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a><button type="button" data-client-call-ai>Call AI</button><button type="button" data-client-crm>Ficha completa</button></div><section class="sales-desk-facts"><div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div><div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Registre a primeira conversa')}</span></div></section><section class="sales-desk-register"><label class="og-field"><span>Resultado rápido</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label class="og-field"><span>Nota rápida</span><textarea id="desk-note" rows="3" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label><button type="button" id="desk-save-result" class="og-button og-button-primary">Registrar resultado e nota</button><div class="sales-desk-next"><label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label><label class="og-field"><span>Quando</span><select id="desk-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem próxima ação</option></select></label><label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label><button type="button" id="desk-save-next">Salvar próxima ação</button></div></section><details class="sales-desk-actions"><summary>Ações e comunicação</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details><section class="sales-desk-history"><h3>Histórico recente</h3>${OG_UI_COMPONENTS.timeline(lead.interactions)}</section>`;
     root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
     root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
       state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
@@ -4277,24 +4277,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function getFilteredLeads() {
     return state.leads.filter(lead => {
       const matchesStatus = state.leadFilterStatus === 'all' || lead.status === state.leadFilterStatus;
-      const q = state.leadSearchQuery;
-      const matchesQuery = !q ||
-        (lead.nome && lead.nome.toLowerCase().includes(q)) ||
-        (lead.empresa && lead.empresa.toLowerCase().includes(q)) ||
-        (lead.telefone && lead.telefone.includes(q)) ||
-        (lead.cnpj && lead.cnpj.includes(q)) ||
-        (lead.cidadeUf && lead.cidadeUf.toLowerCase().includes(q));
-
-      return matchesStatus && matchesQuery;
+      return matchesStatus && OG_CRM_SERVICE.matchesSearch(lead, state.leadSearchQuery);
     });
   }
 
   function renderCrmModule() {
     renderLeadsTable();
-    if (state.leads.length > 0 && !state.selectedLeadId) {
-      state.selectedLeadId = state.leads[0].id;
-    }
-    renderLeadInspector();
+    if (state.leads.length > 0 && !state.selectedLeadId) state.selectedLeadId = state.leads[0].id;
   }
 
   function renderLeadsTable() {
@@ -4306,7 +4295,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!tbody) return;
 
     const filtered = getFilteredLeads();
-    if (badgeCount) badgeCount.textContent = `${filtered.length} leads`;
+    if (badgeCount) badgeCount.textContent = `${filtered.length} cliente${filtered.length === 1 ? '' : 's'}`;
 
     const selCount = state.selectedLeadIds.size;
     if (batchToolbar && batchSelectedCount) {
@@ -4345,33 +4334,35 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const statusObj = OG_DATA.leadStatuses.find(s => s.id === lead.status) || OG_DATA.leadStatuses[0];
       const segObj = OG_DATA.segments.find(s => s.id === lead.segmentId) || { name: 'Geral', icon: '🚛' };
 
+      const code = clientCodeLabel(lead);
+      tr.className = `crm-client-row ${isSelected ? 'selected' : ''}`;
       tr.innerHTML = `
-        <td class="py-3 px-3 w-10 text-center" onclick="event.stopPropagation()">
-          <input type="checkbox" data-lead-id="${lead.id}" ${isChecked ? 'checked' : ''} class="lead-row-checkbox w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500">
+        <td class="crm-check-cell" data-label="Selecionar" onclick="event.stopPropagation()">
+          <input type="checkbox" data-lead-id="${escapeHtml(lead.id)}" ${isChecked ? 'checked' : ''} class="lead-row-checkbox">
         </td>
-        <td class="py-3 px-3">
-          <div class="font-bold text-slate-100 text-sm">${lead.empresa || lead.nome || 'Sem identificação'}</div>
-          <div class="text-[11px] text-slate-400">Contato: <b>${lead.nome || '—'}</b></div>
+        <td data-label="Código OG">
+          <button type="button" class="crm-code-button" data-open-client-sheet="${escapeHtml(lead.id)}" ${code ? '' : 'data-empty="true"'}>${code ? escapeHtml(code) : 'Sem código'}</button>
         </td>
-        <td class="py-3 px-3">
-          <span class="font-mono text-slate-200 font-bold">${formatPhone(lead.telefone)}</span>
-          ${lead.cnpj ? `<span class="block text-[10px] text-slate-400 font-mono">CNPJ: ${lead.cnpj}</span>` : ''}
-        </td>
-        <td class="py-3 px-3">
-          <span class="text-slate-300 font-medium">${lead.cidadeUf || '—'}</span>
-          <span class="text-[10px] text-slate-400 block">${segObj.icon} ${segObj.name}</span>
-        </td>
-        <td class="py-3 px-3 text-center">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusObj.color}">
-            ${statusObj.label}
-          </span>
-        </td>
-        <td class="py-3 px-3 text-right">
-          <button data-id="${lead.id}" class="btn-select-lead px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
-            Abrir →
+        <td data-label="Cliente">
+          <button type="button" class="crm-client-name" data-open-client-sheet="${escapeHtml(lead.id)}">
+            <strong>${escapeHtml(lead.empresa || lead.nome || 'Sem identificação')}</strong>
+            <span>${escapeHtml(lead.cidadeUf || 'Local não informado')} · ${escapeHtml(segObj.name)}</span>
           </button>
         </td>
+        <td data-label="Contato">
+          <div class="crm-contact-cell"><strong>${escapeHtml(lead.nome || 'Contato não informado')}</strong><span>${escapeHtml(formatPhone(lead.telefone) || 'Sem telefone')}</span></div>
+        </td>
+        <td data-label="Próxima ação">
+          <div class="crm-next-cell"><strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div>
+        </td>
+        <td data-label="Status">
+          <span class="crm-status-pill" data-status="${escapeHtml(lead.status || 'novo')}">${escapeHtml(statusObj.label)}</span>
+        </td>
+        <td class="crm-open-cell" data-label="Ficha">
+          <button type="button" data-open-client-sheet="${escapeHtml(lead.id)}" class="crm-open-button">Abrir ficha</button>
+        </td>
       `;
+
 
       const chk = tr.querySelector('.lead-row-checkbox');
       chk.addEventListener('change', (e) => {
@@ -4380,10 +4371,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         renderLeadsTable();
       });
 
-      tr.addEventListener('click', () => {
+      tr.querySelectorAll('[data-open-client-sheet]').forEach(button => button.addEventListener('click', event => {
+        event.stopPropagation();
         state.selectedLeadId = lead.id;
         renderLeadsTable();
-        renderLeadInspector();
+        openClientSheet(lead.id);
+      }));
+      tr.addEventListener('click', event => {
+        if (event.target.closest('input,button,a,select')) return;
+        state.selectedLeadId = lead.id;
+        renderLeadsTable();
+        openClientSheet(lead.id);
       });
 
       tbody.appendChild(tr);
@@ -5440,11 +5438,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     input?.addEventListener('input', () => {
       const query = normalizeCallSearch(input.value);
       const digits = String(input.value).replace(/\D/g, '');
-      matches = query.length < 2 && digits.length < 3 ? [] : state.leads.filter(lead => {
-        const text = normalizeCallSearch([lead.empresa, lead.nome, lead.cidadeUf, lead.status].join(' '));
-        const leadDigits = `${lead.telefone || ''}${lead.cnpj || ''}`.replace(/\D/g, '');
-        return (query && text.includes(query)) || (digits.length >= 3 && leadDigits.includes(digits));
-      }).slice(0, 8);
+      matches = query.length < 2 && digits.length < 3 ? [] : state.leads.filter(lead => OG_CRM_SERVICE.matchesSearch(lead, input.value)).slice(0, 8);
       activeIndex = 0;
       renderCallSearchResults(matches, activeIndex);
     });
