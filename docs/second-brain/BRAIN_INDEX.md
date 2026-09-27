@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 50 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -8,13 +8,13 @@ Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
 |---|---:|
 | anti_pattern | 5 |
 | cycle | 5 |
-| decision | 8 |
+| decision | 9 |
 | experiment | 1 |
 | idea | 3 |
 | knowledge | 3 |
 | open_question | 2 |
-| pattern | 10 |
-| source | 10 |
+| pattern | 11 |
+| source | 11 |
 
 ## Active decisions
 
@@ -34,6 +34,8 @@ Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
   A revision conflict blocks automatic writes until a preserved local/remote comparison is reviewed; queued state persists without credentials and only an authenticated foreground session may perform the remote PUT.
 - **DEC-MIG-05R-001 — Legacy reconciliation requires reviewed intent and reversible apply** (active/high)
   Legacy lead data may enter canonical Company/Contact only through dry-run classification, explicit user selection, checkpoint, revalidation against current state and controlled apply; weak/ambiguous matches never become canonical truth automatically.
+- **DEC-HOST-06R-001 — HTTPS hosting is a protected preview, not a persistence architecture shortcut** (active/high)
+  Expose the current DUTRA OS over HTTPS only through a protected hosted entrypoint with strong access token, healthcheck and persistent volume support; do not reinterpret the transition JSON state as the final canonical database or bypass the planned Supabase validation.
 
 ## Open questions
 
@@ -71,6 +73,8 @@ Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Persist retryable state and recovery metadata without credentials, let background infrastructure signal pending work, and perform authenticated delivery in the foreground where session credentials already exist.
 - **PAT-MIG-001 — Dry-run, approve, revalidate, apply, rollback selectively** (validated/high)
   For brownfield canonicalization, classify without mutation, require explicit approval, re-check candidates at apply time, checkpoint first and reverse only affected entities while blocking rollback if later work depends on them.
+- **PAT-HOST-001 — Provider-safe preview entrypoint** (validated/high)
+  For a brownfield app that was local-only, add a dedicated hosted entrypoint that validates secrets before boot, binds provider PORT on 0.0.0.0, exposes a minimal unauthenticated healthcheck, routes persistent state to the provider volume and keeps production architecture boundaries explicit.
 
 ## Recent sources
 
@@ -78,6 +82,8 @@ Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
 - **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
   Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
+- **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (validated/high)
+  Package 06R prepares a protected Railway HTTPS preview runtime using provider PORT binding, healthcheck, session access token compatibility and configurable persistent data path without redefining hosted JSON as canonical production storage.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
@@ -92,9 +98,6 @@ Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Foundation Bootstrap & Safety Gate implementation report including tests, environment blockers, rollback and intentionally deferred behavior.
 - **SRC-BRAIN-REVIEW-001 — DUTRA Builder Brain design review** (validated/high)
   Structured review identified adoption, semantic validation, proportionality, metrics, provenance, human indexing and license-triage improvements for Builder Brain.
-- **SRC-PKG00R-001 — Package 00R reconciliation and release baseline** (implemented/high)
-  Package 00R reconciled the GitHub baseline with advisory artifacts, contained XLSX risk, hardened local and Cloudflare state APIs, installed Builder Brain governance and established CI and release gates.
-
 ## Retrieval workflow
 
 1. Start here.
