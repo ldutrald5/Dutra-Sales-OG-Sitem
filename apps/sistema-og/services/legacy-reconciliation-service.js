@@ -28,13 +28,19 @@
     const linked=companies.filter(c=>clean(c.legacyLeadId)===id);
     if(linked.length===1)return {leadId:id,status:'linked',reason:'explicit_legacy_bridge',companyId:linked[0].id,candidates:[{companyId:linked[0].id,signals:['legacyLeadId']}],proposal:null};
     if(linked.length>1)return {leadId:id,status:'blocked',reason:'duplicate_legacy_bridge',candidates:linked.map(c=>({companyId:c.id,signals:['legacyLeadId']})),proposal:null};
-    const candidates=companies.map(c=>({companyId:c.id,signals:companySignals(lead,c)})).filter(x=>x.signals.length);
+    const candidates=companies.map(c=>({companyId:c.id,signals:companySignals(lead,c),occupiedByLeadId:clean(c.legacyLeadId)||null})).filter(x=>x.signals.length);
     const strong=candidates.filter(x=>x.signals.includes('cnpj'));
-    if(strong.length===1)return {leadId:id,status:'review',reason:'cnpj_match_requires_confirmation',candidates,proposal:null};
+    if(candidates.length&&candidates.every(x=>x.occupiedByLeadId&&x.occupiedByLeadId!==id))return {leadId:id,status:'blocked',reason:'all_candidates_already_linked',candidates,proposal:null};
+    if(strong.length===1){
+      if(strong[0].occupiedByLeadId&&strong[0].occupiedByLeadId!==id)return {leadId:id,status:'blocked',reason:'cnpj_candidate_already_linked',candidates,proposal:null};
+      return {leadId:id,status:'review',reason:'cnpj_match_requires_confirmation',candidates,proposal:null};
+    }
     if(strong.length>1||candidates.length>1)return {leadId:id,status:'ambiguous',reason:'multiple_company_candidates',candidates,proposal:null};
+    if(candidates.length===1)return {leadId:id,status:'review',reason:'name_match_requires_confirmation',candidates,proposal:null};
     const companyName=clean(lead?.empresa||lead?.nome);
     if(!companyName)return {leadId:id,status:'blocked',reason:'company_name_missing',candidates:[],proposal:null};
-    return {leadId:id,status:'proposed',reason:'new_company_candidate',candidates:[],proposal:{company:{name:companyName,cnpj:digits(lead?.cnpj)||null,legacyLeadId:id,segment:clean(lead?.segmentId)||null,status:'prospect',source:'legacy_lead'},contact:contactProposal(lead)}};
+    const legacyCnpj=digits(lead?.cnpj),promotableCnpj=legacyCnpj.length===14?legacyCnpj:null;
+    return {leadId:id,status:'proposed',reason:'new_company_candidate',candidates:[],warnings:legacyCnpj&&!promotableCnpj?['invalid_cnpj_not_promoted']:[],proposal:{company:{name:companyName,cnpj:promotableCnpj,legacyLeadId:id,segment:clean(lead?.segmentId)||null,status:'prospect',source:'legacy_lead'},contact:contactProposal(lead)}};
   }
   function buildPlan(leads=[],graph={}){
     const rows=list(leads).map(lead=>inspectLead(lead,graph));
@@ -81,7 +87,7 @@
         const companyId=clean(approval.companyId);
         const chosen=current.candidates.find(item=>clean(item.companyId)===companyId);
         if(!chosen)throw new Error(`Company ${companyId||'?'} não é candidata atual para ${leadId}.`);
-        if(current.status==='review'&&!chosen.signals.includes('cnpj'))throw new Error(`Company ${companyId} não corresponde ao CNPJ confirmado de ${leadId}.`);
+        if(current.status==='review'&&current.reason==='cnpj_match_requires_confirmation'&&!chosen.signals.includes('cnpj'))throw new Error(`Company ${companyId} não corresponde ao CNPJ confirmado de ${leadId}.`);
         const index=next.companies.findIndex(item=>item?.entityType==='company'&&clean(item.id)===companyId);
         if(index<0)throw new Error(`Company não encontrada: ${companyId}`);
         const existing=next.companies[index];
