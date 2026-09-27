@@ -51,7 +51,8 @@
     "og:legacy:reconciliation:test": "node scripts/test_legacy_reconciliation.mjs",
     "og:legacy:reconciliation:ui:test": "node scripts/test_legacy_reconciliation_ui.mjs",
     "og:start:hosted": "node scripts/start-og-hosted.mjs",
-    "og:hosted:test": "node scripts/test_hosted_runtime.mjs"
+    "og:hosted:test": "node scripts/test_hosted_runtime.mjs",
+    "start": "npm run og:start:hosted"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
