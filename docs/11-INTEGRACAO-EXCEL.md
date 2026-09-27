@@ -21,12 +21,41 @@ O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `CONFLIC
 
 Esta fase não importa, exporta nem altera workbooks. A exportação futura deve copiar o modelo e escrever somente nas células autorizadas após preview.
 
-## Caracterização disponível
+## Templates canônicos validados
 
-O modelo de Pós-Vendas foi conferido diretamente em modo somente leitura: possui 15 abas, incluindo os meses de novembro de 2025 a dezembro de 2026 e `Planilha15`. Em `Setembro - 2026`, `L2` mantém `SUM(K7:K80)` e `E3` mantém `SUM(L7:L80)`.
+Em 2026-09-27 os dois workbooks reais foram identificados como referências oficiais de compatibilidade. Os binários permanecem privados e fora do Git; fingerprints e contratos ficam em `docs/spreadsheets/canonical-templates.json`.
 
-O arquivo real do CRM não estava disponível no workspace durante esta implementação. O leitor foi testado com uma fixture estrutural sintética baseada no mapeamento fornecido; a validação com o workbook real permanece obrigatória antes de habilitar persistência.
+### CRM Master
+
+- Nome canônico: `CRM OG dr`.
+- Artefato capturado: `CRM OG dr.ods`.
+- Alias conhecido: `CRM OG dr.xlsx`.
+- Abas reais confirmadas: `🚀 HOJE`, `📋 CRM`, `📥 LISTA`, `👥 CONTATOS`.
+- Estruturas confirmadas: `ActivityTable`, `CRMTable`, `HistoryTable`, `ListaContatosTable`, `ContatosTable`.
+- Identidade visual: amarelo `#F5C518` + preto `#171717`.
+- Papel: template canônico de backup/exportação do CRM.
+
+A validação anterior baseada apenas em fixture sintética está superada pelo artefato real capturado. Isso **não** habilita importação destrutiva automaticamente; apenas elimina a incerteza sobre qual modelo é oficial.
+
+### Vendas e comissões
+
+- Nome canônico: `POS VENDAS LucasD Setembro26.xlsx`.
+- 15 abas confirmadas: novembro/2025 a dezembro/2026 + `Planilha15`.
+- Colunas de entrada: D, E, H, I, J, K e M.
+- Colunas calculadas/protegidas: F, G e L.
+- Fórmulas de resumo protegidas: `E3`, `K1`, `K2`, `L2`.
+- Faixa operacional: linhas 7 a 80.
+- Competência: usar `Data da venda` como evidência principal, não confiar cegamente no nome da aba.
+
+## Regra de exportação
+
+A experiência alvo passa a usar dois comandos explícitos:
+
+- `Exportar CRM Master` → cópia versionada do `CRM OG dr`, preservando o visual preto/amarelo e estruturas protegidas.
+- `Exportar Vendas/Comissões` → cópia versionada do modelo de Pós-Vendas, preservando fórmulas e layout mensal.
+
+Nenhum exportador pode editar o original. O arquivo gerado deve ser validado antes de oferecer `Abrir` e `Baixar`.
 
 ## Próxima fase
 
-Validar o preview com o arquivo CRM real, registrar fingerprint e anomalias, e então implementar decisões campo a campo. Persistência deve continuar desabilitada até essa validação.
+Usar os fingerprints reais como baseline para implementar a exportação sobre cópia do modelo e, depois, a importação transacional. A persistência no DUTRA OS continua sendo independente do Excel; a planilha é backup/interoperação, não banco primário.
