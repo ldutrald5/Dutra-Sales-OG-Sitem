@@ -9,9 +9,16 @@ assert.ok(sw.includes("'/services/sync-conflict-service.js'"),'serviço de confl
 assert.ok(app.includes("OG_SYNC_CONFLICT.createConflict("),'409 deve criar snapshot de conflito');
 assert.ok(app.includes("sessionStorage.setItem('og_sync_conflict'"),'conflito deve ser preservado na sessão');
 assert.ok(app.includes("if (pendingSyncConflict())"),'novo sync deve parar enquanto conflito estiver pendente');
-assert.ok(app.includes('Revisar sem sobrescrever'),'UX de revisão ausente');
+assert.ok(app.includes('Ver divergências'),'UX de detalhes ausente');
+assert.ok(app.includes('Preparar conciliação'),'UX de revisão ausente');
+assert.ok(app.includes("OG_SYNC_CONFLICT.differences(conflict)"),'painel deve usar diferenças determinísticas');
 assert.ok(app.includes('Usar versão do servidor'),'opção explícita de servidor ausente');
 assert.ok(app.includes('Nada será enviado ao servidor até você confirmar novamente.'),'revisão deve declarar ausência de envio automático');
+assert.ok(app.includes("sessionStorage.setItem('og_sync_review_pending'"),'conciliação preparada deve ficar pendente');
+assert.ok(app.includes('Enviar revisão'),'envio conciliado deve exigir ação explícita');
+assert.ok(app.includes("if (pendingSyncReview())"),'sync normal deve parar enquanto revisão aguarda confirmação');
+assert.ok(app.includes("body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })"),'envio conciliado deve usar revisão-base');
+assert.ok(app.includes("if (response.status === 409)"),'novo 409 durante envio conciliado deve ser tratado');
 assert.ok(!app.includes("if(response.status===409){\n          const remote=await response.json();\n          const merged=OG_DATA_SAFETY.mergeBackup"),'merge/reenvio silencioso antigo ainda presente');
 assert.ok(!app.includes("response=await apiFetch('/api/state',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0)})})"),'reenvio automático após 409 ainda presente');
 console.log('Sync conflict UI integration tests: PASS');
