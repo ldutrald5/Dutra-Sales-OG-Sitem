@@ -5635,13 +5635,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       installButton.classList.add('hidden');
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    await restoreSyncRecovery();
     window.addEventListener('online', loadSharedState);
-    const importedCount = await importLucas2026Leads();
-    if (importedCount) {
-      renderDayDashboard();
-      if (state.currentTab === 'crm') renderCrmModule();
+    if (!pendingSyncConflict() && !pendingSyncReview()) {
+      const importedCount = await importLucas2026Leads();
+      if (importedCount) {
+        renderDayDashboard();
+        if (state.currentTab === 'crm') renderCrmModule();
+      }
     }
-    loadSharedState();
+    await loadSharedState();
   }
 
   function exportLeadsCsv() {
