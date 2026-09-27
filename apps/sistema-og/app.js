@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
+  let serverSyncInFlight = false;
+  let serverSyncGeneration = 0;
 
   // Carrega histórico e leads
   try {
