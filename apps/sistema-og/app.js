@@ -5624,8 +5624,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const marker = readLegacyRollbackMarker();
-    if (!marker) {
-      showNotification('Nenhum checkpoint de reconciliação disponível.', 'info');
+    if (!marker?.report) {
+      showNotification('Nenhuma aplicação 05R com rollback gerenciado está disponível.', 'info');
       return;
     }
     let snapshot = null;
@@ -5635,31 +5635,34 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     } catch (error) {
       console.warn('Falha ao localizar checkpoint de reconciliação.', error);
     }
-    if (!snapshot?.backup?.data) {
+    if (!snapshot?.backup?.data?.operations) {
       showNotification('Checkpoint de rollback não foi encontrado neste aparelho.', 'warning');
       return;
     }
-    if (!confirm('Restaurar exatamente o estado anterior à última reconciliação 05R? As Companies/Contacts criadas por aquela aplicação serão removidas e o rollback será sincronizado.')) return;
-    const backup = snapshot.backup;
-    state.leads = (backup.data.leads || []).map(normalizeLead);
-    state.history = backup.data.history || [];
-    state.operations = OG_OPERATIONS_MODEL.migrateOperations(backup.data.operations || {});
-    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
-      id: newLibraryId('evt'),
-      type: 'legacy.reconciliation.rolled_back',
-      at: new Date().toISOString(),
-      checkpointCreatedAt: backup.createdAt,
-      checkpointSource: backup.source
-    });
-    localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
-    localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
-    localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
-    legacyReconciliationPlan = null;
-    saveOperationsToStorage();
-    renderOperationsFoundation();
-    renderDayDashboard();
-    if (state.currentTab === 'crm') renderCrmModule();
-    showNotification('Rollback 05R concluído a partir do checkpoint local.', 'success');
+    if (!confirm('Desfazer somente as Companies/Contacts alteradas pela última aplicação 05R? Se algum desses registros recebeu edições ou relações depois da reconciliação, o rollback será bloqueado para não apagar trabalho novo.')) return;
+    try {
+      const rolled = OG_LEGACY_RECONCILIATION.rollbackApplied(
+        state.operations,
+        snapshot.backup.data.operations,
+        marker.report,
+        {
+          domain: OG_CANONICAL_DOMAIN,
+          idFactory: kind => newLibraryId(kind === 'event' ? 'evt' : kind),
+          now: new Date().toISOString()
+        }
+      );
+      state.operations = rolled.graph;
+      localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
+      legacyReconciliationPlan = null;
+      saveOperationsToStorage();
+      renderOperationsFoundation();
+      renderDayDashboard();
+      if (state.currentTab === 'crm') renderCrmModule();
+      showNotification(`Rollback seletivo concluído para ${rolled.report.total} reconciliação(ões), sem restaurar o restante do CRM.`, 'success');
+    } catch (error) {
+      console.warn('Rollback 05R bloqueado.', error);
+      showNotification(`Rollback bloqueado: ${error.message}`, 'warning');
+    }
   }
 
   function renderLegacyReconciliationPanel() {
@@ -5675,7 +5678,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         </section>`;
     }
     const plan = legacyReconciliationPlan;
-    const visibleRows = plan.rows.filter(row => row.status !== 'linked').slice(0, 100);
+    const rowPriority = { review: 0, ambiguous: 1, proposed: 2, blocked: 3, invalid: 4 };
+    const visibleRows = plan.rows.filter(row => row.status !== 'linked').sort((a, b) => (rowPriority[a.status] ?? 9) - (rowPriority[b.status] ?? 9)).slice(0, 100);
     const companyMap = new Map((state.operations.companies || []).filter(item => item?.entityType === 'company').map(item => [String(item.id), item]));
     const leadMap = new Map(state.leads.map(item => [String(item.id), item]));
     const count = key => Number(plan.counts?.[key] || 0);
@@ -5756,6 +5760,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
       if (!approvals.length) return;
       if (!confirm(`Aplicar ${approvals.length} reconciliação(ões) revisada(s)? Um checkpoint completo será salvo antes de qualquer alteração e poderá ser restaurado.`)) return;
+      let applyCommitted = false;
       try {
         await createLegacyReconciliationCheckpoint(legacyReconciliationPlan);
         const applied = OG_LEGACY_RECONCILIATION.applyApproved(
@@ -5769,13 +5774,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
             now: new Date().toISOString()
           }
         );
+        const checkpointMarker = readLegacyRollbackMarker() || {};
+        localStorage.setItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER, JSON.stringify({ ...checkpointMarker, appliedAt: applied.report.appliedAt, report: applied.report }));
         state.operations = applied.graph;
         legacyReconciliationPlan = null;
         saveOperationsToStorage();
+        applyCommitted = true;
         renderOperationsFoundation();
         if (state.currentTab === 'crm') renderCrmModule();
         showNotification(`${applied.report.total} reconciliação(ões) aplicada(s) com checkpoint disponível para rollback.`, 'success');
       } catch (error) {
+        if (!applyCommitted) localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER);
         console.error('Reconciliação 05R falhou.', error);
         showNotification(`Reconciliação não aplicada: ${error.message}`, 'warning');
       }
