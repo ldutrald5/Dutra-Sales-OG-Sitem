@@ -9,7 +9,7 @@
     nao_atendeu: { label: 'Não atendeu', status: 'contatado', nextAction: 'Tentar novo contato' },
     atendeu: { label: 'Atendeu', status: 'contatado' },
     falar_depois: { label: 'Falar depois', status: 'contatado', nextAction: 'Retomar contato' },
-    sem_interesse: { label: 'Sem interesse', status: 'perdido' },
+    sem_interesse: { label: 'Sem interesse', status: 'perdido', clearNextAction: true },
     enviar_apresentacao: { label: 'Enviar apresentação', status: 'contatado', nextAction: 'Enviar apresentação' },
     enviar_orcamento: { label: 'Enviar orçamento', status: 'proposta_enviada', nextAction: 'Preparar orçamento' },
     negociacao: { label: 'Negociação', status: 'negociacao', nextAction: 'Retomar negociação' },
@@ -47,6 +47,9 @@
       idempotencyKey: input.idempotencyKey || eventId('IDEM', now),
       createdBy: input.createdBy || null
     };
+    if (input.sessionId) interaction.sessionId = input.sessionId;
+    if (input.objective) interaction.objective = input.objective;
+    if (Array.isArray(input.signals)) interaction.signals = [...input.signals];
     ensureInteractions(lead).push(interaction);
     if (input.countAsContact !== false) lead.lastContactAt = now;
     lead.updatedBy = input.updatedBy || lead.updatedBy || null;
@@ -55,12 +58,26 @@
 
   function recordResult(lead, result, note, options = {}) {
     const definition = RESULT_DEFINITIONS[result] || RESULT_DEFINITIONS.outro;
+    const interactionInput = options.interaction || {};
+    const changedFields = ['interactions', 'status', 'lastContactAt'];
     if (definition.status) lead.status = definition.status;
-    if (definition.nextAction && !lead.nextAction) lead.nextAction = definition.nextAction;
+    if (definition.clearNextAction) {
+      lead.nextAction = '';
+      lead.followUpAt = '';
+      lead.nextActionReason = '';
+      lead.nextActionObjective = '';
+      lead.nextActionExpectedResult = '';
+      changedFields.push('nextAction', 'followUpAt', 'nextActionReason', 'nextActionObjective', 'nextActionExpectedResult');
+    } else if (definition.nextAction && !lead.nextAction) {
+      lead.nextAction = definition.nextAction;
+      changedFields.push('nextAction');
+    }
     return addInteraction(lead, {
-      type: 'resultado_contato', result,
+      ...interactionInput,
+      type: interactionInput.type || 'resultado_contato',
+      result,
       note: String(note || '').trim() || `Resultado: ${definition.label}`,
-      changedFields: ['interactions', 'status', 'lastContactAt']
+      changedFields: [...new Set([...(interactionInput.changedFields || []), ...changedFields])]
     }, options);
   }
 
