@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import fs from 'node:fs';
+import vm from 'node:vm';
 const require=createRequire(import.meta.url);
 const builder=require('../apps/sistema-og/services/spreadsheet-xlsx-builder.js');
 
@@ -47,5 +49,18 @@ assert.equal(xlsx[1],0x4B);
 const bytes=Buffer.from(xlsx);
 assert.ok(bytes.includes(Buffer.from('xl/styles.xml')));
 assert.ok(bytes.includes(Buffer.from('xl/worksheets/sheet4.xml')));
+
+const vendor=fs.readFileSync(new URL('../apps/sistema-og/assets/vendor/xlsx.full.min.js',import.meta.url),'utf8');
+const sandbox={console,Uint8Array,ArrayBuffer,TextDecoder,TextEncoder,Buffer,setTimeout,clearTimeout};
+sandbox.self=sandbox;sandbox.window=sandbox;sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+vm.runInContext(vendor,sandbox);
+const parsed=sandbox.XLSX.read(bytes,{type:'buffer'});
+assert.deepEqual(Array.from(parsed.SheetNames),['🚀 HOJE','📋 CRM','📥 LISTA','👥 CONTATOS']);
+const crmSheet=parsed.Sheets['📋 CRM'];
+assert.equal(crmSheet.A1.v,'📋 CRM — CARTEIRA COMERCIAL · Visão atual');
+assert.equal(crmSheet.A7.v,'Código cliente');
+assert.equal(crmSheet.A8.v,'0012');
+assert.equal(crmSheet.B8.v,'Rodolog');
 
 console.log('CRM Master visual XLSX builder tests: PASS');
