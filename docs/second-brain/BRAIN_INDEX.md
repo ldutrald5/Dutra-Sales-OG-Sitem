@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 50 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 5 |
-| cycle | 5 |
+| cycle | 6 |
 | decision | 9 |
 | experiment | 1 |
 | idea | 3 |
@@ -82,8 +82,8 @@ Generated from 50 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
 - **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
   Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
-- **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (validated/high)
-  Package 06R prepares a protected Railway HTTPS preview runtime using provider PORT binding, healthcheck, session access token compatibility and configurable persistent data path without redefining hosted JSON as canonical production storage.
+- **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (implemented/high)
+  Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
