@@ -23,6 +23,8 @@ if (seedResult.status === 'applied') {
   console.log(`Seed hospedado aplicado: ${seedResult.added} novos, ${seedResult.matched} conciliados, ${seedResult.finalLeadCount} clientes no total.`);
 } else if (seedResult.status === 'already_applied') {
   console.log(`Seed hospedado já aplicado anteriormente: ${seedResult.seedId}.`);
+} else if (seedResult.status === 'invalid_seed_skipped') {
+  console.warn(`Seed hospedado inválido ignorado porque já existe estado persistente válido (revisão ${seedResult.baseRevision}, ${seedResult.finalLeadCount} leads). O servidor continuará sem alterar o estado salvo.`);
 }
 for (const key of Object.keys(process.env)) {
   if (key === 'OG_STATE_SEED_GZIP_B64' || /^OG_STATE_SEED_GZIP_B64_\d+$/.test(key)) delete process.env[key];
