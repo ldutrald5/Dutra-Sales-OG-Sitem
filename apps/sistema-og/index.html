@@ -582,9 +582,9 @@
       
       <section class="clean-card crm-command-bar">
         <div class="crm-command-copy">
-          <span class="og-kicker">CLIENTES</span>
-          <div class="crm-title-line"><h2>CRM operacional</h2><span id="crm-total-count-badge">0 clientes</span></div>
-          <p>Encontre qualquer conta pelo <b>código OG</b>, empresa, contato, telefone ou CNPJ. O código identifica cadastro; não confirma compra.</p>
+          <span class="og-kicker">LEADS & TRANSCRIÇÃO</span>
+          <div class="crm-title-line"><h2>Fila inteligente de clientes</h2><span id="crm-total-count-badge">0 clientes</span></div>
+          <p>Veja primeiro quem merece atenção. Situação da conversa, prioridade e origem são dimensões separadas; <b>nenhuma lista duplica o cliente</b>. Código OG continua pesquisável e não significa compra.</p>
         </div>
         <div class="crm-command-actions">
           <div class="crm-search-box">
@@ -613,6 +613,27 @@
         </div>
       </section>
 
+      <section class="clean-card lead-smart-toolbar" aria-label="Filtros inteligentes de leads">
+        <div class="lead-smart-head">
+          <div>
+            <span class="og-kicker">ORDEM DE ATAQUE</span>
+            <h3>Mais importantes primeiro</h3>
+            <p id="crm-smart-summary">A fila considera prioridade, retorno, situação da conversa, temperatura e potencial.</p>
+          </div>
+          <div class="lead-smart-kpis">
+            <span data-smart-kpi="urgent">0 urgentes</span>
+            <span data-smart-kpi="waiting">0 aguardando</span>
+            <span data-smart-kpi="first">0 primeiro contato</span>
+          </div>
+        </div>
+        <div id="crm-conversation-filters" class="lead-stage-chips" role="group" aria-label="Situação da conversa"></div>
+        <div class="lead-smart-selects">
+          <label>Origem / lista<select id="crm-source-filter"><option value="all">Todas as origens</option></select></label>
+          <label>Prioridade<select id="crm-priority-filter"><option value="all">Todas as prioridades</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></label>
+          <span class="lead-smart-order">⇅ Ordenado por importância</span>
+        </div>
+      </section>
+
 <section id="crm-excel-preview-panel" class="clean-card p-4 hidden" aria-live="polite">
         <div class="og-section-head"><div><span class="og-kicker">CONCILIAÇÃO SEGURA</span><h2>Excel × clientes atuais</h2><p id="crm-excel-summary">Nenhum arquivo analisado.</p></div><button id="crm-excel-close" type="button">Fechar</button></div>
         <div id="crm-excel-counters" class="prospect-session-metrics"></div>
@@ -630,11 +651,12 @@
             <thead>
               <tr>
                 <th class="crm-check-cell"></th>
-                <th>Código OG</th>
+                <th>Prioridade</th>
                 <th>Cliente</th>
-                <th>Contato</th>
+                <th>Situação</th>
+                <th>Contexto</th>
                 <th>Próxima ação</th>
-                <th>Status</th>
+                <th>Origem</th>
                 <th></th>
               </tr>
             </thead>
@@ -1299,6 +1321,7 @@
   <script src="services/prospect-parser.js"></script>
   <script src="modules/sales-desk.js"></script>
   <script src="modules/prospecting-engine.js"></script>
+  <script src="modules/lead-intelligence.js"></script>
   <script src="components/ui-components.js"></script>
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>

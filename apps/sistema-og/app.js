@@ -103,6 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedLeadIds: new Set(),
     leadFilterStatus: 'all',
     leadSearchQuery: '',
+    leadConversationFilter: 'all',
+    leadSourceFilter: 'all',
+    leadPriorityFilter: 'all',
     salesDeskSearch: '',
     prospecting: { view: 'inbox', previewRows: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
     communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
@@ -3643,6 +3646,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return (OG_DATA.leadStatuses || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('');
   }
 
+  function clientSheetConversationOptions(current) {
+    return (OG_LEAD_INTELLIGENCE.CONVERSATION_STAGES || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('');
+  }
+
   function clientSheetSegmentOptions(current) {
     return (OG_DATA.segments || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('');
   }
@@ -3700,6 +3707,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     state.selectedLeadId = lead.id;
     const code = clientCodeLabel(lead);
     const recent = OG_SALES_DESK.lastInteraction(lead);
+    const conversation = OG_LEAD_INTELLIGENCE.stageDefinition(lead);
+    const priorityDef = OG_LEAD_INTELLIGENCE.priorityDefinition(lead);
+    const source = OG_LEAD_INTELLIGENCE.sourceLabel(lead);
     const overlay = document.createElement('div');
     overlay.id = 'client-sheet-overlay';
     overlay.className = 'client-sheet-overlay';
@@ -3711,7 +3721,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
             <h2 id="client-sheet-title">${escapeHtml(lead.empresa || lead.nome || 'Cliente')}</h2>
             <div class="client-sheet-badges">
               <span class="client-sheet-code" data-has-code="${code ? 'true' : 'false'}">${code ? 'Código OG · ' + escapeHtml(code) : 'Sem código OG'}</span>
+              <span class="client-sheet-conversation-badge" data-stage="${escapeHtml(conversation.id)}">${escapeHtml(conversation.label)}</span>
+              <span class="client-sheet-priority-badge" data-priority="${escapeHtml(OG_LEAD_INTELLIGENCE.priorityBand(lead))}">${escapeHtml(priorityDef.label)}</span>
               <span class="client-sheet-status-badge">${escapeHtml((OG_DATA.leadStatuses || []).find(item => item.id === lead.status)?.label || lead.status || 'Novo')}</span>
+              <span class="client-sheet-source-badge">${escapeHtml(source)}</span>
             </div>
             <small class="client-sheet-code-help">O Código OG identifica o cadastro no sistema da empresa. Ter código não significa que já comprou.</small>
           </div>
@@ -3743,7 +3756,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
               <label>Cidade / UF<input name="cidadeUf" value="${escapeHtml(lead.cidadeUf || '')}"></label>
               <label>Segmento<select name="segmentId">${clientSheetSegmentOptions(lead.segmentId)}</select></label>
               <label>Status comercial<select name="status">${clientSheetStatusOptions(lead.status)}</select></label>
-              <label>Prioridade<select name="priority"><option value="alta" ${lead.priority === 'alta' ? 'selected' : ''}>Alta</option><option value="media" ${lead.priority === 'media' ? 'selected' : ''}>Média</option><option value="baixa" ${lead.priority === 'baixa' ? 'selected' : ''}>Baixa</option></select></label>
+              <label>Situação da conversa<select name="conversationStage">${clientSheetConversationOptions(OG_LEAD_INTELLIGENCE.conversationStage(lead))}</select></label>
+              <label>Prioridade<select name="priorityBand"><option value="urgente" ${OG_LEAD_INTELLIGENCE.priorityBand(lead) === 'urgente' ? 'selected' : ''}>Urgente</option><option value="alta" ${OG_LEAD_INTELLIGENCE.priorityBand(lead) === 'alta' ? 'selected' : ''}>Alta</option><option value="media" ${OG_LEAD_INTELLIGENCE.priorityBand(lead) === 'media' ? 'selected' : ''}>Média</option><option value="baixa" ${OG_LEAD_INTELLIGENCE.priorityBand(lead) === 'baixa' ? 'selected' : ''}>Baixa</option></select></label>
+              <label>Temperatura<select name="temperature"><option value="" ${!lead.temperature ? 'selected' : ''}>Não definida</option><option value="quente" ${lead.temperature === 'quente' ? 'selected' : ''}>Quente</option><option value="morno" ${lead.temperature === 'morno' ? 'selected' : ''}>Morno</option><option value="frio" ${lead.temperature === 'frio' ? 'selected' : ''}>Frio</option></select></label>
+              <label>Potencial<select name="potential"><option value="" ${!lead.potential ? 'selected' : ''}>Não definido</option><option value="alto" ${lead.potential === 'alto' ? 'selected' : ''}>Alto</option><option value="medio" ${lead.potential === 'medio' ? 'selected' : ''}>Médio</option><option value="baixo" ${lead.potential === 'baixo' ? 'selected' : ''}>Baixo</option></select></label>
             </div>
           </section>
 
@@ -3911,7 +3927,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           cidadeUf: data.get('cidadeUf'),
           segmentId: data.get('segmentId'),
           status: data.get('status'),
-          priority: data.get('priority'),
+          priorityBand: data.get('priorityBand'),
+          priority: data.get('priorityBand') === 'urgente' ? 'alta' : data.get('priorityBand'),
+          conversationStage: data.get('conversationStage'),
+          temperature: data.get('temperature'),
+          potential: data.get('potential'),
           decisionMaker: data.get('decisionMaker'),
           fleetSize: Number(data.get('fleetSize') || 0),
           pain: data.get('pain'),
@@ -4279,6 +4299,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function initCrmEvents() {
     const filterSelect = document.getElementById('crm-status-filter');
     const searchInput = document.getElementById('crm-search-input');
+    const sourceFilter = document.getElementById('crm-source-filter');
+    const priorityFilter = document.getElementById('crm-priority-filter');
+    const conversationFilters = document.getElementById('crm-conversation-filters');
     const btnImportModal = document.getElementById('btn-crm-import-modal');
     const modalImport = document.getElementById('modal-import-leads');
     const btnCloseModal = document.getElementById('btn-close-modal-import');
@@ -4293,6 +4316,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     if (filterSelect) filterSelect.addEventListener('change', (e) => { state.leadFilterStatus = e.target.value; renderLeadsTable(); });
     if (searchInput) searchInput.addEventListener('input', (e) => { state.leadSearchQuery = e.target.value.toLowerCase().trim(); renderLeadsTable(); });
+    if (sourceFilter) sourceFilter.addEventListener('change', (e) => { state.leadSourceFilter = e.target.value; renderLeadsTable(); });
+    if (priorityFilter) priorityFilter.addEventListener('change', (e) => { state.leadPriorityFilter = e.target.value; renderLeadsTable(); });
+    if (conversationFilters) conversationFilters.addEventListener('click', (e) => {
+      const button = e.target.closest('[data-conversation-filter]');
+      if (!button) return;
+      state.leadConversationFilter = button.dataset.conversationFilter || 'all';
+      renderLeadsTable();
+    });
     if (btnImportModal && modalImport) btnImportModal.addEventListener('click', () => modalImport.classList.remove('hidden'));
     if (btnCloseModal && modalImport) btnCloseModal.addEventListener('click', () => modalImport.classList.add('hidden'));
 
@@ -4374,16 +4405,45 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     initOcrEngine();
   }
 
+  function renderSmartLeadFilters() {
+    const summary = OG_LEAD_INTELLIGENCE.summarize(state.leads);
+    const root = document.getElementById('crm-conversation-filters');
+    if (root) {
+      const buttons = [{ id: 'all', label: 'Todos', count: summary.total }, ...OG_LEAD_INTELLIGENCE.CONVERSATION_STAGES.map(item => ({ ...item, count: summary.stages[item.id] || 0 }))];
+      root.innerHTML = buttons.map(item => `<button type="button" data-conversation-filter="${escapeHtml(item.id)}" data-active="${state.leadConversationFilter === item.id ? 'true' : 'false'}" data-stage="${escapeHtml(item.id)}"><span>${escapeHtml(item.label)}</span><b>${item.count}</b></button>`).join('');
+    }
+    const sourceSelect = document.getElementById('crm-source-filter');
+    if (sourceSelect) {
+      const sources = Object.entries(summary.sources).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'));
+      sourceSelect.innerHTML = '<option value="all">Todas as origens</option>' + sources.map(([label, count]) => `<option value="${escapeHtml(label)}">${escapeHtml(label)} · ${count}</option>`).join('');
+      sourceSelect.value = sources.some(([label]) => label === state.leadSourceFilter) ? state.leadSourceFilter : 'all';
+      if (sourceSelect.value === 'all') state.leadSourceFilter = 'all';
+    }
+    const prioritySelect = document.getElementById('crm-priority-filter');
+    if (prioritySelect) prioritySelect.value = state.leadPriorityFilter;
+    const urgent = document.querySelector('[data-smart-kpi="urgent"]');
+    const waiting = document.querySelector('[data-smart-kpi="waiting"]');
+    const first = document.querySelector('[data-smart-kpi="first"]');
+    if (urgent) urgent.textContent = `${summary.priorities.urgente || 0} urgentes`;
+    if (waiting) waiting.textContent = `${summary.stages.waiting_response || 0} aguardando`;
+    if (first) first.textContent = `${summary.stages.first_contact || 0} primeiro contato`;
+  }
+
   function getFilteredLeads() {
-    return state.leads.filter(lead => {
+    const base = state.leads.filter(lead => {
       const matchesStatus = state.leadFilterStatus === 'all' || lead.status === state.leadFilterStatus;
       return matchesStatus && OG_CRM_SERVICE.matchesSearch(lead, state.leadSearchQuery);
+    });
+    return OG_LEAD_INTELLIGENCE.filterSort(base, {
+      conversation: state.leadConversationFilter,
+      source: state.leadSourceFilter,
+      priority: state.leadPriorityFilter
     });
   }
 
   function renderCrmModule() {
     renderLeadsTable();
-    if (state.leads.length > 0 && !state.selectedLeadId) state.selectedLeadId = state.leads[0].id;
+    if (state.leads.length > 0 && !state.selectedLeadId) state.selectedLeadId = getFilteredLeads()[0]?.id || state.leads[0].id;
   }
 
   function renderLeadsTable() {
@@ -4394,8 +4454,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const batchSelectedCount = document.getElementById('batch-selected-count');
     if (!tbody) return;
 
+    renderSmartLeadFilters();
     const filtered = getFilteredLeads();
     if (badgeCount) badgeCount.textContent = `${filtered.length} cliente${filtered.length === 1 ? '' : 's'}`;
+    const summaryText = document.getElementById('crm-smart-summary');
+    if (summaryText) summaryText.textContent = filtered.length === state.leads.length
+      ? 'Fila completa ordenada por importância comercial e próxima ação.'
+      : `${filtered.length} de ${state.leads.length} clientes neste recorte · mais importantes primeiro.`;
 
     const selCount = state.selectedLeadIds.size;
     if (batchToolbar && batchSelectedCount) {
@@ -4414,9 +4479,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="text-center py-12 text-slate-500 text-xs">
-            <div class="text-slate-400 font-semibold mb-1">Nenhum lead encontrado</div>
-            <div>Cole contatos ou use a transcrição de imagem com OCR!</div>
+          <td colspan="8" class="text-center py-12 text-slate-500 text-xs">
+            <div class="text-slate-400 font-semibold mb-1">Nenhum cliente neste filtro</div>
+            <div>Troque a situação, origem ou prioridade para ampliar a fila.</div>
           </td>
         </tr>
       `;
@@ -4424,48 +4489,59 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
 
     tbody.innerHTML = '';
-    filtered.forEach(lead => {
+    filtered.forEach((lead, index) => {
       const tr = document.createElement('tr');
       const isSelected = lead.id === state.selectedLeadId;
       const isChecked = state.selectedLeadIds.has(lead.id);
-
-      tr.className = `border-b border-slate-800/50 cursor-pointer transition text-xs ${isSelected ? 'bg-amber-500/10' : 'hover:bg-slate-800/40'}`;
-
-      const statusObj = OG_DATA.leadStatuses.find(s => s.id === lead.status) || OG_DATA.leadStatuses[0];
       const segObj = OG_DATA.segments.find(s => s.id === lead.segmentId) || { name: 'Geral', icon: '🚛' };
-
+      const stage = OG_LEAD_INTELLIGENCE.stageDefinition(lead);
+      const priority = OG_LEAD_INTELLIGENCE.priorityDefinition(lead);
+      const priorityBand = OG_LEAD_INTELLIGENCE.priorityBand(lead);
+      const importance = OG_LEAD_INTELLIGENCE.importanceBand(lead);
+      const source = OG_LEAD_INTELLIGENCE.sourceLabel(lead);
+      const recent = OG_SALES_DESK.lastInteraction(lead);
+      const context = lead.accountSummary || lead.observacoes || recent?.note || 'Sem resumo da conversa';
       const code = clientCodeLabel(lead);
+      const commercialStatus = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status)?.label || lead.status || 'Novo';
+      const temp = lead.temperature ? `Temperatura: ${lead.temperature}` : '';
+      const potential = lead.potential ? `Potencial: ${lead.potential}` : '';
+
       tr.className = `crm-client-row ${isSelected ? 'selected' : ''}`;
+      tr.dataset.importance = importance;
+      tr.dataset.priority = priorityBand;
+      tr.dataset.conversation = stage.id;
       tr.innerHTML = `
         <td class="crm-check-cell" data-label="Selecionar" onclick="event.stopPropagation()">
           <input type="checkbox" data-lead-id="${escapeHtml(lead.id)}" ${isChecked ? 'checked' : ''} class="lead-row-checkbox">
         </td>
-        <td data-label="Código OG">
-          <button type="button" class="crm-code-button" data-open-client-sheet="${escapeHtml(lead.id)}" ${code ? '' : 'data-empty="true"'}>${code ? escapeHtml(code) : 'Sem código'}</button>
+        <td data-label="Prioridade">
+          <div class="lead-priority-cell"><span class="lead-rank">#${index + 1}</span><span class="lead-priority-pill" data-priority="${escapeHtml(priorityBand)}">${escapeHtml(priority.label)}</span></div>
         </td>
         <td data-label="Cliente">
           <button type="button" class="crm-client-name" data-open-client-sheet="${escapeHtml(lead.id)}">
             <strong>${escapeHtml(lead.empresa || lead.nome || 'Sem identificação')}</strong>
-            <span>${escapeHtml(lead.cidadeUf || 'Local não informado')} · ${escapeHtml(segObj.name)}</span>
+            <span>${code ? 'OG ' + escapeHtml(code) + ' · ' : ''}${escapeHtml(lead.cidadeUf || 'Local não informado')} · ${escapeHtml(segObj.name)}</span>
           </button>
         </td>
-        <td data-label="Contato">
-          <div class="crm-contact-cell"><strong>${escapeHtml(lead.nome || 'Contato não informado')}</strong><span>${escapeHtml(formatPhone(lead.telefone) || 'Sem telefone')}</span></div>
+        <td data-label="Situação">
+          <div class="lead-stage-cell"><span class="lead-stage-pill" data-stage="${escapeHtml(stage.id)}">${escapeHtml(stage.label)}</span><small>${escapeHtml(commercialStatus)}</small></div>
+        </td>
+        <td data-label="Contexto">
+          <div class="lead-context-cell"><strong title="${escapeHtml(context)}">${escapeHtml(context)}</strong><span>${escapeHtml([temp, potential].filter(Boolean).join(' · ') || 'Contexto a completar')}</span></div>
         </td>
         <td data-label="Próxima ação">
           <div class="crm-next-cell"><strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div>
         </td>
-        <td data-label="Status">
-          <span class="crm-status-pill" data-status="${escapeHtml(lead.status || 'novo')}">${escapeHtml(statusObj.label)}</span>
+        <td data-label="Origem">
+          <div class="lead-source-cell"><strong>${escapeHtml(source)}</strong><span>${escapeHtml(lead.sourceList || lead.batchTag || 'Base única')}</span></div>
         </td>
         <td class="crm-open-cell" data-label="Ficha">
           <button type="button" data-open-client-sheet="${escapeHtml(lead.id)}" class="crm-open-button">Abrir ficha</button>
         </td>
       `;
 
-
       const chk = tr.querySelector('.lead-row-checkbox');
-      chk.addEventListener('change', (e) => {
+      chk.addEventListener('change', e => {
         if (e.target.checked) state.selectedLeadIds.add(lead.id);
         else state.selectedLeadIds.delete(lead.id);
         renderLeadsTable();

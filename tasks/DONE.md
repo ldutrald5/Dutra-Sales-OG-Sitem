@@ -95,3 +95,14 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Governança:** os workbooks reais contêm dados comerciais e não são commitados. Nomes, fingerprints SHA-256, estrutura e contratos ficam em `docs/spreadsheets/canonical-templates.json`.
 - **Papel dos arquivos:** formatos canônicos de importação/exportação e backup independente; o DUTRA OS permanece como fonte operacional após importação confirmada.
 - **Próximo passo:** implementar `Exportar CRM Master` e `Exportar Vendas/Comissões` sempre sobre cópia versionada, preservando fórmulas, estilos e campos manuais.
+
+
+## TASK-018 — Fila Inteligente de Leads & Transcrição
+
+- **Data:** 2026-09-27.
+- **Mudança observável:** Leads & Transcrição passa a exibir uma fila única com filtros por situação da conversa, origem/lista e prioridade, ordenada deterministicamente por importância comercial, retorno, temperatura e potencial.
+- **Modelo de dados:** status comercial, situação da conversa, origem e prioridade permanecem dimensões independentes; dados legados recebem fallback sem migração destrutiva.
+- **UX:** cores semânticas, contadores rápidos, contexto da conversa, próxima ação e origem na própria fila; no celular cada cliente vira cartão. A ficha lateral permite revisar situação, prioridade, temperatura e potencial.
+- **Segurança:** nenhum cliente real foi versionado no Git; o motor não altera estágio comercial sozinho.
+- **Validação:** `og:lead-intelligence:test` incluído na suíte; primeira execução de CI bloqueou uma regressão de contrato textual do Código OG e a execução seguinte passou após correção.
+- **Arquivos principais:** `modules/lead-intelligence.js`, `services/crm-service.js`, `app.js`, `index.html`, `styles.css`, `scripts/test_lead_intelligence.mjs`.
