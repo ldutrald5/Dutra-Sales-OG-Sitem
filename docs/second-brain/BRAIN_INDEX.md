@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 46 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 47 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 5 |
-| cycle | 4 |
+| cycle | 5 |
 | decision | 8 |
 | experiment | 1 |
 | idea | 3 |
@@ -76,8 +76,8 @@ Generated from 46 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
-- **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (validated/high)
-  Package 05R branch validation establishes a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
+- **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
+  Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
