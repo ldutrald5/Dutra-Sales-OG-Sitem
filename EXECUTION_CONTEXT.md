@@ -1,17 +1,18 @@
-# Execution Context — Baseline pós-Package 04R
+# Execution Context — Package 05R em validação
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline estável de produto: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
+- Baseline estável: `72ac7ab771f639e8598063a2a8d9fc8c07420ded`
+- Baseline de produto pós-04R: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
 - Packages 00R, 01R, 02R, 03R e 04R: incorporados ao `main`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
-- Package 04R: **MERGED**
-- PR 04R: **#7**
-- Head final da PR: `da0fd29848a1262cdcf78eb86c1b6bce9608b45b`
-- CI final da PR: workflow run `36283581505` — **SUCCESS**
-- Merge squash 04R: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
-- Package seguinte autorizado após este closeout: **05R — Legacy Reconciliation / migração controlada**
-- 05R ainda **NÃO INICIADO**.
+- Package em execução: **05R — Legacy Reconciliation / migração controlada**
+- Branch: `package-05r-legacy-reconciliation`
+- PR: **#9** — draft até concluir o gate final do head documental
+- Head de implementação/hardening validado: `0a2998556b7d85cb7e46c3d9a1de307ec6cd26c1`
+- CI de implementação: workflow run `36284704946` — **SUCCESS**
+- Um run anterior (`36284662308`) falhou somente no novo teste 05R por ordem de inicialização de fixture; corrigido antes do SUCCESS.
+- Fora do escopo do 05R: remoção de `lead.id`, migração automática de Opportunities/Tasks/Activities legados, ativação obrigatória do Supabase remoto e cutover big-bang.
 
 ## Sequência reconciliada
 
@@ -19,44 +20,71 @@
 2. 02R — Supabase Auth + Organization Pilot — **MERGED; piloto remoto pendente**
 3. 03R — Company/Contact + Company 360 Beta — **MERGED**
 4. 04R — Sync Bridge & Conflict UX — **MERGED**
-5. 05R — Legacy Reconciliation / migração controlada — **PRÓXIMO**
+5. 05R — Legacy Reconciliation / migração controlada — **EM VALIDAÇÃO**
 
-## Estado técnico após 04R
+## Estado técnico do 05R
 
-O contrato de revisão autoritativa do 00R continua vigente: writes remotos exigem a revisão corrente e `409` nunca autoriza sobrescrita silenciosa.
+O 05R transforma a ponte `Company.legacyLeadId` em um fluxo de reconciliação controlada, sem migrar dados na inicialização e sem auto-link.
 
-O 04R incorporou ao `main`:
-- snapshots determinísticos local/remoto em conflitos;
-- diferenças por registro/campo e revisão humana;
-- checkpoint antes de conciliar ou descartar estado local;
-- Sync Bridge IndexedDB para outbox e recovery sem persistir credenciais;
-- Service Worker que sinaliza trabalho pendente e deixa o PUT autenticado no foreground;
-- recovery antes de qualquer pull remoto;
-- serialização de writes e reenvio de edições ocorridas durante request;
-- markers/tombstones e recuperação entre refresh/reabertura/abas;
-- testes de conflito, bridge, UX, offline e segurança.
+Fluxo obrigatório:
 
-A auditoria do 04R também resolveu dois riscos residuais do 03R:
-- contatos legados sem `entityType` podem coexistir com Contacts canônicos sem bloquear escrita;
-- Company 360 não agrega moedas diferentes em um total único.
+`dry-run → revisão humana → seleção explícita → checkpoint → revalidação → aplicação controlada → sync 04R → rollback seletivo`.
 
-## Builder Brain
+O planner classifica cada lead como:
+- `linked`;
+- `review`;
+- `ambiguous`;
+- `proposed`;
+- `blocked`;
+- `invalid`.
 
-O 04R registrou:
-- `SRC-PKG04R-001`;
-- `DEC-SYNC-04R-001`;
-- `PAT-SYNC-001`;
-- `ANTI-SYNC-001`;
-- `CYCLE-PKG04R-001`.
+Regras de integridade atuais:
+- `legacyLeadId` explícito é soberano;
+- CNPJ numérico completo (14 dígitos no contrato atual) é sinal forte, porém nunca auto-aplica;
+- um match único por nome exige revisão e não cria Company duplicada silenciosamente;
+- candidato já ligado a outro lead é bloqueado/desabilitado;
+- CNPJ legado incompleto não é promovido ao canônico;
+- plano é reavaliado contra o grafo atual antes do apply;
+- Contact canônico duplicado por nome/telefone não é criado novamente;
+- nenhuma seleção da UI vem marcada por padrão.
 
-OQ-PKG02-001 permanece aberta: a fundação Supabase Auth/Organization foi mergeada, mas migration/Auth/RLS ainda exigem ensaio remoto em projeto piloto antes de ativação.
+## Checkpoint, rollback e sincronização
+
+Antes de aplicar, o checkpoint completo em IndexedDB é obrigatório.
+
+Rollback 05R é seletivo:
+- restaura/remover somente entidades afetadas pela última aplicação;
+- usa o snapshot pré-apply como referência;
+- bloqueia se Company/Contact foi alterado depois;
+- bloqueia remoção de Company criada se novas relações foram adicionadas;
+- não restaura o CRM inteiro por cima de trabalho posterior.
+
+Apply/rollback ficam bloqueados durante conflito ou revisão pendente do Sync 04R. Toda persistência continua sujeita à revisão autoritativa do servidor.
+
+## UX e valor visível
+
+A aba **Performance & Operações** oferece:
+- prévia dry-run;
+- contadores por classe;
+- escolha explícita da Company candidata;
+- opção explícita de incluir Contact;
+- avisos de candidato ocupado/CNPJ não promovido;
+- exportação do plano;
+- apply com checkpoint;
+- rollback da última aplicação controlada.
+
+Service Worker/PWA está em v30 com o planner 05R no shell offline.
+
+## Estado do 02R
+
+`OQ-PKG02-001` permanece aberta. A fundação Auth/Organization foi mergeada, mas migration/Auth/RLS remotos ainda exigem ensaio contra um projeto Supabase piloto antes de ativação. O 05R não altera essa condição.
 
 ## Restrições de dados
 
-Até o fechamento do 04R não houve migração em massa de dados comerciais reais. `lead.id` permanece identidade operacional legada. O 05R deve tratar reconciliação de forma controlada, auditável e reversível; não está autorizado a fazer big bang.
+Nenhum commit, CI ou dry-run do 05R migra dados comerciais reais. Uma alteração de Company/Contact só ocorre quando um usuário da aplicação seleciona registros e confirma a operação. `lead.id` permanece ativo durante a transição.
 
 ## Regra de avanço
 
-Fluxo obrigatório: branch isolada → implementação → testes → gate → auditoria → documentação/Brain → merge protegido → closeout → STOP.
+Fluxo obrigatório: branch isolada → implementação → testes → gate → auditoria → documentação/Brain → CI final → merge protegido → closeout → STOP.
 
-Este branch `chore/04r-closeout` contém somente o fechamento administrativo/Brain pós-merge. Após seu CI/merge, encerrar o 04R e só então iniciar 05R.
+O 05R não pode ser declarado concluído enquanto o head documental final não tiver CI/release gate em PASS, a PR não estiver auditada e o closeout pós-merge não tiver sido registrado.
