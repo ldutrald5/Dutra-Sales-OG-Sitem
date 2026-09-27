@@ -19,7 +19,11 @@
     const q = String(query || '').trim().toLowerCase();
     return (leads || []).filter(lead => {
       if (['fechado', 'perdido'].includes(lead.status)) return false;
-      if (q && ![lead.empresa, lead.nome, lead.telefone, lead.nextAction].some(value => String(value || '').toLowerCase().includes(q))) return false;
+      if (q && ![
+        lead.empresa, lead.nome, lead.telefone, lead.internalCode, lead.cnpj, lead.nextAction,
+        ...(lead.additionalPhones || []).flatMap(item => [item?.label, item?.phone]),
+        ...(lead.referrals || []).flatMap(item => [item?.name, item?.company, item?.phone])
+      ].some(value => String(value || '').toLowerCase().includes(q))) return false;
       const due = String(lead.followUpAt || '').slice(0, 10);
       if (filter === 'overdue') return due && due < today;
       if (filter === 'today') return due === today;
