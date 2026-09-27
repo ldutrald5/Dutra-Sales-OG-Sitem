@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 41 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 42 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 4 |
-| cycle | 3 |
+| cycle | 4 |
 | decision | 7 |
 | experiment | 1 |
 | idea | 3 |

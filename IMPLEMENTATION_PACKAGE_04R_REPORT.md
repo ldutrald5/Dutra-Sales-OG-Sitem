@@ -2,13 +2,16 @@
 
 ## Resultado atual
 
-**PACKAGE 04R — IMPLEMENTADO E VALIDADO EM BRANCH; PR #7 AGUARDANDO GATE FINAL/READY**
+**PACKAGE 04R — MERGED; IMPLEMENTAÇÃO/CI CONCLUÍDOS**
 
 ## Baseline e escopo
 
 - Base: `main@a0efb31a244a1967ae8e3cd17d8a29f273f26619`
 - Branch: `package-04r-sync-conflict-ux`
 - PR: `#7` — `feat(04r): durable sync bridge and conflict review`
+- Head final da PR: `da0fd29848a1262cdcf78eb86c1b6bce9608b45b`
+- CI final da PR: workflow run `36283581505` — SUCCESS
+- Merge squash no `main`: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
 - Objetivo: tornar sincronização local-first explícita e recuperável, eliminando merge/reenvio silencioso após `409`.
 - Não objetivos: migração 05R, remoção de `lead.id`, ativação obrigatória de Supabase, Realtime, deploy ou mudança de dados reais.
 
@@ -85,7 +88,7 @@ Testes adicionados/expandidos:
 
 Todos fazem parte do `npm run validate`.
 
-Validação de implementação + Builder Brain na PR #7: head `b2dc3d36fce9bf793486041caa6c556f398464fe`, workflow run `36283478504` — **SUCCESS**. O job `verify` concluiu com PASS em `npm ci`, lockfile, `npm run validate`, `og:brain:check`, `og:security:test`, `npm audit --audit-level=high` e `release:gate`. Este commit apenas reconcilia a evidência documental e, por alterar o head, deve receber seu próprio CI antes do merge.
+Validação final da PR #7: head `da0fd29848a1262cdcf78eb86c1b6bce9608b45b`, workflow run `36283581505` — **SUCCESS**. O job `verify` concluiu com PASS em `npm ci`, lockfile, `npm run validate`, `og:brain:check`, `og:security:test`, `npm audit --audit-level=high` e `release:gate`. A PR foi então mergeada por squash no `main` como `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`.
 
 ## Segurança
 
@@ -114,15 +117,15 @@ Após merge: revert por PR. O rollback de código não deve apagar snapshots/rec
 
 ## Definition of Done
 
-O 04R só fecha quando:
-- CI da PR estiver SUCCESS;
-- `npm run validate`, Brain, security, audit e release gate tiverem PASS no workflow;
-- branch estiver sem drift relevante do `main`;
-- review threads/reviews estiverem limpos ou resolvidos;
-- Builder Brain for atualizado e validado;
-- PR sair de draft e for mergeada com head SHA protegido.
+O 04R fechou com:
+- CI da PR em SUCCESS;
+- `npm run validate`, Brain, security, audit e release gate em PASS;
+- compare final pré-merge em 56 ahead / 0 behind;
+- nenhuma review e nenhuma review thread pendente;
+- Builder Brain atualizado e validado;
+- PR #7 retirada de draft e mergeada com `expected_head_sha` no head final.
 
 ## Próxima sequência
 
-Após merge do 04R e STOP:
+Após o closeout administrativo do 04R e STOP:
 - 05R — Legacy Reconciliation / migração controlada.
