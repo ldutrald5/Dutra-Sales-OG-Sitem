@@ -15,14 +15,12 @@ const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const port = Number(process.env.OG_PORT || 4321);
 const host = process.env.OG_HOST || '127.0.0.1';
 const localAccessToken = String(process.env.OG_LOCAL_ACCESS_TOKEN || '');
+const localAccessPin = String(process.env.OG_LOCAL_ACCESS_PIN || '');
 const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
 const hostedMode = Boolean(process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN);
-const minimumAccessTokenLength = hostedMode ? 6 : 16;
 const writeWindows = new Map();
-if (lanMode && localAccessToken.length < minimumAccessTokenLength) {
-  const scope = hostedMode ? 'ambiente hospedado' : 'modo LAN';
-  throw new Error(`OG_LOCAL_ACCESS_TOKEN com pelo menos ${minimumAccessTokenLength} caracteres é obrigatório no ${scope}.`);
-}
+if (lanMode && localAccessToken.length < 16) throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no modo LAN/hospedado.');
+if (hostedMode && localAccessPin && localAccessPin.length < 6) throw new Error('OG_LOCAL_ACCESS_PIN deve ter pelo menos 6 caracteres quando configurado.');
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -60,7 +58,9 @@ function readSharedState() {
 
 function isAuthorized(req) {
   if (!lanMode) return true;
-  return req.headers.authorization === `Bearer ${localAccessToken}`;
+  const authorization = req.headers.authorization;
+  if (authorization === `Bearer ${localAccessToken}`) return true;
+  return Boolean(hostedMode && localAccessPin && authorization === `Bearer ${localAccessPin}`);
 }
 
 function allowWrite(req) {
