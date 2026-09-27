@@ -127,22 +127,16 @@ function openSyncDb() {
 
 async function readOutbox() {
   const db = await openSyncDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(SYNC_STORE, 'readonly');
-    const req = tx.objectStore(SYNC_STORE).get('state');
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function clearOutbox() {
-  const db = await openSyncDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(SYNC_STORE, 'readwrite');
-    tx.objectStore(SYNC_STORE).delete('state');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(SYNC_STORE, 'readonly');
+      const req = tx.objectStore(SYNC_STORE).get('state');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function flushOutbox() {
