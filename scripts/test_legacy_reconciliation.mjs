@@ -21,9 +21,28 @@ const review=svc.inspectLead(leads[1],graph);assert.equal(review.status,'review'
 assert.equal(svc.inspectLead(leads[2],graph).status,'ambiguous');
 const proposed=svc.inspectLead(leads[3],graph);assert.equal(proposed.status,'proposed');assert.equal(proposed.proposal.company.legacyLeadId,'L4');assert.equal(proposed.proposal.company.cnpj,'33333333000133');assert.equal(proposed.proposal.contact.isDecisionMaker,true);
 assert.equal(svc.inspectLead(leads[4],graph).status,'blocked');
+const singleNameGraph={companies:[{id:'C-NAME',entityType:'company',name:'Empresa Nome Igual',legacyLeadId:null,cnpj:null}],contacts:[]};
+const singleNameLead={id:'L-NAME',empresa:'Empresa Nome Igual'};
+const singleNamePlan=svc.buildPlan([singleNameLead],singleNameGraph);
+assert.equal(singleNamePlan.rows[0].status,'review','match único por nome deve exigir revisão em vez de criar duplicata');
+assert.equal(singleNamePlan.rows[0].reason,'name_match_requires_confirmation');
+const singleNameApplied=svc.applyApproved([singleNameLead],{...singleNameGraph,opportunities:[],activities:[],tasks:[],activityEvents:[]},singleNamePlan,[{leadId:'L-NAME',action:'link_company',companyId:'C-NAME',confirmed:true}],{domain,idFactory,now:'2026-09-27T01:00:00Z'});
+assert.equal(singleNameApplied.graph.companies[0].legacyLeadId,'L-NAME');
+
+const occupiedGraph={companies:[{id:'C-OCC',entityType:'company',name:'Empresa Ocupada',legacyLeadId:'L-OUTRO',cnpj:'44444444000144'}],contacts:[]};
+const occupiedLead={id:'L-OCC',empresa:'Empresa Ocupada',cnpj:'44.444.444/0001-44'};
+const occupiedRow=svc.inspectLead(occupiedLead,occupiedGraph);
+assert.equal(occupiedRow.status,'blocked');
+assert.equal(occupiedRow.candidates[0].occupiedByLeadId,'L-OUTRO');
+
 const invalidCnpjLead={id:'L-INVALID-CNPJ',empresa:'Sem Correspondência',cnpj:'123'};
 const invalidCnpjGraph={companies:[{id:'C-INVALID',entityType:'company',name:'Outro Nome',legacyLeadId:null,cnpj:'123'}],contacts:[]};
 assert.equal(svc.inspectLead(invalidCnpjLead,invalidCnpjGraph).status,'proposed','CNPJ incompleto não pode ser sinal forte');
+
+const invalidProposal=svc.inspectLead({id:'L-BAD-PROP',empresa:'Empresa CNPJ Ruim',cnpj:'12345'},graph);
+assert.equal(invalidProposal.status,'proposed');
+assert.equal(invalidProposal.proposal.company.cnpj,null,'CNPJ legado incompleto não deve ser promovido ao canônico');
+assert.deepEqual(invalidProposal.warnings,['invalid_cnpj_not_promoted']);
 
 const plan=svc.buildPlan(leads,graph);assert.equal(plan.mode,'dry_run');assert.equal(plan.total,5);assert.deepEqual(plan.counts,{linked:1,review:1,ambiguous:1,proposed:1,blocked:1});assert.equal(svc.validatePlan(plan).valid,true);
 assert.equal(svc.validatePlan({mode:'apply',rows:[]}).valid,false);
