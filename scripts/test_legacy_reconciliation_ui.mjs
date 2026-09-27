@@ -16,8 +16,11 @@ assert.ok(app.includes("OG_LEGACY_RECONCILIATION.applyApproved("),'apply deve pa
 assert.ok(app.includes("confirmed: true"),'apply deve registrar confirmação explícita');
 assert.ok(app.includes('pendingSyncConflict() || pendingSyncReview()'),'reconciliação deve bloquear com sync pendente');
 assert.ok(app.includes('Desfazer última aplicação'),'rollback explícito ausente');
-assert.ok(app.includes("type: 'legacy.reconciliation.rolled_back'"),'rollback deve deixar trilha de auditoria');
+assert.ok(app.includes("OG_LEGACY_RECONCILIATION.rollbackApplied("),'rollback deve usar inversão seletiva do serviço');
 assert.ok(app.includes("localStorage.removeItem(LEGACY_RECONCILIATION_ROLLBACK_MARKER)"),'rollback concluído deve limpar marker');
+assert.ok(app.includes('sem restaurar o restante do CRM'),'rollback não pode substituir todo o CRM silenciosamente');
+assert.ok(app.includes('report: applied.report'),'marker deve preservar relatório necessário ao rollback seletivo');
+assert.ok(app.includes('Se algum desses registros recebeu edições ou relações depois da reconciliação, o rollback será bloqueado'),'UX deve explicar bloqueio contra perda de trabalho posterior');
 assert.ok(app.includes('Exportar plano'),'plano dry-run deve ser exportável para auditoria');
 assert.ok(!app.includes('data-reconcile-select') || !app.includes('data-reconcile-select=\"') || app.includes("actionable ? '' : 'disabled'"),'linhas não elegíveis devem ser bloqueadas');
 console.log('Legacy reconciliation UI checks: PASS');
