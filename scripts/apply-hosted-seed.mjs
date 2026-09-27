@@ -33,8 +33,20 @@ function codeOnlyCollision(existing, imported) {
   if (!a || !b) return false;
   if (a === b || a.includes(b) || b.includes(a)) return false;
 
-  const aTokens = new Set(a.split(/\s+/).filter(token => token.length >= 4));
-  const bTokens = new Set(b.split(/\s+/).filter(token => token.length >= 4));
+  const compactA = a.replace(/[^a-z0-9]/g, '');
+  const compactB = b.replace(/[^a-z0-9]/g, '');
+  if (compactA === compactB || compactA.includes(compactB) || compactB.includes(compactA)) return false;
+
+  let sharedPrefix = 0;
+  while (sharedPrefix < Math.min(compactA.length, compactB.length) && compactA[sharedPrefix] === compactB[sharedPrefix]) sharedPrefix += 1;
+  if (sharedPrefix >= 6) return false;
+
+  const wordsA = a.split(/\s+/).filter(token => token.length >= 3);
+  const wordsB = b.split(/\s+/).filter(token => token.length >= 3);
+  if (wordsA[0] && wordsA[0] === wordsB[0]) return false;
+
+  const aTokens = new Set(wordsA.filter(token => token.length >= 4));
+  const bTokens = new Set(wordsB.filter(token => token.length >= 4));
   const overlap = [...aTokens].filter(token => bTokens.has(token));
   return overlap.length === 0;
 }
