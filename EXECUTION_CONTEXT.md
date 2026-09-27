@@ -1,19 +1,19 @@
-# Execution Context — Baseline pós-Package 01R
+# Execution Context — Baseline pós-Package 02R
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline estável: `4e062cf1228a407eccc688b7b00254ef44bf3ded`
-- Packages 00R e 01R: incorporados ao `main`
+- Baseline estável: `89e3eff4c78149659cfe3ac6b86f187b14d0297c`
+- Packages 00R, 01R e 02R: incorporados ao `main`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
 - Estado estável: segurança/release baseline + Canonical Domain Foundation/operations schema V2.
-- Package em execução: **02R — Supabase Auth + Organization Pilot**.
-- Fora do escopo do 02R: Company 360, migração de dados reais, corte do acesso legado e deploy.
+- Package em execução: **03R — Company/Contact + Company 360 Beta**.
+- Fora do escopo do 03R: migração em massa do legado, remoção de `lead.id`, ativação obrigatória do Supabase remoto e Sync Bridge 04R.
 
 ## Sequência reconciliada
 
 1. 01R — Canonical Domain Foundation — **MERGED**
-2. 02R — Supabase Auth + Organization Pilot — **EM EXECUÇÃO**
-3. 03R — Company/Contact + Company 360 Beta
+2. 02R — Supabase Auth + Organization Pilot — **MERGED; piloto remoto pendente**
+3. 03R — Company/Contact + Company 360 Beta — **EM EXECUÇÃO**
 4. 04R — Sync Bridge & Conflict UX
 5. 05R — Legacy Reconciliation / migração controlada
 
