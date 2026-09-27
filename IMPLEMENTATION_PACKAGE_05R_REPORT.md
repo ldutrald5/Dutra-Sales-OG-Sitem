@@ -2,7 +2,7 @@
 
 ## Resultado atual
 
-**PACKAGE 05R — IMPLEMENTADO E VALIDADO EM BRANCH; PR #9 EM DRAFT AGUARDANDO GATE DOCUMENTAL/FINAL**
+**PACKAGE 05R — MERGED; IMPLEMENTAÇÃO, CI E AUDITORIA CONCLUÍDOS**
 
 ## Baseline e escopo
 
@@ -10,8 +10,11 @@
 - Baseline de produto anterior: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`.
 - Branch: `package-05r-legacy-reconciliation`.
 - PR: `#9` — `feat(05r): controlled legacy reconciliation workflow`.
-- Head de implementação/hardening + segurança validado: `c8bfa90c4f84d4d9957e59df463a8345678b0601`.
-- CI de implementação/hardening + segurança: workflow `Package 00R CI`, run `36285040392` — **SUCCESS**. O commit documental deste relatório altera o head e deve receber CI próprio antes do merge.
+- Head final da PR: `1a60ae69fbf005b6dd9513d4578fc5233f0f745b`.
+- CI final da PR: workflow `Package 00R CI`, run `36285077211` — **SUCCESS**.
+- Compare final pré-merge: **39 ahead / 0 behind**.
+- Reviews: nenhuma. Threads: nenhuma.
+- Merge squash no `main`: `dad8edb2c3196f0c6e91b15489f685e87d90711d`.
 - Objetivo: reconciliar `lead.id` legado com Company/Contact canônicos de forma explícita, auditável, reversível e sem migração em massa.
 - Não objetivos: remover `lead.id`, migrar automaticamente Opportunities/Tasks/Activities legados, ativar Supabase remoto, executar migração de dados reais via CI ou fazer cutover big-bang.
 
@@ -156,15 +159,17 @@ Após merge: revert por PR. Não apagar snapshots 05R automaticamente. Se houver
 
 ## Definition of Done
 
-O 05R fecha somente quando:
-- CI final do head documental estiver SUCCESS;
-- Brain/security/audit/release gate estiverem PASS;
-- branch estiver 0 behind do `main`;
-- reviews/threads estiverem limpos;
-- Builder Brain estiver atualizado/validado;
-- PR sair de draft e for mergeada com `expected_head_sha`;
-- closeout pós-merge registrar novo baseline e ciclo.
+O 05R foi mergeado após:
+- CI final do head documental em **SUCCESS**;
+- `npm run validate`, Brain, security, audit e release gate em PASS;
+- compare final em **39 ahead / 0 behind**;
+- nenhuma review e nenhuma review thread pendente;
+- Builder Brain atualizado e validado;
+- PR #9 retirada de draft;
+- merge squash protegido por `expected_head_sha=1a60ae69fbf005b6dd9513d4578fc5233f0f745b`.
+
+Este closeout pós-merge registra o baseline final e o ciclo 05R.
 
 ## Próxima etapa
 
-Após merge + closeout + STOP do 05R, a próxima etapa deve ser definida a partir do estado real. Não há autorização automática neste relatório para remover o legado ou ativar Supabase remoto.
+Após este closeout e STOP do 05R, a próxima etapa deve ser definida a partir do estado real. Não há autorização automática para remover o legado, migrar entidades aninhadas ou ativar Supabase remoto.
