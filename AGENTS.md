@@ -4,14 +4,14 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 
 ## Session Bootstrap — economical context
 
-For any non-trivial DUTRA OS task, start with the compact entrypoints below before loading broad documentation:
+For any non-trivial DUTRA OS task, start with the smallest useful context before loading broad documentation:
 
-1. `docs/DUTRA-BRAIN.md` — compact system map and source-of-truth rules.
-2. `docs/CURRENT.md` — current baseline, live-runtime snapshot locator and authorized work.
-3. `docs/DECISIONS.md` — human-readable active decision summary; canonical decision history remains in `docs/second-brain/decisions.jsonl`.
-4. `docs/DUTRA-PROTOCOL.md` — minimal-context workflow and project shorthand such as `/STATUS`, `/BUILD`, `/AUDIT`, `/FIX` and `/IDEA`.
+1. Always read `docs/DUTRA-BRAIN.md` — compact system map and source-of-truth rules.
+2. Always read `docs/CURRENT.md` — current baseline, live-runtime snapshot locator and authorization state.
+3. Read `docs/DUTRA-PROTOCOL.md` when the task needs the project workflow, shorthand or closeout rules.
+4. Read `docs/DECISIONS.md` only when a relevant decision boundary affects the task; canonical decision history remains in `docs/second-brain/decisions.jsonl`.
 
-Do not replace the existing Builder Brain with these files. They are lightweight entrypoints over the canonical second brain and scoped project documentation.
+Do not load `DUTRA-PROTOCOL.md` or `DECISIONS.md` by default when they are not needed. Do not replace the existing Builder Brain with these files; they are lightweight entrypoints over the canonical second brain and scoped project documentation.
 
 <!-- AIOX-MANAGED-START: core -->
 ## Core Rules
