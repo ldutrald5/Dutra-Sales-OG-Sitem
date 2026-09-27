@@ -114,4 +114,4 @@ Próxima recomendação: **TASK-010 — Templates comerciais e governança**.
 - **Arquivos relevantes:** `modules/lead-intelligence.js`, `services/interaction-service.js`, `services/crm-service.js`, `services/call-ai-context.js`, `app.js`.
 - **Critério de aceite:** score auditável; campos aditivos; compatibilidade legada; nenhum status alterado automaticamente; Call AI consome contexto confirmado.
 - **Dependências:** OG-18 / Ficha Universal / fila inteligente.
-- **Status:** em andamento — BUILD em branch, aguardando auditoria e gate final.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md`, story CIC-01 e PR #23. PR permanece sem merge por instrução de closeout.
