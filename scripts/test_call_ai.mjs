@@ -8,6 +8,7 @@ const knowledgeSelector = require('../apps/sistema-og/services/knowledge-selecto
 const prompts = require('../apps/sistema-og/services/call-ai-prompts.js');
 const aiService = require('../apps/sistema-og/services/ai-service.js');
 const interactions = require('../apps/sistema-og/services/interaction-service.js');
+const leadIntelligence = require('../apps/sistema-og/modules/lead-intelligence.js');
 
 const html = fs.readFileSync('apps/sistema-og/index.html', 'utf8');
 const app = fs.readFileSync('apps/sistema-og/app.js', 'utf8');
@@ -48,6 +49,43 @@ const saveReviewBlock = app.slice(app.indexOf('function saveCallAIReview()'), ap
 assert.match(saveReviewBlock, /OG_INTERACTION_SERVICE\.setNextAction\(lead, reviewedNextAction, reviewedFollowUp, \{ now \}\)/, 'Revisão Call AI deve usar o contrato central de próxima ação');
 assert.doesNotMatch(saveReviewBlock, /lead\.nextAction\s*=/, 'Revisão Call AI não pode escrever nextAction diretamente');
 assert.doesNotMatch(saveReviewBlock, /lead\.followUpAt\s*=/, 'Revisão Call AI não pode escrever followUpAt diretamente');
+assert.match(saveReviewBlock, /if \(result === 'sem_interesse'\)[\s\S]*OG_INTERACTION_SERVICE\.recordResult\(lead, result, summary/, 'Call AI Review deve usar recordResult para sem_interesse');
+assert.match(saveReviewBlock, /type: 'call_ai'[\s\S]*sessionId[\s\S]*idempotencyKey: sessionId/, 'Call AI Review deve preservar tipo call_ai, sessionId e chave idempotente');
+const semInteresseBranch = saveReviewBlock.slice(saveReviewBlock.indexOf("if (result === 'sem_interesse')"), saveReviewBlock.indexOf("} else {", saveReviewBlock.indexOf("if (result === 'sem_interesse')")));
+assert.doesNotMatch(semInteresseBranch, /lead\.interactions\.push|setNextAction\(/, 'sem_interesse não pode registrar a mesma ligação ou próxima ação uma segunda vez');
+
+const callAIReviewLead = {
+  id: 'CALL-SEM-1',
+  status: 'negociacao',
+  nextAction: 'Ligar amanhã',
+  followUpAt: '2026-09-28T09:00',
+  nextActionReason: 'Retorno combinado',
+  nextActionObjective: 'Validar proposta',
+  nextActionExpectedResult: 'Obter decisão',
+  interactions: []
+};
+const callSessionId = 'CALL-AI-SESSION-SEM-1';
+interactions.recordResult(callAIReviewLead, 'sem_interesse', 'Cliente informou que não possui interesse.', {
+  now: '2026-09-27T15:30:00.000Z',
+  interaction: {
+    id: 'INT-CALL-SEM-1',
+    type: 'call_ai',
+    sessionId: callSessionId,
+    objective: 'followup_proposta',
+    signals: ['sem_interesse'],
+    idempotencyKey: callSessionId
+  }
+});
+assert.equal(callAIReviewLead.status, 'perdido', 'Call AI Review sem_interesse deve aplicar o estado comercial do contrato');
+assert.equal(callAIReviewLead.nextAction, '', 'sem_interesse deve limpar próxima ação antiga');
+assert.equal(callAIReviewLead.followUpAt, '', 'sem_interesse deve limpar follow-up antigo');
+assert.equal(callAIReviewLead.interactions.length, 1, 'Call AI Review sem_interesse deve registrar uma única ligação');
+assert.equal(callAIReviewLead.interactions[0].type, 'call_ai');
+assert.equal(callAIReviewLead.interactions[0].sessionId, callSessionId);
+assert.equal(callAIReviewLead.interactions[0].idempotencyKey, callSessionId);
+const callAIReviewNextBest = leadIntelligence.nextBestAction(callAIReviewLead, new Date('2026-09-27T15:31:00.000Z'));
+assert.equal(callAIReviewNextBest.action, '', 'Call AI Review sem_interesse não deve gerar ação automática');
+assert.equal(callAIReviewNextBest.actionRequired, false, 'Call AI Review sem_interesse deve deixar de exigir próxima ação');
 assert.ok(server.includes("/api/knowledge/status"));
 assert.ok(server.includes("/api/knowledge/search"));
 assert.ok(ignore.includes('apps/sistema-og/.data/'));
