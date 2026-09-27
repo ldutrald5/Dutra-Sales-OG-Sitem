@@ -6,6 +6,8 @@ const sw=fs.readFileSync(new URL('../apps/sistema-og/service-worker.js',import.m
 
 assert.ok(html.includes('services/sync-conflict-service.js'),'serviço de conflito não carregado');
 assert.ok(sw.includes("'/services/sync-conflict-service.js'"),'serviço de conflito fora do shell offline');
+assert.ok(sw.includes("type: 'OG_SYNC_CONFLICT'"),'service worker deve avisar a janela sobre 409');
+assert.ok(sw.includes('return false;'),'409 do background sync deve preservar outbox');
 assert.ok(app.includes("OG_SYNC_CONFLICT.createConflict("),'409 deve criar snapshot de conflito');
 assert.ok(app.includes("sessionStorage.setItem('og_sync_conflict'"),'conflito deve ser preservado na sessão');
 assert.ok(app.includes("if (pendingSyncConflict())"),'novo sync deve parar enquanto conflito estiver pendente');
@@ -17,6 +19,9 @@ assert.ok(app.includes('Nada será enviado ao servidor até você confirmar nova
 assert.ok(app.includes("sessionStorage.setItem('og_sync_review_pending'"),'conciliação preparada deve ficar pendente');
 assert.ok(app.includes('Enviar revisão'),'envio conciliado deve exigir ação explícita');
 assert.ok(app.includes("if (pendingSyncReview())"),'sync normal deve parar enquanto revisão aguarda confirmação');
+assert.ok(app.includes("navigator.serviceWorker.addEventListener('message'"),'app deve receber conflito do service worker');
+assert.ok(app.includes("const restoredConflict = pendingSyncConflict()"),'conflito deve reaparecer após refresh da sessão');
+assert.ok(app.includes("showSyncReviewBanner();"),'revisão pendente deve reaparecer após refresh');
 assert.ok(app.includes("body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })"),'envio conciliado deve usar revisão-base');
 assert.ok(app.includes("if (response.status === 409)"),'novo 409 durante envio conciliado deve ser tratado');
 assert.ok(!app.includes("if(response.status===409){\n          const remote=await response.json();\n          const merged=OG_DATA_SAFETY.mergeBackup"),'merge/reenvio silencioso antigo ainda presente');
