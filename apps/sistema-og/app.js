@@ -3617,14 +3617,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     </div>`;
   }
 
+  let clientSheetReturnFocus = null;
+
   function closeClientSheet() {
     document.getElementById('client-sheet-overlay')?.remove();
+    const target = clientSheetReturnFocus;
+    clientSheetReturnFocus = null;
+    if (target?.isConnected) setTimeout(() => target.focus(), 0);
   }
 
   function openClientSheet(leadId) {
     const lead = OG_CRM_SERVICE.getLeadById(state.leads, leadId);
     if (!lead) return;
-    closeClientSheet();
+    clientSheetReturnFocus = document.activeElement;
+    document.getElementById('client-sheet-overlay')?.remove();
     state.selectedLeadId = lead.id;
     const code = clientCodeLabel(lead);
     const recent = OG_SALES_DESK.lastInteraction(lead);
@@ -3732,6 +3738,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     overlay.querySelectorAll('[data-client-sheet-close]').forEach(button => button.addEventListener('click', closeClientSheet));
     overlay.addEventListener('click', event => { if (event.target === overlay) closeClientSheet(); });
     panel.addEventListener('click', event => event.stopPropagation());
+    overlay.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeClientSheet();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+        .filter(item => item.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
 
     const bindRemovers = root => root.querySelectorAll('[data-remove-repeat]').forEach(button => {
       button.onclick = () => {
@@ -3877,7 +3897,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     bindCompany360BetaPanel(lead, overlay);
     bindClientMaterialsPanel(overlay, lead);
 
-    setTimeout(() => form.elements.empresa?.focus(), 40);
+    setTimeout(() => overlay.querySelector('[data-client-sheet-close]')?.focus(), 40);
   }
 
   function renderSalesDeskClient() {
