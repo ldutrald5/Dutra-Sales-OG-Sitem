@@ -379,6 +379,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data?.type !== 'OG_SYNC_CONFLICT') return;
+      const pending = event.data.pending || {};
+      const remote = event.data.remote || {};
+      const conflict = OG_SYNC_CONFLICT.createConflict(
+        { leads: pending.leads || state.leads, history: pending.history || state.history, operations: pending.operations || state.operations },
+        Number(pending.revision || serverRevision),
+        remote
+      );
+      sessionStorage.setItem('og_sync_conflict', JSON.stringify(conflict));
+      sessionStorage.removeItem('og_sync_review_pending');
+      document.getElementById('og-sync-review-banner')?.remove();
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner(conflict);
+    });
+  }
+
+  const restoredConflict = pendingSyncConflict();
+  if (restoredConflict) {
+    setSyncStatus('Conflito de sincronização', 'conflict');
+    showSyncConflictBanner(restoredConflict);
+  } else if (pendingSyncReview()) {
+    setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+    showSyncReviewBanner();
+  }
+
   // Navegação de Abas
   const tabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
