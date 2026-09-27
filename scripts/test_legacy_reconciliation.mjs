@@ -43,6 +43,13 @@ assert.equal(applyGraph.companies.find(x=>x.id==='C2').legacyLeadId,null,'apply 
 assert.throws(()=>svc.applyApproved(leads,applyGraph,applyPlan,[{leadId:'L4',action:'create_company',confirmed:false}],{domain,idFactory,now:'2026-09-27T01:00:00Z'}),/confirmação explícita/);
 assert.throws(()=>svc.applyApproved(leads,applyGraph,applyPlan,[{leadId:'L3',action:'link_company',companyId:'INEXISTENTE',confirmed:true}],{domain,idFactory,now:'2026-09-27T01:00:00Z'}),/não é candidata atual/);
 
+
+const reviewWithWeakCandidateGraph={...applyGraph,companies:[...applyGraph.companies,{id:'C-WEAK',entityType:'company',name:'Outro nome',legacyLeadId:null,cnpj:null,createdAt:'2026-09-27T00:00:00.000Z',updatedAt:'2026-09-27T00:00:00.000Z'}]};
+const reviewLead={...leads[1],empresa:'Outro nome'};
+const reviewWithWeakPlan=svc.buildPlan([reviewLead],reviewWithWeakCandidateGraph);
+assert.equal(reviewWithWeakPlan.rows[0].status,'review');
+assert.throws(()=>svc.applyApproved([reviewLead],reviewWithWeakCandidateGraph,reviewWithWeakPlan,[{leadId:'L2',action:'link_company',companyId:'C-WEAK',confirmed:true}],{domain,idFactory,now:'2026-09-27T01:00:00Z'}),/não corresponde ao CNPJ confirmado/);
+
 const staleGraph={...applyGraph,companies:[...applyGraph.companies,{id:'C5',entityType:'company',name:'Empresa Nova',legacyLeadId:null,cnpj:'33333333000133',createdAt:'2026-09-27T00:00:00.000Z',updatedAt:'2026-09-27T00:00:00.000Z'}]};
 assert.throws(()=>svc.applyApproved(leads,staleGraph,applyPlan,[{leadId:'L4',action:'create_company',confirmed:true}],{domain,idFactory,now:'2026-09-27T01:00:00Z'}),/não está mais elegível.*Gere nova prévia/);
 
