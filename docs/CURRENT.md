@@ -5,10 +5,10 @@
 ## Baseline
 
 - **Production branch:** `main`
-- **GitHub HEAD when this file was prepared:** `b9a512a667a53c8501e5cd2069a93b1e08ba1d61`
+- **GitHub HEAD when this audit fix was prepared:** `2314f8f7935a759404d49037ab2796d428fa043b`
 - **Latest product package:** **07R — client sheet and usable CRM workspace**
 - **Visible result:** searchable CRM list + editable side sheet, OG client code search, preserved Company 360/material context, improved mobile accessibility.
-- **Evidence:** `tasks/DONE.md`, `tasks/TODO.md`, commit `b9a512a...`.
+- **Evidence:** `tasks/DONE.md`, `tasks/TODO.md`, current 07R product baseline on `main`.
 
 ## Quality state recorded for 07R
 
@@ -36,18 +36,17 @@ Live Railway verification performed while preparing this file:
 
 Do not reuse this snapshot as proof later. Query Railway live.
 
+## AI Operating System status
+
+**CONCLUÍDO — compact entrypoints and economical bootstrap (PR #18).**
+
+This is a documentation/process closeout only. It adds the compact brain/current/decision/protocol entrypoints and AGENTS routing without changing product behavior, persistence, runtime or architecture.
+
 ## Current authorized work
 
-**AI Operating System compact entrypoints only.**
+**Nenhum próximo pacote de produto, runtime ou arquitetura é autorizado por este arquivo após o merge da PR #18.**
 
-Scope:
-
-- economical context bootstrap;
-- compact brain/current/decision/protocol docs;
-- short AGENTS routing reference;
-- no product feature;
-- no persistence change;
-- no deploy architecture change.
+Any next implementation requires explicit authorization and formal prioritization against the operational backlog in `tasks/TODO.md`.
 
 ## Known blockers / cautions
 
@@ -56,6 +55,8 @@ Scope:
 - Avoid two agents writing the same product package concurrently.
 - Do not assign the next package number from chat memory; inspect the live plan first.
 
-## Next product direction
+## Product candidates vs. operational backlog
 
-A **Cockpit Operacional / Painel Hoje** is a strong candidate for the next commercial-product slice, but it is **not authorized by this documentation task** and should receive its package ID/acceptance criteria only after this work is audited and closed.
+`tasks/TODO.md` remains the operational backlog and prioritization reference for executable work.
+
+A **Cockpit Operacional / Painel Hoje** remains only a **candidate idea**. It is not an authorized package, does not supersede `tasks/TODO.md`, and may receive package/task scope only after explicit formal prioritization.
