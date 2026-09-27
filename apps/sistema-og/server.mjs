@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(root, '.data');
+const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
 const dataFile = path.join(dataDir, 'shared-state.json');
 const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const port = Number(process.env.OG_PORT || 4321);
@@ -150,6 +150,16 @@ async function readBody(req) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
+
+  if (url.pathname === '/health' && (req.method === 'GET' || req.method === 'HEAD')) {
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    if (req.method === 'HEAD') return res.end();
+    return res.end(JSON.stringify({ ok: true, service: 'sistema-og' }));
+  }
 
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
 
