@@ -29,6 +29,7 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 - Backend Cloudflare: `cloudflare/worker.mjs`
 - Testes e gates: `scripts/test_*.mjs`, `scripts/validate.mjs`, `scripts/release-gate.mjs`
 - Builder Brain: `.codex/skills/dutra-builder-brain/`, `docs/second-brain/`
+- Runtime Operator: `.codex/skills/dutra-runtime-operator/`, `docs/runtime/DUTRA_OS_RUNTIME.md`
 - Framework AIOX: `.aiox-core/`
 - Documentação: `docs/`
 <!-- AIOX-MANAGED-END: codebase -->
@@ -78,6 +79,11 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 | Comunicação e templates | `docs/07-CENTRAL-COMUNICACAO.md`, `docs/08-TEMPLATES-COMERCIAIS.md` |
 | Custos e contexto de IA | `docs/09-CUSTOS-IA.md` |
 | Execução | `tasks/TODO.md` e a story específica em `docs/stories/` |
+| Produção, Railway, deploy, domínio, logs e acesso no celular | `.codex/skills/dutra-runtime-operator/SKILL.md`, `docs/runtime/DUTRA_OS_RUNTIME.md` |
+
+### Regra de runtime hospedado
+
+Quando a tarefa envolver sistema online, Railway, deploy, domínio, logs, health check, link atual ou acesso pelo celular, carregue `.codex/skills/dutra-runtime-operator/SKILL.md` e consulte o estado ao vivo da infraestrutura antes de responder. Documentação e memória são apenas localizadores; não comprovam que o runtime está saudável.
 
 ### Mapa real do Sistema OG
 
