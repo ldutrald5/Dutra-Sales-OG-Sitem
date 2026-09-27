@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
+  let serverSyncInFlight = false;
+  let serverSyncGeneration = 0;
 
   // Carrega histórico e leads
   try {
@@ -205,32 +207,425 @@ document.addEventListener('DOMContentLoaded', () => {
     return response;
   }
 
-  function scheduleServerSync() {
-    clearTimeout(serverSyncTimer);
-    setSyncStatus('Salvando…', 'busy');
-    serverSyncTimer = setTimeout(async () => {
+  const SYNC_CONFLICT_MARKER = 'og_sync_conflict_pending';
+  const SYNC_REVIEW_MARKER = 'og_sync_review_pending_marker';
+  let activeSyncConflict = null;
+  let activeSyncReview = null;
+  let syncRecoveryReady = false;
+
+  function readSmallMarker(key) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); }
+    catch { return null; }
+  }
+
+  function pendingSyncConflict() { return activeSyncConflict; }
+  function pendingSyncReview() { return activeSyncReview; }
+
+  async function checkpointLocalState(source) {
+    try {
+      const backup = OG_DATA_SAFETY.createBackup(
+        { leads: state.leads, history: state.history, operations: state.operations },
+        { source, revision: serverRevision }
+      );
+      await OG_DATA_SAFETY.saveLocalSnapshot(backup);
+      return true;
+    } catch (error) {
+      console.warn('Checkpoint local não pôde ser salvo.', error);
+      return false;
+    }
+  }
+
+  async function persistSyncConflict(conflict) {
+    activeSyncConflict = conflict;
+    localStorage.setItem(SYNC_CONFLICT_MARKER, JSON.stringify({
+      detectedAt: conflict.detectedAt,
+      baseRevision: Number(conflict.local?.revision || 0),
+      remoteRevision: Number(conflict.remote?.revision || 0)
+    }));
+    try { await OG_SYNC_BRIDGE.saveConflict(conflict); }
+    catch (error) { console.warn('Conflito mantido em memória; IndexedDB indisponível.', error); }
+    return conflict;
+  }
+
+  async function clearSyncConflict() {
+    activeSyncConflict = null;
+    localStorage.setItem(SYNC_CONFLICT_MARKER, JSON.stringify({ resolved: true, resolvedAt: new Date().toISOString() }));
+    try {
+      await OG_SYNC_BRIDGE.clearConflict();
+      localStorage.removeItem(SYNC_CONFLICT_MARKER);
+    } catch (error) {
+      console.warn('Limpeza do conflito será repetida na próxima abertura.', error);
+    }
+    document.getElementById('og-sync-conflict-banner')?.remove();
+    document.getElementById('og-sync-conflict-detail')?.remove();
+  }
+
+  async function persistSyncReview(review) {
+    activeSyncReview = review;
+    localStorage.setItem(SYNC_REVIEW_MARKER, JSON.stringify({
+      preparedAt: review.preparedAt,
+      baseRevision: Number(review.baseRevision || 0)
+    }));
+    try { await OG_SYNC_BRIDGE.saveReview(review); }
+    catch (error) { console.warn('Revisão mantida por marcador local; IndexedDB indisponível.', error); }
+    return review;
+  }
+
+  async function clearSyncReview() {
+    activeSyncReview = null;
+    localStorage.setItem(SYNC_REVIEW_MARKER, JSON.stringify({ resolved: true, resolvedAt: new Date().toISOString() }));
+    try {
+      await OG_SYNC_BRIDGE.clearReview();
+      localStorage.removeItem(SYNC_REVIEW_MARKER);
+    } catch (error) {
+      console.warn('Limpeza da revisão será repetida na próxima abertura.', error);
+    }
+    document.getElementById('og-sync-review-banner')?.remove();
+  }
+
+  function applySharedState(shared) {
+    state.leads = (shared.leads || []).map(normalizeLead);
+    state.history = shared.history || [];
+    state.operations = OG_OPERATIONS_MODEL.migrateOperations(shared.operations || state.operations);
+    localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
+    localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
+    localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+    renderDayDashboard();
+    if (state.currentTab === 'crm') renderCrmModule();
+    if (state.currentTab === 'biblioteca') renderMaterialLibrary();
+    if (state.currentTab === 'historico') renderHistory();
+  }
+
+  function showSyncConflictBanner(conflict = pendingSyncConflict()) {
+    if (!conflict || document.getElementById('og-sync-conflict-banner')) return;
+    const localOnly = conflict.summary?.leads?.onlyLocal || 0;
+    const remoteOnly = conflict.summary?.leads?.onlyRemote || 0;
+    const different = conflict.summary?.leads?.different || 0;
+    const banner = document.createElement('aside');
+    banner.id = 'og-sync-conflict-banner';
+    banner.className = 'og-sync-conflict-banner';
+    banner.setAttribute('role', 'alert');
+    banner.innerHTML = `
+      <div><strong>⚠ Alterações em outro dispositivo</strong><span>Local r${conflict.local.revision} · Servidor r${conflict.remote.revision} · ${different} divergente(s), ${localOnly} só local, ${remoteOnly} só servidor.</span></div>
+      <div class="og-sync-conflict-actions"><button type="button" data-sync-details>Ver divergências</button><button type="button" data-sync-review>Preparar conciliação</button><button type="button" data-sync-server>Usar versão do servidor</button></div>`;
+    document.body.prepend(banner);
+
+    banner.querySelector('[data-sync-details]')?.addEventListener('click', () => {
+      const rows = OG_SYNC_CONFLICT.differences(conflict);
+      document.getElementById('og-sync-conflict-detail')?.remove();
+      const panel = document.createElement('section');
+      panel.id = 'og-sync-conflict-detail';
+      panel.className = 'og-sync-conflict-detail';
+      const kind = { different: 'DIVERGENTE', only_local: 'SÓ NESTE APARELHO', only_remote: 'SÓ NO SERVIDOR' };
+      panel.innerHTML = `<header><div><strong>Revisão de conflitos</strong><span>${rows.length} registro(s) exigem atenção antes do próximo envio.</span></div><button type="button" data-close-conflicts>Fechar</button></header><div class="og-sync-conflict-list">${rows.slice(0, 100).map(row => `<article><div><b>${escapeHtml(row.label || row.id)}</b><small>${escapeHtml(row.type)} · ${kind[row.kind] || row.kind}</small></div><span>${row.fields?.length ? 'Campos: ' + row.fields.map(escapeHtml).join(', ') : 'Registro existe em apenas uma versão'}</span></article>`).join('') || '<p>Nenhuma divergência por ID encontrada.</p>'}</div>`;
+      document.body.appendChild(panel);
+      panel.querySelector('[data-close-conflicts]')?.addEventListener('click', () => panel.remove());
+    });
+
+    banner.querySelector('[data-sync-review]')?.addEventListener('click', async () => {
+      if (!confirm('Preparar uma versão conciliada neste aparelho? Nada será enviado ao servidor até você confirmar novamente.')) return;
+      await checkpointLocalState('pre-sync-conflict-reconciliation');
+      const reviewState = OG_SYNC_CONFLICT.mergeForReview(conflict, OG_DATA_SAFETY, OG_OPERATIONS_MODEL);
+      state.leads = (reviewState.leads || []).map(normalizeLead);
+      state.history = reviewState.history || [];
+      state.operations = OG_OPERATIONS_MODEL.migrateOperations(reviewState.operations || {});
+      serverRevision = reviewState.revision;
+      localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
+      localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
+      localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
+      await persistSyncReview({ preparedAt: new Date().toISOString(), baseRevision: reviewState.revision });
+      await clearSyncConflict();
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showNotification('Conciliação preparada neste aparelho. Revise e use “Enviar revisão” quando estiver pronto.', 'warning');
+      showSyncReviewBanner();
+      renderDayDashboard();
+      if (state.currentTab === 'crm') renderCrmModule();
+    });
+
+    banner.querySelector('[data-sync-server]')?.addEventListener('click', async () => {
+      if (!confirm('Descartar as alterações locais conflitantes e carregar a versão atual do servidor? Um checkpoint local será mantido para recuperação.')) return;
+      await checkpointLocalState('pre-use-server-version');
+      applySharedState(conflict.remote);
+      serverRevision = Number(conflict.remote.revision || serverRevision);
+      await clearSyncConflict();
+      setSyncStatus('Servidor carregado', 'ok');
+    });
+  }
+
+  function showSyncReviewBanner() {
+    if (!pendingSyncReview() || document.getElementById('og-sync-review-banner')) return;
+    const banner = document.createElement('aside');
+    banner.id = 'og-sync-review-banner';
+    banner.className = 'og-sync-review-banner';
+    banner.innerHTML = '<div><strong>Conciliação preparada localmente</strong><span>Nenhum dado conciliado foi enviado ainda.</span></div><button type="button" data-send-review>Enviar revisão</button>';
+    document.body.prepend(banner);
+    banner.querySelector('[data-send-review]')?.addEventListener('click', async () => {
+      if (!confirm('Enviar agora a versão conciliada usando a revisão atual do servidor?')) return;
+      const pending = pendingSyncReview();
+      if (!pending) return;
       try {
-        let response = await apiFetch('/api/state', {
+        const response = await apiFetch('/api/state', {
           method: 'PUT',
-          body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: serverRevision })
+          body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })
         });
-        if(response.status===409){
-          const remote=await response.json();
-          const merged=OG_DATA_SAFETY.mergeBackup({leads:state.leads,history:state.history,operations:state.operations},{format:'sistema-og-backup',version:1,data:{leads:remote.leads||[],history:remote.history||[],operations:remote.operations||{}}},OG_OPERATIONS_MODEL);
-          state.leads=merged.leads;state.history=merged.history;state.operations=merged.operations;
-          response=await apiFetch('/api/state',{method:'PUT',body:JSON.stringify({...merged,revision:Number(remote.revision||0)})});
+        if (response.status === 409) {
+          const remote = await response.json();
+          const conflict = OG_SYNC_CONFLICT.createConflict(
+            { leads: state.leads, history: state.history, operations: state.operations },
+            pending.baseRevision,
+            remote
+          );
+          await persistSyncConflict(conflict);
+          await clearSyncReview();
+          setSyncStatus('Novo conflito detectado', 'conflict');
+          showSyncConflictBanner(conflict);
+          return;
         }
         if (!response.ok) throw new Error('Servidor indisponível');
         const saved = await response.json();
-        serverRevision = saved.revision || serverRevision;
+        serverRevision = Number(saved.revision || pending.baseRevision);
+        await clearSyncReview();
+        try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
         setSyncStatus('Sincronizado', 'ok');
+        showNotification('Revisão conciliada sincronizada.', 'success');
+      } catch {
+        setSyncStatus('Revisão aguardando envio', 'offline');
+      }
+    });
+  }
+
+  function currentSyncPayload(revision = serverRevision) {
+    return {
+      leads: state.leads,
+      history: state.history,
+      operations: state.operations,
+      revision: Number(revision || 0)
+    };
+  }
+
+  async function flushQueuedState() {
+    if (!syncRecoveryReady || pendingSyncConflict() || pendingSyncReview()) return false;
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return false;
+    if (serverSyncInFlight) return false;
+
+    let queued = null;
+    try { queued = await OG_SYNC_BRIDGE.readQueuedState(); } catch {}
+    if (!queued?.body) return true;
+
+    const generationAtStart = serverSyncGeneration;
+    const payload = currentSyncPayload(queued.body.revision);
+    serverSyncInFlight = true;
+    try {
+      const response = await apiFetch(queued.url || '/api/state', {
+        method: queued.method || 'PUT',
+        body: JSON.stringify(payload)
+      });
+      if (response.status === 409) {
+        const remote = await response.json();
+        const conflict = OG_SYNC_CONFLICT.createConflict(
+          { leads: state.leads, history: state.history, operations: state.operations },
+          Number(payload.revision || 0),
+          remote
+        );
+        await checkpointLocalState('queued-sync-conflict-detected');
+        await persistSyncConflict(conflict);
+        setSyncStatus('Conflito de sincronização', 'conflict');
+        showSyncConflictBanner(conflict);
+        return false;
+      }
+      if (!response.ok) throw new Error('Servidor indisponível');
+      const saved = await response.json();
+      serverRevision = Number(saved.revision || payload.revision || serverRevision);
+      await OG_SYNC_BRIDGE.clearQueuedState();
+      if (serverSyncGeneration !== generationAtStart) {
+        setSyncStatus('Alterações locais aguardando envio', 'busy');
+        clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+        return false;
+      }
+      setSyncStatus('Sincronizado', 'ok');
+      return true;
+    } catch {
+      try { await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision)); } catch {}
+      setSyncStatus('Sincronização pendente', 'offline');
+      return false;
+    } finally {
+      serverSyncInFlight = false;
+    }
+  }
+
+  async function runScheduledServerSync() {
+    if (!syncRecoveryReady || pendingSyncConflict() || pendingSyncReview()) return;
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return;
+    if (serverSyncInFlight) {
+      clearTimeout(serverSyncTimer);
+      serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+      return;
+    }
+
+    const generationAtStart = serverSyncGeneration;
+    const payload = currentSyncPayload();
+    serverSyncInFlight = true;
+    try {
+      const response = await apiFetch('/api/state', { method: 'PUT', body: JSON.stringify(payload) });
+      if (response.status === 409) {
+        const remote = await response.json();
+        const conflict = OG_SYNC_CONFLICT.createConflict(
+          { leads: state.leads, history: state.history, operations: state.operations },
+          payload.revision,
+          remote
+        );
+        await checkpointLocalState('sync-conflict-detected');
+        await persistSyncConflict(conflict);
+        setSyncStatus('Conflito de sincronização', 'conflict');
+        showSyncConflictBanner(conflict);
+        return;
+      }
+      if (!response.ok) throw new Error('Servidor indisponível');
+      const saved = await response.json();
+      serverRevision = Number(saved.revision || serverRevision);
+      try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
+      setSyncStatus(serverSyncGeneration === generationAtStart ? 'Sincronizado' : 'Salvando alterações recentes…', serverSyncGeneration === generationAtStart ? 'ok' : 'busy');
+    } catch {
+      try {
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision));
+        const registration = await navigator.serviceWorker?.ready;
+        await registration?.sync?.register?.('og-sync-state');
+        setSyncStatus('Pendente de sincronização', 'offline');
       } catch {
         setSyncStatus('Salvo neste aparelho', 'offline');
       }
-    }, 450);
+    } finally {
+      serverSyncInFlight = false;
+      if (serverSyncGeneration !== generationAtStart && !pendingSyncConflict() && !pendingSyncReview() && !readSmallMarker(SYNC_CONFLICT_MARKER) && !readSmallMarker(SYNC_REVIEW_MARKER)) {
+        clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+      }
+    }
+  }
+
+  function scheduleServerSync() {
+    serverSyncGeneration += 1;
+    clearTimeout(serverSyncTimer);
+    if (!syncRecoveryReady) {
+      setSyncStatus('Preparando sincronização…', 'busy');
+      return;
+    }
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+      setSyncStatus('Recuperação de conflito pendente', 'conflict');
+      return;
+    }
+    if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+      setSyncStatus('Revisão pendente em outra aba/sessão', 'conflict');
+      return;
+    }
+    if (pendingSyncReview()) {
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showSyncReviewBanner();
+      return;
+    }
+    if (pendingSyncConflict()) {
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner();
+      return;
+    }
+    setSyncStatus('Salvando…', 'busy');
+    serverSyncTimer = setTimeout(runScheduledServerSync, 450);
+  }
+
+  async function restoreSyncRecovery() {
+    syncRecoveryReady = false;
+    const conflictMarker = readSmallMarker(SYNC_CONFLICT_MARKER);
+    const reviewMarker = readSmallMarker(SYNC_REVIEW_MARKER);
+
+    if (conflictMarker?.resolved) {
+      activeSyncConflict = null;
+      try {
+        await OG_SYNC_BRIDGE.clearConflict();
+        localStorage.removeItem(SYNC_CONFLICT_MARKER);
+      } catch {}
+    } else {
+      try { activeSyncConflict = await OG_SYNC_BRIDGE.loadConflict(); } catch { activeSyncConflict = null; }
+    }
+
+    if (reviewMarker?.resolved) {
+      activeSyncReview = null;
+      try {
+        await OG_SYNC_BRIDGE.clearReview();
+        localStorage.removeItem(SYNC_REVIEW_MARKER);
+      } catch {}
+    } else {
+      try { activeSyncReview = await OG_SYNC_BRIDGE.loadReview(); } catch { activeSyncReview = null; }
+    }
+
+    if (!activeSyncConflict && conflictMarker && !conflictMarker.resolved) {
+      try {
+        const response = await apiFetch('/api/state', { cache: 'no-store' });
+        if (response.ok) {
+          const remote = await response.json();
+          activeSyncConflict = OG_SYNC_CONFLICT.createConflict(
+            { leads: state.leads, history: state.history, operations: state.operations },
+            Number(conflictMarker.baseRevision || serverRevision),
+            remote
+          );
+          await persistSyncConflict(activeSyncConflict);
+        }
+      } catch {}
+    }
+
+    if (!activeSyncReview && reviewMarker && !reviewMarker.resolved) {
+      activeSyncReview = { preparedAt: reviewMarker.preparedAt, baseRevision: Number(reviewMarker.baseRevision || 0) };
+      try { await OG_SYNC_BRIDGE.saveReview(activeSyncReview); } catch {}
+    }
+
+    if (activeSyncConflict && activeSyncReview) {
+      await clearSyncReview();
+    }
+
+    syncRecoveryReady = true;
+    if (conflictMarker && !conflictMarker.resolved && !activeSyncConflict) {
+      setSyncStatus('Conflito aguardando conexão', 'offline');
+      return;
+    }
+    if (activeSyncConflict) {
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner(activeSyncConflict);
+    } else if (activeSyncReview) {
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showSyncReviewBanner();
+    }
   }
 
   async function loadSharedState() {
+    if (!syncRecoveryReady) {
+      setSyncStatus('Preparando sincronização…', 'busy');
+      return;
+    }
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+      await restoreSyncRecovery();
+      if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
+        setSyncStatus('Conflito aguardando conexão', 'offline');
+        return;
+      }
+    }
+    if (pendingSyncConflict()) {
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner();
+      return;
+    }
+    if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+      await restoreSyncRecovery();
+      if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+        setSyncStatus('Revisão pendente aguardando recuperação', 'offline');
+        return;
+      }
+    }
+    if (pendingSyncReview()) {
+      setSyncStatus('Revisão pronta · confirmar envio', 'conflict');
+      showSyncReviewBanner();
+      return;
+    }
+    if (!(await flushQueuedState())) return;
     try {
       const response = await apiFetch('/api/state', { cache: 'no-store' });
       if (!response.ok) throw new Error('Sem sincronização');
@@ -238,23 +633,39 @@ document.addEventListener('DOMContentLoaded', () => {
       serverRevision = Number(shared.revision || 0);
       const serverHasData = (shared.leads?.length || 0) + (shared.history?.length || 0) + (shared.operations?.activityEvents?.length || 0) > 0;
       const browserHasData = state.leads.length + state.history.length > 0;
-      if (serverHasData) {
-        state.leads = (shared.leads || []).map(normalizeLead);
-        state.history = shared.history || [];
-        state.operations = OG_OPERATIONS_MODEL.migrateOperations(shared.operations || state.operations);
-        localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
-        localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
-        localStorage.setItem('og_operations_state', JSON.stringify(state.operations));
-        renderDayDashboard();
-        if (state.currentTab === 'crm') renderCrmModule();
-        if (state.currentTab === 'biblioteca') renderMaterialLibrary();
-        if (state.currentTab === 'historico') renderHistory();
-      } else if (browserHasData) scheduleServerSync();
+      if (serverHasData) applySharedState(shared);
+      else if (browserHasData) scheduleServerSync();
       setSyncStatus('Sincronizado', 'ok');
     } catch {
       setSyncStatus('Salvo neste aparelho', 'offline');
     }
   }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', async event => {
+      if (event.data?.type === 'OG_SYNC_OUTBOX_READY') {
+        await flushQueuedState();
+        return;
+      }
+      if (event.data?.type !== 'OG_SYNC_CONFLICT') return;
+      const pending = event.data.pending || {};
+      const remote = event.data.remote || {};
+      const conflict = OG_SYNC_CONFLICT.createConflict(
+        { leads: pending.leads || state.leads, history: pending.history || state.history, operations: pending.operations || state.operations },
+        Number(pending.revision || serverRevision),
+        remote
+      );
+      await persistSyncConflict(conflict);
+      await clearSyncReview();
+      setSyncStatus('Conflito de sincronização', 'conflict');
+      showSyncConflictBanner(conflict);
+    });
+  }
+
+  window.addEventListener('storage', event => {
+    if (![SYNC_CONFLICT_MARKER, SYNC_REVIEW_MARKER].includes(event.key)) return;
+    restoreSyncRecovery().catch(error => console.warn('Falha ao reconciliar estado entre abas.', error));
+  });
 
   // Navegação de Abas
   const tabs = document.querySelectorAll('.nav-tab');
@@ -3713,17 +4124,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     const view = service.buildCompany360(operations, company.id);
     if (!view) return '';
-    const money = cents => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((cents || 0) / 100);
+    const money = (cents, currency = 'BRL') => cents == null ? '—' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: currency || 'BRL' }).format(cents / 100);
+    const pipelineCurrencies = Object.keys(view.summary.pipelineValueByCurrency || {});
+    const pipelineLabel = view.summary.pipelineCurrency
+      ? money(view.summary.pipelineValueCents, view.summary.pipelineCurrency)
+      : pipelineCurrencies.length > 1 ? 'Múltiplas moedas' : money(0, 'BRL');
     const date = value => value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
     const contactNames = view.contacts.slice(0, 3).map(item => `<li><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.role || 'Contato')}${item.isDecisionMaker ? ' · Decisor' : ''}</span></li>`).join('');
-    const opportunityNames = view.openOpportunities.slice(0, 3).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents)}</span></li>`).join('');
+    const opportunityNames = view.openOpportunities.slice(0, 3).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents, item.currency || 'BRL')}</span></li>`).join('');
     return `
       <section class="company-360-beta" aria-label="Company 360 Beta">
         <header><div><span class="og-kicker">COMPANY 360 · BETA</span><strong>${escapeHtml(view.company.name)}</strong></div><span class="company-360-canonical">CANÔNICO</span></header>
         <div class="company-360-metrics">
           <div><small>Contatos</small><b>${view.summary.contacts}</b></div>
           <div><small>Decisores</small><b>${view.summary.decisionMakers}</b></div>
-          <div><small>Pipeline</small><b>${money(view.summary.pipelineValueCents)}</b></div>
+          <div><small>Pipeline</small><b>${pipelineLabel}</b></div>
           <div><small>Tarefas</small><b>${view.summary.openTasks}</b></div>
         </div>
         <div class="company-360-dates"><span>Última atividade <b>${date(view.summary.lastActivityAt)}</b></span><span>Próxima tarefa <b>${date(view.summary.nextTaskAt)}</b></span></div>
@@ -5330,13 +5745,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       installButton.classList.add('hidden');
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    await restoreSyncRecovery();
     window.addEventListener('online', loadSharedState);
-    const importedCount = await importLucas2026Leads();
-    if (importedCount) {
-      renderDayDashboard();
-      if (state.currentTab === 'crm') renderCrmModule();
+    if (!pendingSyncConflict() && !pendingSyncReview()) {
+      const importedCount = await importLucas2026Leads();
+      if (importedCount) {
+        renderDayDashboard();
+        if (state.currentTab === 'crm') renderCrmModule();
+      }
     }
-    loadSharedState();
+    await loadSharedState();
   }
 
   function exportLeadsCsv() {

@@ -6,11 +6,13 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v27';
+const SW_VERSION = 'v29';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
 const SYNC_STORE = 'outbox';
+const SYNC_RECOVERY_STORE = 'recovery';
+const SYNC_DB_VERSION = 2;
 const SYNC_TAG = 'og-sync-state';
 
 const SHELL_URLS = [
@@ -34,6 +36,8 @@ const SHELL_URLS = [
   '/services/ai-service.js',
   '/services/communication-service.js',
   '/services/data-safety-service.js',
+  '/services/sync-conflict-service.js',
+  '/services/sync-bridge-service.js',
   '/knowledge/og-sales-brain.json',
   '/services/prospect-parser.js',
   '/modules/sales-desk.js',
@@ -110,10 +114,11 @@ self.addEventListener('sync', event => {
 
 function openSyncDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(SYNC_DB, 1);
+    const req = indexedDB.open(SYNC_DB, SYNC_DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(SYNC_STORE)) db.createObjectStore(SYNC_STORE);
+      if (!db.objectStoreNames.contains(SYNC_RECOVERY_STORE)) db.createObjectStore(SYNC_RECOVERY_STORE);
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -122,39 +127,25 @@ function openSyncDb() {
 
 async function readOutbox() {
   const db = await openSyncDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(SYNC_STORE, 'readonly');
-    const req = tx.objectStore(SYNC_STORE).get('state');
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function clearOutbox() {
-  const db = await openSyncDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(SYNC_STORE, 'readwrite');
-    tx.objectStore(SYNC_STORE).delete('state');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(SYNC_STORE, 'readonly');
+      const req = tx.objectStore(SYNC_STORE).get('state');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function flushOutbox() {
   const pending = await readOutbox();
   if (!pending || !pending.body) return true;
-  const body = { ...pending.body };
-  const response = await fetch(pending.url || '/api/state', {
-    method: pending.method || 'PUT',
-    headers: pending.headers || { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (response.status === 409) throw new Error('Background sync: conflito de revision');
-  if (!response.ok) throw new Error(`Background sync falhou: ${response.status}`);
-  await clearOutbox();
   const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-  clientsList.forEach(client => client.postMessage({ type: 'OG_SYNC_COMPLETE', revision: null }));
-  return true;
+  if (!clientsList.length) return false;
+  clientsList.forEach(client => client.postMessage({ type: 'OG_SYNC_OUTBOX_READY' }));
+  return false;
 }
 
 self.addEventListener('fetch', event => {

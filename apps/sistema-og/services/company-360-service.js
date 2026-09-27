@@ -50,7 +50,15 @@
     const openOpportunities = opportunities.filter(item => !['won', 'lost', 'closed'].includes(clean(item.stage).toLowerCase()));
     const openTasks = tasks.filter(item => !['done', 'completed', 'cancelled', 'canceled'].includes(clean(item.status).toLowerCase()));
     const decisionMakers = contacts.filter(item => item.isDecisionMaker === true);
-    const pipelineValueCents = openOpportunities.reduce((total, item) => total + (Number.isInteger(item.valueCents) ? item.valueCents : 0), 0);
+    const pipelineValueByCurrency = openOpportunities.reduce((totals, item) => {
+      if (!Number.isInteger(item.valueCents)) return totals;
+      const currency = clean(item.currency).toUpperCase() || 'BRL';
+      totals[currency] = (totals[currency] || 0) + item.valueCents;
+      return totals;
+    }, {});
+    const pipelineCurrencies = Object.keys(pipelineValueByCurrency);
+    const pipelineCurrency = pipelineCurrencies.length === 1 ? pipelineCurrencies[0] : null;
+    const pipelineValueCents = pipelineCurrency ? pipelineValueByCurrency[pipelineCurrency] : null;
 
     return Object.freeze({
       company,
@@ -69,6 +77,8 @@
         activities: activities.length,
         openTasks: openTasks.length,
         pipelineValueCents,
+        pipelineCurrency,
+        pipelineValueByCurrency: Object.freeze({ ...pipelineValueByCurrency }),
         lastActivityAt: activities[0]?.occurredAt || null,
         nextTaskAt: openTasks[0]?.dueAt || null
       })

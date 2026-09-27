@@ -2,12 +2,15 @@
 
 ## Resultado
 
-**PACKAGE 01R — IMPLEMENTADO; AGUARDANDO CI/AUDITORIA FINAL**
+**PACKAGE 01R — MERGED; CI E AUDITORIA CONCLUÍDOS**
 
 ## Baseline e escopo
 
 - Base: `main@e9a2d06fa7c82033641b5666806f425c12de6019`
 - Branch: `package-01r-canonical-domain`
+- PR: `#4` — `feat(01r): canonical domain foundation`
+- CI: workflow run `36279487570` — SUCCESS
+- Merge no `main`: `4e062cf1228a407eccc688b7b00254ef44bf3ded`
 - Objetivo: introduzir contratos canônicos mínimos e evolução aditiva do envelope operacional.
 - Fora do escopo: Supabase/Auth, Company 360, migração automática de leads, alteração de dados reais, deploy e substituição do CRM atual.
 
