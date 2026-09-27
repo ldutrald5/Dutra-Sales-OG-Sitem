@@ -1,108 +1,121 @@
 # IMPLEMENTATION PACKAGE 06R REPORT
 
-## Resultado atual
+## Resultado final
 
-**PACKAGE 06R — IMPLEMENTADO E VALIDADO EM BRANCH; PUBLICAÇÃO RAILWAY AINDA PENDENTE**
+**PACKAGE 06R — PUBLICADO EM HTTPS, VERIFICADO AO VIVO E PRONTO PARA PREVIEW PROTEGIDO**
 
-## Baseline e objetivo
+## Baseline, merge e hotfix
 
-- Base estável: `main@30a3516a95a2385cd3a1ff6fae1b16f69b761409`.
-- Branch: `package-06r-https-preview`.
-- PR: `#11` — `feat(06r): prepare secure Railway HTTPS preview`.
-- Objetivo: tornar o DUTRA OS acessível por HTTPS em PC/celular como preview protegido, sem transformar o armazenamento JSON transitório em banco definitivo.
-- Não objetivos: ativar Supabase remoto, migrar dados reais, remover `lead.id`, expor API sem autenticação ou declarar Railway volume como arquitetura canônica final.
+- Base inicial: `main@30a3516a95a2385cd3a1ff6fae1b16f69b761409`.
+- PR #11: `feat(06r): prepare secure Railway HTTPS preview`.
+- Merge inicial 06R: `5f2433429cd9355466bb81f89140fb08ccf0bf93`.
+- PR #12: hotfix de compatibilidade Railway atual.
+- Merge do hotfix: `1edb2775c7accea290405c92c4137b472e702250`.
+- PR #13: adicionou o Runtime Operator/manifesto para impedir respostas de infraestrutura baseadas em memória stale.
+- `main` verificado antes deste closeout: `9873644423a7f6bc204240dac3b4bb40d533fd4c`.
 
-## Runtime hospedado
+## Objetivo entregue
 
-Foi criado `scripts/start-og-hosted.mjs`, responsável por:
-- exigir `OG_ACCESS_TOKEN` ou `OG_LOCAL_ACCESS_TOKEN` com 16+ caracteres antes do boot;
-- usar `PORT` fornecido pelo provedor;
-- bindar `0.0.0.0` apenas no entrypoint hospedado;
-- mapear `RAILWAY_VOLUME_MOUNT_PATH`/ `OG_DATA_DIR` para persistência;
-- iniciar o mesmo servidor do Sistema OG, preservando o comportamento local-first existente.
+O DUTRA OS pode ser aberto por HTTPS no computador ou celular sem depender do PC local ou da mesma rede Wi-Fi.
 
-O servidor ganhou `/health` sem autenticação, limitado ao estado de prontidão do serviço. Todo `/api/*` continua protegido pelo token.
+URL verificada:
 
-`RAILWAY_PUBLIC_DOMAIN` é reconhecido por `/api/access` e pela página de acesso no celular, evitando links localhost quando o app estiver hospedado.
+`https://sistema-og-production.up.railway.app`
 
-## Configuração Railway
+Página auxiliar móvel:
 
-A auditoria de documentação oficial feita após o primeiro merge do 06R identificou uma mudança relevante do Railway: `railway.json` / Config as Code foi descontinuado para serviços novos. O hotfix atual remove esse arquivo e usa o caminho compatível com serviços novos:
+`https://sistema-og-production.up.railway.app/celular`
 
-- `package.json -> scripts.start = "npm run og:start:hosted"`, permitindo detecção zero-config do Railpack;
-- healthcheck `/health` configurado no serviço Railway durante a criação/publicação;
-- segredo `OG_ACCESS_TOKEN` configurado no ambiente Railway;
-- domínio público gerado no serviço;
-- volume opcional/recomendado anexado pelo Railway; o runtime usa automaticamente `RAILWAY_VOLUME_MOUNT_PATH`.
+## Runtime publicado
 
-Não existe mais dependência de `railway.json` para o primeiro deploy.
+Railway verificado ao vivo em 2026-09-27:
 
-## Segurança e limites
+- Project: `Dutra Sales OG`
+- Project ID: `02a559fd-b4a6-457a-81dd-6501a0e23bdb`
+- Environment: `production`
+- Environment ID: `976ea20f-7cac-4d48-83c5-1ccffb1cd7f9`
+- Service: `sistema-og`
+- Service ID: `f5bf6592-1ef6-40d0-89d4-518c65fae12d`
+- Public domain: `sistema-og-production.up.railway.app`
+- Latest verified deployment: `ea0134ea-d6fa-46f4-adea-5db0b4c3b53a`
+- Deployed GitHub commit: `9873644423a7f6bc204240dac3b4bb40d533fd4c`
+- Deployment status: **SUCCESS**
+- Replicas: **1/1 running**
+- Builder: Railpack 0.40.0
+- Node: 24.21.0
+- Start command: `npm start`
+- Healthcheck: `/health` — **PASS**
+- Domain/network configuration: **PASS**
 
-A publicação é tratada como **preview HTTPS protegido**:
-- segredo obrigatório e nunca commitado;
-- token de browser permanece em `sessionStorage`, conforme baseline 00R/04R;
-- nenhuma credencial é persistida no Sync Bridge/Service Worker;
-- healthcheck não expõe dados;
-- sem volume, o armazenamento do servidor hospedado não deve ser tratado como durável;
-- mesmo com volume, o JSON hospedado continua ponte de transição, não substitui Supabase Postgres/Auth planejados.
+A verificação da pipeline Railway confirmou as etapas SNAPSHOT_CODE, BUILD_IMAGE, PUBLISH_IMAGE, CREATE_CONTAINER, HEALTHCHECK, CONFIGURE_NETWORK e DRAIN_INSTANCES concluídas.
 
-## Testes
+## Segurança
 
-Novo gate `og:hosted:test`:
-- inicia o runtime hospedado em porta dinâmica;
-- valida `/health`;
-- confirma 401 sem token em `/api/state`;
-- confirma acesso autenticado;
-- valida `RAILWAY_PUBLIC_DOMAIN`;
-- valida o shell HTML;
-- valida o diretório persistente configurável.
+O preview mantém:
+- `OG_ACCESS_TOKEN` no gerenciador de variáveis do Railway;
+- compatibilidade interna com `OG_LOCAL_ACCESS_TOKEN`;
+- token do navegador somente em `sessionStorage`;
+- rotas `/api/*` protegidas;
+- `/health` mínimo e sem dados comerciais;
+- segredo ausente do Git, Builder Brain, manifestos e commits.
 
-`og:security:test` também verifica:
-- token forte obrigatório;
-- `0.0.0.0` restrito ao entrypoint hospedado;
-- script `start` padrão apontando para o runtime hospedado;
-- ausência do `railway.json` legado no root.
+O runtime verificado contém as variáveis `OG_ACCESS_TOKEN` e `PORT`. Seus valores não são documentados.
 
-Primeiro CI do pacote: workflow run `36287750590` — **SUCCESS** em:
-- `npm ci`;
-- lockfile íntegro;
+## Persistência — classificação obrigatória
+
+O serviço Railway foi verificado **sem volume persistente anexado**.
+
+Consequência: esta instância é um **preview HTTPS protegido**, não deve ser tratada como armazenamento definitivo do CRM. O filesystem do container pode ser recriado em deploy/restart.
+
+O 06R deliberadamente não promove essa persistência transitória a arquitetura final. Supabase Postgres/Auth continua a direção canônica aprovada e `OQ-PKG02-001` permanece aberta.
+
+## Evidência funcional ao vivo
+
+Além do deployment SUCCESS:
+- domínio Railway está ligado ao serviço;
+- o runtime imprime o endereço HTTPS correto para PC e celular;
+- requests reais observados no domínio retornaram 200 para a página principal e assets;
+- autenticação de `/api/state` foi observada protegendo a API antes de acesso autenticado;
+- healthcheck Railway de `/health` passou na publicação final.
+
+## Gates de código
+
+O package e o hotfix passaram por:
 - `npm run validate`;
 - `og:brain:check`;
 - `og:security:test`;
 - `npm audit --audit-level=high`;
 - `release:gate`.
 
-Como documentação/Brain alteram o head depois desse run, o merge exige CI final do head atual.
+A publicação externa só foi declarada concluída depois da verificação do estado ao vivo no Railway.
 
 ## Builder Brain
 
-Registrados:
+O 06R registra:
 - `SRC-PKG06R-001`;
 - `DEC-HOST-06R-001`;
-- `PAT-HOST-001`.
+- `PAT-HOST-001`;
+- `CYCLE-PKG06R-001`.
 
-Decisão central: HTTPS é acesso/preview, não atalho para substituir a arquitetura canônica.
+Decisão central preservada: **HTTPS resolve acesso; não resolve sozinho persistência canônica.**
 
 ## Definition of Done
 
-O 06R só fecha quando:
-- CI final do head estiver SUCCESS;
-- PR estiver 0 behind do `main`;
-- reviews/threads estiverem limpos;
-- PR #11 for mergeada com `expected_head_sha`;
-- o projeto Railway estiver efetivamente criado/conectado ao repositório;
-- `OG_ACCESS_TOKEN` estiver configurado;
-- domínio HTTPS estiver gerado;
-- o endpoint `/health` e a página principal responderem online;
-- persistência for explicitamente classificada como preview (com volume se habilitada);
-- closeout registrar URL e baseline final.
+Cumprido:
+- código 06R mergeado;
+- hotfix Railway mergeado;
+- projeto/serviço conectado ao GitHub;
+- segredo configurado;
+- domínio HTTPS gerado;
+- deploy do `main` atual em SUCCESS;
+- healthcheck PASS;
+- interface acessível pelo domínio;
+- persistência classificada explicitamente como preview sem volume;
+- Runtime Operator e manifesto operacional criados;
+- closeout/Brain pós-publicação registrado.
 
-## Publicação externa
+## STOP
 
-A instalação/conexão do Railway no ChatGPT foi iniciada pelo usuário. O repositório está preparado para deploy. A etapa externa de criar o projeto/serviço/domínio Railway ainda precisa ocorrer antes de chamar o 06R de publicado.
+Encerrar o 06R após o merge deste closeout.
 
-
-## Hotfix de compatibilidade Railway
-
-Depois do merge inicial da PR #11, a documentação Railway vigente em setembro de 2026 confirmou que serviços novos não podem mais adotar Config as Code legado. O hotfix remove `railway.json` e troca para o contrato atual de detecção via script `start` + configuração do serviço/Agent/CLI Railway. Este hotfix precisa passar pelos mesmos gates antes do deploy externo.
+Não anexar volume pago, migrar dados comerciais reais, remover `lead.id`, ativar Supabase ou iniciar outro package automaticamente. Qualquer evolução de persistência exige novo escopo e decisão explícita.

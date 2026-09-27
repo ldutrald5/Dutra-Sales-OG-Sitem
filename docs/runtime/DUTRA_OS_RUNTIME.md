@@ -26,10 +26,15 @@
 - Página auxiliar de acesso móvel: `https://sistema-og-production.up.railway.app/celular`
 - Health endpoint: `/health`
 
-O domínio acima é um localizador conhecido. Antes de entregar ao usuário como "link atual funcionando", confirmar no Railway:
-1. último deploy = SUCCESS;
-2. domínio continua ligado ao serviço;
-3. health check está saudável.
+Verificação operacional mais recente (2026-09-27):
+- deployment `ea0134ea-d6fa-46f4-adea-5db0b4c3b53a`;
+- commit `9873644423a7f6bc204240dac3b4bb40d533fd4c`;
+- status `SUCCESS`;
+- 1/1 replica rodando;
+- healthcheck `/health` concluído com sucesso;
+- domínio ligado ao serviço.
+
+Mesmo assim, antes de responder sobre estado atual em conversas futuras, consultar Railway novamente.
 
 ## Runtime
 
@@ -50,7 +55,7 @@ O valor deve permanecer no gerenciador de variáveis do Railway ou outro cofre d
 
 ## Persistência — atenção
 
-No momento da criação deste manifesto, o serviço Railway foi observado sem volume persistente anexado.
+Na verificação de 2026-09-27, o serviço Railway continuava **sem volume persistente anexado**.
 
 O launcher usa `RAILWAY_VOLUME_MOUNT_PATH` quando existe e, caso contrário, cai em `/data/sistema-og`. Sem volume/database durável confirmado, não tratar o filesystem do container como armazenamento definitivo de CRM.
 
