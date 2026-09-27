@@ -22,5 +22,6 @@ assert.ok(app.includes('sem restaurar o restante do CRM'),'rollback não pode su
 assert.ok(app.includes('report: applied.report'),'marker deve preservar relatório necessário ao rollback seletivo');
 assert.ok(app.includes('Se algum desses registros recebeu edições ou relações depois da reconciliação, o rollback será bloqueado'),'UX deve explicar bloqueio contra perda de trabalho posterior');
 assert.ok(app.includes('Exportar plano'),'plano dry-run deve ser exportável para auditoria');
+assert.doesNotMatch(app,/showNotification\(\`(?:Reconciliação não aplicada|Rollback bloqueado): \$\{error\.message\}/,'erro técnico não deve ser interpolado em toast HTML');
 assert.ok(!app.includes('data-reconcile-select') || !app.includes('data-reconcile-select=\"') || app.includes("actionable ? '' : 'disabled'"),'linhas não elegíveis devem ser bloqueadas');
 console.log('Legacy reconciliation UI checks: PASS');
