@@ -3786,7 +3786,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const internalCode = String(data.get('internalCode') || '').trim();
       const conflict = OG_CRM_SERVICE.findInternalCodeConflict(state.leads, internalCode, lead.id);
       if (conflict) {
-        showNotification(`Código OG já usado por ${conflict.empresa || conflict.nome}. Revise antes de salvar.`, 'warning');
+        showNotification('Este Código OG já está vinculado a outro cliente. Abra o outro cadastro antes de continuar.', 'warning');
         return;
       }
       const additionalPhones = [...overlay.querySelectorAll('[data-extra-phone-row]')].map(row => ({
