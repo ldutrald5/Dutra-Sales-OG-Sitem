@@ -16,8 +16,13 @@ const port = Number(process.env.OG_PORT || 4321);
 const host = process.env.OG_HOST || '127.0.0.1';
 const localAccessToken = String(process.env.OG_LOCAL_ACCESS_TOKEN || '');
 const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
+const hostedMode = Boolean(process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN);
+const minimumAccessTokenLength = hostedMode ? 6 : 16;
 const writeWindows = new Map();
-if (lanMode && localAccessToken.length < 16) throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no modo LAN.');
+if (lanMode && localAccessToken.length < minimumAccessTokenLength) {
+  const scope = hostedMode ? 'ambiente hospedado' : 'modo LAN';
+  throw new Error(`OG_LOCAL_ACCESS_TOKEN com pelo menos ${minimumAccessTokenLength} caracteres é obrigatório no ${scope}.`);
+}
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',

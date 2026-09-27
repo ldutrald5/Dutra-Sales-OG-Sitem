@@ -15,7 +15,8 @@ assert.doesNotMatch(sw,/fetch\(pending\.url/,'Service Worker não deve enviar ou
 assert.match(server,/process\.env\.OG_HOST \|\| '127\.0\.0\.1'/);
 assert.match(server,/OG_LOCAL_ACCESS_TOKEN/);
 assert.match(hosted,/OG_LOCAL_ACCESS_TOKEN \|\| process\.env\.OG_ACCESS_TOKEN/,'Hosted runtime deve aceitar segredo dedicado sem hardcode');
-assert.match(hosted,/token\.length < 16/,'Hosted runtime deve recusar token fraco');
+assert.match(hosted,/token\.length < 6/,'Hosted runtime deve exigir código hospedado com ao menos 6 caracteres');
+assert.match(server,/hostedMode \? 6 : 16/,'Servidor deve manter 16 caracteres no LAN e permitir 6 somente no hospedado');
 assert.match(hosted,/OG_HOST = process\.env\.OG_HOST \|\| '0\.0\.0\.0'/,'Hosted runtime deve bindar todas interfaces somente pelo entrypoint hospedado');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 assert.equal(pkg.scripts.start,'npm run og:start:hosted','Railway novo deve detectar o start padrão sem Config as Code legado');
