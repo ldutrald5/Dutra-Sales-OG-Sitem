@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const svc=require('../apps/sistema-og/services/legacy-reconciliation-service.js');
+const domain=require('../apps/sistema-og/domain/canonical-domain.js');
+let seq=0;const idFactory=(kind,leadId)=>`${kind.toUpperCase()}-${leadId}-${++seq}`;
 
 const graph={companies:[
  {id:'C1',entityType:'company',name:'Já vinculada',legacyLeadId:'L1',cnpj:'11111111000111'},
@@ -49,8 +51,6 @@ assert.equal(svc.validatePlan({mode:'apply',rows:[]}).valid,false);
 assert.equal(svc.validatePlan({mode:'dry_run',rows:[{leadId:'L1'},{leadId:'L1'}]}).valid,false);
 assert.equal(graph.companies.length,4,'dry-run não pode mutar grafo');
 
-const domain=require('../apps/sistema-og/domain/canonical-domain.js');
-let seq=0;const idFactory=(kind,leadId)=>`${kind.toUpperCase()}-${leadId}-${++seq}`;
 const applyGraph={...graph,contacts:[],opportunities:[],activities:[],tasks:[],activityEvents:[]};
 const applyPlan=svc.buildPlan(leads,applyGraph);
 const applied=svc.applyApproved(leads,applyGraph,applyPlan,[
