@@ -85,3 +85,13 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Validação:** `npm run og:client-sheet:test`, `npm run validate`, security/audit/release gate em CI.
 - **Arquivos principais:** `apps/sistema-og/app.js`, `index.html`, `styles.css`, `services/crm-service.js`, `modules/sales-desk.js`, `scripts/test_client_sheet.mjs`.
 
+
+
+## Templates canônicos de planilhas — captura real
+
+- **Data:** 2026-09-27.
+- **CRM oficial:** `CRM OG dr` foi confirmado pelo arquivo real anexado; abas `🚀 HOJE`, `📋 CRM`, `📥 LISTA` e `👥 CONTATOS`; identidade preta/amarela registrada. A incerteza anterior baseada em fixture sintética foi encerrada.
+- **Vendas oficial:** `POS VENDAS LucasD Setembro26.xlsx` foi conferido diretamente; 15 abas, entradas D/E/H/I/J/K/M, fórmulas protegidas F/G/L e resumos E3/K1/K2/L2.
+- **Governança:** os workbooks reais contêm dados comerciais e não são commitados. Nomes, fingerprints SHA-256, estrutura e contratos ficam em `docs/spreadsheets/canonical-templates.json`.
+- **Papel dos arquivos:** formatos canônicos de importação/exportação e backup independente; o DUTRA OS permanece como fonte operacional após importação confirmada.
+- **Próximo passo:** implementar `Exportar CRM Master` e `Exportar Vendas/Comissões` sempre sobre cópia versionada, preservando fórmulas, estilos e campos manuais.
