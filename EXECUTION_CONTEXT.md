@@ -7,8 +7,8 @@
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
 - Package em execução: **04R — Sync Bridge & Conflict UX**
 - Branch: `package-04r-sync-conflict-ux`
-- PR: **#7** — draft durante a validação estrutural
-- CI atual: workflow run `36283164052` iniciado; resultado ainda não deve ser tratado como PASS até conclusão
+- PR: **#7** — draft até concluir o CI do head documental final
+- CI de implementação + Brain: head `b2dc3d36fce9bf793486041caa6c556f398464fe`, workflow run `36283478504` — **SUCCESS**; o head documental final ainda deve passar pelo mesmo workflow antes do merge
 - Fora do escopo do 04R: migração em massa do legado, remoção de `lead.id`, ativação obrigatória do Supabase remoto e reconciliação 05R.
 
 ## Sequência reconciliada
