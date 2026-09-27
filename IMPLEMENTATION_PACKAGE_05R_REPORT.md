@@ -10,8 +10,8 @@
 - Baseline de produto anterior: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`.
 - Branch: `package-05r-legacy-reconciliation`.
 - PR: `#9` — `feat(05r): controlled legacy reconciliation workflow`.
-- Head de implementação/hardening validado: `0a2998556b7d85cb7e46c3d9a1de307ec6cd26c1`.
-- CI validado: workflow `Package 00R CI`, run `36284704946` — **SUCCESS**.
+- Head de implementação/hardening + segurança validado: `c8bfa90c4f84d4d9957e59df463a8345678b0601`.
+- CI de implementação/hardening + segurança: workflow `Package 00R CI`, run `36285040392` — **SUCCESS**. O commit documental deste relatório altera o head e deve receber CI próprio antes do merge.
 - Objetivo: reconciliar `lead.id` legado com Company/Contact canônicos de forma explícita, auditável, reversível e sem migração em massa.
 - Não objetivos: remover `lead.id`, migrar automaticamente Opportunities/Tasks/Activities legados, ativar Supabase remoto, executar migração de dados reais via CI ou fazer cutover big-bang.
 
@@ -120,9 +120,9 @@ Cobertura inclui:
 - bloqueio do rollback quando houver edição/relação posterior;
 - checkpoint/UX/sync gate/offline.
 
-Run `36284662308` falhou no novo teste por ordem de inicialização da fixture `domain` (ReferenceError no teste; `og:check` e demais suites haviam passado). A fixture foi corrigida em `0a2998556b7d85cb7e46c3d9a1de307ec6cd26c1`.
+Run `36284662308` falhou no novo teste por ordem de inicialização da fixture `domain` (ReferenceError no teste; `og:check` e demais suites haviam passado). A fixture foi corrigida em `0a2998556b7d85cb7e46c3d9a1de307ec6cd26c1`. Depois disso, o fluxo recebeu hardening adicional contra duplicação por match de nome, candidata ocupada, CNPJ incompleto, rollback destrutivo e interpolação de erro técnico em toast HTML.
 
-Run final de implementação `36284704946`: **SUCCESS** em:
+Run de implementação/hardening + segurança `36285040392`: **SUCCESS** em:
 - `npm ci`;
 - lockfile íntegro;
 - `npm run validate`;
