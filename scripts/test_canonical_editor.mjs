@@ -17,8 +17,13 @@ assert.equal(updated.graph.companies.length, 1);
 assert.equal(updated.company.createdAt, new Date(now).toISOString(), 'createdAt original deve ser preservado');
 assert.equal(updated.company.updatedAt, '2026-09-27T12:00:00.000Z', 'updatedAt deve avançar na edição');
 
-const invalidExisting = { ...updated.graph, contacts: [{ id: 'BROKEN', name: 'Legado sem entityType/companyId' }] };
-assert.throws(() => editor.saveCompany(invalidExisting, { id: 'C1', name: 'Não deve salvar', legacyLeadId: 'L1' }, { domain, now }), /entityType inválido|companyId inexistente/);
+const mixedLegacy = { ...updated.graph, contacts: [{ id: 'LEGACY-CONT-1', name: 'Contato legado sem entityType/companyId' }] };
+const mixedSaved = editor.saveCompany(mixedLegacy, { id: 'C1', name: 'Dutra Transportes Compatível', legacyLeadId: 'L1' }, { domain, now });
+assert.equal(mixedSaved.graph.contacts.length, 1, 'Contato legado deve ser preservado');
+assert.equal(mixedSaved.graph.contacts[0].id, 'LEGACY-CONT-1');
+
+const wrongTypedContact = { ...updated.graph, contacts: [{ id: 'BROKEN', entityType: 'company', name: 'Tipo explícito incorreto' }] };
+assert.throws(() => editor.saveCompany(wrongTypedContact, { id: 'C1', name: 'Não deve salvar', legacyLeadId: 'L1' }, { domain, now }), /entityType inválido/);
 
 
 assert.throws(() => editor.saveCompany(updated.graph, { id: 'C2', name: 'Duplicada', legacyLeadId: 'L1' }, { domain, now }), /já vinculado/);
