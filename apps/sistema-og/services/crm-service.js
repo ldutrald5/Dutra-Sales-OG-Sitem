@@ -8,6 +8,20 @@
   const clean = value => String(value || '').trim();
   const digits = value => clean(value).replace(/\D/g, '');
   const comparable = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalizeAdditionalPhones = value => {
+    const seen = new Set();
+    return (Array.isArray(value) ? value : []).map(item => typeof item === 'string' ? { label: '', phone: item } : item || {}).map(item => ({
+      label: clean(item.label),
+      phone: digits(item.phone),
+      whatsapp: item.whatsapp !== false
+    })).filter(item => item.phone && !seen.has(item.phone) && seen.add(item.phone)).slice(0, 10);
+  };
+  const normalizeReferrals = value => (Array.isArray(value) ? value : []).map(item => ({
+    name: clean(item?.name),
+    company: clean(item?.company),
+    phone: digits(item?.phone),
+    note: clean(item?.note)
+  })).filter(item => item.name || item.company || item.phone || item.note).slice(0, 30);
 
   function normalizeLead(lead = {}) {
     return {
@@ -19,6 +33,9 @@
       cnpj: digits(lead.cnpj),
       cpf: digits(lead.cpf),
       internalCode: clean(lead.internalCode || lead.codigo),
+      email: clean(lead.email),
+      additionalPhones: normalizeAdditionalPhones(lead.additionalPhones),
+      referrals: normalizeReferrals(lead.referrals),
       status: clean(lead.status) || 'novo',
       priority: ['alta', 'media', 'baixa'].includes(lead.priority) ? lead.priority : 'media',
       fleetSize: Number.isFinite(Number(lead.fleetSize)) ? Number(lead.fleetSize) : 0,
@@ -83,9 +100,61 @@
     });
   }
 
+
+  function searchableText(lead = {}) {
+    const item = normalizeLead(lead);
+    const values = [
+      item.empresa, item.nome, item.telefone, item.cnpj, item.cpf, item.internalCode,
+      item.email, item.cidadeUf, item.decisionMaker, item.nextAction, item.pain,
+      item.sourceChannel, item.batchTag,
+      ...item.additionalPhones.flatMap(phone => [phone.label, phone.phone]),
+      ...item.referrals.flatMap(referral => [referral.name, referral.company, referral.phone, referral.note])
+    ];
+    return values.map(value => comparable(value)).filter(Boolean).join(' ');
+  }
+
+  function matchesSearch(lead, query) {
+    const q = comparable(query);
+    if (!q) return true;
+    return searchableText(lead).includes(q);
+  }
+
+  function findInternalCodeConflict(leads, code, excludeId = null) {
+    const key = comparable(code);
+    if (!key) return null;
+    return (leads || []).find(item => String(item.id) !== String(excludeId || '') && comparable(normalizeLead(item).internalCode) === key) || null;
+  }
+
+  function updateLeadProfile(lead, input = {}, options = {}) {
+    if (!lead?.id) throw new Error('Cliente inválido.');
+    const merged = normalizeLead({
+      ...lead,
+      ...input,
+      id: lead.id,
+      internalCode: input.internalCode ?? lead.internalCode,
+      telefone: input.telefone ?? lead.telefone,
+      additionalPhones: input.additionalPhones ?? lead.additionalPhones,
+      referrals: input.referrals ?? lead.referrals,
+      objections: Array.isArray(input.objections) ? input.objections : lead.objections,
+      updatedAt: options.now || new Date().toISOString()
+    });
+    if (!merged.empresa && !merged.nome) throw new Error('Informe empresa ou contato.');
+    return merged;
+  }
+
+  const EDITABLE_PROFILE_FIELDS = Object.freeze([
+    'empresa','nome','internalCode','telefone','additionalPhones','email','cnpj','cpf','cidadeUf','segmentId',
+    'status','priority','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','sourceChannel',
+    'referrals','observacoes'
+  ]);
+
+  function diffProfile(before, after) {
+    return EDITABLE_PROFILE_FIELDS.filter(field => JSON.stringify(before?.[field] ?? null) !== JSON.stringify(after?.[field] ?? null));
+  }
+
   function getLeadById(leads, id) {
     return (leads || []).find(lead => String(lead.id) === String(id)) || null;
   }
 
-  return { normalizeLead, findPossibleDuplicates, createProspect, getLeadById };
+  return { normalizeLead, findPossibleDuplicates, createProspect, getLeadById, searchableText, matchesSearch, findInternalCodeConflict, updateLeadProfile, diffProfile };
 }));

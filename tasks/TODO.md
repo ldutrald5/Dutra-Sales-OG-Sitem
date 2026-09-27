@@ -59,11 +59,11 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 ## TASK-007 — Painel lateral do cliente
 
 - **Objetivo:** consultar e agir sobre a conta sem abandonar a Mesa.
-- **Escopo:** resumo, contato, dor, objeções, oportunidade, timeline e ações.
-- **Arquivos relevantes:** `docs/03-DESIGN-SYSTEM.md`, `docs/04-CRM.md`, `docs/05-MESA-DE-VENDAS.md`.
-- **Critério de aceite:** abertura rápida, teclado e celular; mesmas informações do CRM; sem cópia paralela.
+- **Escopo:** resumo, contato, Código OG, telefones adicionais, indicações, dor, objeções, contexto, timeline e ações.
+- **Arquivos relevantes:** `docs/03-DESIGN-SYSTEM.md`, `docs/04-CRM.md`, `docs/05-MESA-DE-VENDAS.md`, `apps/sistema-og/app.js`, `services/crm-service.js`.
+- **Critério de aceite:** abertura rápida, teclado e celular; mesmas informações do CRM; sem cópia paralela; Código OG pesquisável e independente do status de compra.
 - **Dependências:** TASK-001 e TASK-004.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md` e PR #17.
 
 ## TASK-008 — Central Call AI
 

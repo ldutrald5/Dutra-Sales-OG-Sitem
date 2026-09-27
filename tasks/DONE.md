@@ -72,3 +72,16 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 - **Ativação externa pendente:** autenticar a conta Cloudflare, criar o KV e cadastrar o segredo de acesso.
 
 Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos principais, testes executados e limitações remanescentes. Mover o status em `TODO.md` sem apagar o histórico do objetivo original.
+
+## TASK-007 — Painel lateral do cliente
+
+- **Data:** 2026-09-27.
+- **Mudança observável:** “Ficha completa” em Meu Dia e a lista do CRM abrem a mesma ficha lateral; o vendedor pode editar empresa, contato, Código OG, telefones extras, e-mail, CNPJ, cidade/UF, segmento, status, prioridade, decisor, frota, dor, objeções, próxima ação, observações e indicações sem abandonar a tela.
+- **Semântica do Código OG:** `internalCode` é código de cadastro no sistema da empresa e não significa compra; o DUTRA OS não gera código fictício e bloqueia duplicidade.
+- **Busca:** Código OG passa a localizar a conta em CRM, Meu Dia e Call AI.
+- **Continuidade:** histórico, Company 360 e materiais continuam acessíveis dentro da ficha; `lead.id`, sincronização e backups existentes foram preservados.
+- **UX:** CRM foi simplificado para lista pesquisável + ficha lateral; ferramentas de importação foram rebaixadas para menu secundário; no celular a lista vira cartões e a ficha ocupa a tela com foco preso, Escape e alvos de toque mínimos.
+- **Auditoria:** alterações registram `client.profile.updated`; mudança de código registra `client.og_code.updated`.
+- **Validação:** `npm run og:client-sheet:test`, `npm run validate`, security/audit/release gate em CI.
+- **Arquivos principais:** `apps/sistema-og/app.js`, `index.html`, `styles.css`, `services/crm-service.js`, `modules/sales-desk.js`, `scripts/test_client_sheet.mjs`.
+
