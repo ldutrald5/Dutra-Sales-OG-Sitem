@@ -78,7 +78,9 @@
       }else if(action==='link_company'){
         if(!['review','ambiguous'].includes(current.status))throw new Error(`Lead ${leadId} não está mais elegível para vínculo (${current.status}). Gere nova prévia.`);
         const companyId=clean(approval.companyId);
-        if(!current.candidates.some(item=>clean(item.companyId)===companyId))throw new Error(`Company ${companyId||'?'} não é candidata atual para ${leadId}.`);
+        const chosen=current.candidates.find(item=>clean(item.companyId)===companyId);
+        if(!chosen)throw new Error(`Company ${companyId||'?'} não é candidata atual para ${leadId}.`);
+        if(current.status==='review'&&!chosen.signals.includes('cnpj'))throw new Error(`Company ${companyId} não corresponde ao CNPJ confirmado de ${leadId}.`);
         const index=next.companies.findIndex(item=>item?.entityType==='company'&&clean(item.id)===companyId);
         if(index<0)throw new Error(`Company não encontrada: ${companyId}`);
         const existing=next.companies[index];
