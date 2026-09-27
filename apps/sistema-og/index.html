@@ -601,6 +601,13 @@
           </select>
           <button type="button" data-quick-lead="crm" class="og-button og-button-primary crm-new-client">＋ Novo cliente</button>
           <button id="btn-crm-excel-preview" type="button" class="og-button og-button-secondary">⬆ Importar planilha</button>
+          <details class="crm-tools-menu crm-export-menu">
+            <summary>⬇ Exportar leads</summary>
+            <div>
+              <button id="btn-crm-export-all-xlsx" type="button">Exportar todos os leads</button>
+              <button id="btn-crm-export-current-xlsx" type="button">Exportar visão atual</button>
+            </div>
+          </details>
           <details class="crm-tools-menu">
             <summary>Ferramentas</summary>
             <div>
@@ -1314,6 +1321,7 @@
   <script src="services/interaction-service.js"></script>
   <script src="services/whatsapp-service.js"></script>
   <script src="services/spreadsheet-import-service.js"></script>
+  <script src="services/spreadsheet-export-service.js"></script>
   <script src="services/call-ai-context.js"></script>
   <script src="services/knowledge-selector.js"></script>
   <script src="services/call-ai-prompts.js"></script>
