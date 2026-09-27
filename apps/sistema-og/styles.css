@@ -870,3 +870,8 @@ body {
 @media(max-width:640px){.company-360-metrics{grid-template-columns:1fr 1fr}.company-360-columns{grid-template-columns:1fr}.company-360-dates{flex-direction:column;gap:.25rem}}
 
 .company-360-actions{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.75rem;padding-top:.65rem;border-top:1px solid #26313b}.company-360-action{margin-top:.65rem;padding:.48rem .65rem;border:1px solid rgba(16,185,129,.35);border-radius:.58rem;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.56rem;font-weight:900}.company-360-actions .company-360-action{margin-top:0}.company-360-action:hover{background:rgba(16,185,129,.15)}
+
+
+/* Package 04R — conflito de sincronização */
+.og-sync-conflict-banner{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:center;gap:1rem;padding:.7rem 1rem;border-bottom:1px solid rgba(245,158,11,.45);background:#1c1407;color:#fde68a;box-shadow:0 10px 28px rgba(0,0,0,.35)}.og-sync-conflict-banner>div:first-child{display:flex;flex-direction:column;gap:.15rem}.og-sync-conflict-banner strong{font-size:.72rem}.og-sync-conflict-banner span{font-size:.58rem;color:#d6b96e}.og-sync-conflict-actions{display:flex;gap:.4rem}.og-sync-conflict-actions button{padding:.42rem .6rem;border:1px solid rgba(245,158,11,.45);border-radius:.55rem;background:rgba(245,158,11,.1);color:#fde68a;font-size:.56rem;font-weight:900}.og-sync-conflict-actions button:hover{background:rgba(245,158,11,.2)}[data-mode="conflict"]{color:#fbbf24!important}
+@media(max-width:640px){.og-sync-conflict-banner{align-items:stretch;flex-direction:column}.og-sync-conflict-actions{display:grid;grid-template-columns:1fr 1fr}.og-sync-conflict-actions button{min-height:2.25rem}}
