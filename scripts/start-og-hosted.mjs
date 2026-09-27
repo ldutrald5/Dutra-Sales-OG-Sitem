@@ -14,6 +14,18 @@ process.env.OG_LOCAL_ACCESS_TOKEN = token;
 if (pin) process.env.OG_LOCAL_ACCESS_PIN = pin;
 process.env.OG_HOST = process.env.OG_HOST || '0.0.0.0';
 process.env.OG_PORT = String(port);
-process.env.OG_DATA_DIR = process.env.OG_DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || '/data/sistema-og';
+const volumeMount = String(process.env.RAILWAY_VOLUME_MOUNT_PATH || '').trim().replace(/\/+$/, '');
+process.env.OG_DATA_DIR = process.env.OG_DATA_DIR || volumeMount || '/data';
+
+const { applyHostedSeed } = await import('./apply-hosted-seed.mjs');
+const seedResult = applyHostedSeed({ env: process.env });
+if (seedResult.status === 'applied') {
+  console.log(`Seed hospedado aplicado: ${seedResult.added} novos, ${seedResult.matched} conciliados, ${seedResult.finalLeadCount} clientes no total.`);
+} else if (seedResult.status === 'already_applied') {
+  console.log(`Seed hospedado já aplicado anteriormente: ${seedResult.seedId}.`);
+}
+for (const key of Object.keys(process.env)) {
+  if (key === 'OG_STATE_SEED_GZIP_B64' || /^OG_STATE_SEED_GZIP_B64_\d+$/.test(key)) delete process.env[key];
+}
 
 await import('../apps/sistema-og/server.mjs');

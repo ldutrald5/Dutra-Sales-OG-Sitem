@@ -8,9 +8,11 @@ Resumo de conversa e observações são campos protegidos. O sistema nunca os su
 
 ## Estado implementado
 
-A primeira fatia é somente leitura. Na tela CRM, o vendedor escolhe um arquivo `.xlsx`; o navegador valida as quatro abas esperadas, lê `📋 CRM` a partir do cabeçalho da linha 7 e compara cada registro com `state.leads`. Nenhum dado é persistido.
+O fluxo nativo de importação aceita `.xlsx` e `.csv` e continua usando `state.leads` como fonte mestre. O modelo `CRM OG dr` é reconhecido diretamente; planilhas genéricas passam por detecção de cabeçalho e mapeamento automático de colunas, com possibilidade de ajuste manual antes do preview.
 
-O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `CONFLICT` ou `INVALID`. A correspondência usa código externo, documento, telefone e por último nome mais cidade como sugestão de baixa confiança. Observações diferentes geram conflito obrigatório.
+O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `POSSIBLE_DUPLICATE`, `CONFLICT` ou `INVALID`. A correspondência usa Código OG, CNPJ/CPF, telefone e e-mail como identificadores fortes; empresa + cidade é apenas sugestão fraca. Chaves repetidas dentro do próprio arquivo também são marcadas para revisão.
+
+Nenhuma linha é aplicada automaticamente. O usuário escolhe `Criar novo`, `Atualizar existente` ou `Ignorar`; em atualizações, campos protegidos de histórico/observação permanecem sob decisão explícita. Só após a confirmação final o resultado é gravado em `state.leads`, com trilha de auditoria contendo arquivo, hash, linha de origem e campos alterados.
 
 ## Contrato protegido
 
@@ -19,7 +21,7 @@ O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `CONFLIC
 - Derivado: última interação e quantidade de contatos.
 - Estrutura: tabelas, mesclagens, validações, formatação condicional e estilos.
 
-Esta fase não importa, exporta nem altera workbooks. A exportação futura deve copiar o modelo e escrever somente nas células autorizadas após preview.
+A importação confirmada altera apenas a base `state.leads`; o arquivo de origem nunca é modificado. A exportação XLSX continua como fase seguinte e deverá partir do estado atual da base, sem transformar a planilha em banco paralelo.
 
 ## Templates canônicos validados
 
@@ -47,15 +49,25 @@ A validação anterior baseada apenas em fixture sintética está superada pelo 
 - Faixa operacional: linhas 7 a 80.
 - Competência: usar `Data da venda` como evidência principal, não confiar cegamente no nome da aba.
 
-## Regra de exportação
+## Exportação nativa de leads
 
-A experiência alvo passa a usar dois comandos explícitos:
+A tela **Leads & Transcrição** oferece duas saídas XLSX:
 
-- `Exportar CRM Master` → cópia versionada do `CRM OG dr`, preservando o visual preto/amarelo e estruturas protegidas.
-- `Exportar Vendas/Comissões` → cópia versionada do modelo de Pós-Vendas, preservando fórmulas e layout mensal.
+- `Exportar todos os leads` → usa a base completa `state.leads`;
+- `Exportar visão atual` → usa exatamente o resultado dos filtros e da busca que estão ativos na tela.
 
-Nenhum exportador pode editar o original. O arquivo gerado deve ser validado antes de oferecer `Abrir` e `Baixar`.
+O workbook é gerado em Web Worker para evitar travar a interface. Ele contém as quatro abas compatíveis com o CRM Master (`🚀 HOJE`, `📋 CRM`, `📥 LISTA`, `👥 CONTATOS`) e mantém o cabeçalho canônico de `📋 CRM` na linha 7. Campos adicionais do DUTRA OS são acrescentados depois das colunas canônicas, incluindo situação da conversa, decisor, frota, dor, objeções, origem/lista, datas e ID interno.
+
+A exportação sempre lê o estado atual do DUTRA OS no momento do clique, inclusive clientes criados manualmente depois da última importação. Ela não reutiliza uma cópia antiga do arquivo original e nunca transforma a planilha em banco paralelo.
+
+Os campos extras exportados também são reconhecidos no round-trip pelo importador quando o XLSX gerado volta ao sistema.
+
+### Acabamento visual do CRM Master
+
+O exportador agora reproduz a identidade visual do modelo canônico `CRM OG dr`: preto `#171717`, amarelo `#F5C518`, tipografia Aptos/Aptos Display, títulos escuros com destaque amarelo, cabeçalhos pretos, linhas alternadas claras e sinalização semântica para prioridade/status. A aba `📋 CRM` mantém o cabeçalho na linha 7 e as quatro abas continuam no mesmo desenho operacional do modelo.
+
+A geração visual é feita dentro do Web Worker por um builder OOXML próprio. Isso evita bloquear a interface e não depende de uma cópia antiga com dados reais de clientes.
 
 ## Próxima fase
 
-Usar os fingerprints reais como baseline para implementar a exportação sobre cópia do modelo e, depois, a importação transacional. A persistência no DUTRA OS continua sendo independente do Excel; a planilha é backup/interoperação, não banco primário.
+Validar a experiência publicada no navegador e, depois, avançar para refinamentos adicionais do template (fórmulas/validações específicas que fizerem sentido), mantendo `state.leads` como única fonte de verdade.
