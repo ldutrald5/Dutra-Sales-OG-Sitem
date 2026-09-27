@@ -6572,7 +6572,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       });
       downloadExportedWorkbook(result.buffer, result.filename);
       document.querySelector('.crm-export-menu')?.removeAttribute('open');
-      showNotification(\`\${leads.length} lead\${leads.length === 1 ? '' : 's'} exportado\${leads.length === 1 ? '' : 's'} em XLSX.\`, 'success');
+      showNotification(`${leads.length} lead${leads.length === 1 ? '' : 's'} exportado${leads.length === 1 ? '' : 's'} em XLSX.`, 'success');
     } catch (error) {
       showNotification(error?.message || 'Não foi possível gerar o XLSX.', 'error');
     } finally {
