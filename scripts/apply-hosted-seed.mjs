@@ -32,7 +32,7 @@ function readState(file) {
 }
 
 function newestState(states) {
-  return states.filter(Boolean).sort((a, b) => {
+  return states.filter(item => item?.state && validState(item.state)).sort((a, b) => {
     const revisionDiff = stateRevision(b.state) - stateRevision(a.state);
     if (revisionDiff) return revisionDiff;
     return String(b.state.updatedAt || '').localeCompare(String(a.state.updatedAt || ''));
