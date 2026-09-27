@@ -384,23 +384,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function currentSyncPayload(revision = serverRevision) {
+    return {
+      leads: state.leads,
+      history: state.history,
+      operations: state.operations,
+      revision: Number(revision || 0)
+    };
+  }
+
   async function flushQueuedState() {
     if (!syncRecoveryReady || pendingSyncConflict() || pendingSyncReview()) return false;
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return false;
+    if (serverSyncInFlight) return false;
+
     let queued = null;
     try { queued = await OG_SYNC_BRIDGE.readQueuedState(); } catch {}
     if (!queued?.body) return true;
+
+    const generationAtStart = serverSyncGeneration;
+    const payload = currentSyncPayload(queued.body.revision);
+    serverSyncInFlight = true;
     try {
       const response = await apiFetch(queued.url || '/api/state', {
         method: queued.method || 'PUT',
-        body: JSON.stringify(queued.body)
+        body: JSON.stringify(payload)
       });
       if (response.status === 409) {
         const remote = await response.json();
         const conflict = OG_SYNC_CONFLICT.createConflict(
-          { leads: queued.body.leads || [], history: queued.body.history || [], operations: queued.body.operations || {} },
-          Number(queued.body.revision || 0),
+          { leads: state.leads, history: state.history, operations: state.operations },
+          Number(payload.revision || 0),
           remote
         );
+        await checkpointLocalState('queued-sync-conflict-detected');
         await persistSyncConflict(conflict);
         setSyncStatus('Conflito de sincronização', 'conflict');
         showSyncConflictBanner(conflict);
@@ -408,17 +425,77 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!response.ok) throw new Error('Servidor indisponível');
       const saved = await response.json();
-      serverRevision = Number(saved.revision || queued.body.revision || serverRevision);
+      serverRevision = Number(saved.revision || payload.revision || serverRevision);
       await OG_SYNC_BRIDGE.clearQueuedState();
+      if (serverSyncGeneration !== generationAtStart) {
+        setSyncStatus('Alterações locais aguardando envio', 'busy');
+        clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+        return false;
+      }
       setSyncStatus('Sincronizado', 'ok');
       return true;
     } catch {
+      try { await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision)); } catch {}
       setSyncStatus('Sincronização pendente', 'offline');
       return false;
+    } finally {
+      serverSyncInFlight = false;
+    }
+  }
+
+  async function runScheduledServerSync() {
+    if (!syncRecoveryReady || pendingSyncConflict() || pendingSyncReview()) return;
+    if (readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return;
+    if (serverSyncInFlight) {
+      clearTimeout(serverSyncTimer);
+      serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+      return;
+    }
+
+    const generationAtStart = serverSyncGeneration;
+    const payload = currentSyncPayload();
+    serverSyncInFlight = true;
+    try {
+      const response = await apiFetch('/api/state', { method: 'PUT', body: JSON.stringify(payload) });
+      if (response.status === 409) {
+        const remote = await response.json();
+        const conflict = OG_SYNC_CONFLICT.createConflict(
+          { leads: state.leads, history: state.history, operations: state.operations },
+          payload.revision,
+          remote
+        );
+        await checkpointLocalState('sync-conflict-detected');
+        await persistSyncConflict(conflict);
+        setSyncStatus('Conflito de sincronização', 'conflict');
+        showSyncConflictBanner(conflict);
+        return;
+      }
+      if (!response.ok) throw new Error('Servidor indisponível');
+      const saved = await response.json();
+      serverRevision = Number(saved.revision || serverRevision);
+      try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
+      setSyncStatus(serverSyncGeneration === generationAtStart ? 'Sincronizado' : 'Salvando alterações recentes…', serverSyncGeneration === generationAtStart ? 'ok' : 'busy');
+    } catch {
+      try {
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision));
+        const registration = await navigator.serviceWorker?.ready;
+        await registration?.sync?.register?.('og-sync-state');
+        setSyncStatus('Pendente de sincronização', 'offline');
+      } catch {
+        setSyncStatus('Salvo neste aparelho', 'offline');
+      }
+    } finally {
+      serverSyncInFlight = false;
+      if (serverSyncGeneration !== generationAtStart && !pendingSyncConflict() && !pendingSyncReview() && !readSmallMarker(SYNC_CONFLICT_MARKER) && !readSmallMarker(SYNC_REVIEW_MARKER)) {
+        clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+      }
     }
   }
 
   function scheduleServerSync() {
+    serverSyncGeneration += 1;
     clearTimeout(serverSyncTimer);
     if (!syncRecoveryReady) {
       setSyncStatus('Preparando sincronização…', 'busy');
@@ -426,6 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()) {
       setSyncStatus('Recuperação de conflito pendente', 'conflict');
+      return;
+    }
+    if (readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()) {
+      setSyncStatus('Revisão pendente em outra aba/sessão', 'conflict');
       return;
     }
     if (pendingSyncReview()) {
@@ -439,39 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     setSyncStatus('Salvando…', 'busy');
-    const payload = { leads: state.leads, history: state.history, operations: state.operations, revision: serverRevision };
-    serverSyncTimer = setTimeout(async () => {
-      try {
-        const response = await apiFetch('/api/state', { method: 'PUT', body: JSON.stringify(payload) });
-        if (response.status === 409) {
-          const remote = await response.json();
-          const conflict = OG_SYNC_CONFLICT.createConflict(
-            { leads: payload.leads, history: payload.history, operations: payload.operations },
-            payload.revision,
-            remote
-          );
-          await checkpointLocalState('sync-conflict-detected');
-          await persistSyncConflict(conflict);
-          setSyncStatus('Conflito de sincronização', 'conflict');
-          showSyncConflictBanner(conflict);
-          return;
-        }
-        if (!response.ok) throw new Error('Servidor indisponível');
-        const saved = await response.json();
-        serverRevision = Number(saved.revision || serverRevision);
-        try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
-        setSyncStatus('Sincronizado', 'ok');
-      } catch {
-        try {
-          await OG_SYNC_BRIDGE.queueState(payload);
-          const registration = await navigator.serviceWorker?.ready;
-          await registration?.sync?.register?.('og-sync-state');
-          setSyncStatus('Pendente de sincronização', 'offline');
-        } catch {
-          setSyncStatus('Salvo neste aparelho', 'offline');
-        }
-      }
-    }, 450);
+    serverSyncTimer = setTimeout(runScheduledServerSync, 450);
   }
 
   async function restoreSyncRecovery() {
