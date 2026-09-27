@@ -10,10 +10,16 @@ assert.ok(sw.includes("'/services/sync-conflict-service.js'"),'serviço de confl
 assert.ok(sw.includes("'/services/sync-bridge-service.js'"),'Sync Bridge fora do shell offline');
 assert.ok(app.includes("OG_SYNC_CONFLICT.createConflict("),'409 deve criar snapshot de conflito');
 assert.ok(app.includes("OG_SYNC_BRIDGE.saveConflict(conflict)"),'conflito deve persistir fora de sessionStorage');
-assert.ok(app.includes("OG_SYNC_BRIDGE.queueState(payload)"),'falha de rede deve manter outbox');
+assert.ok(app.includes("OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision))"),'falha de rede deve manter o estado local mais recente na outbox');
 assert.ok(app.includes("async function flushQueuedState()"),'outbox deve ter flush autenticado no foreground');
 assert.ok(app.includes("await restoreSyncRecovery();"),'recovery deve acontecer antes do pull inicial');
 assert.ok(app.includes("readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()"),'marcador de conflito deve bloquear pull/sync');
+assert.ok(app.includes("readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()"),'marcador de revisão deve bloquear pull/sync');
+assert.ok(app.includes('serverSyncInFlight'),'escritas devem ser serializadas');
+assert.ok(app.includes('serverSyncGeneration'),'edições durante request devem gerar novo envio');
+assert.ok(app.includes("setTimeout(runScheduledServerSync, 120)"),'alteração concorrente deve ser reenfileirada sem auto-conflito');
+assert.ok(app.includes("window.addEventListener('storage'"),'outras abas devem disparar recovery');
+assert.ok(app.includes("resolved: true"),'limpeza resiliente deve usar tombstone antes de apagar recovery');
 assert.ok(app.includes("if (pendingSyncConflict())"),'novo sync deve parar enquanto conflito estiver pendente');
 assert.ok(app.includes('Ver divergências'),'UX de detalhes ausente');
 assert.ok(app.includes('Preparar conciliação'),'UX de revisão ausente');
