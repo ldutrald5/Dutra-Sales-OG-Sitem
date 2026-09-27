@@ -2,7 +2,7 @@
 
 ## Status
 
-Em andamento — BUILD concluído em branch; aguarda auditoria/gate final.
+Concluída — auditoria final aprovada; closeout documental e Builder Brain executado no PR #23. Sem merge neste fechamento.
 
 ## Objetivo
 
@@ -80,9 +80,18 @@ Esses itens pertencem a pacotes posteriores.
 - [x] FIX de auditoria: Mesa/Meu Dia delega ao score canônico sem pesos duplicados.
 - [x] FIX de auditoria: trocar a descrição da ação invalida contexto antigo; trocar só a data preserva.
 - [x] FIX de auditoria: estados sem ação explícita não recebem “Definir próxima ação”.
-- [ ] CI/gates após o FIX.
-- [ ] Auditoria final independente.
-- [ ] Closeout do Builder Brain após aprovação.
+- [x] CI/gates após o FIX.
+- [x] Auditoria final independente aprovada.
+- [x] Closeout do Builder Brain após aprovação.
+
+## Aprendizados do ciclo
+
+- Uma única fonte determinística de score deve alimentar ordenação e explicação; scores paralelos inevitavelmente divergem.
+- Mudanças na descrição da próxima ação invalidam motivo/objetivo/resultado esperado dependentes; alterar somente a data pode preservar esse contexto.
+- Estados terminais ou sem próxima ação válida não recebem uma ação inventada apenas para preencher a interface.
+- Todos os fluxos de UI e serviços devem passar pelos mesmos contratos centrais para evitar regras concorrentes.
+- Cache de inteligência precisa variar com o contexto comercial relevante; chave incompleta pode reutilizar orientação obsoleta.
+- Testes de regressão precisam cobrir caminhos alternativos de UI/entrada, não apenas funções centrais.
 
 ## Rollback
 
