@@ -600,16 +600,16 @@
             <option value="fechado">Venda fechada</option>
           </select>
           <button type="button" data-quick-lead="crm" class="og-button og-button-primary crm-new-client">＋ Novo cliente</button>
+          <button id="btn-crm-excel-preview" type="button" class="og-button og-button-secondary">⬆ Importar planilha</button>
           <details class="crm-tools-menu">
             <summary>Ferramentas</summary>
             <div>
-              <button id="btn-crm-import-modal" type="button">Importar / OCR</button>
-              <button id="btn-crm-excel-preview" type="button">Excel · Preview</button>
-              <button id="btn-crm-export-csv" type="button">Exportar CSV</button>
+              <button id="btn-crm-import-modal" type="button">Transcrição / OCR</button>
+              <button id="btn-crm-export-csv" type="button">Exportar CSV legado</button>
               <button id="btn-crm-clear-all" type="button" class="danger">Limpar base</button>
             </div>
           </details>
-          <input id="crm-excel-file" type="file" accept=".xlsx" class="hidden">
+          <input id="crm-excel-file" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
         </div>
       </section>
 
@@ -635,10 +635,14 @@
       </section>
 
 <section id="crm-excel-preview-panel" class="clean-card p-4 hidden" aria-live="polite">
-        <div class="og-section-head"><div><span class="og-kicker">CONCILIAÇÃO SEGURA</span><h2>Excel × clientes atuais</h2><p id="crm-excel-summary">Nenhum arquivo analisado.</p></div><button id="crm-excel-close" type="button">Fechar</button></div>
+        <div class="og-section-head"><div><span class="og-kicker">IMPORTAÇÃO SEGURA</span><h2>Planilha × base atual</h2><p id="crm-excel-summary">Nenhum arquivo analisado.</p></div><button id="crm-excel-close" type="button">Fechar</button></div>
+        <div id="crm-import-mapping" class="spreadsheet-mapping hidden">
+          <div class="spreadsheet-mapping-head"><div><b>Mapeamento de colunas</b><span id="crm-import-mapping-note">O sistema tentou reconhecer os campos automaticamente.</span></div><button id="crm-import-remap-preview" type="button">Atualizar preview</button></div>
+          <div id="crm-import-mapping-fields" class="spreadsheet-mapping-grid"></div>
+        </div>
         <div id="crm-excel-counters" class="prospect-session-metrics"></div>
-        <div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Linha</th><th>Empresa</th><th>Estado</th><th>Correspondência</th><th>Alterações e decisão</th></tr></thead><tbody id="crm-excel-preview-body"></tbody></table></div>
-        <div class="spreadsheet-review-actions"><p id="crm-excel-review-note" class="spreadsheet-readonly-note">Nenhum dado foi alterado. Revise cada diferença antes de confirmar.</p><button id="crm-excel-apply" type="button" class="og-button og-button-primary" disabled>Aplicar decisões confirmadas</button></div>
+        <div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Linha</th><th>Empresa</th><th>Classificação</th><th>Correspondência</th><th>Decisão</th></tr></thead><tbody id="crm-excel-preview-body"></tbody></table></div>
+        <div class="spreadsheet-review-actions"><p id="crm-excel-review-note" class="spreadsheet-readonly-note">Nada será gravado antes da sua confirmação.</p><button id="crm-excel-apply" type="button" class="og-button og-button-primary" disabled>Confirmar importação</button></div>
       </section>
 
       <section class="clean-card crm-list-card">
