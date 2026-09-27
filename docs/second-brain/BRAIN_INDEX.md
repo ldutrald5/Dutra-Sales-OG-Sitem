@@ -1,20 +1,20 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 42 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 46 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
-| anti_pattern | 4 |
+| anti_pattern | 5 |
 | cycle | 4 |
-| decision | 7 |
+| decision | 8 |
 | experiment | 1 |
 | idea | 3 |
 | knowledge | 3 |
 | open_question | 2 |
-| pattern | 9 |
-| source | 9 |
+| pattern | 10 |
+| source | 10 |
 
 ## Active decisions
 
@@ -32,6 +32,8 @@ Generated from 42 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Remove vulnerable xlsx npm dependency and retain the vendored parser only inside a time- and size-bounded Web Worker until a compatible maintained replacement is validated.
 - **DEC-SYNC-04R-001 — Human-reviewed revision conflicts with auth-safe outbox** (active/high)
   A revision conflict blocks automatic writes until a preserved local/remote comparison is reviewed; queued state persists without credentials and only an authenticated foreground session may perform the remote PUT.
+- **DEC-MIG-05R-001 — Legacy reconciliation requires reviewed intent and reversible apply** (active/high)
+  Legacy lead data may enter canonical Company/Contact only through dry-run classification, explicit user selection, checkpoint, revalidation against current state and controlled apply; weak/ambiguous matches never become canonical truth automatically.
 
 ## Open questions
 
@@ -67,11 +69,15 @@ Generated from 42 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Keep JSONL canonical for versioning/parsing while generating a readable index and metrics for human retrieval/adoption.
 - **PAT-SYNC-001 — Durable outbox with foreground-auth handoff** (validated/high)
   Persist retryable state and recovery metadata without credentials, let background infrastructure signal pending work, and perform authenticated delivery in the foreground where session credentials already exist.
+- **PAT-MIG-001 — Dry-run, approve, revalidate, apply, rollback selectively** (validated/high)
+  For brownfield canonicalization, classify without mutation, require explicit approval, re-check candidates at apply time, checkpoint first and reverse only affected entities while blocking rollback if later work depends on them.
 
 ## Recent sources
 
 - **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
+- **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (validated/high)
+  Package 05R branch validation establishes a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
