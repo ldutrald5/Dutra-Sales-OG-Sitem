@@ -709,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (tabId === 'dia') renderDayDashboard();
+    else if (tabId === 'cotacao') refreshQuoteClientSheetAccess();
     else if (tabId === 'prospeccao') renderProspecting();
     else if (tabId === 'historico') renderHistory();
     else if (tabId === 'catalogo') renderCatalog();
@@ -2246,11 +2247,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function saveQuoteToHistory(quoteData) {
+    const relatedLead = findLeadForClientData(state.client);
     const newQuote = {
       id: 'COT-' + Date.now().toString().slice(-6),
       date: new Date().toISOString(),
-      clientName: state.client.nome || 'Cliente sem nome',
-      clientCompany: state.client.empresa || '',
+      clientId: relatedLead?.id || null,
+      clientInternalCode: relatedLead?.internalCode || null,
+      clientName: state.client.nome || relatedLead?.nome || 'Cliente sem nome',
+      clientCompany: state.client.empresa || relatedLead?.empresa || '',
       totalValue: quoteData.totalFinalVenda,
       totalPecas: quoteData.totalPecas,
       payload: JSON.parse(JSON.stringify(state))
@@ -2262,12 +2266,6 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     try {
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
       scheduleServerSync();
-      const phoneKey = (state.client.telefone || '').replace(/\D/g, '');
-      const companyKey = (state.client.empresa || '').trim().toLowerCase();
-      const relatedLead = state.leads.find(lead =>
-        (phoneKey && (lead.telefone || '').replace(/\D/g, '') === phoneKey) ||
-        (companyKey && (lead.empresa || '').trim().toLowerCase() === companyKey)
-      );
       if (relatedLead) {
         relatedLead.interactions = Array.isArray(relatedLead.interactions) ? relatedLead.interactions : [];
         relatedLead.interactions.push({
@@ -2742,12 +2740,60 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // ENLACES DOS INPUTS DO CLIENTE E CONDIÇÕES
   // =========================================================================
 
+  function findLeadForClientData(client = {}) {
+    const digits = value => String(value || '').replace(/\D/g, '');
+    const text = value => String(value || '').trim().toLocaleLowerCase('pt-BR');
+    const cnpj = digits(client.cnpj);
+    const phone = digits(client.telefone);
+    const code = text(client.internalCode);
+    const company = text(client.empresa);
+    const strong = state.leads.filter(lead =>
+      (code && text(lead.internalCode) === code) ||
+      (cnpj.length >= 11 && digits(lead.cnpj) === cnpj) ||
+      (phone.length >= 10 && digits(lead.telefone) === phone)
+    );
+    if (strong.length === 1) return strong[0];
+    if (strong.length > 1) return null;
+    if (!company) return null;
+    const byCompany = state.leads.filter(lead => text(lead.empresa || lead.nome) === company);
+    return byCompany.length === 1 ? byCompany[0] : null;
+  }
+
+  function resolveHistoryLead(item) {
+    if (!item) return null;
+    if (item.clientId) {
+      const direct = OG_CRM_SERVICE.getLeadById(state.leads, item.clientId);
+      if (direct) return direct;
+    }
+    return findLeadForClientData(item.payload?.client || {
+      empresa: item.clientCompany,
+      nome: item.clientName,
+      internalCode: item.clientInternalCode
+    });
+  }
+
+  function refreshQuoteClientSheetAccess() {
+    const button = document.getElementById('quote-open-client-sheet');
+    if (!button) return;
+    const lead = findLeadForClientData(state.client);
+    button.classList.toggle('hidden', !lead);
+    button.disabled = !lead;
+    if (lead) {
+      button.dataset.openClientSheet = lead.id;
+      button.textContent = `Ficha · ${clientCodeLabel(lead) || lead.empresa || lead.nome || 'cliente'}`;
+    } else {
+      delete button.dataset.openClientSheet;
+      button.textContent = 'Ficha do cliente';
+    }
+  }
+
   function initClientInputs() {
     const bindInput = (id, key) => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('input', (e) => {
         state.client[key] = e.target.value;
+        refreshQuoteClientSheetAccess();
         recalculateQuote();
       });
     };
@@ -2789,6 +2835,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     state.history.forEach((h, idx) => {
       const d = new Date(h.date);
       const dateFormatted = d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const relatedLead = resolveHistoryLead(h);
       const card = document.createElement('div');
       card.className = 'clean-card p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4';
 
@@ -2798,7 +2845,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             ${h.id}
           </div>
           <div>
-            <div class="font-bold text-slate-100">${h.clientName} ${h.clientCompany ? `<span class="text-xs font-normal text-slate-400">(${h.clientCompany})</span>` : ''}</div>
+            ${relatedLead ? `<button type="button" class="history-client-link" data-open-client-sheet="${escapeHtml(relatedLead.id)}"><strong>${escapeHtml(h.clientName || relatedLead.nome || 'Cliente')}</strong>${h.clientCompany ? `<span>(${escapeHtml(h.clientCompany)})</span>` : ''}<small>abrir ficha</small></button>` : `<div class="font-bold text-slate-100">${escapeHtml(h.clientName || 'Cliente')} ${h.clientCompany ? `<span class="text-xs font-normal text-slate-400">(${escapeHtml(h.clientCompany)})</span>` : ''}</div>`}
             <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
               <span>📦 ${h.totalPecas} peças</span> •
               <span>📅 ${dateFormatted}</span>
@@ -2811,6 +2858,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             <div class="text-lg font-bold text-amber-400">R$ ${h.totalValue.toFixed(2)}</div>
           </div>
           <div class="flex items-center gap-1.5">
+            ${relatedLead ? `<button type="button" data-open-client-sheet="${escapeHtml(relatedLead.id)}" class="btn-client-hist px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25 text-xs font-bold">Ficha</button>` : ''}
             <button data-load="${idx}" class="btn-load-hist px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 transition font-bold">
               Carregar
             </button>
@@ -3813,6 +3861,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       setVal('client-cnpj', state.client.cnpj);
       setVal('client-phone', state.client.telefone);
       setVal('client-city', state.client.cidadeUf);
+      refreshQuoteClientSheetAccess();
       closeClientSheet();
       switchTab('cotacao');
       recalculateQuote();
