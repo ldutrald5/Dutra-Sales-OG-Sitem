@@ -5799,8 +5799,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <section class="operations-foundation-grid">
         <article class="clean-card operations-status-card"><span class="og-kicker">FUNDAÇÃO DE DADOS</span><h2>Schema operacional v${summary.schemaVersion}</h2><p>A base foi migrada de forma aditiva. Clientes e cotações continuam preservados, enquanto os novos módulos usam coleções versionadas.</p><div class="operations-status-line"><span class="operations-dot ready"></span><b>Migração validada</b></div><div class="operations-status-line"><span class="operations-dot ready"></span><b>Biblioteca e Performance ativas</b></div><div class="operations-status-line"><span class="operations-dot pending"></span><b>Vendas e comissões aguardam as próximas fases</b></div></article>
         <article class="clean-card operations-status-card"><span class="og-kicker">ATIVIDADE MAIS RECENTE</span><h2>${lastEvent ? escapeHtml(lastEvent.type) : 'Nenhum evento novo'}</h2><p>${lastEvent ? `${escapeHtml(lastEvent.clientId || '')} · ${escapeHtml(new Date(lastEvent.at).toLocaleString('pt-BR'))}` : 'Os novos cadastros e ações operacionais passarão a alimentar esta linha do tempo.'}</p><button type="button" data-operations-open-crm class="og-button og-button-primary">Abrir clientes</button></article>
-      </section>`;
+      </section>
+      ${renderLegacyReconciliationPanel()}`;
     root.querySelector('[data-operations-open-crm]')?.addEventListener('click', () => switchTab('crm'));
+    bindLegacyReconciliationPanel(root);
     renderPerformanceDashboard();
   }
 
