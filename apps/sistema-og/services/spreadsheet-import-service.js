@@ -152,7 +152,7 @@
         if(!best||score>best.score)best={canonical:false,sheetName,headerRow:index,headers:headers.map(value=>String(value??'')),mapping,score,mapped};
       }
     }
-    if(!best||best.mapped===0)throw new Error('Não encontrei um cabeçalho reconhecível. Ajuste o mapeamento das colunas.');
+    if(!best)throw new Error('A planilha não possui linhas utilizáveis.');
     return best;
   }
 
