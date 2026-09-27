@@ -2749,7 +2749,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const company = text(client.empresa);
     const strong = state.leads.filter(lead =>
       (code && text(lead.internalCode) === code) ||
-      (cnpj.length >= 11 && digits(lead.cnpj) === cnpj) ||
+      (cnpj.length === 14 && digits(lead.cnpj) === cnpj) ||
       (phone.length >= 10 && digits(lead.telefone) === phone)
     );
     if (strong.length === 1) return strong[0];
