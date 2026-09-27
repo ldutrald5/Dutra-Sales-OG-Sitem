@@ -6533,6 +6533,59 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     await loadSharedState();
   }
 
+  function downloadExportedWorkbook(buffer, filename) {
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  async function exportLeadWorkbook(scope = 'all') {
+    const currentView = scope === 'current';
+    const leads = currentView
+      ? getFilteredLeads()
+      : OG_LEAD_INTELLIGENCE.filterSort(state.leads.slice(), {});
+
+    if (!leads.length) {
+      showNotification(currentView ? 'A visão atual não possui leads para exportar.' : 'Não há leads para exportar.', 'info');
+      return;
+    }
+
+    const allButton = document.getElementById('btn-crm-export-all-xlsx');
+    const currentButton = document.getElementById('btn-crm-export-current-xlsx');
+    const buttons = [allButton, currentButton].filter(Boolean);
+    buttons.forEach(button => { button.disabled = true; });
+    const activeButton = currentView ? currentButton : allButton;
+    const previousText = activeButton?.textContent;
+    if (activeButton) activeButton.textContent = 'Gerando XLSX…';
+
+    try {
+      const result = await OG_SPREADSHEET_EXPORT.exportLeads(leads, {
+        scope: currentView ? 'current' : 'all',
+        generatedAt: new Date().toISOString(),
+        scoreFn: lead => OG_LEAD_INTELLIGENCE.score(lead)
+      });
+      downloadExportedWorkbook(result.buffer, result.filename);
+      document.querySelector('.crm-export-menu')?.removeAttribute('open');
+      showNotification(`${leads.length} lead${leads.length === 1 ? '' : 's'} exportado${leads.length === 1 ? '' : 's'} em XLSX.`, 'success');
+    } catch (error) {
+      showNotification(error?.message || 'Não foi possível gerar o XLSX.', 'error');
+    } finally {
+      buttons.forEach(button => { button.disabled = false; });
+      if (activeButton && previousText) activeButton.textContent = previousText;
+    }
+  }
+
+  function initLeadExport() {
+    document.getElementById('btn-crm-export-all-xlsx')?.addEventListener('click', () => exportLeadWorkbook('all'));
+    document.getElementById('btn-crm-export-current-xlsx')?.addEventListener('click', () => exportLeadWorkbook('current'));
+  }
+
   function exportLeadsCsv() {
     let csv = 'ID;Nome;Empresa;Telefone;CNPJ;Cidade_UF;Segmento;Status\n';
     state.leads.forEach(l => {
@@ -6579,6 +6632,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initCommandCenter();
   initQuickLead();
   initCrmExcelPreview();
+  initLeadExport();
   initCommunication();
   initCallAI();
   initMaterialLibrary();

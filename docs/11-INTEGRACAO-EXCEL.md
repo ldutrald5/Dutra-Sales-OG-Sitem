@@ -49,15 +49,23 @@ A validação anterior baseada apenas em fixture sintética está superada pelo 
 - Faixa operacional: linhas 7 a 80.
 - Competência: usar `Data da venda` como evidência principal, não confiar cegamente no nome da aba.
 
-## Regra de exportação
+## Exportação nativa de leads
 
-A experiência alvo passa a usar dois comandos explícitos:
+A tela **Leads & Transcrição** oferece duas saídas XLSX:
 
-- `Exportar CRM Master` → cópia versionada do `CRM OG dr`, preservando o visual preto/amarelo e estruturas protegidas.
-- `Exportar Vendas/Comissões` → cópia versionada do modelo de Pós-Vendas, preservando fórmulas e layout mensal.
+- `Exportar todos os leads` → usa a base completa `state.leads`;
+- `Exportar visão atual` → usa exatamente o resultado dos filtros e da busca que estão ativos na tela.
 
-Nenhum exportador pode editar o original. O arquivo gerado deve ser validado antes de oferecer `Abrir` e `Baixar`.
+O workbook é gerado em Web Worker para evitar travar a interface. Ele contém as quatro abas compatíveis com o CRM Master (`🚀 HOJE`, `📋 CRM`, `📥 LISTA`, `👥 CONTATOS`) e mantém o cabeçalho canônico de `📋 CRM` na linha 7. Campos adicionais do DUTRA OS são acrescentados depois das colunas canônicas, incluindo situação da conversa, decisor, frota, dor, objeções, origem/lista, datas e ID interno.
+
+A exportação sempre lê o estado atual do DUTRA OS no momento do clique, inclusive clientes criados manualmente depois da última importação. Ela não reutiliza uma cópia antiga do arquivo original e nunca transforma a planilha em banco paralelo.
+
+Os campos extras exportados também são reconhecidos no round-trip pelo importador quando o XLSX gerado volta ao sistema.
+
+### Etapa visual ainda separada
+
+O Bloco 2 entrega estrutura, dados e round-trip. A reprodução fiel do acabamento preto/amarelo, fórmulas e demais detalhes visuais do `CRM OG dr` permanece para o bloco seguinte, trabalhando sobre o contrato canônico já registrado.
 
 ## Próxima fase
 
-Usar os fingerprints reais como baseline para implementar a exportação sobre cópia do modelo e, depois, a importação transacional. A persistência no DUTRA OS continua sendo independente do Excel; a planilha é backup/interoperação, não banco primário.
+Aplicar o acabamento do CRM Master canônico na exportação, preservando a arquitetura atual: `state.leads` continua fonte de verdade e o XLSX continua sendo somente entrada/saída e backup portátil.
