@@ -8,9 +8,11 @@ Resumo de conversa e observações são campos protegidos. O sistema nunca os su
 
 ## Estado implementado
 
-A primeira fatia é somente leitura. Na tela CRM, o vendedor escolhe um arquivo `.xlsx`; o navegador valida as quatro abas esperadas, lê `📋 CRM` a partir do cabeçalho da linha 7 e compara cada registro com `state.leads`. Nenhum dado é persistido.
+O fluxo nativo de importação aceita `.xlsx` e `.csv` e continua usando `state.leads` como fonte mestre. O modelo `CRM OG dr` é reconhecido diretamente; planilhas genéricas passam por detecção de cabeçalho e mapeamento automático de colunas, com possibilidade de ajuste manual antes do preview.
 
-O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `CONFLICT` ou `INVALID`. A correspondência usa código externo, documento, telefone e por último nome mais cidade como sugestão de baixa confiança. Observações diferentes geram conflito obrigatório.
+O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `POSSIBLE_DUPLICATE`, `CONFLICT` ou `INVALID`. A correspondência usa Código OG, CNPJ/CPF, telefone e e-mail como identificadores fortes; empresa + cidade é apenas sugestão fraca. Chaves repetidas dentro do próprio arquivo também são marcadas para revisão.
+
+Nenhuma linha é aplicada automaticamente. O usuário escolhe `Criar novo`, `Atualizar existente` ou `Ignorar`; em atualizações, campos protegidos de histórico/observação permanecem sob decisão explícita. Só após a confirmação final o resultado é gravado em `state.leads`, com trilha de auditoria contendo arquivo, hash, linha de origem e campos alterados.
 
 ## Contrato protegido
 
@@ -19,7 +21,7 @@ O preview classifica cada linha como `NEW`, `UNCHANGED`, `SAFE_UPDATE`, `CONFLIC
 - Derivado: última interação e quantidade de contatos.
 - Estrutura: tabelas, mesclagens, validações, formatação condicional e estilos.
 
-Esta fase não importa, exporta nem altera workbooks. A exportação futura deve copiar o modelo e escrever somente nas células autorizadas após preview.
+A importação confirmada altera apenas a base `state.leads`; o arquivo de origem nunca é modificado. A exportação XLSX continua como fase seguinte e deverá partir do estado atual da base, sem transformar a planilha em banco paralelo.
 
 ## Templates canônicos validados
 
