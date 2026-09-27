@@ -4018,17 +4018,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     const view = service.buildCompany360(operations, company.id);
     if (!view) return '';
-    const money = cents => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((cents || 0) / 100);
+    const money = (cents, currency = 'BRL') => cents == null ? '—' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: currency || 'BRL' }).format(cents / 100);
+    const pipelineCurrencies = Object.keys(view.summary.pipelineValueByCurrency || {});
+    const pipelineLabel = view.summary.pipelineCurrency
+      ? money(view.summary.pipelineValueCents, view.summary.pipelineCurrency)
+      : pipelineCurrencies.length > 1 ? 'Múltiplas moedas' : money(0, 'BRL');
     const date = value => value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
     const contactNames = view.contacts.slice(0, 3).map(item => `<li><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.role || 'Contato')}${item.isDecisionMaker ? ' · Decisor' : ''}</span></li>`).join('');
-    const opportunityNames = view.openOpportunities.slice(0, 3).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents)}</span></li>`).join('');
+    const opportunityNames = view.openOpportunities.slice(0, 3).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents, item.currency || 'BRL')}</span></li>`).join('');
     return `
       <section class="company-360-beta" aria-label="Company 360 Beta">
         <header><div><span class="og-kicker">COMPANY 360 · BETA</span><strong>${escapeHtml(view.company.name)}</strong></div><span class="company-360-canonical">CANÔNICO</span></header>
         <div class="company-360-metrics">
           <div><small>Contatos</small><b>${view.summary.contacts}</b></div>
           <div><small>Decisores</small><b>${view.summary.decisionMakers}</b></div>
-          <div><small>Pipeline</small><b>${money(view.summary.pipelineValueCents)}</b></div>
+          <div><small>Pipeline</small><b>${pipelineLabel}</b></div>
           <div><small>Tarefas</small><b>${view.summary.openTasks}</b></div>
         </div>
         <div class="company-360-dates"><span>Última atividade <b>${date(view.summary.lastActivityAt)}</b></span><span>Próxima tarefa <b>${date(view.summary.nextTaskAt)}</b></span></div>
