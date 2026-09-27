@@ -72,6 +72,7 @@
       const planned=list(plan.rows).find(row=>row.leadId===leadId);if(!planned)throw new Error(`Lead fora do plano: ${leadId}`);
       const current=inspectLead(lead,next);
       let company=null,action=clean(approval.action),contact=null,contactSkipped=null,beforeCompany=null;
+      if(action==='create_company'){
         if(current.status!=='proposed')throw new Error(`Lead ${leadId} não está mais elegível para criar Company (${current.status}). Gere nova prévia.`);
         company=domain.createCompany({id:idFactory('company',leadId),...current.proposal.company},{now});
         next.companies.push(company);
