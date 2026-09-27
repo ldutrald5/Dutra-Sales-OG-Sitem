@@ -14,6 +14,13 @@ const updated = editor.saveCompany(created.graph, { id: 'C1', name: 'Dutra Trans
 assert.equal(updated.company.name, 'Dutra Transportes SA');
 assert.equal(updated.graph.companies.length, 1);
 
+assert.equal(updated.company.createdAt, now, 'createdAt original deve ser preservado');
+assert.equal(updated.company.updatedAt, '2026-09-27T12:00:00.000Z', 'updatedAt deve avançar na edição');
+
+const invalidExisting = { ...updated.graph, contacts: [{ id: 'BROKEN', name: 'Legado sem entityType/companyId' }] };
+assert.throws(() => editor.saveCompany(invalidExisting, { id: 'C1', name: 'Não deve salvar', legacyLeadId: 'L1' }, { domain, now }), /entityType inválido|companyId inexistente/);
+
+
 assert.throws(() => editor.saveCompany(updated.graph, { id: 'C2', name: 'Duplicada', legacyLeadId: 'L1' }, { domain, now }), /já vinculado/);
 
 const contact = editor.saveContact(updated.graph, { id: 'CT1', companyId: 'C1', name: 'Ana', role: 'Compras', phone: '(44) 99999-0000', email: 'ANA@EXAMPLE.COM', isDecisionMaker: true }, { domain, now });
