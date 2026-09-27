@@ -5595,7 +5595,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   const LEGACY_RECONCILIATION_ROLLBACK_MARKER = 'og_legacy_reconciliation_rollback';
 
   function reconciliationStatusLabel(status) {
-    return ({ linked: 'Já vinculado', review: 'Revisar CNPJ', ambiguous: 'Ambíguo', proposed: 'Nova Company', blocked: 'Bloqueado', invalid: 'Inválido' })[status] || status;
+    return ({ linked: 'Já vinculado', review: 'Revisar correspondência', ambiguous: 'Ambíguo', proposed: 'Nova Company', blocked: 'Bloqueado', invalid: 'Inválido' })[status] || status;
   }
 
   function readLegacyRollbackMarker() {
@@ -5690,7 +5690,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const candidates = (row.candidates || []).map(candidate => {
         const company = companyMap.get(String(candidate.companyId));
         const signal = (candidate.signals || []).join(' + ') || 'sem sinal';
-        return `<option value="${escapeHtml(candidate.companyId)}">${escapeHtml(company?.name || candidate.companyId)} · ${escapeHtml(signal)}</option>`;
+        const occupied = candidate.occupiedByLeadId && String(candidate.occupiedByLeadId) !== String(row.leadId);
+        const suffix = occupied ? ` · já ligado a ${candidate.occupiedByLeadId}` : '';
+        return `<option value="${escapeHtml(candidate.companyId)}" ${occupied ? 'disabled' : ''}>${escapeHtml(company?.name || candidate.companyId)} · ${escapeHtml(signal + suffix)}</option>`;
       }).join('');
       const decision = row.status === 'proposed'
         ? `<span class="reconciliation-target">Criar: <b>${escapeHtml(row.proposal?.company?.name || lead.empresa || lead.nome || row.leadId)}</b></span>`
@@ -5701,7 +5703,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <article class="reconciliation-row" data-status="${escapeHtml(row.status)}">
           <label class="reconciliation-select"><input type="checkbox" data-reconcile-select="${escapeHtml(row.leadId)}" ${actionable ? '' : 'disabled'}><span></span></label>
           <div class="reconciliation-main"><div><b>${escapeHtml(lead.empresa || lead.nome || row.leadId || 'Sem identificação')}</b><small>${escapeHtml(row.leadId || '')} · ${escapeHtml(reconciliationStatusLabel(row.status))}</small></div>${decision}</div>
-          <div class="reconciliation-meta"><span>${lead.cnpj ? 'CNPJ ' + escapeHtml(lead.cnpj) : 'Sem CNPJ'}</span>${hasContact && actionable ? `<label><input type="checkbox" data-reconcile-contact="${escapeHtml(row.leadId)}"> incluir contato</label>` : ''}</div>
+          <div class="reconciliation-meta"><span>${lead.cnpj ? 'CNPJ ' + escapeHtml(lead.cnpj) : 'Sem CNPJ'}</span>${row.warnings?.includes('invalid_cnpj_not_promoted') ? '<em>CNPJ legado incompleto não será promovido</em>' : ''}${hasContact && actionable ? `<label><input type="checkbox" data-reconcile-contact="${escapeHtml(row.leadId)}"> incluir contato</label>` : ''}</div>
         </article>`;
     }).join('');
     return `
@@ -5710,7 +5712,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div><span class="og-kicker">PACKAGE 05R · PRÉVIA DRY-RUN</span><h2>${plan.total} leads analisados sem alterar dados</h2><p>Selecione somente os registros que você revisou. Ambíguos exigem escolha explícita da Company.</p></div>
           <div class="reconciliation-actions"><button type="button" data-reconcile-regenerate class="og-button og-button-ghost">Regerar prévia</button><button type="button" data-reconcile-export class="og-button og-button-ghost">Exportar plano</button>${marker ? '<button type="button" data-reconcile-rollback class="og-button og-button-ghost">Desfazer última aplicação</button>' : ''}</div>
         </div>
-        <div class="reconciliation-counts"><span>Já ligados <b>${count('linked')}</b></span><span>Revisar CNPJ <b>${count('review')}</b></span><span>Ambíguos <b>${count('ambiguous')}</b></span><span>Novas Companies <b>${count('proposed')}</b></span><span>Bloqueados <b>${count('blocked') + count('invalid')}</b></span></div>
+        <div class="reconciliation-counts"><span>Já ligados <b>${count('linked')}</b></span><span>Revisar correspondência <b>${count('review')}</b></span><span>Ambíguos <b>${count('ambiguous')}</b></span><span>Novas Companies <b>${count('proposed')}</b></span><span>Bloqueados <b>${count('blocked') + count('invalid')}</b></span></div>
         <div class="reconciliation-list">${rowsHtml || '<p class="reconciliation-empty">Nenhum registro pendente de reconciliação.</p>'}</div>
         ${plan.rows.filter(row => row.status !== 'linked').length > 100 ? '<p class="reconciliation-limit">Prévia visual limitada aos primeiros 100 pendentes. O plano exportado contém todos.</p>' : ''}
         <div class="reconciliation-footer"><span>Nenhuma seleção vem marcada por padrão.</span><button type="button" data-reconcile-apply class="og-button og-button-primary">Aplicar selecionados com checkpoint</button></div>
