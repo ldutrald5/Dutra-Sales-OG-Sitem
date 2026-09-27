@@ -8,6 +8,26 @@
   const clean = value => String(value || '').trim();
   const digits = value => clean(value).replace(/\D/g, '');
   const comparable = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const categoryKey = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const normalizePriorityBand = value => {
+    const key = categoryKey(value);
+    if (key.includes('urgent')) return 'urgente';
+    if (key === 'alta' || key === 'high') return 'alta';
+    if (key === 'baixa' || key === 'low') return 'baixa';
+    return 'media';
+  };
+  const normalizeTemperature = value => {
+    const key = categoryKey(value);
+    return ['quente','morno','frio'].includes(key) ? key : '';
+  };
+  const normalizePotential = value => {
+    const key = categoryKey(value);
+    return ['alto','medio','baixo'].includes(key) ? key : '';
+  };
+  const normalizeConversationStage = value => {
+    const key = categoryKey(value);
+    return ['first_contact','talked','no_reply','waiting_response','interested','proposal','negotiation','customer','loyal_customer','not_interested'].includes(key) ? key : '';
+  };
   const normalizeAdditionalPhones = value => {
     const seen = new Set();
     return (Array.isArray(value) ? value : []).map(item => typeof item === 'string' ? { label: '', phone: item } : item || {}).map(item => ({
@@ -37,7 +57,16 @@
       additionalPhones: normalizeAdditionalPhones(lead.additionalPhones),
       referrals: normalizeReferrals(lead.referrals),
       status: clean(lead.status) || 'novo',
-      priority: ['alta', 'media', 'baixa'].includes(lead.priority) ? lead.priority : 'media',
+      priorityBand: normalizePriorityBand(lead.priorityBand || lead.sourcePriority || lead.priority),
+      priority: normalizePriorityBand(lead.priorityBand || lead.sourcePriority || lead.priority) === 'urgente' ? 'alta' : normalizePriorityBand(lead.priorityBand || lead.sourcePriority || lead.priority),
+      conversationStage: normalizeConversationStage(lead.conversationStage),
+      temperature: normalizeTemperature(lead.temperature),
+      potential: normalizePotential(lead.potential),
+      sourcePriority: clean(lead.sourcePriority),
+      sourceLabel: clean(lead.sourceLabel || lead.sourceChannel || lead.origem || lead.origin),
+      sourceList: clean(lead.sourceList),
+      accountSummary: clean(lead.accountSummary || lead.summary),
+      importMeta: lead.importMeta && typeof lead.importMeta === 'object' ? { ...lead.importMeta } : null,
       fleetSize: Number.isFinite(Number(lead.fleetSize)) ? Number(lead.fleetSize) : 0,
       pain: clean(lead.pain),
       objections: Array.isArray(lead.objections) ? lead.objections : [],
@@ -86,6 +115,12 @@
       segmentId: input.segmentId || 'transportadora',
       status: 'novo',
       priority: input.priority || 'media',
+      priorityBand: input.priorityBand || input.priority || 'media',
+      conversationStage: input.conversationStage || 'first_contact',
+      temperature: input.temperature || '',
+      potential: input.potential || '',
+      sourceLabel: input.sourceLabel || input.sourceChannel || 'Sistema OG',
+      sourceList: input.sourceList || 'Cadastro rápido',
       nextAction: clean(input.nextAction),
       followUpAt: clean(input.followUpAt),
       operationalStatus: input.operationalStatus || 'NEW_PROSPECT',
@@ -106,7 +141,8 @@
     const values = [
       item.empresa, item.nome, item.telefone, item.cnpj, item.cpf, item.internalCode,
       item.email, item.cidadeUf, item.decisionMaker, item.nextAction, item.pain,
-      item.sourceChannel, item.batchTag,
+      item.sourceChannel, item.sourceLabel, item.sourceList, item.batchTag, item.conversationStage,
+      item.temperature, item.potential, item.priorityBand, item.accountSummary,
       ...item.additionalPhones.flatMap(phone => [phone.label, phone.phone]),
       ...item.referrals.flatMap(referral => [referral.name, referral.company, referral.phone, referral.note])
     ];
@@ -144,7 +180,7 @@
 
   const EDITABLE_PROFILE_FIELDS = Object.freeze([
     'empresa','nome','internalCode','telefone','additionalPhones','email','cnpj','cpf','cidadeUf','segmentId',
-    'status','priority','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','sourceChannel',
+    'status','priority','priorityBand','conversationStage','temperature','potential','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','sourceChannel','sourceLabel','sourceList','accountSummary',
     'referrals','observacoes'
   ]);
 
