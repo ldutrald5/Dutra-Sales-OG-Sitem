@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 52 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 5 |
-| cycle | 6 |
+| cycle | 7 |
 | decision | 9 |
 | experiment | 1 |
 | idea | 3 |
@@ -98,6 +98,7 @@ Generated from 51 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Foundation Bootstrap & Safety Gate implementation report including tests, environment blockers, rollback and intentionally deferred behavior.
 - **SRC-BRAIN-REVIEW-001 — DUTRA Builder Brain design review** (validated/high)
   Structured review identified adoption, semantic validation, proportionality, metrics, provenance, human indexing and license-triage improvements for Builder Brain.
+
 ## Retrieval workflow
 
 1. Start here.
