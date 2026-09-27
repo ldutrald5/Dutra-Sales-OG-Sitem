@@ -80,6 +80,11 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 | Custos e contexto de IA | `docs/09-CUSTOS-IA.md` |
 | Execução | `tasks/TODO.md` e a story específica em `docs/stories/` |
 | Produção, Railway, deploy, domínio, logs e acesso no celular | `.codex/skills/dutra-runtime-operator/SKILL.md`, `docs/runtime/DUTRA_OS_RUNTIME.md` |
+| Planilhas, Excel, backup/exportação CRM e vendas | `docs/11-INTEGRACAO-EXCEL.md`, `docs/spreadsheets/CANONICAL_TEMPLATES.md`, `docs/spreadsheets/canonical-templates.json` |
+
+### Regra de templates canônicos de planilhas
+
+Quando a tarefa envolver CRM Excel/ODS, exportação, backup em planilha, vendas, faturamento ou comissão, carregue primeiro `docs/11-INTEGRACAO-EXCEL.md` e `docs/spreadsheets/canonical-templates.json`. Os binários reais são privados e não devem ser commitados. Sempre trabalhar sobre cópia do modelo e preservar fórmulas, campos manuais e estrutura.
 
 ### Regra de runtime hospedado
 
