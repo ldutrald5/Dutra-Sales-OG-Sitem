@@ -1,50 +1,62 @@
-# Execution Context — Package 04R em validação
+# Execution Context — Baseline pós-Package 04R
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline estável: `a0efb31a244a1967ae8e3cd17d8a29f273f26619`
-- Packages 00R, 01R, 02R e 03R: incorporados ao `main`
+- Baseline estável de produto: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
+- Packages 00R, 01R, 02R, 03R e 04R: incorporados ao `main`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
-- Package em execução: **04R — Sync Bridge & Conflict UX**
-- Branch: `package-04r-sync-conflict-ux`
-- PR: **#7** — draft até concluir o CI do head documental final
-- CI de implementação + Brain: head `b2dc3d36fce9bf793486041caa6c556f398464fe`, workflow run `36283478504` — **SUCCESS**; o head documental final ainda deve passar pelo mesmo workflow antes do merge
-- Fora do escopo do 04R: migração em massa do legado, remoção de `lead.id`, ativação obrigatória do Supabase remoto e reconciliação 05R.
+- Package 04R: **MERGED**
+- PR 04R: **#7**
+- Head final da PR: `da0fd29848a1262cdcf78eb86c1b6bce9608b45b`
+- CI final da PR: workflow run `36283581505` — **SUCCESS**
+- Merge squash 04R: `5d2d8aa5d1541010e03d2ca1926ba76a60efb3eb`
+- Package seguinte autorizado após este closeout: **05R — Legacy Reconciliation / migração controlada**
+- 05R ainda **NÃO INICIADO**.
 
 ## Sequência reconciliada
 
 1. 01R — Canonical Domain Foundation — **MERGED**
 2. 02R — Supabase Auth + Organization Pilot — **MERGED; piloto remoto pendente**
 3. 03R — Company/Contact + Company 360 Beta — **MERGED**
-4. 04R — Sync Bridge & Conflict UX — **EM VALIDAÇÃO**
-5. 05R — Legacy Reconciliation / migração controlada
+4. 04R — Sync Bridge & Conflict UX — **MERGED**
+5. 05R — Legacy Reconciliation / migração controlada — **PRÓXIMO**
 
-## Estado técnico do 04R
+## Estado técnico após 04R
 
-O contrato de revisão autoritativa do 00R continua vigente: write remoto exige a revisão corrente e `409` nunca autoriza sobrescrita silenciosa.
+O contrato de revisão autoritativa do 00R continua vigente: writes remotos exigem a revisão corrente e `409` nunca autoriza sobrescrita silenciosa.
 
-A branch 04R acrescenta:
-- conflito determinístico com snapshots local/remoto e diferenças por ID/campos;
-- revisão humana antes de qualquer envio reconciliado;
-- checkpoint local antes de descartar ou conciliar;
-- Sync Bridge IndexedDB para outbox e recovery;
-- foreground autenticado como único emissor da outbox; Service Worker não persiste token e apenas sinaliza trabalho pendente;
+O 04R incorporou ao `main`:
+- snapshots determinísticos local/remoto em conflitos;
+- diferenças por registro/campo e revisão humana;
+- checkpoint antes de conciliar ou descartar estado local;
+- Sync Bridge IndexedDB para outbox e recovery sem persistir credenciais;
+- Service Worker que sinaliza trabalho pendente e deixa o PUT autenticado no foreground;
 - recovery antes de qualquer pull remoto;
-- serialização de writes para impedir auto-conflitos e perda de edições concorrentes;
-- recuperação entre refresh/reabertura e abas por marker + IndexedDB.
+- serialização de writes e reenvio de edições ocorridas durante request;
+- markers/tombstones e recuperação entre refresh/reabertura/abas;
+- testes de conflito, bridge, UX, offline e segurança.
 
-A auditoria do 04R também corrige dois riscos residuais do 03R: coexistência de contatos legados/canônicos e pipeline multi-moeda.
+A auditoria do 04R também resolveu dois riscos residuais do 03R:
+- contatos legados sem `entityType` podem coexistir com Contacts canônicos sem bloquear escrita;
+- Company 360 não agrega moedas diferentes em um total único.
 
-## Estado do 02R
+## Builder Brain
 
-`OQ-PKG02-001` permanece aberta. A fundação Auth/Organization foi mergeada, porém migration/Auth/RLS só serão considerados comprovados remotamente após ensaio contra um projeto Supabase piloto. O 04R não ativa esse piloto.
+O 04R registrou:
+- `SRC-PKG04R-001`;
+- `DEC-SYNC-04R-001`;
+- `PAT-SYNC-001`;
+- `ANTI-SYNC-001`;
+- `CYCLE-PKG04R-001`.
+
+OQ-PKG02-001 permanece aberta: a fundação Supabase Auth/Organization foi mergeada, mas migration/Auth/RLS ainda exigem ensaio remoto em projeto piloto antes de ativação.
 
 ## Restrições de dados
 
-Nenhum package até o 04R está autorizado a transformar em massa os leads existentes. O 04R altera mecanismos de sincronização/recuperação e contratos de compatibilidade, mas não executa migração de dados comerciais reais.
+Até o fechamento do 04R não houve migração em massa de dados comerciais reais. `lead.id` permanece identidade operacional legada. O 05R deve tratar reconciliação de forma controlada, auditável e reversível; não está autorizado a fazer big bang.
 
 ## Regra de avanço
 
-Cada package segue: branch isolada → implementação → testes → gate → auditoria → documentação/Brain → merge protegido → novo baseline → STOP.
+Fluxo obrigatório: branch isolada → implementação → testes → gate → auditoria → documentação/Brain → merge protegido → closeout → STOP.
 
-O 04R não pode ser declarado concluído enquanto CI/release gate não estiverem em PASS e a PR não tiver sido auditada/mergeada.
+Este branch `chore/04r-closeout` contém somente o fechamento administrativo/Brain pós-merge. Após seu CI/merge, encerrar o 04R e só então iniciar 05R.
