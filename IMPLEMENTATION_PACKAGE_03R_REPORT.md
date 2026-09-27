@@ -1,11 +1,16 @@
 # IMPLEMENTATION PACKAGE 03R REPORT
 
 ## Resultado atual
-PACKAGE 03R - IMPLEMENTADO EM BRANCH; AGUARDANDO CI
+**PACKAGE 03R — MERGED; CI E AUDITORIA CONCLUÍDOS**
 
 ## Baseline e escopo
-Base: main 89e3eff4c78149659cfe3ac6b86f187b14d0297c.
-Branch: package-03r-company-contact-360.
+Base: `main@89e3eff4c78149659cfe3ac6b86f187b14d0297c`.
+Branch: `package-03r-company-contact-360`.
+PR: `#6` — `feat(03r): Company Contact and Company 360 beta`.
+Primeiro CI `36281686857`: FAIL por expectativa de timestamp não normalizada no teste; produção estava correta.
+Correção: `f4198134c9b614fb8b21e12e99b8cdaa29d3a09a`.
+CI final: workflow run `36281801953` — SUCCESS.
+Merge no `main`: `a0efb31a244a1967ae8e3cd17d8a29f273f26619`.
 Objetivo: tornar Company e Contact utilizaveis no CRM por uma visao Company 360 Beta sem converter silenciosamente o lead legado.
 Fora do escopo: migracao em massa, remocao de lead.id, Supabase remoto obrigatorio, Sync Bridge 04R e reconciliacao 05R.
 
@@ -36,3 +41,7 @@ Antes do merge, fechar a PR. Depois do merge, revert por PR. O pacote e aditivo;
 
 ## Proxima sequencia
 Depois de CI, auditoria e merge do 03R: 04R Sync Bridge e Conflict UX; depois 05R Legacy Reconciliation e migracao controlada.
+
+
+## Hardening residual identificado no 04R
+A auditoria estrutural do Package 04R confirmou dois riscos herdados que não estavam cobertos no fechamento original do 03R: contatos legados sem `entityType` dentro de `operations.contacts` podiam bloquear uma escrita canônica, e o resumo de pipeline podia somar moedas diferentes. O 04R inclui correções de compatibilidade/regressão para esses dois pontos sem migrar dados legados.
