@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
+  let legacyReconciliationPlan = null;
   let serverSyncInFlight = false;
   let serverSyncGeneration = 0;
 
