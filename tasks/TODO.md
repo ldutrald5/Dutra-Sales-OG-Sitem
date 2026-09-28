@@ -160,7 +160,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** snapshot versionado, token público opaco/revogável, eventos `proposal_sent/opened/reopened/contact_clicked/accepted/revoked`, Signal Center e próxima ação.
 - **Critério de aceite:** página pública acessa somente snapshot publicado; rate limit e validação; nenhuma visualização inventada; eventos auditáveis.
 - **Dependências:** Security Gate, persistência remota adequada e contrato Quote/GeneratedDocument.
-- **Status:** PROP-01A concluída; PROP-01B em andamento em 2026-09-28 sobre o runtime Railway persistente atual, com publicação pública isolada do CRM e sem antecipar SCALE-01.
+- **Status:** PROP-01A e PROP-01B concluídas em 2026-09-28; evidência em `tasks/DONE.md`, stories PROP-01A/01B e PRs #40/#43. Aceite público permanece fora deste incremento.
 
 ## AUTO-01 — Automation Engine V1
 
