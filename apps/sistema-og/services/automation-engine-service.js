@@ -6,7 +6,7 @@
   'use strict';
 
   const DAY = 86400000;
-  const TERMINAL = new Set(['fechado','perdido']);
+  const LOST_STATUS = 'perdido';
 
   function clean(value) { return String(value ?? '').trim(); }
   function key(value) {
@@ -38,6 +38,7 @@
       proposal_accepted:'proposal.accepted',
       proposal_revoked:'proposal.revoked',
       installation_completed:'installation.completed',
+      installation_reopened:'installation.reopened',
       customer_satisfaction_confirmed:'customer.satisfaction.confirmed',
       referral_requested:'referral.requested',
       referral_received:'referral.received',
@@ -78,13 +79,14 @@
   }
 
   function suggestionsForLead(lead = {}, operations = {}, now = new Date()) {
-    if (!lead?.id || TERMINAL.has(key(lead.status))) return Object.freeze([]);
+    if (!lead?.id || key(lead.status) === LOST_STATUS) return Object.freeze([]);
     const reference = asDate(now) || new Date();
     const events = eventsForLead(operations, lead.id);
     const output = [];
+    const customerLifecycle = key(lead.status) === 'fechado' || ['customer','loyal_customer'].includes(key(lead.conversationStage));
 
     const proposalSent = events.filter(item => item.type === 'proposal.sent').slice(-1)[0];
-    if (proposalSent) {
+    if (proposalSent && !customerLifecycle) {
       const sentAt = asDate(proposalSent.at);
       const closedAfter = events.some(item => ['proposal.accepted','proposal.revoked'].includes(item.type) && (asDate(item.at)?.getTime()||0) >= (sentAt?.getTime()||0));
       const sourceId = proposalSent.proposalId || proposalSent.id;
@@ -98,7 +100,8 @@
       const completedAt = asDate(installation.at);
       const sourceId = installation.installationId || installation.id;
       const postSaleDone = events.some(item => ['post_sale.completed','post_sale.contact_confirmed'].includes(item.type) && (asDate(item.at)?.getTime()||0) >= (completedAt?.getTime()||0));
-      if (completedAt && !postSaleDone && !alreadyApplied(events,'post_sale_15d',sourceId)) {
+      const installationReopened = events.some(item => item.type === 'installation.reopened' && (asDate(item.at)?.getTime()||0) >= (completedAt?.getTime()||0));
+      if (completedAt && !postSaleDone && !installationReopened && !alreadyApplied(events,'post_sale_15d',sourceId)) {
         output.push(make(lead,'post_sale_15d',sourceId,'Pós-venda da instalação','A instalação foi concluída e precisa de acompanhamento para validar uso, benefício e possíveis ajustes.','Fazer pós-venda da instalação',addDays(completedAt,15),'medium',{completedAt:completedAt.toISOString()}));
       }
     }
@@ -125,7 +128,7 @@
 
     const last = leadLastActivity(lead);
     const hasFutureFollowUp = asDate(lead.followUpAt)?.getTime() > reference.getTime();
-    if (last && !hasFutureFollowUp && !clean(lead.nextAction)) {
+    if (!customerLifecycle && last && !hasFutureFollowUp && !clean(lead.nextAction)) {
       const idleDays = Math.floor((reference.getTime() - last.getTime()) / DAY);
       const sourceId = last.toISOString().slice(0,10);
       if (idleDays >= 7 && !alreadyApplied(events,'idle_7d_action',sourceId)) {
