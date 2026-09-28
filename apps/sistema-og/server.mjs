@@ -7,11 +7,14 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
+const proposalIntelligence = require('./services/proposal-intelligence-service.js');
+const proposalStore = require('./server-proposal-store.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
 const dataFile = path.join(dataDir, 'shared-state.json');
 const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
+const proposalStoreFile = path.join(dataDir, 'public-proposals.json');
 const port = Number(process.env.OG_PORT || 4321);
 const host = process.env.OG_HOST || '127.0.0.1';
 const localAccessToken = String(process.env.OG_LOCAL_ACCESS_TOKEN || '');
@@ -19,6 +22,7 @@ const localAccessPin = String(process.env.OG_LOCAL_ACCESS_PIN || '');
 const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
 const hostedMode = Boolean(process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN);
 const writeWindows = new Map();
+const publicEventWindows = new Map();
 if (lanMode && localAccessToken.length < 16) throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no modo LAN/hospedado.');
 if (hostedMode && localAccessPin && localAccessPin.length < 6) throw new Error('OG_LOCAL_ACCESS_PIN deve ter pelo menos 6 caracteres quando configurado.');
 const types = {
@@ -68,6 +72,15 @@ function allowWrite(req) {
   const recent = (writeWindows.get(key) || []).filter(time => now - time < 60_000);
   if (recent.length >= 30) return false;
   recent.push(now); writeWindows.set(key, recent); return true;
+}
+
+function allowPublicEngagement(req) {
+  const key = req.socket.remoteAddress || 'unknown', now = Date.now();
+  const recent = (publicEventWindows.get(key) || []).filter(time => now - time < 60_000);
+  if (recent.length >= 60) return false;
+  recent.push(now);
+  publicEventWindows.set(key, recent);
+  return true;
 }
 
 function validateStatePayload(body) {
@@ -142,15 +155,109 @@ function cleanArray(value, max) {
   return Array.isArray(value) ? value.slice(0, max) : [];
 }
 
-async function readBody(req) {
+async function readBody(req, maxBytes = 5_000_000) {
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 5_000_000) throw new Error('Payload muito grande');
+    if (size > maxBytes) throw new Error('Payload muito grande');
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function proposalPublicBaseUrl() {
+  const domain = String(process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN || '')
+    .trim()
+    .replace(/^https?:\/\//, '')
+    .replace(/\/$/, '');
+  return domain ? `https://${domain}` : '';
+}
+
+function proposalWhatsappDigits() {
+  const digits = String(process.env.OG_PROPOSAL_WHATSAPP || '554491658321').replace(/\D/g, '');
+  return digits.length >= 12 ? digits.slice(0, 15) : '554491658321';
+}
+
+function proposalHeaders() {
+  return {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store, max-age=0',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY',
+    'X-Robots-Tag': 'noindex, nofollow, noarchive',
+    'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+  };
+}
+
+function formatPublicMoney(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }) : 'A consultar';
+}
+
+function buildPublicProposalPage(publication) {
+  const snapshot = publication?.snapshot || {};
+  const client = snapshot.client || {};
+  const commercial = snapshot.commercial || {};
+  const vehicles = Array.isArray(snapshot.vehicles) ? snapshot.vehicles : [];
+  const extras = Array.isArray(snapshot.extraItems) ? snapshot.extraItems : [];
+  const title = client.company || client.name || 'Proposta Olho de Gato';
+  const whats = proposalWhatsappDigits();
+  const vehicleHtml = vehicles.length
+    ? vehicles.map(vehicle => `<article class="item"><div><b>${escapeHtml(vehicle.name || 'Configuração')}</b><span>${escapeHtml(vehicle.qty || 1)} un. · ${escapeHtml(vehicle.libras || '')} LBS</span></div><strong>${(vehicle.items || []).reduce((sum,item)=>sum+(Number(item.qty)||0),0)} peça(s)</strong></article>`).join('')
+    : '<p class="muted">Configuração comercial registrada na proposta.</p>';
+  const extrasHtml = extras.length
+    ? `<div class="extras"><b>Itens adicionais</b><span>${extras.map(item=>`${escapeHtml(item.code)} × ${escapeHtml(item.qty)}`).join(' · ')}</span></div>`
+    : '';
+  const location = [client.city, client.cnpj ? `CNPJ ${client.cnpj}` : ''].filter(Boolean).join(' · ');
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>${escapeHtml(title)} · Proposta Olho de Gato</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#06080b;color:#f8fafc;min-height:100vh}
+main{width:min(940px,calc(100% - 28px));margin:0 auto;padding:28px 0 52px}
+.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;border-bottom:1px solid #26303a;padding-bottom:22px}
+.brand{font-size:12px;letter-spacing:.16em;font-weight:900;color:#ffde17}.badge{font-size:11px;border:1px solid #3b4652;border-radius:999px;padding:7px 10px;color:#cbd5e1}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.02;margin:26px 0 8px;letter-spacing:-.035em}.lead{color:#94a3b8;margin:0;line-height:1.6}
+.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;margin-top:22px}.card{background:#0c1118;border:1px solid #202a35;border-radius:18px;padding:20px}
+.kicker{font-size:10px;letter-spacing:.14em;color:#94a3b8;font-weight:900}.total{font-size:clamp(30px,5vw,50px);font-weight:950;color:#ffde17;margin:8px 0}.meta{display:grid;gap:9px;margin-top:16px}.meta div{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #1f2937;padding-top:9px}.meta span{color:#94a3b8;font-size:12px}.meta b{font-size:12px;text-align:right}
+h2{font-size:16px;margin:0 0 13px}.list{display:grid;gap:8px}.item{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid #222d39;border-radius:12px;background:#090d13}.item div{display:grid;gap:3px}.item span,.muted,.extras span{font-size:12px;color:#94a3b8}.item strong{font-size:12px;color:#fef08a}.extras{display:grid;gap:5px;border-top:1px solid #27313b;margin-top:13px;padding-top:13px}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.cta a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;padding:12px 15px;font-weight:900;font-size:13px}.primary{background:#ffde17;color:#090909}.secondary{border:1px solid #334155;color:#e2e8f0}
+.notice{margin-top:18px;padding:12px 14px;border-left:3px solid #ffde17;background:#10151d;color:#94a3b8;font-size:12px;line-height:1.5}
+footer{margin-top:28px;border-top:1px solid #202a35;padding-top:16px;color:#64748b;font-size:11px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.top{flex-direction:column}.card{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+<section class="top"><div><div class="brand">OLHO DE GATO · EQUALIZAÇÃO PASSIVA DE PNEUS</div><h1>${escapeHtml(title)}</h1><p class="lead">${escapeHtml(location || 'Proposta comercial personalizada')}</p></div><span class="badge">Proposta rastreável segura</span></section>
+<section class="grid">
+<article class="card"><span class="kicker">INVESTIMENTO</span><div class="total">${escapeHtml(formatPublicMoney(commercial.totalValue))}</div><div class="meta"><div><span>Peças</span><b>${escapeHtml(commercial.totalPieces || '—')}</b></div><div><span>Condição</span><b>${escapeHtml(commercial.paymentTerms || 'A confirmar')}</b></div><div><span>Frete</span><b>${escapeHtml(commercial.freightText || 'A confirmar')}</b></div></div></article>
+<article class="card"><span class="kicker">VALIDADE DO LINK</span><h2>Canal direto com a Olho de Gato</h2><p class="muted">Este endereço é exclusivo desta proposta e pode ser revogado pelo consultor.</p><div class="cta"><a id="proposal-contact" class="primary" href="https://wa.me/${whats}" rel="noreferrer">Falar no WhatsApp</a></div></article>
+</section>
+<section class="card" style="margin-top:16px"><h2>Configuração indicada</h2><div class="list">${vehicleHtml}</div>${extrasHtml}</section>
+<div class="notice">Valores, estoque, frete, instalação, prazos e condições permanecem sujeitos à confirmação comercial quando indicado na proposta. Este link não expõe o CRM nem dados internos da conta.</div>
+<footer>Olho de Gato · Vamos salvar pneus — e dinheiro.</footer>
+</main>
+<script>
+(()=>{const token=location.pathname.split('/').filter(Boolean).pop();if(!/^[A-Za-z0-9_-]{24,160}$/.test(token||''))return;const key='og_prop_session_'+token.slice(0,12);let sid=sessionStorage.getItem(key);if(!sid){sid=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^A-Za-z0-9_-]/g,'');sessionStorage.setItem(key,sid)}const send=(type)=>fetch('/public-api/proposals/'+encodeURIComponent(token)+'/engagement',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,sessionId:sid}),keepalive:true,credentials:'same-origin'}).catch(()=>{});setTimeout(()=>{if(document.visibilityState==='visible')send('open')},1800);document.getElementById('proposal-contact')?.addEventListener('click',()=>send('contact_clicked'))})();
+</script>
+</body></html>`;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -166,7 +273,87 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ ok: true, service: 'sistema-og' }));
   }
 
+  const publicProposalMatch = url.pathname.match(/^\/p\/([A-Za-z0-9_-]{24,160})$/);
+  if (publicProposalMatch && (req.method === 'GET' || req.method === 'HEAD')) {
+    const publication = proposalStore.findByToken(proposalStoreFile, publicProposalMatch[1]);
+    if (!publication) {
+      res.writeHead(404, proposalHeaders());
+      return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Proposta indisponível</title><body style="font-family:system-ui;background:#070707;color:#fff;padding:40px"><h1>Proposta indisponível</h1><p>O link expirou, foi revogado ou não existe.</p></body></html>');
+    }
+    const html = buildPublicProposalPage(publication);
+    res.writeHead(200, proposalHeaders());
+    if (req.method === 'HEAD') return res.end();
+    return res.end(html);
+  }
+
+  const publicEngagementMatch = url.pathname.match(/^\/public-api\/proposals\/([A-Za-z0-9_-]{24,160})\/engagement$/);
+  if (publicEngagementMatch && req.method === 'POST') {
+    if (!allowPublicEngagement(req)) return sendJson(res, 429, { error:'Muitas interações. Tente novamente em instantes.' });
+    try {
+      const body = await readBody(req, 10_000);
+      const result = proposalStore.recordEngagement(proposalStoreFile, publicEngagementMatch[1], body);
+      if (!result) return sendJson(res, 404, { error:'Proposta indisponível' });
+      return sendJson(res, result.duplicate ? 200 : 201, {
+        ok:true,
+        duplicate:Boolean(result.duplicate),
+        type:result.event?.type || null,
+        at:result.event?.at || null
+      });
+    } catch (error) {
+      return sendJson(res, /Payload muito grande/.test(error.message) ? 413 : 400, { error:error.message });
+    }
+  }
+
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
+
+  if (url.pathname === '/api/proposals/publish' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const baseUrl = proposalPublicBaseUrl();
+      if (!baseUrl) return sendJson(res, 409, { error:'Domínio HTTPS público ainda não está configurado para propostas.' });
+      const body = await readBody(req, 50_000);
+      const proposalId = String(body.proposalId || '').trim();
+      if (!proposalId) throw new Error('proposalId é obrigatório');
+      const shared = readSharedState();
+      const document = (shared.operations.generatedDocuments || []).find(item =>
+        String(item.id) === proposalId && item.documentType === 'proposal_tracking'
+      );
+      if (!document || !proposalIntelligence.canPublish(document)) return sendJson(res, 404, { error:'Rascunho de proposta publicável não encontrado.' });
+      proposalIntelligence.validatePublicSnapshot(document.snapshot);
+      const published = proposalStore.publish(proposalStoreFile, {
+        proposalId:document.id,
+        clientId:document.clientId,
+        quoteId:document.quoteId,
+        snapshot:document.snapshot
+      });
+      return sendJson(res, 201, {
+        proposalId:document.id,
+        publicUrl:`${baseUrl}/p/${published.token}`,
+        publishedAt:published.publication.publishedAt,
+        expiresAt:published.publication.expiresAt
+      });
+    } catch (error) {
+      return sendJson(res, /Payload muito grande/.test(error.message) ? 413 : 400, { error:error.message });
+    }
+  }
+
+  if (url.pathname === '/api/proposals/revoke' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const body = await readBody(req, 50_000);
+      const revoked = proposalStore.revoke(proposalStoreFile, body.proposalId);
+      if (!revoked) return sendJson(res, 404, { error:'Publicação não encontrada.' });
+      return sendJson(res, 200, { proposalId:revoked.id, revokedAt:revoked.revokedAt, status:revoked.status });
+    } catch (error) {
+      return sendJson(res, /Payload muito grande/.test(error.message) ? 413 : 400, { error:error.message });
+    }
+  }
+
+  if (url.pathname === '/api/proposals/events' && req.method === 'GET') {
+    const since = String(url.searchParams.get('since') || '').trim();
+    if (since && Number.isNaN(Date.parse(since))) return sendJson(res, 400, { error:'since inválido' });
+    return sendJson(res, 200, { events:proposalStore.listEvents(proposalStoreFile, { since, limit:500 }) });
+  }
 
   if (url.pathname === '/api/state' && req.method === 'GET') {
     return sendJson(res, 200, readSharedState());
