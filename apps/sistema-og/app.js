@@ -2267,6 +2267,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     if (state.history.length > 50) state.history.pop();
 
     try {
+      if (relatedLead && window.OG_PROPOSAL_INTELLIGENCE?.prepareTrackingDraft) {
+        state.operations = OG_PROPOSAL_INTELLIGENCE.prepareTrackingDraft(
+          state.operations,
+          { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id },
+          { operationsModel:OG_OPERATIONS_MODEL }
+        );
+        saveOperationsToStorage();
+      }
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
       scheduleServerSync();
       if (relatedLead) {
@@ -2280,7 +2288,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         if (!relatedLead.nextAction) relatedLead.nextAction = 'Revisar a cotação e combinar o envio com o cliente.';
         saveLeadsToStorage();
       }
-      showNotification('Cotação salva com sucesso!', 'success');
+      showNotification(relatedLead ? 'Cotação salva e rascunho de proposta rastreável preparado com segurança.' : 'Cotação salva com sucesso!', 'success');
     } catch (e) {
       console.error(e);
     }

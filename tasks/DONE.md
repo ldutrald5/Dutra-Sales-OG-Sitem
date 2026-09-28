@@ -153,3 +153,13 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **PWA:** serviço contextual incluído no shell e cache atualizado.
 - **Validação:** KCC test, suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 155 da PR #39.
 - **Limites:** Proposal Tracking permanece separado e não foi antecipado por este pacote.
+
+
+## PROP-01A — Proposal Intelligence Contracts
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** ao salvar uma cotação vinculada a cliente, o DUTRA OS prepara um rascunho rastreável interno e sanitizado, registra a quote normalizada e o evento `proposal.prepared`.
+- **Segurança:** publicação começa desativada; não existe token público nem URL; snapshots bloqueiam chaves sensíveis; abertura/reabertura/clique/aceite só possuem contrato para backend marcado como confiável.
+- **Integridade:** salvar cotação continua sendo uma ação explícita; o sistema não registra envio ou visualização por inferência.
+- **Validação:** suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 159 da PR #40.
+- **Limite:** PROP-01B (rota/link público + eventos reais) permanece condicionado a backend público e persistência/autorização adequados.
