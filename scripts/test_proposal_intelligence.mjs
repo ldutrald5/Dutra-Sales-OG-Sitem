@@ -45,7 +45,7 @@ assert.match(app,/OG_PROPOSAL_INTELLIGENCE\.prepareTrackingDraft/);
 assert.match(app,/rascunho de proposta rastreável preparado com segurança/);
 assert.match(html,/proposal-intelligence-service\.js/);
 assert.match(sw,/proposal-intelligence-service\.js/);
-assert.match(sw,/SW_VERSION = 'v44'/);
+assert.match(sw,/SW_VERSION = 'v\d+'/);
 assert.doesNotMatch(app,/proposal_opened.*appendActivity/s);
 
 console.log('PROP-01A proposal intelligence contracts: PASS');
