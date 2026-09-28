@@ -176,7 +176,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** proposta reaberta, instalação pendente, teste próximo do fim, satisfação sem indicação, gap de expansão e revisão de reposição; normalização compatível de eventos `proposal.*`.
 - **Critério de aceite:** sinais derivados não mutam fatos; clientes fechados recebem somente sinais de ciclo de cliente; eventos públicos continuam restritos a backend confiável; aliases legados permanecem compatíveis.
 - **Dependências:** CIC-02, PROP-01A e AUTO-01.
-- **Status:** em andamento em 2026-09-28; story `docs/stories/CIC-04-commercial-lifecycle-signals.md`.
+- **Status:** concluída em 2026-09-28; evidência em `tasks/DONE.md`, story CIC-04 e PR #42.
 
 ## TERR-01 — Territory Intelligence
 
