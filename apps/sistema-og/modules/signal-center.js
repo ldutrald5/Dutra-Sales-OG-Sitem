@@ -266,8 +266,9 @@
 
     const size = fleetSize(lead);
     const equippedRaw = lead.equippedVehicles ?? lead.protectedVehicleCount ?? lead.installedVehicleCount ?? lead.vehiclesProtected;
-    const equipped = Number(String(equippedRaw ?? '').replace(/[^0-9.,-]/g,'').replace(',','.'));
-    if (customerLifecycle && size > 0 && Number.isFinite(equipped) && equipped >= 0 && equipped < size) {
+    const equippedKnown = equippedRaw !== undefined && equippedRaw !== null && clean(equippedRaw) !== '';
+    const equipped = equippedKnown ? Number(String(equippedRaw).replace(/[^0-9.,-]/g,'').replace(',','.')) : Number.NaN;
+    if (customerLifecycle && size > 0 && equippedKnown && Number.isFinite(equipped) && equipped >= 0 && equipped < size) {
       const gap = Math.max(0, Math.round(size - equipped));
       signals.push(makeSignal(
         lead,
