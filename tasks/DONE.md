@@ -142,3 +142,14 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Validação:** Package 00R CI run 151 passou `npm run validate`, Brain, Security, npm audit e Release Gate em Node 24.21.0/npm 11.19.0.
 - **Merge:** PR #38 → `dafe21cf442fa37d8e0ce157b0e15a169b72bbb7`.
 - **Limites preservados:** Proposal Tracking, Automation Engine, Territory Intelligence e ativação remota do Supabase permanecem em pacotes próprios.
+
+
+## KCC-01 — Knowledge Command Center
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** Account 360 ganha ação **Sales Brain da conta**; a consulta é montada com segmento, dor, objeção, próxima ação, veículos/padrão de frota, temperatura, potencial e notas recentes e abre o Command Center já em modo Brain.
+- **Arquitetura:** `account-knowledge-service.js` é puro e somente leitura; o endpoint `/api/knowledge/search` e o Sales Brain existentes continuam sendo a fonte de conhecimento.
+- **Segurança:** nenhuma resposta ou sugestão é persistida automaticamente; nenhum registro do Brain é copiado para a conta.
+- **PWA:** serviço contextual incluído no shell e cache atualizado.
+- **Validação:** KCC test, suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 155 da PR #39.
+- **Limites:** Proposal Tracking permanece separado e não foi antecipado por este pacote.
