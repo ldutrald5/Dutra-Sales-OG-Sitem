@@ -3944,6 +3944,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return (OG_DATA.segments || []).map(item => `<option value="${escapeHtml(item.id)}" ${item.id === current ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('');
   }
 
+  function clientSheetDateTimeValue(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value).slice(0,16);
+    const pad = number => String(number).padStart(2,'0');
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
   function clientSheetExtraPhoneRow(item = {}) {
     return `<div class="client-sheet-repeat-row" data-extra-phone-row>
       <input data-extra-label value="${escapeHtml(item.label || '')}" placeholder="Ex.: Financeiro">
@@ -4092,6 +4100,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           </section>
 
           <section>
+            <div class="client-sheet-section-title"><div><span>PÓS-VENDA & EXPANSÃO</span><small>Fatos operacionais que alimentam sinais e automações sem depender de texto livre.</small></div></div>
+            <div class="client-sheet-grid">
+              <label>Instalação<select name="installationStatus"><option value="" ${!lead.installationStatus?'selected':''}>Não informado</option><option value="pending" ${lead.installationStatus==='pending'?'selected':''}>Pendente</option><option value="scheduled" ${lead.installationStatus==='scheduled'?'selected':''}>Agendada</option><option value="completed" ${lead.installationStatus==='completed'?'selected':''}>Concluída</option><option value="not_applicable" ${lead.installationStatus==='not_applicable'?'selected':''}>Não se aplica</option></select></label>
+              <label>Data da instalação<input name="installationCompletedAt" type="datetime-local" value="${escapeHtml(clientSheetDateTimeValue(lead.installationCompletedAt))}"></label>
+              <label>Veículos protegidos/equipados<input name="equippedVehicles" type="number" min="0" value="${lead.equippedVehicles == null ? '' : Number(lead.equippedVehicles)}" placeholder="Ex.: 12"></label>
+              <label>Revisar reposição em<input name="replacementReviewAt" type="datetime-local" value="${escapeHtml(clientSheetDateTimeValue(lead.replacementReviewAt))}"></label>
+              <label>Status do teste<select name="testStatus"><option value="" ${!lead.testStatus?'selected':''}>Não informado</option><option value="active" ${lead.testStatus==='active'?'selected':''}>Em teste</option><option value="completed" ${lead.testStatus==='completed'?'selected':''}>Concluído</option><option value="cancelled" ${lead.testStatus==='cancelled'?'selected':''}>Cancelado</option></select></label>
+              <label>Fim previsto do teste<input name="testEndsAt" type="datetime-local" value="${escapeHtml(clientSheetDateTimeValue(lead.testEndsAt))}"></label>
+              <label>Satisfação<select name="satisfactionStatus"><option value="" ${!lead.satisfactionStatus?'selected':''}>Não informada</option><option value="satisfied" ${lead.satisfactionStatus==='satisfied'?'selected':''}>Satisfeito</option><option value="neutral" ${lead.satisfactionStatus==='neutral'?'selected':''}>Neutro</option><option value="dissatisfied" ${lead.satisfactionStatus==='dissatisfied'?'selected':''}>Insatisfeito</option></select></label>
+            </div>
+          </section>
+
+          <section>
             <div class="client-sheet-section-title"><div><span>INDICAÇÕES</span><small>Registre quem esse cliente indicou para você abordar depois.</small></div><button type="button" data-add-referral>＋ Indicação</button></div>
             <div class="client-sheet-repeat-list" data-referral-list>
               ${(lead.referrals || []).map(clientSheetReferralRow).join('') || '<p class="client-sheet-empty-repeat" data-empty-referral>Nenhuma indicação registrada.</p>'}
@@ -4222,6 +4243,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         note: row.querySelector('[data-referral-note]')?.value || ''
       }));
       const before = OG_CRM_SERVICE.normalizeLead(lead);
+      const saveAt = new Date().toISOString();
       let updated;
       try {
         updated = OG_CRM_SERVICE.updateLeadProfile(lead, {
@@ -4242,6 +4264,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           potential: data.get('potential'),
           decisionMaker: data.get('decisionMaker'),
           fleetSize: Number(data.get('fleetSize') || 0),
+          equippedVehicles: String(data.get('equippedVehicles') || '').trim() === '' ? null : Number(data.get('equippedVehicles')),
+          installationStatus: data.get('installationStatus'),
+          installationCompletedAt: data.get('installationStatus') === 'completed' ? (data.get('installationCompletedAt') || saveAt) : data.get('installationCompletedAt'),
+          testStatus: data.get('testStatus'),
+          testEndsAt: data.get('testEndsAt'),
+          satisfactionStatus: data.get('satisfactionStatus'),
+          replacementReviewAt: data.get('replacementReviewAt'),
           pain: data.get('pain'),
           objections: String(data.get('objections') || '').split(/\r?\n|,/).map(item => item.trim()).filter(Boolean),
           nextAction: data.get('nextAction'),
@@ -4263,7 +4292,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
       const index = state.leads.findIndex(item => String(item.id) === String(lead.id));
       state.leads.splice(index, 1, updated);
-      const now = new Date().toISOString();
+      const now = saveAt;
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
         id: newLibraryId('evt'),
         type: 'client.profile.updated',
@@ -4282,6 +4311,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           internalCode: updated.internalCode || null,
           note: 'Código de cadastro OG; independente do status de compra.'
         });
+      }
+      const lifecycleEvents = OG_CUSTOMER_LIFECYCLE.deriveEvents(before, updated, {
+        now,
+        idFactory: type => newLibraryId(`evt-${String(type).replace(/[^a-z0-9]+/gi,'-')}`)
+      });
+      for (const lifecycleEvent of lifecycleEvents) {
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, lifecycleEvent);
       }
       saveLeadsToStorage();
       saveOperationsToStorage();
