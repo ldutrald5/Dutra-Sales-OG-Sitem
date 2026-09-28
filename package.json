@@ -57,7 +57,8 @@
     "og:lead-intelligence:test": "node scripts/test_lead_intelligence.mjs",
     "og:hosted-seed:test": "node scripts/test_hosted_seed_import.mjs",
     "og:spreadsheet-export:test": "node scripts/test_spreadsheet_export.mjs",
-    "og:spreadsheet-xlsx-builder:test": "node scripts/test_spreadsheet_xlsx_builder.mjs"
+    "og:spreadsheet-xlsx-builder:test": "node scripts/test_spreadsheet_xlsx_builder.mjs",
+    "og:lead-io:smoke": "node scripts/test_native_lead_import_export_smoke.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
