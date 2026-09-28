@@ -1,6 +1,6 @@
 # PROP-01B — Public Proposal Tracking seguro
 
-Status: **em andamento**
+Status: **concluída**
 
 ## Objetivo
 
@@ -100,3 +100,12 @@ Isso não transforma o JSON em banco multiusuário canônico; PROP-01B é uma fa
 ## Rollback
 
 Reverter o pacote remove as rotas/UX novas. `public-proposals.json` é independente do estado comercial e pode permanecer inerte; nenhum lead, quote ou atividade existente precisa ser migrado ou apagado.
+
+
+## Evidência de conclusão
+
+- PR: **#43 — PROP-01B proposta pública rastreável e segura**.
+- CI: **Package 00R CI run 173 — success**.
+- `npm run validate`, Brain, Security, npm audit e Release Gate passaram.
+- O teste do runtime sobe um servidor sintético, publica a proposta, abre duas sessões, registra clique, consulta eventos, revoga o link e confirma 404 depois da revogação.
+- A publicação é suportada pelo volume persistente atual do Railway, mas a verdade multiusuário canônica continua reservada ao SCALE-01.
