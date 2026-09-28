@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 const require=createRequire(import.meta.url);
 const service=require('../apps/sistema-og/services/spreadsheet-import-service.js');
@@ -89,6 +90,53 @@ const summary=service.summarizePreview([...genericPreview,...ambiguous]);
 assert.equal(summary.total,2);
 assert.equal(summary.newCount,1);
 assert.equal(summary.duplicateCount,1);
+
+const newRecommendation=service.recommendDecision(genericPreview[0]);
+assert.equal(newRecommendation.action,'create');
+assert.equal(newRecommendation.needsReview,false);
+
+const safeUpdateRecommendation=service.recommendDecision(updatePreview[0]);
+assert.equal(safeUpdateRecommendation.action,'update');
+assert.equal(safeUpdateRecommendation.targetLeadId,'A');
+
+const conflictRecommendation=service.recommendDecision(preview[0]);
+assert.equal(conflictRecommendation.action,'update');
+assert.equal(conflictRecommendation.targetLeadId,'L1');
+assert.match(conflictRecommendation.reason,/histórico protegido/);
+
+const duplicateRecommendation=service.recommendDecision(ambiguous[0]);
+assert.equal(duplicateRecommendation.action,'ignore');
+assert.equal(duplicateRecommendation.needsReview,true);
+
+const plan=service.recommendedDecisionMap([genericPreview[0],updatePreview[0],preview[0],ambiguous[0]]);
+assert.equal(plan['2'].action,'ignore','source rows duplicated across fixtures must resolve to the last explicit fixture in this isolated map');
+
+const uniquePlan=service.recommendedDecisionMap([
+  {...genericPreview[0],row:{...genericPreview[0].row,sourceRow:21}},
+  {...updatePreview[0],row:{...updatePreview[0].row,sourceRow:22}},
+  {...preview[0],row:{...preview[0].row,sourceRow:23}},
+  {...ambiguous[0],row:{...ambiguous[0].row,sourceRow:24}}
+]);
+assert.equal(uniquePlan['21'].action,'create');
+assert.equal(uniquePlan['22'].action,'update');
+assert.equal(uniquePlan['23'].action,'update');
+assert.equal(uniquePlan['23'].fields.notes,'keep');
+assert.equal(uniquePlan['24'].action,'ignore');
+
+const recommendationSummary=service.summarizeRecommendations([
+  genericPreview[0],updatePreview[0],preview[0],ambiguous[0]
+]);
+assert.equal(recommendationSummary.ready,3);
+assert.equal(recommendationSummary.create,1);
+assert.equal(recommendationSummary.update,2);
+assert.equal(recommendationSummary.manualReview,1);
+
+const appSource=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'utf8');
+const htmlSource=fs.readFileSync(new URL('../apps/sistema-og/index.html',import.meta.url),'utf8');
+assert.match(appSource,/recommendDecision\(item\)/);
+assert.match(appSource,/crm-import-reset-recommendations/);
+assert.match(htmlSource,/Decisões recomendadas já vêm prontas/);
+assert.match(htmlSource,/crm-import-auto-note/);
 
 assert.throws(()=>service.preflightFile({name:'dados.xls',size:100}),/\.xlsx ou \.csv/);
 assert.equal(service.preflightFile({name:'dados.csv',type:'text/csv',size:100}),true);

@@ -234,6 +234,43 @@
     return{total:items.length,newCount:counts.NEW,updateCount:counts.SAFE_UPDATE,duplicateCount:counts.POSSIBLE_DUPLICATE+counts.CONFLICT,invalidCount:counts.INVALID,unchangedCount:counts.UNCHANGED,counts};
   }
 
+  function recommendDecision(item={}){
+    const candidates=Array.isArray(item.candidates)?item.candidates:[];
+    const targetLeadId=item.matchedLeadId||(candidates.length===1?candidates[0].leadId:null);
+    if(item.status==='NEW')return{action:'create',targetLeadId:null,automatic:true,needsReview:false,reason:'Novo registro identificado'};
+    if(item.status==='SAFE_UPDATE')return{action:'update',targetLeadId,automatic:true,needsReview:false,reason:'Correspondência forte e campos seguros'};
+    if(item.status==='CONFLICT'&&targetLeadId&&candidates.length<=1)return{action:'update',targetLeadId,automatic:true,needsReview:false,reason:'Atualizar campos seguros e manter histórico protegido'};
+    if(item.status==='POSSIBLE_DUPLICATE')return{action:'ignore',targetLeadId:null,automatic:false,needsReview:true,reason:'Duplicidade precisa de decisão manual'};
+    if(item.status==='INVALID')return{action:'ignore',targetLeadId:null,automatic:true,needsReview:false,reason:'Registro inválido'};
+    return{action:'ignore',targetLeadId:null,automatic:true,needsReview:false,reason:'Sem alteração necessária'};
+  }
+
+  function recommendedDecisionMap(items=[]){
+    const decisions={};
+    for(const item of items){
+      if(!item?.row?.sourceRow)continue;
+      const recommendation=recommendDecision(item);
+      const fields={};
+      for(const change of item.changes||[])fields[change.field]=change.protected?'keep':'excel';
+      decisions[String(item.row.sourceRow)]={action:recommendation.action,fields};
+      if(recommendation.targetLeadId)decisions[String(item.row.sourceRow)].targetLeadId=recommendation.targetLeadId;
+    }
+    return decisions;
+  }
+
+  function summarizeRecommendations(items=[]){
+    const summary={ready:0,manualReview:0,create:0,update:0,ignore:0};
+    for(const item of items){
+      const recommendation=recommendDecision(item);
+      if(recommendation.needsReview)summary.manualReview+=1;
+      else if(recommendation.action==='create'||recommendation.action==='update')summary.ready+=1;
+      if(recommendation.action==='create')summary.create+=1;
+      else if(recommendation.action==='update')summary.update+=1;
+      else summary.ignore+=1;
+    }
+    return summary;
+  }
+
   const normalizeDecision=value=>['keep','excel','append','ignore'].includes(value)?value:'keep';
 
   function normalizeConversationStage(value){
@@ -323,5 +360,5 @@
 
   function protectedContract(){return{formula:['📋 CRM!Q:Q','🚀 HOJE!A:W'],manual:['📋 CRM!P:P','👥 CONTATOS!H:H'],derived:['📋 CRM!I:I','📋 CRM!W:W'],structure:['tables','merges','validations','conditionalFormatting'],writable:CRM_HEADERS.filter(item=>!['Score','Nº contatos'].includes(item))};}
 
-  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,applyPreview,readArrayBuffer,readFile,protectedContract,digits,norm};
+  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,digits,norm};
 });
