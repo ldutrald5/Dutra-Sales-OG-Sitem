@@ -20,6 +20,39 @@
     return TERMINAL_STATUSES.has(key(lead.status));
   }
 
+  function isCustomerLifecycle(lead = {}) {
+    const status = key(lead.status);
+    const conversation = key(lead.conversationStage);
+    return status === 'fechado' || ['customer','loyal_customer','cliente','cliente_fidelizado'].includes(conversation);
+  }
+
+  function canonicalEventType(value) {
+    const normalized = key(value);
+    const aliases = {
+      proposal_prepared:'proposal.prepared',
+      proposal_sent:'proposal.sent',
+      proposal_opened:'proposal.opened',
+      proposal_reopened:'proposal.reopened',
+      proposal_contact_clicked:'proposal.contact_clicked',
+      proposal_accepted:'proposal.accepted',
+      proposal_revoked:'proposal.revoked',
+      installation_completed:'installation.completed',
+      customer_satisfaction_confirmed:'customer.satisfaction.confirmed',
+      referral_requested:'referral.requested',
+      referral_received:'referral.received',
+      test_completed:'test.completed',
+      test_cancelled:'test.cancelled'
+    };
+    return aliases[normalized] || clean(value);
+  }
+
+  function eventsForLead(operations = {}, leadId) {
+    return (Array.isArray(operations?.activityEvents) ? operations.activityEvents : [])
+      .filter(item => clean(item.clientId || item.leadId) === clean(leadId))
+      .map(item => ({ ...item, type:canonicalEventType(item.type) }))
+      .sort((a,b)=>(asDate(b.at)?.getTime()||0)-(asDate(a.at)?.getTime()||0));
+  }
+
   function interactionDate(lead = {}) {
     const interactions = Array.isArray(lead.interactions) ? lead.interactions : [];
     const latestInteraction = interactions
@@ -54,10 +87,12 @@
     return Number.isFinite(value) ? value : 0;
   }
 
-  function signalsForLead(lead = {}, now = new Date()) {
-    if (!lead?.id || isTerminal(lead)) return Object.freeze([]);
+  function signalsForLead(lead = {}, now = new Date(), operations = {}) {
+    if (!lead?.id || key(lead.status) === 'perdido') return Object.freeze([]);
     const reference = asDate(now) || new Date();
     const signals = [];
+    const customerLifecycle = isCustomerLifecycle(lead);
+    const events = eventsForLead(operations, lead.id);
     const due = asDate(lead.followUpAt);
     const nextAction = clean(lead.nextAction);
     const priority = key(lead.priorityBand || lead.sourcePriority || lead.priority);
@@ -65,6 +100,7 @@
     const proposalStage = ['proposal', 'proposta', 'proposta_enviada'].includes(conversation)
       || key(lead.status) === 'proposta_enviada';
 
+    if (!customerLifecycle) {
     if (due) {
       const delta = due.getTime() - reference.getTime();
       if (delta < 0) {
@@ -161,6 +197,104 @@
         ));
       }
     }
+    }
+
+    // Sinais pós-venda e de intenção: só nascem de campos/eventos explícitos.
+    const proposalReopened = events.find(item => item.type === 'proposal.reopened');
+    const proposalClosedAfter = proposalReopened && events.some(item =>
+      ['proposal.accepted','proposal.revoked'].includes(item.type)
+      && (asDate(item.at)?.getTime()||0) >= (asDate(proposalReopened.at)?.getTime()||0)
+    );
+    if (proposalReopened && !proposalClosedAfter) {
+      const reopenedAt = asDate(proposalReopened.at);
+      signals.push(makeSignal(
+        lead,
+        'proposal_reopened',
+        'high',
+        'Proposta reaberta',
+        reopenedAt ? `A proposta foi reaberta em ${reopenedAt.toLocaleString('pt-BR')}.` : 'Existe uma reabertura confirmada da proposta.',
+        'Retomar a proposta enquanto o interesse está ativo',
+        { proposalId:proposalReopened.proposalId || null, reopenedAt:reopenedAt?.toISOString() || null }
+      ));
+    }
+
+    const installationStatus = key(lead.installationStatus || lead.installStatus);
+    if (['pending','pendente','not_installed','nao_instalou','aguardando_instalacao','waiting_installation'].includes(installationStatus)) {
+      signals.push(makeSignal(
+        lead,
+        'installation_pending',
+        'medium',
+        'Instalação pendente',
+        'A conta está marcada explicitamente com instalação ainda pendente.',
+        'Confirmar data, responsável e condição para concluir a instalação'
+      ));
+    }
+
+    const testEnd = asDate(lead.testEndsAt || lead.trialEndsAt);
+    const testStatus = key(lead.testStatus || lead.trialStatus);
+    const testClosedByEvent = events.some(item => ['test.completed','test.cancelled'].includes(item.type));
+    if (testEnd && !['completed','concluido','cancelled','cancelado'].includes(testStatus) && !testClosedByEvent) {
+      const daysUntil = Math.ceil((testEnd.getTime() - reference.getTime()) / 86400000);
+      if (daysUntil <= 14 && daysUntil >= -7) {
+        signals.push(makeSignal(
+          lead,
+          'test_ending',
+          daysUntil <= 2 ? 'high' : 'medium',
+          daysUntil < 0 ? 'Teste terminou sem fechamento registrado' : 'Teste perto do fechamento',
+          daysUntil < 0 ? `O teste terminou há ${Math.abs(daysUntil)} dia(s).` : `O teste termina em ${daysUntil} dia(s).`,
+          'Revisar resultado do teste e definir expansão, ajuste ou próximo passo',
+          { testEndsAt:testEnd.toISOString(), daysUntil }
+        ));
+      }
+    }
+
+    const satisfaction = key(lead.satisfactionStatus || lead.customerSatisfaction || lead.satisfaction);
+    const referralDone = Boolean(
+      clean(lead.referralRequestedAt || lead.referralReceivedAt || lead.referredAt)
+      || events.some(item => ['referral.requested','referral.received'].includes(item.type))
+    );
+    if (['satisfied','satisfeito','satisfeita','positive','positivo','confirmada','confirmed'].includes(satisfaction) && !referralDone) {
+      signals.push(makeSignal(
+        lead,
+        'satisfied_without_referral',
+        'medium',
+        'Cliente satisfeito sem indicação registrada',
+        'A satisfação está confirmada e ainda não existe pedido/recebimento de indicação depois disso.',
+        'Pedir uma indicação de outra frota ou gestor'
+      ));
+    }
+
+    const size = fleetSize(lead);
+    const equippedRaw = lead.equippedVehicles ?? lead.protectedVehicleCount ?? lead.installedVehicleCount ?? lead.vehiclesProtected;
+    const equipped = Number(String(equippedRaw ?? '').replace(/[^0-9.,-]/g,'').replace(',','.'));
+    if (customerLifecycle && size > 0 && Number.isFinite(equipped) && equipped >= 0 && equipped < size) {
+      const gap = Math.max(0, Math.round(size - equipped));
+      signals.push(makeSignal(
+        lead,
+        'fleet_expansion_gap',
+        gap >= 10 ? 'high' : 'medium',
+        'Frota com espaço para expansão',
+        `${Math.round(equipped)} de ${Math.round(size)} veículo(s) estão registrados como protegidos/equipados.`,
+        `Mapear expansão para os ${gap} veículo(s) restantes`,
+        { fleetSize:size, equippedVehicles:equipped, gap }
+      ));
+    }
+
+    const replacementAt = asDate(lead.replacementReviewAt || lead.reorderDueAt || lead.nextReplacementReviewAt);
+    if (customerLifecycle && replacementAt) {
+      const daysUntil = Math.ceil((replacementAt.getTime() - reference.getTime()) / 86400000);
+      if (daysUntil <= 14) {
+        signals.push(makeSignal(
+          lead,
+          'replacement_review_due',
+          daysUntil <= 0 ? 'high' : 'medium',
+          'Revisão de reposição próxima',
+          daysUntil < 0 ? `A revisão de reposição está vencida há ${Math.abs(daysUntil)} dia(s).` : `A revisão de reposição vence em ${daysUntil} dia(s).`,
+          'Revisar reposição, peças e oportunidade de recompra',
+          { replacementReviewAt:replacementAt.toISOString(), daysUntil }
+        ));
+      }
+    }
 
     return Object.freeze(signals.sort((a, b) =>
       b.severityWeight - a.severityWeight
@@ -169,10 +303,10 @@
     ));
   }
 
-  function buildSignalCenter(leads = [], now = new Date()) {
+  function buildSignalCenter(leads = [], now = new Date(), operations = {}) {
     const output = [];
     for (const lead of Array.isArray(leads) ? leads : []) {
-      for (const signal of signalsForLead(lead, now)) output.push(signal);
+      for (const signal of signalsForLead(lead, now, operations)) output.push(signal);
     }
     return output.sort((a, b) =>
       b.severityWeight - a.severityWeight
@@ -182,11 +316,11 @@
     );
   }
 
-  function nextMission(leads = [], now = new Date(), scoreFn = () => 0) {
+  function nextMission(leads = [], now = new Date(), scoreFn = () => 0, operations = {}) {
     const candidates = (Array.isArray(leads) ? leads : [])
       .filter(lead => lead?.id && !isTerminal(lead))
       .map(lead => {
-        const signals = signalsForLead(lead, now);
+        const signals = signalsForLead(lead, now, operations);
         const score = Number(scoreFn(lead, now)) || 0;
         return { lead, score, signals, topSignal: signals[0] || null };
       })
