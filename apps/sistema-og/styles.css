@@ -1224,3 +1224,23 @@ body {
 
 .account-360-brain-action{border-color:rgba(255,222,23,.42)!important;color:#fff3a3!important;background:rgba(255,222,23,.08)!important}
 .account-360-brain-action:hover,.account-360-brain-action:focus-visible{background:rgba(255,222,23,.14)!important;border-color:rgba(255,222,23,.7)!important;outline:none}
+
+
+/* AUTO-01 — Automation Engine V1 */
+.automation-center{border-color:rgba(56,189,248,.2)}
+.automation-center-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;margin-bottom:.7rem}
+.automation-center-head h2{margin:.18rem 0 0;font-size:.82rem;color:var(--og-text)}
+.automation-center-count{min-width:1.7rem;height:1.7rem;display:grid;place-items:center;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);font-size:.62rem;font-weight:900;color:#7dd3fc}
+.automation-center-list{display:grid;gap:.55rem}
+.automation-center-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.6rem;padding:.7rem;border:1px solid var(--og-border);border-radius:.72rem;background:#090f17}
+.automation-center-item>div{min-width:0}
+.automation-center-item strong,.automation-center-item b,.automation-center-item small,.automation-center-item em{display:block}
+.automation-center-item strong{font-size:.66rem;color:#e2e8f0}
+.automation-center-item b{margin-top:.16rem;font-size:.63rem;color:#f8fafc}
+.automation-center-item small{margin-top:.18rem;color:#94a3b8;font-size:.57rem;line-height:1.4}
+.automation-center-item em{margin-top:.28rem;color:#7dd3fc;font-style:normal;font-size:.58rem}
+.automation-center-item button{padding:.48rem .62rem;border:1px solid rgba(56,189,248,.35);border-radius:.55rem;background:rgba(56,189,248,.08);color:#bae6fd;font-size:.57rem;font-weight:850;white-space:nowrap}
+.automation-center-item[data-severity="high"]{box-shadow:inset 3px 0 #f97316}
+.automation-center-empty{display:grid;gap:.2rem;color:#94a3b8;font-size:.6rem;line-height:1.4}
+.automation-center-empty strong{color:#cbd5e1}
+@media(max-width:700px){.automation-center-item{grid-template-columns:1fr}.automation-center-item button{width:100%}}
