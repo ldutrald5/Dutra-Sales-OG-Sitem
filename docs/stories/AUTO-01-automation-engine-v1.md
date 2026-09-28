@@ -1,6 +1,6 @@
 # AUTO-01 — Automation Engine V1
 
-Status: **em revisão**
+Status: **concluída**
 
 ## Objetivo
 
@@ -40,3 +40,10 @@ Este pacote também corrige sequências literais `\n` que haviam entrado no HTML
 ## Rollback
 
 Reverter o pacote remove o Automation Center e as regras. Próximas ações já explicitamente aplicadas pelo usuário permanecem como fatos históricos e não são apagadas.
+
+## Evidência de conclusão
+
+- PR: **#41 — feat: AUTO-01 Automation Engine V1**.
+- CI de implementação: Package 00R CI run **163**, conclusão **success**.
+- Gates aprovados: validate, Brain, Security, npm audit e Release Gate.
+- O Service Worker passa a entrar no syntax gate permanente.
