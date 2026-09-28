@@ -4830,7 +4830,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
         <div class="company-360-columns">
           <div><small>CONTATOS / DECISORES</small><ul>${contactNames || operationalContactHtml || '<li><span>Nenhum decisor confirmado</span></li>'}</ul></div>
-          <div><small>OPORTUNIDADES ABERTAS</small><ul>${opportunityNames || `<li><b>${escapeHtml(lead.nextAction || 'Sem oportunidade canônica')}</b><span>${view ? 'Nenhuma oportunidade canônica aberta' : 'Reconcilie quando houver necessidade real; nada é criado automaticamente.'}</span></li>`}</ul></div>
+          <div><small>OPORTUNIDADES ABERTAS</small><ul>${opportunityNames || `<li><b>${escapeHtml(lead.nextAction || 'Sem oportunidade canônica')}</b><span>${view ? 'Nenhuma oportunidade canônica aberta' : 'Nenhuma Company canônica será criada automaticamente. Reconcilie somente quando houver necessidade real.'}</span></li>`}</ul></div>
         </div>
 
         <div class="company-360-actions">
