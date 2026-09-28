@@ -93,6 +93,86 @@
     });
   }
 
+  function createAdapter(spec) {
+    if (!spec || !spec.id) throw new TypeError("adapter.id is required");
+    const allowed = new Set(spec.operations || []);
+    function guard(operation) {
+      if (!allowed.has(operation)) throw new Error("operation not allowed: " + operation);
+    }
+    return Object.freeze({
+      id: String(spec.id),
+      operations: Object.freeze(Array.from(allowed)),
+      health: typeof spec.health === "function" ? spec.health : async () => ({ status: "unknown" }),
+      read: async (request) => { guard("read"); return spec.read ? spec.read(request) : null; },
+      prepare: async (request) => { guard("prepare"); return spec.prepare ? spec.prepare(request) : null; },
+      execute: async (request) => {
+        guard("external_write");
+        if (!request || request.approved !== true) throw new Error("explicit approval required");
+        return spec.execute ? spec.execute(request) : null;
+      }
+    });
+  }
+
+  function createExecutionLog(initial) {
+    const entries = Array.isArray(initial) ? initial.slice() : [];
+    return Object.freeze({
+      append(entry) {
+        if (!entry || !entry.missionId || !entry.status) throw new TypeError("execution entry requires missionId and status");
+        const record = Object.freeze({
+          id: String(entry.id || ("execution-" + Date.now() + "-" + entries.length)),
+          missionId: String(entry.missionId),
+          accountId: entry.accountId ? String(entry.accountId) : null,
+          agentId: entry.agentId ? String(entry.agentId) : null,
+          integrationId: entry.integrationId ? String(entry.integrationId) : null,
+          status: String(entry.status),
+          evidence: Array.isArray(entry.evidence) ? entry.evidence.slice() : [],
+          startedAt: entry.startedAt || new Date().toISOString(),
+          finishedAt: entry.finishedAt || null,
+          errorCode: entry.errorCode || null
+        });
+        entries.push(record);
+        return record;
+      },
+      list() { return entries.slice(); },
+      forMission(missionId) { return entries.filter((item) => item.missionId === String(missionId)); }
+    });
+  }
+
+  function createApprovalQueue(initial) {
+    const requests = Array.isArray(initial) ? initial.map((item) => ({ ...item })) : [];
+    function find(id) {
+      const item = requests.find((request) => request.id === String(id));
+      if (!item) throw new Error("approval request not found");
+      return item;
+    }
+    return Object.freeze({
+      enqueue(action, context) {
+        const request = createApprovalRequest(action, context);
+        if (!request) return null;
+        requests.push({ ...request });
+        return { ...request };
+      },
+      approve(id, actor, at) {
+        const item = find(id);
+        if (item.status !== "pending") throw new Error("approval request already decided");
+        item.status = "approved";
+        item.decidedBy = String(actor || "user");
+        item.decidedAt = at || new Date().toISOString();
+        return { ...item };
+      },
+      reject(id, actor, at) {
+        const item = find(id);
+        if (item.status !== "pending") throw new Error("approval request already decided");
+        item.status = "rejected";
+        item.decidedBy = String(actor || "user");
+        item.decidedAt = at || new Date().toISOString();
+        return { ...item };
+      },
+      pending() { return requests.filter((item) => item.status === "pending").map((item) => ({ ...item })); },
+      list() { return requests.map((item) => ({ ...item })); }
+    });
+  }
+
   return Object.freeze({
     AUTONOMY,
     agentRegistry,
@@ -100,6 +180,9 @@
     normalizeMission,
     routeMission,
     requiresApproval,
-    createApprovalRequest
+    createApprovalRequest,
+    createAdapter,
+    createExecutionLog,
+    createApprovalQueue
   });
 });
