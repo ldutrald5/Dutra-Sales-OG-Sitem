@@ -88,6 +88,31 @@ function newestState(states) {
   })[0] || null;
 }
 
+function meaningfulState(state) {
+  return Boolean(
+    validState(state) &&
+    (
+      stateRevision(state) > 0 ||
+      state.leads.length > 0 ||
+      state.history.length > 0 ||
+      clean(state.updatedAt)
+    )
+  );
+}
+
+function persistentStateCandidates(dataFile, volumeRoot) {
+  const candidates = [{ file: dataFile, state: readState(dataFile) }];
+  if (volumeRoot) {
+    const legacyAtVolumeRoot = path.join(volumeRoot, 'shared-state.json');
+    if (legacyAtVolumeRoot !== dataFile) candidates.push({ file: legacyAtVolumeRoot, state: readState(legacyAtVolumeRoot) });
+  }
+  const legacyDefault = '/data/shared-state.json';
+  if (legacyDefault !== dataFile && (!volumeRoot || legacyDefault !== path.join(volumeRoot, 'shared-state.json'))) {
+    candidates.push({ file: legacyDefault, state: readState(legacyDefault) });
+  }
+  return candidates;
+}
+
 function leadKeys(lead = {}) {
   const keys = [];
   const code = codeKey(lead.internalCode || lead.codigo);
@@ -232,11 +257,29 @@ export function applyHostedSeed(options = {}) {
   const encoded = seedPayloadFromEnv(env);
   if (!encoded) return { status: 'no_seed' };
 
-  const payload = decodeSeed(encoded);
-  const seedId = safeSeedId(payload.seedId);
   const volumeRoot = clean(env.RAILWAY_VOLUME_MOUNT_PATH);
   const dataDir = path.resolve(clean(env.OG_DATA_DIR) || volumeRoot || '/data');
   const dataFile = path.join(dataDir, 'shared-state.json');
+  const persistent = newestState(persistentStateCandidates(dataFile, volumeRoot));
+
+  let payload;
+  try {
+    payload = decodeSeed(encoded);
+  } catch (error) {
+    if (persistent?.state && meaningfulState(persistent.state)) {
+      return {
+        status: 'invalid_seed_skipped',
+        reason: 'valid_persistent_state_present',
+        dataFile: persistent.file,
+        baseRevision: stateRevision(persistent.state),
+        finalLeadCount: persistent.state.leads.length,
+        errorCode: clean(error?.code) || 'INVALID_SEED'
+      };
+    }
+    throw error;
+  }
+
+  const seedId = safeSeedId(payload.seedId);
   const markerDir = path.join(dataDir, '.seed-history');
   const markerFile = path.join(markerDir, `${seedId}.json`);
   if (fs.existsSync(markerFile)) {
@@ -247,15 +290,7 @@ export function applyHostedSeed(options = {}) {
   fs.mkdirSync(dataDir, { recursive: true });
   fs.mkdirSync(markerDir, { recursive: true });
 
-  const candidates = [{ file: dataFile, state: readState(dataFile) }];
-  if (volumeRoot) {
-    const legacyAtVolumeRoot = path.join(volumeRoot, 'shared-state.json');
-    if (legacyAtVolumeRoot !== dataFile) candidates.push({ file: legacyAtVolumeRoot, state: readState(legacyAtVolumeRoot) });
-  }
-  const legacyDefault = '/data/shared-state.json';
-  if (legacyDefault !== dataFile && (!volumeRoot || legacyDefault !== path.join(volumeRoot, 'shared-state.json'))) {
-    candidates.push({ file: legacyDefault, state: readState(legacyDefault) });
-  }
+  const candidates = persistentStateCandidates(dataFile, volumeRoot);
 
   let selected = newestState(candidates);
   let base = selected?.state || null;

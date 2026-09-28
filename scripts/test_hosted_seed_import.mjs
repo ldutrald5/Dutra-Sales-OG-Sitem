@@ -104,3 +104,45 @@ assert.equal(rootState.leads[0].id,'LIVE1');
 assert.equal(rootState.operations.activityEvents[0].id,'LIVE-EVT');
 
 console.log('Hosted seed volume-root compatibility: PASS');
+
+const corruptRoot=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-corrupt-root-'));
+const durableState={
+  revision:7,
+  updatedAt:'2026-09-27T22:19:34.768Z',
+  leads:[{id:'LIVE-SAFE',empresa:'Persistido'}],
+  history:[],
+  operations:{schemaVersion:2,activityEvents:[{id:'SAFE-EVT'}]}
+};
+const durableFile=path.join(corruptRoot,'shared-state.json');
+fs.writeFileSync(durableFile,JSON.stringify(durableState,null,2));
+const durableBefore=fs.readFileSync(durableFile,'utf8');
+const skipped=applyHostedSeed({
+  env:{
+    RAILWAY_VOLUME_MOUNT_PATH:corruptRoot,
+    OG_STATE_SEED_GZIP_B64_1:'bm90LWEtZ3ppcC1wYXlsb2Fk'
+  }
+});
+assert.equal(skipped.status,'invalid_seed_skipped','seed corrompido não pode derrubar runtime com estado persistente válido');
+assert.equal(skipped.reason,'valid_persistent_state_present');
+assert.equal(skipped.baseRevision,7);
+assert.equal(skipped.finalLeadCount,1);
+assert.equal(fs.readFileSync(durableFile,'utf8'),durableBefore,'estado persistente deve permanecer byte a byte intacto');
+assert.equal(fs.existsSync(path.join(corruptRoot,'.seed-history')),false,'seed inválido ignorado não cria marcador');
+assert.equal(fs.existsSync(path.join(corruptRoot,'backups')),false,'seed inválido ignorado não cria backup desnecessário');
+
+const corruptNoState=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-corrupt-empty-'));
+assert.throws(
+  ()=>applyHostedSeed({env:{RAILWAY_VOLUME_MOUNT_PATH:corruptNoState,OG_STATE_SEED_GZIP_B64:'bm90LWEtZ3ppcA=='}}),
+  /incorrect header check|invalid block type|unexpected end of file|unknown compression method|invalid distance|invalid stored block lengths/i,
+  'sem estado persistente válido o seed corrompido deve continuar falhando de forma explícita'
+);
+
+const emptyStateRoot=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-corrupt-empty-state-'));
+fs.writeFileSync(path.join(emptyStateRoot,'shared-state.json'),JSON.stringify({revision:0,updatedAt:null,leads:[],history:[],operations:{}},null,2));
+assert.throws(
+  ()=>applyHostedSeed({env:{RAILWAY_VOLUME_MOUNT_PATH:emptyStateRoot,OG_STATE_SEED_GZIP_B64:'bm90LWEtZ3ppcA=='}}),
+  /incorrect header check|invalid block type|unexpected end of file|unknown compression method|invalid distance|invalid stored block lengths/i,
+  'estado vazio inicial não deve esconder seed corrompido durante uma migração'
+);
+
+console.log('Hosted corrupt-seed guard tests: PASS');
