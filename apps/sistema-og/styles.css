@@ -1276,3 +1276,30 @@ body {
 .territory-clusters span{margin-top:.18rem;color:#94a3b8;font-size:.52rem}
 .territory-empty{margin-top:.7rem;color:#94a3b8;font-size:.6rem}
 @media(max-width:700px){.territory-readiness-stats{grid-template-columns:1fr 1fr}.territory-readiness-head{align-items:center}.territory-readiness-score{min-width:2.8rem;height:2.8rem}.territory-clusters button{min-width:9.5rem}}
+
+
+/* DUTRA-DAY-01 — Morning Command */
+.morning-command-panel{padding:1rem 1.1rem;border-color:rgba(255,222,23,.24);background:linear-gradient(145deg,rgba(255,222,23,.045),rgba(8,13,20,.96))}
+.morning-command-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.morning-command-head h2{margin:.16rem 0 .25rem;font-size:1rem;color:#f8fafc}
+.morning-command-head p{margin:0;max-width:62rem;color:#aab4c0;font-size:.65rem;line-height:1.55}
+.morning-command-head>button{border:0;background:transparent;color:#94a3b8;font-size:1.3rem;line-height:1;padding:.15rem .25rem}
+.morning-command-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.55rem;margin-top:.9rem}
+.morning-command-kpis>div{padding:.65rem;border:1px solid var(--og-border);border-radius:.7rem;background:#080d14}
+.morning-command-kpis small,.morning-command-kpis b{display:block}
+.morning-command-kpis small{font-size:.52rem;color:#94a3b8}
+.morning-command-kpis b{margin-top:.15rem;font-size:.9rem;color:#ffde17}
+.morning-command-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:.65rem;margin-top:.7rem}
+.morning-command-grid>article{padding:.75rem;border:1px solid var(--og-border);border-radius:.75rem;background:#080d14}
+.morning-command-mission h3{margin:.28rem 0 .2rem;color:#fff;font-size:.82rem}
+.morning-command-mission p{margin:0;color:#94a3b8;font-size:.58rem;line-height:1.45}
+.morning-command-mission strong{display:block;margin:.55rem 0;color:#fef08a;font-size:.6rem}
+.morning-command-mission button{width:100%;padding:.55rem;border:1px solid rgba(255,222,23,.4);border-radius:.55rem;background:rgba(255,222,23,.11);color:#ffef82;font-size:.57rem;font-weight:900}
+.morning-command-list{display:grid;gap:.38rem;margin-top:.45rem}
+.morning-command-list button{display:grid;gap:.08rem;text-align:left;padding:.5rem;border:1px solid #1f2937;border-radius:.55rem;background:#070b11;color:#e2e8f0}
+.morning-command-list b{font-size:.57rem}.morning-command-list span{font-size:.54rem;color:#f8fafc}.morning-command-list small{font-size:.5rem;color:#94a3b8}
+.morning-command-empty{color:#94a3b8;font-size:.58rem}
+.morning-command-foot{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.65rem;padding-top:.6rem;border-top:1px solid #1f2937;font-size:.52rem;color:#94a3b8}
+.morning-command-foot b{color:#cbd5e1}.morning-command-foot small{margin-left:auto}
+@media(max-width:900px){.morning-command-kpis{grid-template-columns:repeat(3,1fr)}.morning-command-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.morning-command-kpis{grid-template-columns:repeat(2,1fr)}.morning-command-head{align-items:center}.morning-command-foot small{width:100%;margin-left:0}}
