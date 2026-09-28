@@ -33,6 +33,9 @@
     if(afterInstallation==='completed'&&beforeInstallation!=='completed'){
       push('installation.completed',after.installationCompletedAt||now,{installationStatus:'completed'});
     }
+    if(beforeInstallation==='completed'&&afterInstallation&&afterInstallation!=='completed'){
+      push('installation.reopened',now,{installationStatus:afterInstallation});
+    }
 
     const beforeSatisfaction=key(before.satisfactionStatus);
     const afterSatisfaction=key(after.satisfactionStatus);
