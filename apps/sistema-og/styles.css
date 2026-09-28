@@ -1221,3 +1221,6 @@ body {
   .command-center-overlay { padding-top:5vh; }
   .command-center { max-height:90vh; overflow:auto; }
 }
+
+.account-360-brain-action{border-color:rgba(255,222,23,.42)!important;color:#fff3a3!important;background:rgba(255,222,23,.08)!important}
+.account-360-brain-action:hover,.account-360-brain-action:focus-visible{background:rgba(255,222,23,.14)!important;border-color:rgba(255,222,23,.7)!important;outline:none}
