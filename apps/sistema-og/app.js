@@ -3721,6 +3721,136 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     };
   }
 
+  function renderMorningCommand(report) {
+    const root = document.getElementById('morning-command-panel');
+    if (!root || !report) return;
+    root.classList.remove('hidden');
+    const missionLead = report.mission ? OG_CRM_SERVICE.getLeadById(state.leads, report.mission.leadId) : null;
+    const missionName = missionLead?.empresa || missionLead?.nome || 'Nenhuma conta crítica';
+    const signalItems = (report.signals || []).slice(0, 3);
+    const automationItems = (report.automations || []).slice(0, 3);
+    root.innerHTML = `
+      <header class="morning-command-head">
+        <div><span class="og-kicker">DUTRA COMMAND · MORNING BRIEF</span><h2>Seu dia foi organizado com os fatos atuais do CRM.</h2><p>${escapeHtml(report.briefing.join(' '))}</p></div>
+        <button type="button" data-morning-close aria-label="Fechar briefing">×</button>
+      </header>
+      <div class="morning-command-kpis">
+        <div><small>Vencidos</small><b>${report.counts.overdue}</b></div>
+        <div><small>Hoje</small><b>${report.counts.today}</b></div>
+        <div><small>Sinais</small><b>${report.counts.signals}</b></div>
+        <div><small>Automações</small><b>${report.counts.automations}</b></div>
+        <div><small>Pós-venda / expansão</small><b>${report.counts.lifecycle}</b></div>
+      </div>
+      <div class="morning-command-grid">
+        <article class="morning-command-mission">
+          <span class="og-kicker">PRÓXIMA MISSÃO</span>
+          <h3>${escapeHtml(missionName)}</h3>
+          <p>${escapeHtml(report.mission?.reason || 'Nenhuma missão crítica detectada agora.')}</p>
+          <strong>→ ${escapeHtml(report.mission?.recommendedAction || 'Continuar a rotina comercial registrada')}</strong>
+          ${report.mission ? '<button type="button" data-morning-mission>ABRIR PRÓXIMA MISSÃO</button>' : ''}
+        </article>
+        <article>
+          <span class="og-kicker">SINAIS</span>
+          ${signalItems.length ? `<div class="morning-command-list">${signalItems.map(item => {
+            const lead = OG_CRM_SERVICE.getLeadById(state.leads, item.leadId);
+            return `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(lead?.empresa || lead?.nome || 'Conta')}</b><span>${escapeHtml(item.title)}</span><small>${escapeHtml(item.recommendedAction)}</small></button>`;
+          }).join('')}</div>` : '<p class="morning-command-empty">Nenhum sinal crítico.</p>'}
+        </article>
+        <article>
+          <span class="og-kicker">ROTINAS SUGERIDAS</span>
+          ${automationItems.length ? `<div class="morning-command-list">${automationItems.map(item => {
+            const lead = OG_CRM_SERVICE.getLeadById(state.leads, item.leadId);
+            return `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(lead?.empresa || lead?.nome || 'Conta')}</b><span>${escapeHtml(item.title)}</span><small>${escapeHtml(item.action)}</small></button>`;
+          }).join('')}</div>` : '<p class="morning-command-empty">Nenhuma rotina pendente.</p>'}
+        </article>
+      </div>
+      <footer class="morning-command-foot"><span>Agenda externa</span><b>${escapeHtml(report.calendar.note)}</b><small>Gerado em ${new Date(report.generatedAt).toLocaleString('pt-BR')}</small></footer>
+    `;
+
+    root.querySelector('[data-morning-close]')?.addEventListener('click', () => root.classList.add('hidden'));
+    root.querySelector('[data-morning-mission]')?.addEventListener('click', () => {
+      if (!report.mission) return;
+      state.selectedLeadId = report.mission.leadId;
+      dayFilter = 'all';
+      renderDayDashboard();
+      document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+    root.querySelectorAll('[data-morning-account]').forEach(button => button.addEventListener('click', () => {
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.morningAccount);
+      if (!lead) return;
+      state.selectedLeadId = lead.id;
+      renderDayDashboard();
+      openClientSheet(lead.id);
+    }));
+  }
+
+  function runMorningCommand() {
+    if (!window.OG_COMMAND_CORE || !window.OG_COMMAND_EXECUTION || !window.OG_MORNING_COMMAND) {
+      showNotification('Command Core ainda não está disponível nesta sessão.', 'warning');
+      return null;
+    }
+    const now = new Date();
+    const missionId = `DAY-${now.toISOString().replace(/[^0-9]/g,'').slice(0,14)}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+    const route = OG_COMMAND_CORE.routeMission({
+      id:missionId,
+      capability:'day.prepare',
+      requestedBy:'lucas',
+      payload:{ source:'morning-command', currentTab:state.currentTab || 'dia' },
+      createdAt:now.toISOString()
+    });
+    try {
+      state.operations = OG_COMMAND_EXECUTION.startMission(state.operations, route, {
+        operationsModel:OG_OPERATIONS_MODEL,
+        now
+      });
+      const report = OG_MORNING_COMMAND.build({
+        leads:state.leads,
+        operations:state.operations,
+        now,
+        calendarConnected:false,
+        calendarEvents:[]
+      }, {
+        salesDesk:OG_SALES_DESK,
+        leadIntelligence:OG_LEAD_INTELLIGENCE,
+        signalCenter:OG_SIGNAL_CENTER,
+        automationEngine:OG_AUTOMATION_ENGINE
+      });
+      state.operations = OG_COMMAND_EXECUTION.finishMission(state.operations, {
+        missionId,
+        capability:'day.prepare',
+        agentId:route.agent?.id || null,
+        summary:'Morning Command preparado com CRM, sinais, automações e próxima missão.',
+        result:{
+          counts:report.counts,
+          nextMissionLeadId:report.mission?.leadId || null,
+          externalCalendarConnected:false
+        }
+      }, {
+        operationsModel:OG_OPERATIONS_MODEL,
+        now:new Date()
+      });
+      saveOperationsToStorage();
+      if (state.currentTab !== 'dia') switchTab('dia');
+      renderMorningCommand(report);
+      showNotification('DUTRA organizou seu dia com os dados atuais.', 'success');
+      document.getElementById('morning-command-panel')?.scrollIntoView({ behavior:'smooth', block:'start' });
+      return report;
+    } catch (error) {
+      try {
+        state.operations = OG_COMMAND_EXECUTION.finishMission(state.operations, {
+          missionId,
+          capability:'day.prepare',
+          agentId:route.agent?.id || null,
+          status:'failed',
+          summary:error?.message || 'Falha ao preparar Morning Command'
+        }, { operationsModel:OG_OPERATIONS_MODEL, now:new Date() });
+        saveOperationsToStorage();
+      } catch (_) {}
+      showNotification(error?.message || 'Não foi possível preparar o seu dia.', 'warning');
+      return null;
+    }
+  }
+
   function renderAutomationCenter() {
     const root = document.getElementById('automation-center');
     if (!root || !window.OG_AUTOMATION_ENGINE) return;
@@ -4390,6 +4520,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
       if (event.key.toLowerCase() === 'a') { event.preventDefault(); document.querySelector('.sales-desk-actions summary')?.click(); }
     });
+    document.getElementById('btn-morning-command')?.addEventListener('click', runMorningCommand);
     setInterval(updateDayClock, 30000);
   }
 
@@ -4566,6 +4697,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     let renderSequence = 0;
     const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     const moduleCommands = [
+      { id: 'morning', label: '☀ DUTRA, COMEÇA MEU DIA', terms: 'dutra começa meu dia comeca morning briefing agenda hoje organizar dia' },
       { id: 'new', label: '＋ Novo prospect', terms: 'novo cadastrar cliente prospect' },
       { id: 'desk', label: '◉ Meu Dia / Mission Control', terms: 'meu dia mesa mission control agenda hoje' },
       { id: 'prospecting', label: '🎯 Prospecção', terms: 'prospeccao prospectar fila caixa' },
@@ -4599,6 +4731,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     const runModule = id => {
       closeCommandCenter();
+      if (id === 'morning') { switchTab('dia'); return runMorningCommand(); }
       if (id === 'new') return openQuickLead('dia');
       if (id === 'desk') return switchTab('dia');
       if (id === 'prospecting') { switchTab('prospeccao'); return setProspectingView('queue'); }
