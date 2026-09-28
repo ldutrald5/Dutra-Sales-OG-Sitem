@@ -4834,6 +4834,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         </div>
 
         <div class="company-360-actions">
+          <button type="button" class="company-360-action account-360-brain-action" data-account-brain>🧠 Sales Brain da conta</button>
           ${view
             ? '<button type="button" class="company-360-action" data-company360-edit>Editar Company</button><button type="button" class="company-360-action" data-company360-contact>＋ Contato</button>'
             : '<button type="button" class="company-360-action" data-company360-create>Revisar e criar Company canônica</button>'}
@@ -4851,6 +4852,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       else renderLeadInspector();
       showNotification('Company 360 atualizada.', 'success');
     };
+    root.querySelector('[data-account-brain]')?.addEventListener('click', () => {
+      const command = window.OG_ACCOUNT_KNOWLEDGE?.commandForLead?.(lead)
+        || `brain ${[lead.segmentId, lead.pain, lead.objection || lead.objections, lead.nextAction].filter(Boolean).join(' ') || 'produto vendas'}`;
+      if (root.closest?.('.client-sheet-panel')) closeClientSheet();
+      openCommandCenter(command);
+    });
+
     root.querySelector('[data-company360-create]')?.addEventListener('click', () => {
       const name = prompt('Confirme o nome da empresa:', lead.empresa || lead.nome || '');
       if (!name?.trim()) return;

@@ -130,3 +130,26 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Offline:** `modules/signal-center.js` foi incluído no shell do PWA.
 - **Validação:** `og:signal-center:test`, `og:mission-control:ui:test`, `npm run validate`, `og:security:test`, `npm audit --audit-level=high` e `release:gate` passaram no workflow da PR #29.
 - **Limites preservados:** Proposal Tracking, Referral Intelligence, expansão, briefing “o que não falar”, automação de envio e novo score por IA permanecem para incrementos próprios.
+
+
+## CIC-03 — Account 360 operacional + Command Center 2.0
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** a Ficha Universal passa a funcionar como Account 360 operacional, combinando fatos do lead com Company 360 canônico quando existe, sem criar Company automaticamente. Exibe frota, score explicável, sinais, pipeline, próximo movimento, motivo, dor, objeção, potencial, contatos/decisores e oportunidades.
+- **Command Center 2.0:** Ctrl/Cmd+K passa a abrir módulos e executar ações contextuais por conta — ficha, Call AI, cotação, WhatsApp, ligação e comunicação — além de pesquisar o Sales Brain por `brain <assunto>`.
+- **Integridade:** `OG_LEAD_INTELLIGENCE` continua como fonte única de score; `OG_SIGNAL_CENTER` continua derivando sinais; nenhuma navegação registra contato, envio ou venda.
+- **Documentação:** baseline 2026-09-28, diretriz permanente de produto, Execution Context, Context Manifest e overlay DUTRA OS no `.claude/CLAUDE.md` foram reconciliados com o código e o Railway ao vivo.
+- **Validação:** Package 00R CI run 151 passou `npm run validate`, Brain, Security, npm audit e Release Gate em Node 24.21.0/npm 11.19.0.
+- **Merge:** PR #38 → `dafe21cf442fa37d8e0ce157b0e15a169b72bbb7`.
+- **Limites preservados:** Proposal Tracking, Automation Engine, Territory Intelligence e ativação remota do Supabase permanecem em pacotes próprios.
+
+
+## KCC-01 — Knowledge Command Center
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** Account 360 ganha ação **Sales Brain da conta**; a consulta é montada com segmento, dor, objeção, próxima ação, veículos/padrão de frota, temperatura, potencial e notas recentes e abre o Command Center já em modo Brain.
+- **Arquitetura:** `account-knowledge-service.js` é puro e somente leitura; o endpoint `/api/knowledge/search` e o Sales Brain existentes continuam sendo a fonte de conhecimento.
+- **Segurança:** nenhuma resposta ou sugestão é persistida automaticamente; nenhum registro do Brain é copiado para a conta.
+- **PWA:** serviço contextual incluído no shell e cache atualizado.
+- **Validação:** KCC test, suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 155 da PR #39.
+- **Limites:** Proposal Tracking permanece separado e não foi antecipado por este pacote.
