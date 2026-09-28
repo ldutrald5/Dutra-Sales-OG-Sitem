@@ -152,7 +152,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** busca global por produto, veículo, eixos, objeção, segmento, case, ROI, instalação e pós-venda; reutilizar `/api/knowledge/search` e materiais existentes.
 - **Critério de aceite:** mesma base de conhecimento atende Command Center, Call AI e Account 360; resultados mostram origem/status; fallback local seguro.
 - **Dependências:** CIC-03.
-- **Status:** em andamento em 2026-09-28.
+- **Status:** concluída em 2026-09-28; evidência em `tasks/DONE.md`, story KCC-01 e PR #39.
 
 ## PROP-01 — Proposal Tracking seguro
 
