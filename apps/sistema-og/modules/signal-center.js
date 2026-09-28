@@ -251,6 +251,7 @@
     const satisfaction = key(lead.satisfactionStatus || lead.customerSatisfaction || lead.satisfaction);
     const referralDone = Boolean(
       clean(lead.referralRequestedAt || lead.referralReceivedAt || lead.referredAt)
+      || (Array.isArray(lead.referrals) && lead.referrals.length > 0)
       || events.some(item => ['referral.requested','referral.received'].includes(item.type))
     );
     if (['satisfied','satisfeito','satisfeita','positive','positivo','confirmada','confirmed'].includes(satisfaction) && !referralDone) {
