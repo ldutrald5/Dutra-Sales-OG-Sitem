@@ -186,3 +186,17 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Integração:** Signal Center pode consumir `activityEvents`; Automation Engine normaliza eventos canônicos/legados e mantém as mesmas regras determinísticas.
 - **Validação:** CI run 168 passou suíte completa, Brain, Security, npm audit e Release Gate. O run 167 bloqueou um falso positivo de expansão e resultou em correção antes do merge.
 - **Arquivos principais:** `modules/signal-center.js`, `services/proposal-intelligence-service.js`, `services/automation-engine-service.js`, `app.js` e testes associados.
+
+
+## PROP-01B — Public Proposal Tracking seguro
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** a cotação salva pode gerar um link público exclusivo; a página mostra apenas o snapshot comercial sanitizado e registra abertura, reabertura por nova sessão e clique no WhatsApp.
+- **UX comercial:** **Gerar link rastreável** publica e copia o endereço; **Confirmar envio** registra `proposal.sent` somente depois da confirmação humana; **Revogar link** invalida a URL; editar a cotação invalida o contexto do rascunho e exige novo salvamento antes de republicar.
+- **Signal Center:** eventos públicos confiáveis são importados pela API protegida para `activityEvents`; `proposal.reopened` passa a alimentar o Signal Center CIC-04.
+- **Segurança:** token público aleatório de 256 bits; somente SHA-256 fica persistido; raw token não entra no CRM/localStorage/store; CSP, noindex/noarchive/no-store, payload de 10 KB, rate limit e deduplicação por sessão; IP e User-Agent não são persistidos.
+- **PWA:** `/p/` e `/public-api/` nunca entram no cache do Service Worker.
+- **Correção adicional:** Meu Dia passa a chamar efetivamente `renderAutomationCenter()`, fechando uma lacuna de integração detectada pelo novo gate.
+- **Persistência:** publicações usam `OG_DATA_DIR/public-proposals.json`; no Railway atual isso fica no volume `/data`. Isso não substitui SCALE-01/Postgres/Auth canônicos.
+- **Validação:** CI run 173 passou suíte completa, teste HTTP real do runtime, Brain, Security, npm audit e Release Gate.
+- **Arquivos principais:** `server-proposal-store.cjs`, `server.mjs`, `app.js`, `index.html`, `styles.css`, `service-worker.js` e `test_proposal_public_runtime.mjs`.
