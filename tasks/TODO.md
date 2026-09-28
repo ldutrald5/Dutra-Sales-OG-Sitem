@@ -168,7 +168,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo inicial:** proposta +48h sem resposta; instalação +15 dias; satisfação → indicação; oportunidade parada → sinal; teste com data final → tarefa.
 - **Critério de aceite:** automação cria tarefa/sinal/sugestão; não inventa contato, envio, visualização, venda ou aceite.
 - **Dependências:** PROP-01 para automações de proposta e contratos de Task/Activity.
-- **Status:** futura.
+- **Status:** concluída em 2026-09-28; evidência em `tasks/DONE.md`, story AUTO-01 e PR #41.
 
 ## TERR-01 — Territory Intelligence
 

@@ -163,3 +163,14 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Integridade:** salvar cotação continua sendo uma ação explícita; o sistema não registra envio ou visualização por inferência.
 - **Validação:** suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 159 da PR #40.
 - **Limite:** PROP-01B (rota/link público + eventos reais) permanece condicionado a backend público e persistência/autorização adequados.
+
+
+## AUTO-01 — Automation Engine V1
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** Meu Dia passa a exibir um Automation Center com sugestões derivadas de fatos para proposta +48h, pós-instalação +15d, satisfação → indicação, teste próximo do fim e conta parada sem próxima ação.
+- **Controle humano:** cada sugestão exige clique em **Criar próxima ação** e usa o `interaction-service` canônico; nada é executado silenciosamente.
+- **Deduplicação:** aplicar uma sugestão registra `automation.suggestion.applied` e impede repetição da mesma origem/regra.
+- **Segurança:** o motor não cria contato, envio, visualização, venda, instalação ou satisfação; esses fatos precisam existir antes da regra.
+- **PWA:** removidos artefatos literais `\\n` acumulados em HTML/Service Worker; `service-worker.js` agora entra no `node --check` obrigatório.
+- **Validação:** suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 163 da PR #41.
