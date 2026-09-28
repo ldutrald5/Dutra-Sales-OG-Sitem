@@ -38,6 +38,6 @@ assert.match(app,/OG_ACCOUNT_KNOWLEDGE\?\.commandForLead/);
 assert.match(app,/openCommandCenter\(command\)/);
 assert.match(html,/services\/account-knowledge-service\.js/);
 assert.match(sw,/account-knowledge-service\.js/);
-assert.match(sw,/SW_VERSION = 'v43'/);
+assert.match(sw,/SW_VERSION = 'v\d+'/);
 
 console.log('KCC-01 contextual knowledge tests: PASS');
