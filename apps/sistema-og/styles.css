@@ -1114,6 +1114,11 @@ body {
 
 
 /* Native lead import — XLSX/CSV preview and mapping */
+.spreadsheet-sheet-picker{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.85rem 0;padding:.85rem;border:1px solid rgba(255,222,23,.28);border-radius:.8rem;background:rgba(255,222,23,.05)}
+.spreadsheet-sheet-picker>div{display:grid;gap:.14rem}
+.spreadsheet-sheet-picker b{color:#fef08a;font-size:.7rem}
+.spreadsheet-sheet-picker span{color:#94a3b8;font-size:.59rem;line-height:1.4}
+.spreadsheet-sheet-picker select{min-width:18rem;max-width:100%;padding:.55rem .65rem;border:1px solid rgba(255,222,23,.35);border-radius:.58rem;background:#080d13;color:#f8fafc;font-size:.64rem;font-weight:750}
 .spreadsheet-mapping{margin:.85rem 0;padding:.85rem;border:1px solid #303945;border-radius:.8rem;background:#0a1018}
 .spreadsheet-mapping-head{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-bottom:.7rem}
 .spreadsheet-mapping-head>div{display:grid;gap:.12rem}
@@ -1140,6 +1145,8 @@ body {
 .spreadsheet-state[data-state="CONFLICT"]{color:#fdba74;border-color:#f97316}
 @media(max-width:900px){.spreadsheet-mapping-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){
+  .spreadsheet-sheet-picker{align-items:stretch;flex-direction:column}
+  .spreadsheet-sheet-picker select{min-width:0;width:100%}
   .spreadsheet-mapping-head{align-items:stretch;flex-direction:column}
   .spreadsheet-mapping-grid{grid-template-columns:1fr}
   .spreadsheet-auto-actions{align-items:stretch;flex-direction:column}
