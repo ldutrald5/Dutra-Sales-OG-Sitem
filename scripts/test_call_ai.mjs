@@ -7,6 +7,8 @@ const contextService = require('../apps/sistema-og/services/call-ai-context.js')
 const knowledgeSelector = require('../apps/sistema-og/services/knowledge-selector.js');
 const prompts = require('../apps/sistema-og/services/call-ai-prompts.js');
 const aiService = require('../apps/sistema-og/services/ai-service.js');
+const interactions = require('../apps/sistema-og/services/interaction-service.js');
+const leadIntelligence = require('../apps/sistema-og/modules/lead-intelligence.js');
 
 const html = fs.readFileSync('apps/sistema-og/index.html', 'utf8');
 const app = fs.readFileSync('apps/sistema-og/app.js', 'utf8');
@@ -43,6 +45,47 @@ assert.ok(html.includes('call-ai-size-toggle'), 'Central deve alternar entre com
 assert.ok(app.includes("OG_AI_SERVICE.generate"), 'Call AI deve usar a abstração central de IA');
 assert.ok(app.includes("data-ai-save-note"), 'Resposta deve permitir nota confirmada');
 assert.ok(app.includes("data-ai-next-action"), 'Resposta deve permitir próxima ação confirmada');
+const saveReviewBlock = app.slice(app.indexOf('function saveCallAIReview()'), app.indexOf('function setCallRecordingStatus'));
+assert.match(saveReviewBlock, /OG_INTERACTION_SERVICE\.setNextAction\(lead, reviewedNextAction, reviewedFollowUp, \{ now \}\)/, 'Revisão Call AI deve usar o contrato central de próxima ação');
+assert.doesNotMatch(saveReviewBlock, /lead\.nextAction\s*=/, 'Revisão Call AI não pode escrever nextAction diretamente');
+assert.doesNotMatch(saveReviewBlock, /lead\.followUpAt\s*=/, 'Revisão Call AI não pode escrever followUpAt diretamente');
+assert.match(saveReviewBlock, /if \(result === 'sem_interesse'\)[\s\S]*OG_INTERACTION_SERVICE\.recordResult\(lead, result, summary/, 'Call AI Review deve usar recordResult para sem_interesse');
+assert.match(saveReviewBlock, /type: 'call_ai'[\s\S]*sessionId[\s\S]*idempotencyKey: sessionId/, 'Call AI Review deve preservar tipo call_ai, sessionId e chave idempotente');
+const semInteresseBranch = saveReviewBlock.slice(saveReviewBlock.indexOf("if (result === 'sem_interesse')"), saveReviewBlock.indexOf("} else {", saveReviewBlock.indexOf("if (result === 'sem_interesse')")));
+assert.doesNotMatch(semInteresseBranch, /lead\.interactions\.push|setNextAction\(/, 'sem_interesse não pode registrar a mesma ligação ou próxima ação uma segunda vez');
+
+const callAIReviewLead = {
+  id: 'CALL-SEM-1',
+  status: 'negociacao',
+  nextAction: 'Ligar amanhã',
+  followUpAt: '2026-09-28T09:00',
+  nextActionReason: 'Retorno combinado',
+  nextActionObjective: 'Validar proposta',
+  nextActionExpectedResult: 'Obter decisão',
+  interactions: []
+};
+const callSessionId = 'CALL-AI-SESSION-SEM-1';
+interactions.recordResult(callAIReviewLead, 'sem_interesse', 'Cliente informou que não possui interesse.', {
+  now: '2026-09-27T15:30:00.000Z',
+  interaction: {
+    id: 'INT-CALL-SEM-1',
+    type: 'call_ai',
+    sessionId: callSessionId,
+    objective: 'followup_proposta',
+    signals: ['sem_interesse'],
+    idempotencyKey: callSessionId
+  }
+});
+assert.equal(callAIReviewLead.status, 'perdido', 'Call AI Review sem_interesse deve aplicar o estado comercial do contrato');
+assert.equal(callAIReviewLead.nextAction, '', 'sem_interesse deve limpar próxima ação antiga');
+assert.equal(callAIReviewLead.followUpAt, '', 'sem_interesse deve limpar follow-up antigo');
+assert.equal(callAIReviewLead.interactions.length, 1, 'Call AI Review sem_interesse deve registrar uma única ligação');
+assert.equal(callAIReviewLead.interactions[0].type, 'call_ai');
+assert.equal(callAIReviewLead.interactions[0].sessionId, callSessionId);
+assert.equal(callAIReviewLead.interactions[0].idempotencyKey, callSessionId);
+const callAIReviewNextBest = leadIntelligence.nextBestAction(callAIReviewLead, new Date('2026-09-27T15:31:00.000Z'));
+assert.equal(callAIReviewNextBest.action, '', 'Call AI Review sem_interesse não deve gerar ação automática');
+assert.equal(callAIReviewNextBest.actionRequired, false, 'Call AI Review sem_interesse deve deixar de exigir próxima ação');
 assert.ok(server.includes("/api/knowledge/status"));
 assert.ok(server.includes("/api/knowledge/search"));
 assert.ok(ignore.includes('apps/sistema-og/.data/'));
@@ -58,6 +101,27 @@ assert.equal(contextA.company.id, 'A');
 assert.equal(contextB.company.id, 'B');
 assert.doesNotMatch(JSON.stringify(contextB), /Empresa A|Nota A/, 'Troca de conta não pode vazar contexto');
 assert.notEqual(contextService.cacheKey(contextA,'prepare_call'), contextService.cacheKey(contextB,'prepare_call'));
+
+const cacheLead = {
+  id:'CACHE', empresa:'Cache Frota', status:'negociacao', conversationStage:'negotiation',
+  updatedAt:'2026-09-20T10:00:00.000Z',
+  nextAction:'Ligar para validar proposta',
+  followUpAt:'2026-09-28T09:00',
+  nextActionReason:'Retorno combinado',
+  nextActionObjective:'Validar aprovação',
+  nextActionExpectedResult:'Obter decisão',
+  interactions:Array.from({length:8},(_,i)=>({at:`2026-09-${String(i+1).padStart(2,'0')}T10:00:00Z`,type:'nota',note:`Histórico ${i}`}))
+};
+const cacheBefore = contextService.build(cacheLead, { intent:'prepare_call' });
+const keyBefore = contextService.cacheKey(cacheBefore, 'prepare_call');
+interactions.setNextAction(cacheLead, 'Enviar apresentação', '2026-09-28T09:00', { now:'2026-09-27T15:20:00.000Z' });
+const cacheAfter = contextService.build(cacheLead, { intent:'prepare_call' });
+const keyAfter = contextService.cacheKey(cacheAfter, 'prepare_call');
+assert.equal(cacheBefore.recentInteractions.length, contextService.BUDGET.maxRecentInteractions);
+assert.equal(cacheAfter.recentInteractions.length, contextService.BUDGET.maxRecentInteractions, 'janela cheia não pode mascarar mudança comercial');
+assert.notEqual(cacheBefore.contextVersion, cacheAfter.contextVersion, 'mudança de próxima ação deve alterar contextVersion mesmo com timestamp-base e janela iguais');
+assert.notEqual(keyBefore, keyAfter, 'cache do Call AI deve ser invalidado por mudança no contexto comercial');
+
 assert.deepEqual(knowledgeSelector.select('handle_objection'), ['objeções','ROI','economia']);
 assert.equal(prompts.INTENTS.prepare_call.tier, 2);
 assert.equal(prompts.INTENTS.post_call.tier, 1);

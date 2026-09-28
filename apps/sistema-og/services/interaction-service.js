@@ -9,7 +9,7 @@
     nao_atendeu: { label: 'Não atendeu', status: 'contatado', nextAction: 'Tentar novo contato' },
     atendeu: { label: 'Atendeu', status: 'contatado' },
     falar_depois: { label: 'Falar depois', status: 'contatado', nextAction: 'Retomar contato' },
-    sem_interesse: { label: 'Sem interesse', status: 'perdido' },
+    sem_interesse: { label: 'Sem interesse', status: 'perdido', clearNextAction: true },
     enviar_apresentacao: { label: 'Enviar apresentação', status: 'contatado', nextAction: 'Enviar apresentação' },
     enviar_orcamento: { label: 'Enviar orçamento', status: 'proposta_enviada', nextAction: 'Preparar orçamento' },
     negociacao: { label: 'Negociação', status: 'negociacao', nextAction: 'Retomar negociação' },
@@ -47,6 +47,9 @@
       idempotencyKey: input.idempotencyKey || eventId('IDEM', now),
       createdBy: input.createdBy || null
     };
+    if (input.sessionId) interaction.sessionId = input.sessionId;
+    if (input.objective) interaction.objective = input.objective;
+    if (Array.isArray(input.signals)) interaction.signals = [...input.signals];
     ensureInteractions(lead).push(interaction);
     if (input.countAsContact !== false) lead.lastContactAt = now;
     lead.updatedBy = input.updatedBy || lead.updatedBy || null;
@@ -55,21 +58,64 @@
 
   function recordResult(lead, result, note, options = {}) {
     const definition = RESULT_DEFINITIONS[result] || RESULT_DEFINITIONS.outro;
+    const interactionInput = options.interaction || {};
+    const changedFields = ['interactions', 'status', 'lastContactAt'];
     if (definition.status) lead.status = definition.status;
-    if (definition.nextAction && !lead.nextAction) lead.nextAction = definition.nextAction;
+    if (definition.clearNextAction) {
+      lead.nextAction = '';
+      lead.followUpAt = '';
+      lead.nextActionReason = '';
+      lead.nextActionObjective = '';
+      lead.nextActionExpectedResult = '';
+      changedFields.push('nextAction', 'followUpAt', 'nextActionReason', 'nextActionObjective', 'nextActionExpectedResult');
+    } else if (definition.nextAction && !lead.nextAction) {
+      lead.nextAction = definition.nextAction;
+      changedFields.push('nextAction');
+    }
     return addInteraction(lead, {
-      type: 'resultado_contato', result,
+      ...interactionInput,
+      type: interactionInput.type || 'resultado_contato',
+      result,
       note: String(note || '').trim() || `Resultado: ${definition.label}`,
-      changedFields: ['interactions', 'status', 'lastContactAt']
+      changedFields: [...new Set([...(interactionInput.changedFields || []), ...changedFields])]
     }, options);
   }
 
   function setNextAction(lead, nextAction, followUpAt, options = {}) {
-    const previous = { nextAction: lead.nextAction || '', followUpAt: lead.followUpAt || '' };
-    lead.nextAction = String(nextAction || '').trim();
+    const previous = {
+      nextAction: lead.nextAction || '',
+      followUpAt: lead.followUpAt || '',
+      nextActionReason: lead.nextActionReason || '',
+      nextActionObjective: lead.nextActionObjective || '',
+      nextActionExpectedResult: lead.nextActionExpectedResult || ''
+    };
+    const nextDescription = String(nextAction || '').trim();
+    const actionChanged = nextDescription !== previous.nextAction;
+    lead.nextAction = nextDescription;
     lead.followUpAt = String(followUpAt || '').trim();
+
+    const hasReason = Object.hasOwn(options, 'reason') || Object.hasOwn(options, 'nextActionReason');
+    const hasObjective = Object.hasOwn(options, 'objective') || Object.hasOwn(options, 'nextActionObjective');
+    const hasExpected = Object.hasOwn(options, 'expectedResult') || Object.hasOwn(options, 'nextActionExpectedResult');
+
+    if (actionChanged) {
+      lead.nextActionReason = hasReason ? String(options.reason ?? options.nextActionReason ?? '').trim() : '';
+      lead.nextActionObjective = hasObjective ? String(options.objective ?? options.nextActionObjective ?? '').trim() : '';
+      lead.nextActionExpectedResult = hasExpected ? String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim() : '';
+    } else {
+      if (hasReason) lead.nextActionReason = String(options.reason ?? options.nextActionReason ?? '').trim();
+      if (hasObjective) lead.nextActionObjective = String(options.objective ?? options.nextActionObjective ?? '').trim();
+      if (hasExpected) lead.nextActionExpectedResult = String(options.expectedResult ?? options.nextActionExpectedResult ?? '').trim();
+    }
+
+    const changedFields = ['nextAction', 'followUpAt'];
+    if (actionChanged || hasReason) changedFields.push('nextActionReason');
+    if (actionChanged || hasObjective) changedFields.push('nextActionObjective');
+    if (actionChanged || hasExpected) changedFields.push('nextActionExpectedResult');
+    changedFields.push('interactions');
+
     const label = lead.nextAction ? `${lead.nextAction}${lead.followUpAt ? ` · ${lead.followUpAt}` : ''}` : 'Sem próxima ação';
-    return addInteraction(lead, { type: 'proxima_acao', note: label, countAsContact: false, changedFields: ['nextAction', 'followUpAt', 'interactions'], previous }, options);
+    return addInteraction(lead, { type: 'proxima_acao', note: label, countAsContact: false, changedFields, previous }, options);
   }
 
   return { RESULT_DEFINITIONS, addInteraction, recordResult, setNextAction };

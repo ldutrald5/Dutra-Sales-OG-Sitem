@@ -38,6 +38,7 @@
   }
 
   function conversationStage(lead = {}) {
+    if (key(lead.status) === 'perdido') return 'not_interested';
     const explicit = key(lead.conversationStage);
     if (byId(CONVERSATION_STAGES, explicit)) return explicit;
     if (lead.status === 'proposta_enviada') return 'proposal';
@@ -78,20 +79,44 @@
     return 0;
   }
 
-  function score(lead = {}, now = new Date()) {
+  function scoreBreakdown(lead = {}, now = new Date()) {
     const reference = now instanceof Date ? now : new Date(now);
-    let value = priorityDefinition(lead).weight + stageDefinition(lead).weight;
+    const factors = [];
+    const add = (id, label, points) => {
+      if (!points) return;
+      factors.push(Object.freeze({ id, label, points }));
+    };
+
+    const priority = priorityDefinition(lead);
+    add('priority', `Prioridade ${priority.label.toLowerCase()}`, priority.weight);
+
+    const stage = stageDefinition(lead);
+    add('conversation', `Situação: ${stage.label}`, stage.weight);
+
     const due = lead.followUpAt ? new Date(lead.followUpAt) : null;
     if (due && !Number.isNaN(due.getTime())) {
       const distance = due.getTime() - reference.getTime();
-      if (distance < 0) value += 50;
-      else if (distance <= 86400000) value += 35;
-      else if (distance <= 172800000) value += 20;
+      if (distance < 0) add('followup_overdue', 'Retorno vencido', 50);
+      else if (distance <= 86400000) add('followup_24h', 'Retorno nas próximas 24h', 35);
+      else if (distance <= 172800000) add('followup_48h', 'Retorno nas próximas 48h', 20);
     }
-    value += temperatureWeight(lead.temperature);
-    value += potentialWeight(lead.potential);
-    if (!clean(lead.nextAction) && !['not_interested', 'customer', 'loyal_customer'].includes(conversationStage(lead))) value += 8;
-    return value;
+
+    const temperature = temperatureWeight(lead.temperature);
+    if (temperature) add('temperature', `Temperatura ${clean(lead.temperature).toLowerCase()}`, temperature);
+
+    const potential = potentialWeight(lead.potential);
+    if (potential) add('potential', `Potencial ${clean(lead.potential).toLowerCase()}`, potential);
+
+    if (!clean(lead.nextAction) && !['not_interested', 'customer', 'loyal_customer'].includes(conversationStage(lead))) {
+      add('missing_next_action', 'Sem próxima ação definida', 8);
+    }
+
+    const total = factors.reduce((sum, factor) => sum + factor.points, 0);
+    return Object.freeze({ total, factors: Object.freeze(factors) });
+  }
+
+  function score(lead = {}, now = new Date()) {
+    return scoreBreakdown(lead, now).total;
   }
 
   function importanceBand(lead = {}, now = new Date()) {
@@ -100,6 +125,27 @@
     if (value >= 105) return 'high';
     if (value >= 70) return 'medium';
     return 'normal';
+  }
+
+  function nextBestAction(lead = {}, now = new Date()) {
+    const breakdown = scoreBreakdown(lead, now);
+    const timing = breakdown.factors.find(item => item.id.startsWith('followup_'));
+    const stage = breakdown.factors.find(item => item.id === 'conversation');
+    const priority = breakdown.factors.find(item => item.id === 'priority');
+    const explicitAction = clean(lead.nextAction);
+    const noActionStage = ['not_interested', 'customer', 'loyal_customer'].includes(conversationStage(lead));
+    return Object.freeze({
+      action: explicitAction || (noActionStage ? '' : 'Definir próxima ação'),
+      dueAt: clean(lead.followUpAt),
+      reason: clean(lead.nextActionReason) || timing?.label || stage?.label || priority?.label || '',
+      objective: clean(lead.nextActionObjective),
+      expectedResult: clean(lead.nextActionExpectedResult),
+      explicitAction: Boolean(explicitAction),
+      actionRequired: Boolean(explicitAction) || !noActionStage,
+      score: breakdown.total,
+      importance: importanceBand(lead, now),
+      factors: breakdown.factors
+    });
   }
 
   function filterSort(leads = [], filters = {}, now = new Date()) {
@@ -140,6 +186,8 @@
     stageDefinition,
     sourceLabel,
     score,
+    scoreBreakdown,
+    nextBestAction,
     importanceBand,
     filterSort,
     summarize

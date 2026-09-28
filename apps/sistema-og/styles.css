@@ -1137,3 +1137,16 @@ body {
   .spreadsheet-mapping-grid{grid-template-columns:1fr}
   .spreadsheet-decision-stack{min-width:15rem}
 }
+
+
+/* CIC-01 — Next Best Action explicável */
+.client-sheet-next-move{margin:14px 0;padding:14px;border:1px solid rgba(148,163,184,.2);border-radius:16px;background:rgba(15,23,42,.42)}
+.client-sheet-score{font-size:.78rem;white-space:nowrap}
+.client-sheet-next-move-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.client-sheet-next-move-grid>div{display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:rgba(15,23,42,.52)}
+.client-sheet-next-move-grid small,.client-sheet-score-factors{font-size:.72rem}
+.client-sheet-next-move-grid strong{font-size:.88rem}
+.client-sheet-next-move-grid span{font-size:.75rem;opacity:.72}
+.client-sheet-score-factors{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.client-sheet-score-factors span{padding:5px 8px;border:1px solid rgba(148,163,184,.18);border-radius:999px}
+@media(max-width:640px){.client-sheet-next-move-grid{grid-template-columns:1fr}.client-sheet-next-move{margin:10px 0;padding:10px}}

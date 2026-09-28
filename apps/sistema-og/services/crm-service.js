@@ -73,6 +73,9 @@
       decisionMaker: clean(lead.decisionMaker),
       nextAction: clean(lead.nextAction),
       followUpAt: clean(lead.followUpAt),
+      nextActionReason: clean(lead.nextActionReason),
+      nextActionObjective: clean(lead.nextActionObjective),
+      nextActionExpectedResult: clean(lead.nextActionExpectedResult),
       lastContactAt: clean(lead.lastContactAt),
       operationalStatus: clean(lead.operationalStatus) || (lead.interactions?.length ? 'WORKED_LEAD' : 'NEW_PROSPECT'),
       sourceChannel: clean(lead.sourceChannel || lead.origem) || 'sistema_og',
@@ -123,6 +126,9 @@
       sourceList: input.sourceList || 'Cadastro rápido',
       nextAction: clean(input.nextAction),
       followUpAt: clean(input.followUpAt),
+      nextActionReason: clean(input.nextActionReason),
+      nextActionObjective: clean(input.nextActionObjective),
+      nextActionExpectedResult: clean(input.nextActionExpectedResult),
       operationalStatus: input.operationalStatus || 'NEW_PROSPECT',
       sourceChannel: input.sourceChannel || 'sistema_og',
       batchTag: clean(input.batchTag),
@@ -140,7 +146,8 @@
     const item = normalizeLead(lead);
     const values = [
       item.empresa, item.nome, item.telefone, item.cnpj, item.cpf, item.internalCode,
-      item.email, item.cidadeUf, item.decisionMaker, item.nextAction, item.pain,
+      item.email, item.cidadeUf, item.decisionMaker, item.nextAction, item.nextActionReason,
+      item.nextActionObjective, item.nextActionExpectedResult, item.pain,
       item.sourceChannel, item.sourceLabel, item.sourceList, item.batchTag, item.conversationStage,
       item.temperature, item.potential, item.priorityBand, item.accountSummary,
       ...item.additionalPhones.flatMap(phone => [phone.label, phone.phone]),
@@ -180,7 +187,7 @@
 
   const EDITABLE_PROFILE_FIELDS = Object.freeze([
     'empresa','nome','internalCode','telefone','additionalPhones','email','cnpj','cpf','cidadeUf','segmentId',
-    'status','priority','priorityBand','conversationStage','temperature','potential','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','sourceChannel','sourceLabel','sourceList','accountSummary',
+    'status','priority','priorityBand','conversationStage','temperature','potential','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','nextActionReason','nextActionObjective','nextActionExpectedResult','sourceChannel','sourceLabel','sourceList','accountSummary',
     'referrals','observacoes'
   ]);
 

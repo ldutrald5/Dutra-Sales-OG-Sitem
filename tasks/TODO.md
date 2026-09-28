@@ -105,3 +105,13 @@ Próxima recomendação: **TASK-010 — Templates comerciais e governança**.
 - **Critério de aceite:** uma única base; filtros combináveis; urgentes e retornos vencidos sobem na fila; ficha preserva status comercial separado da situação da conversa; dados legados continuam compatíveis.
 - **Dependências:** TASK-007 e base de sincronização existente.
 - **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md` e PR #21.
+
+
+## CIC-01 — Next Best Action + Score Explicável
+
+- **Objetivo:** explicar por que uma conta está priorizada e transformar próxima ação em movimento comercial com motivo, objetivo e resultado esperado.
+- **Escopo:** estender o score atual, Ficha Universal, interaction-service e contexto do Call AI; sem segundo motor ou segunda agenda.
+- **Arquivos relevantes:** `modules/lead-intelligence.js`, `services/interaction-service.js`, `services/crm-service.js`, `services/call-ai-context.js`, `app.js`.
+- **Critério de aceite:** score auditável; campos aditivos; compatibilidade legada; nenhum status alterado automaticamente; Call AI consome contexto confirmado.
+- **Dependências:** OG-18 / Ficha Universal / fila inteligente.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md`, story CIC-01 e PR #23. PR permanece sem merge por instrução de closeout.

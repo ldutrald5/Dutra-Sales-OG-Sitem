@@ -6,6 +6,23 @@
   'use strict';
   const BUDGET = Object.freeze({ maxRecentInteractions: 6, maxContextChars: 6000, maxKnowledgeSections: 3, defaultResponseLength: 'short' });
   function compactText(value, max = 900) { return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max); }
+  function commercialContextFingerprint(lead = {}) {
+    const raw = JSON.stringify([
+      compactText(lead.status, 60),
+      compactText(lead.conversationStage, 60),
+      compactText(lead.nextAction, 240),
+      compactText(lead.followUpAt, 80),
+      compactText(lead.nextActionReason, 360),
+      compactText(lead.nextActionObjective, 360),
+      compactText(lead.nextActionExpectedResult, 360)
+    ]);
+    let hash = 2166136261;
+    for (let index = 0; index < raw.length; index += 1) {
+      hash ^= raw.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+  }
   function buildAccountSummary(lead) {
     if (!lead) return '';
     const parts = [lead.empresa || lead.nome];
@@ -21,12 +38,18 @@
     const needsPhone = ['create_message', 'personalize_message'].includes(options.intent || '');
     const recentInteractions = (lead.interactions || []).slice(-recentLimit).map(item => ({ at: item.at, type: compactText(item.type, 60), result: compactText(item.result, 100), note: compactText(item.note, 500), important: Boolean(item.important) }));
     const context = {
-      contextVersion: `${lead.updatedAt || lead.lastContactAt || lead.createdDate || '0'}:${recentInteractions.length}`,
+      contextVersion: `${lead.updatedAt || lead.lastContactAt || lead.createdDate || '0'}:${recentInteractions.length}:${commercialContextFingerprint(lead)}`,
       company: { id: lead.id, name: compactText(lead.empresa || lead.nome, 160), segmentId: compactText(lead.segmentId, 80), fleetSize: Number(lead.fleetSize || 0) },
       contact: { id: lead.contactId || '', name: compactText(lead.nome, 120), role: compactText(lead.cargo || lead.decisionMaker, 100), ...(needsPhone ? { phone: compactText(lead.telefone, 30) } : {}) },
       stage: compactText(lead.status || 'novo', 60), accountSummary: buildAccountSummary(lead), recentInteractions,
       objections: Array.isArray(lead.objections) ? lead.objections.slice(0, 5).map(item => compactText(item, 240)) : [],
-      nextAction: { description: compactText(lead.nextAction, 240), dueAt: lead.followUpAt || '' },
+      nextAction: {
+        description: compactText(lead.nextAction, 240),
+        dueAt: lead.followUpAt || '',
+        reason: compactText(lead.nextActionReason, 360),
+        objective: compactText(lead.nextActionObjective, 360),
+        expectedResult: compactText(lead.nextActionExpectedResult, 360)
+      },
       relevantOpportunity: (lead.opportunities || []).find(item => item.status !== 'closed') || null
     };
     if (JSON.stringify(context).length > BUDGET.maxContextChars) context.recentInteractions = context.recentInteractions.slice(-3);

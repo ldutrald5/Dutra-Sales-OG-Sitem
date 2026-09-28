@@ -36,7 +36,12 @@ const updated=crm.updateLeadProfile(base,{
   status:'novo',
   additionalPhones:[{label:'Oficina',phone:'44911112222'}],
   referrals:[{name:'Marcos',company:'Gamma',phone:'44999998888',note:'Falar amanhã'}],
-  pain:'Desgaste irregular'
+  pain:'Desgaste irregular',
+  nextAction:'Ligar para Marcos',
+  followUpAt:'2026-09-28T09:00',
+  nextActionReason:'Retorno combinado',
+  nextActionObjective:'Validar aprovação interna',
+  nextActionExpectedResult:'Definir data de decisão'
 },{now:'2026-09-27T04:45:00.000Z'});
 assert.equal(updated.id,'L1');
 assert.equal(updated.internalCode,'7007');
@@ -48,6 +53,10 @@ assert.ok(changed.includes('internalCode'));
 assert.ok(changed.includes('additionalPhones'));
 assert.ok(changed.includes('referrals'));
 assert.ok(changed.includes('pain'));
+assert.ok(changed.includes('nextActionReason'));
+assert.ok(changed.includes('nextActionObjective'));
+assert.ok(changed.includes('nextActionExpectedResult'));
+assert.equal(crm.matchesSearch(updated,'aprovação interna'),true,'objetivo do próximo movimento deve ser pesquisável');
 
 const app=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../apps/sistema-og/index.html',import.meta.url),'utf8');
@@ -61,6 +70,11 @@ assert.match(app,/findInternalCodeConflict/,'código OG duplicado deve ser bloqu
 assert.match(app,/data-add-extra-phone/,'ficha deve permitir número adicional');
 assert.match(app,/data-add-referral/,'ficha deve permitir indicação');
 assert.match(app,/Código de cadastro OG; independente do status de compra/,'código OG não pode implicar compra');
+assert.match(app,/PRÓXIMO MOVIMENTO/,'ficha deve explicar o próximo movimento comercial');
+assert.match(app,/nextActionReason/,'ficha deve persistir motivo do follow-up');
+assert.match(app,/nextActionObjective/,'ficha deve persistir objetivo do próximo movimento');
+assert.match(app,/nextActionExpectedResult/,'ficha deve persistir resultado esperado');
+assert.match(app,/return OG_LEAD_INTELLIGENCE\.score\(lead\)/,'Meu Dia não deve manter um segundo score paralelo');
 assert.match(app,/OG_CRM_SERVICE\.matchesSearch\(lead, state\.leadSearchQuery\)/,'CRM deve pesquisar por perfil completo');
 assert.match(app,/OG_CRM_SERVICE\.matchesSearch\(lead, input\.value\)/,'Call AI deve aceitar busca por código');
 assert.match(html,/Buscar nome, código OG, telefone, CNPJ/,'campo CRM deve comunicar busca por código');

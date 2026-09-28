@@ -1,20 +1,20 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 60 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
-| anti_pattern | 5 |
-| cycle | 7 |
-| decision | 10 |
+| anti_pattern | 6 |
+| cycle | 8 |
+| decision | 11 |
 | experiment | 1 |
 | idea | 3 |
-| knowledge | 3 |
+| knowledge | 4 |
 | open_question | 2 |
-| pattern | 11 |
-| source | 12 |
+| pattern | 12 |
+| source | 13 |
 
 ## Active decisions
 
@@ -38,6 +38,8 @@ Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Expose the current DUTRA OS over HTTPS only through a protected hosted entrypoint with strong access token, healthcheck and persistent volume support; do not reinterpret the transition JSON state as the final canonical database or bypass the planned Supabase validation.
 - **DEC-LEADS-OG18-001 — Keep conversation state, pipeline status and source as separate lead dimensions** (active/high)
   Smart lists are projections of one state.leads base. Conversation state, commercial pipeline status, source/list and priority remain independent fields; deterministic scoring may order work but never changes commercial truth automatically.
+- **DEC-CIC01-001 — One deterministic score and shared commercial contracts** (active/high)
+  All prioritization surfaces must delegate to the same deterministic score contract, and all next-action flows must use the same central mutation/normalization contracts instead of reimplementing weights, fallbacks or context rules per UI.
 
 ## Open questions
 
@@ -77,6 +79,8 @@ Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
   For brownfield canonicalization, classify without mutation, require explicit approval, re-check candidates at apply time, checkpoint first and reverse only affected entities while blocking rollback if later work depends on them.
 - **PAT-HOST-001 — Provider-safe preview entrypoint** (validated/high)
   For a brownfield app that was local-only, add a dedicated hosted entrypoint that validates secrets before boot, binds provider PORT on 0.0.0.0, exposes a minimal unauthenticated healthcheck, routes persistent state to the provider volume and keeps production architecture boundaries explicit.
+- **PAT-CIC01-001 — Context-aware deterministic decision contract** (validated/high)
+  Centralize deterministic decisions in one contract, make dependent context invalidation explicit, include relevant business context in cache keys, and exercise every alternate UI path through the same contract in regression tests.
 
 ## Recent sources
 
@@ -88,6 +92,8 @@ Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
 - **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
   OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
+- **SRC-CIC01-001 — CIC-01 Next Best Action + Score Explicável closeout** (implemented/high)
+  CIC-01 consolidated explainable prioritization and next-action context around shared deterministic contracts, then passed final audit before closeout on PR #23 without introducing a second score, queue or agenda.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
@@ -98,8 +104,6 @@ Generated from 54 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Approved architectural direction: evolve incrementally, use canonical relational truth and individual identity while preserving differentiated commercial UX/intelligence.
 - **SRC-PLAN-001 — DUTRA OS Master Implementation Plan** (active/high)
   Turns Architecture V1 into small reversible packages across Foundation and Commercial Product tracks.
-- **SRC-PKG01-001 — Implementation Package 01 report** (implemented/high)
-  Foundation Bootstrap & Safety Gate implementation report including tests, environment blockers, rollback and intentionally deferred behavior.
 
 ## Retrieval workflow
 
