@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v46';
+const SW_VERSION = 'v47';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -24,6 +24,7 @@ const SHELL_URLS = [
   '/operations-model.js',
   '/domain/canonical-domain.js',
   '/services/crm-service.js',
+  '/services/customer-lifecycle-service.js',
   '/services/company-360-service.js',
   '/services/canonical-editor-service.js',
   '/services/legacy-reconciliation-service.js',
