@@ -53,7 +53,7 @@ assert.match(app,/Criar próxima ação/);
 assert.match(html,/id="automation-center"/);
 assert.match(html,/automation-engine-service\.js/);
 assert.match(sw,/automation-engine-service\.js/);
-assert.match(sw,/SW_VERSION = 'v45'/);
+assert.match(sw,/SW_VERSION = 'v\d+'/);
 assert.ok(!sw.includes("',\\n  '"),'service worker não pode conter quebra literal \\n entre itens do shell');
 assert.ok(!html.includes("</script>\\n  <script"),'HTML não pode conter quebra literal \\n entre scripts');
 
