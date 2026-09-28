@@ -118,3 +118,15 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Arquivos principais:** `modules/lead-intelligence.js`, `modules/sales-desk.js`, `services/interaction-service.js`, `services/crm-service.js`, `services/call-ai-context.js`, `app.js`, testes e story CIC-01.
 - **Limites preservados:** não inclui CIC-02, briefing “o que não falar”, diagnóstico contextual, referral/expansão, automação de envio ou novo score por IA.
 - **Auditoria:** auditoria final do CIC-01 aprovada antes deste closeout; PR #23 deve permanecer aberto e sem merge.
+
+
+## CIC-02 — Mission Control + Signal Center
+
+- **Data:** 2026-09-27.
+- **Mudança observável:** Meu Dia passa a oferecer **INICIAR PRÓXIMA MISSÃO** e um Signal Center com sinais comerciais acionáveis. A missão seleciona a conta ativa mais prioritária reutilizando o score determinístico do CIC-01 e explica o motivo pelo sinal mais relevante disponível.
+- **Sinais V1:** follow-up vencido, retorno nas próximas 24 horas, proposta sem próxima ação, conta prioritária/ativa sem próximo passo, conta grande sem decisor, oportunidade avançada sem dor validada e conta parada.
+- **Integridade:** os sinais são derivados e não persistem fatos; iniciar missão não registra contato, não altera status e não inventa atividade. `OG_LEAD_INTELLIGENCE.score()` permanece a única fonte de score comercial.
+- **UX:** Signal Center fica dentro do Meu Dia, sem nova aba; cada sinal termina em ação recomendada e seleciona a mesma conta mestre na Mesa de Vendas.
+- **Offline:** `modules/signal-center.js` foi incluído no shell do PWA.
+- **Validação:** `og:signal-center:test`, `og:mission-control:ui:test`, `npm run validate`, `og:security:test`, `npm audit --audit-level=high` e `release:gate` passaram no workflow da PR #29.
+- **Limites preservados:** Proposal Tracking, Referral Intelligence, expansão, briefing “o que não falar”, automação de envio e novo score por IA permanecem para incrementos próprios.

@@ -115,3 +115,13 @@ Próxima recomendação: **TASK-010 — Templates comerciais e governança**.
 - **Critério de aceite:** score auditável; campos aditivos; compatibilidade legada; nenhum status alterado automaticamente; Call AI consome contexto confirmado.
 - **Dependências:** OG-18 / Ficha Universal / fila inteligente.
 - **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md`, story CIC-01 e PR #23. PR permanece sem merge por instrução de closeout.
+
+
+## CIC-02 — Mission Control + Signal Center
+
+- **Objetivo:** transformar Meu Dia em uma central operacional que escolha a próxima conta, explique o motivo e exponha sinais comerciais acionáveis sem criar outra base.
+- **Escopo:** CTA Próxima Missão, Signal Center derivado, integração com Mesa/Ficha e score canônico do CIC-01.
+- **Arquivos relevantes:** `modules/signal-center.js`, `modules/lead-intelligence.js`, `app.js`, `index.html`, `styles.css`.
+- **Critério de aceite:** sem segundo score; sinais não mutam fatos; cada sinal termina em ação; missão seleciona conta ativa; offline e mobile preservados.
+- **Dependências:** CIC-01, TASK-007 e TASK-018.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md` e PR #29.

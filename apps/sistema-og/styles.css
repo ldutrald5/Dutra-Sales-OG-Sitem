@@ -1150,3 +1150,27 @@ body {
 .client-sheet-score-factors{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .client-sheet-score-factors span{padding:5px 8px;border:1px solid rgba(148,163,184,.18);border-radius:999px}
 @media(max-width:640px){.client-sheet-next-move-grid{grid-template-columns:1fr}.client-sheet-next-move{margin:10px 0;padding:10px}}
+
+
+/* CIC-02 — Mission Control + Signal Center */
+.signal-center{display:grid;gap:.8rem}
+.signal-center-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+.signal-center-head h2{margin:.22rem 0 0;color:#f8fafc;font-size:.95rem;font-weight:900}
+.signal-center-count{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 .45rem;border:1px solid rgba(255,222,23,.32);border-radius:999px;background:rgba(255,222,23,.08);color:#ffe75c;font-size:.62rem;font-weight:900}
+.signal-center-list{display:grid;gap:.48rem}
+.signal-center-item{width:100%;display:grid;grid-template-columns:10px minmax(0,1fr);gap:.58rem;align-items:start;padding:.72rem;border:1px solid #2b3440;border-radius:.8rem;background:#0b1016;color:inherit;text-align:left;transition:border-color .15s ease,background .15s ease,transform .15s ease}
+.signal-center-item:hover{border-color:#475569;background:#101720;transform:translateY(-1px)}
+.signal-center-item:focus-visible{outline:2px solid rgba(255,222,23,.72);outline-offset:2px}
+.signal-center-dot{width:8px;height:8px;margin-top:.28rem;border-radius:999px;background:#64748b;box-shadow:0 0 0 3px rgba(100,116,139,.12)}
+.signal-center-item[data-severity="critical"] .signal-center-dot{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.13)}
+.signal-center-item[data-severity="high"] .signal-center-dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.13)}
+.signal-center-item[data-severity="medium"] .signal-center-dot{background:#facc15;box-shadow:0 0 0 3px rgba(250,204,21,.11)}
+.signal-center-copy{min-width:0;display:grid;gap:.18rem}
+.signal-center-copy strong{overflow:hidden;color:#f8fafc;font-size:.7rem;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
+.signal-center-copy b{color:#dbe4ef;font-size:.64rem}
+.signal-center-copy small{color:#8492a4;font-size:.58rem;line-height:1.42}
+.signal-center-copy em{margin-top:.12rem;color:#f6d94c;font-size:.58rem;font-style:normal;font-weight:800;line-height:1.4}
+.signal-center-empty{display:grid;gap:.28rem;padding:.8rem;border:1px dashed #34404d;border-radius:.8rem;background:#0a0f15}
+.signal-center-empty strong{color:#cbd5e1;font-size:.68rem}.signal-center-empty span{color:#748295;font-size:.58rem;line-height:1.45}
+@media(max-width:640px){.signal-center-item{min-height:60px;padding:.78rem}.signal-center-copy strong{font-size:.74rem}.signal-center-copy b{font-size:.67rem}}
+@media(prefers-reduced-motion:reduce){.signal-center-item{transition:none!important}.signal-center-item:hover{transform:none}}
