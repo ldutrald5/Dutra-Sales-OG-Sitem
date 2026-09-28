@@ -45,7 +45,7 @@ const initialLeads=[
 const csv=[
   'Código OG;Empresa;Contato;Telefone;CNPJ;Cidade / UF;Status;Situação da conversa;Prioridade;Temperatura;Potencial;Próxima ação;Data de retorno;Observações',
   '3003;Frota Nova;Ana;44999990003;33333333000173;Cascavel / PR;Novo;Primeiro contato;Alta;Quente;Alto;Ligar amanhã;2026-09-29T09:00:00-03:00;Lead sintético novo',
-  '1001;Frota Alfa Atualizada;Carlos;44999990001;11111111000191;Maringá / PR;Contatado;Já conversei;Urgente;Quente;Alto;Enviar proposta;2026-09-29T15:00:00-03:00;Observação da planilha não deve sobrescrever sem decisão explícita',
+  '1001;Frota Alfa Atualizada;Carlos;;;Maringá / PR;Contatado;Já conversei;Urgente;Quente;Alto;Enviar proposta;2026-09-29T15:00:00-03:00;Observação da planilha não deve sobrescrever sem decisão explícita',
   '2002;Conflito Sintético;Teste;44999990004;11111111000191;Curitiba / PR;Novo;Primeiro contato;Média;Morno;Médio;Revisar cadastro;;Duplicidade proposital'
 ].join('\n');
 
