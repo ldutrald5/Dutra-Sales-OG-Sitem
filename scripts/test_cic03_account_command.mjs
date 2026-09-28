@@ -24,7 +24,7 @@ assert.match(app,/refreshQuoteClientSheetAccess\(\)/);
 assert.match(styles,/CIC-03 — Account 360 \+ Command Center 2\.0/);
 assert.match(styles,/\.account-360-now/);
 assert.match(styles,/\.command-section-title/);
-assert.match(sw,/SW_VERSION = 'v\\d+'/);
+assert.match(sw,/SW_VERSION = 'v\d+'/);
 
 assert.match(directive,/Sales Operating System vertical/);
 assert.match(directive,/Não criar segunda fonte de verdade/);
