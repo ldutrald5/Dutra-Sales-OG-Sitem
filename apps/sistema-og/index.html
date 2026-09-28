@@ -167,7 +167,8 @@
           <h1 id="day-title">Seu dia, com cada próximo passo no lugar.</h1>
           <p id="day-guidance">Comece pelos retornos vencidos e termine cada conversa com uma ação e uma data.</p>
           <div class="og-hero-actions" aria-label="Ações rápidas do dia">
-            <button id="btn-hero-start" type="button" class="og-button og-button-primary">INICIAR PRÓXIMA MISSÃO</button>
+            <button id="btn-morning-command" type="button" class="og-button og-button-primary">DUTRA, COMEÇA MEU DIA</button>
+            <button id="btn-hero-start" type="button" class="og-button og-button-secondary">INICIAR PRÓXIMA MISSÃO</button>
             <button id="btn-hero-quote" type="button" class="og-button og-button-ghost">Criar cotação</button>
           </div>
         </div>
@@ -176,6 +177,8 @@
           <span id="day-block">Preparando sua rotina</span>
         </div>
       </section>
+
+      <section id="morning-command-panel" class="morning-command-panel clean-card hidden" aria-live="polite"></section>
 
       <section class="og-product-proof" aria-labelledby="product-proof-title">
         <div class="og-product-proof-copy">
@@ -1345,6 +1348,7 @@
   <script src="services/territory-readiness-service.js"></script>
   <script src="services/command-core-service.js"></script>
   <script src="services/command-execution-service.js"></script>
+  <script src="services/morning-command-service.js"></script>
   <script src="services/call-ai-prompts.js"></script>
   <script src="services/ai-service.js"></script>
   <script src="services/communication-service.js"></script>
