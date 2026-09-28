@@ -1255,3 +1255,24 @@ body {
 .proposal-tracking-actions button{border:1px solid rgba(167,139,250,.28);border-radius:.55rem;background:#111827;color:#ddd6fe;padding:.48rem .65rem;font-size:.61rem;font-weight:800}
 .proposal-tracking-actions button:hover{border-color:rgba(196,181,253,.6);background:#171f2f}
 @media(max-width:680px){.proposal-tracking-status{align-items:stretch;flex-direction:column}.proposal-tracking-actions{justify-content:stretch}.proposal-tracking-actions button{flex:1}}
+
+
+/* TERR-01A — Territory readiness (sem geocoding inventado) */
+.territory-readiness{padding:1rem;margin-bottom:1rem;border-color:rgba(255,222,23,.18)}
+.territory-readiness-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.territory-readiness-head h2{margin:.18rem 0 .15rem;font-size:.9rem;color:var(--og-text)}
+.territory-readiness-head p{margin:0;color:#94a3b8;font-size:.62rem;line-height:1.45}
+.territory-readiness-score{display:grid;place-items:center;min-width:3.15rem;height:3.15rem;border-radius:999px;border:1px solid rgba(255,222,23,.35);background:rgba(255,222,23,.08);color:#ffde17;font-size:.78rem;font-weight:950}
+.territory-readiness-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;margin-top:.8rem}
+.territory-readiness-stats>div{padding:.65rem;border:1px solid var(--og-border);border-radius:.7rem;background:#090f17}
+.territory-readiness-stats small,.territory-readiness-stats b{display:block}
+.territory-readiness-stats small{font-size:.55rem;color:#94a3b8}
+.territory-readiness-stats b{margin-top:.18rem;font-size:.82rem;color:#f8fafc}
+.territory-clusters{display:flex;gap:.45rem;overflow:auto;padding-top:.75rem;scrollbar-width:thin}
+.territory-clusters button{min-width:10.5rem;text-align:left;padding:.58rem .65rem;border:1px solid var(--og-border);border-radius:.65rem;background:#080d14;color:#e2e8f0}
+.territory-clusters button.active{border-color:rgba(255,222,23,.65);background:rgba(255,222,23,.1)}
+.territory-clusters b,.territory-clusters span{display:block}
+.territory-clusters b{font-size:.6rem}
+.territory-clusters span{margin-top:.18rem;color:#94a3b8;font-size:.52rem}
+.territory-empty{margin-top:.7rem;color:#94a3b8;font-size:.6rem}
+@media(max-width:700px){.territory-readiness-stats{grid-template-columns:1fr 1fr}.territory-readiness-head{align-items:center}.territory-readiness-score{min-width:2.8rem;height:2.8rem}.territory-clusters button{min-width:9.5rem}}

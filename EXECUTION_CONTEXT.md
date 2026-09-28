@@ -2,7 +2,7 @@
 
 - Repositório fonte: `ldutrald5/Dutra-Sales-OG-Sitem`
 - Branch estável: `main`
-- Baseline antes deste pacote: `1fdafed8b60e7f3bcf0df894e0127a11dc4b7368`
+- Baseline antes do TERR-01A: `727bc940f64895d89b6474b34a2e58e7389ce6f8`
 - Runtime suportado: Node `>=24 <25`, npm `>=11`
 - Estratégia: migração incremental, reversível e sem segunda fonte de verdade.
 - Diretriz de produto: `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
@@ -10,7 +10,7 @@
 
 ## Capacidades incorporadas
 
-Packages 00R–06R, Ficha Universal, OG-18, CIC-01 e CIC-02 já fazem parte da linha evolutiva atual. Isso inclui fundação canônica, piloto Auth/Organization, Company 360 beta, sync/conflict UX, reconciliação legada, HTTPS hospedado, fila inteligente, Next Best Action explicável, Mission Control e Signal Center.
+Packages 00R–06R, Ficha Universal, OG-18, CIC-01–04, KCC-01, PROP-01A/B e AUTO-01 fazem parte da linha atual. Isso inclui fundação canônica, piloto Auth/Organization, Company/Account 360, sync/conflict UX, reconciliação legada, HTTPS hospedado, fila inteligente, Next Best Action, Mission Control, Signal Center de ciclo comercial, Knowledge Command Center, proposta pública rastreável segura e Automation Engine V1.
 
 ## Railway verificado ao iniciar este pacote
 
@@ -21,8 +21,8 @@ Packages 00R–06R, Ficha Universal, OG-18, CIC-01 e CIC-02 já fazem parte da l
 - Service: `sistema-og`
 - Service ID: `f5bf6592-1ef6-40d0-89d4-518c65fae12d`
 - URL: `https://sistema-og-production.up.railway.app`
-- Deployment verificado na abertura deste pacote: `dad9d643-9a62-40e7-8c96-58026c3e03ab`
-- Commit publicado verificado: `1fdafed8b60e7f3bcf0df894e0127a11dc4b7368`
+- Deployment verificado na abertura do TERR-01A: `3fdd91dd-1069-4874-b4c0-e8157889f5ca`
+- Commit publicado verificado: `727bc940f64895d89b6474b34a2e58e7389ce6f8`
 - Status: `SUCCESS`
 - Volume: `sistema-og-data` montado em `/data`, 500 MB, região `sfo`.
 
@@ -42,13 +42,11 @@ A fundação de Auth/Organization existe sob feature flag e permanece fail-close
 
 ## Próxima trilha autorizada por esta consolidação
 
-1. CIC-03 — Account 360 operacional + Command Center 2.0.
-2. KCC-01 — Knowledge Command Center.
-3. PROP-01 — Proposal Tracking seguro.
-4. AUTO-01 — Automation Engine V1.
-5. TERR-01 — Territory Intelligence.
-6. SCALE-01 — validação Auth/Organization/Persistence canônica.
-7. ERP-OG-01 — instalação/ativos/reposição vertical, somente após evidência de uso.
+1. TERR-01A — qualidade territorial e concentração por cidade/UF.
+2. TERR-01B — mapa/geocoding/rota, condicionado a provedor e qualidade da base.
+3. SCALE-01 — validação Auth/Organization/Persistence canônica, condicionada à conexão/configuração real do Supabase.
+4. ERP-OG-01 — instalação/ativos/reposição vertical, somente após evidência de uso.
+5. Proposal Room — somente após uso real do tracking público já publicado.
 
 ## Gate de avanço
 

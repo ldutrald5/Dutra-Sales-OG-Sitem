@@ -200,3 +200,14 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Persistência:** publicações usam `OG_DATA_DIR/public-proposals.json`; no Railway atual isso fica no volume `/data`. Isso não substitui SCALE-01/Postgres/Auth canônicos.
 - **Validação:** CI run 173 passou suíte completa, teste HTTP real do runtime, Brain, Security, npm audit e Release Gate.
 - **Arquivos principais:** `server-proposal-store.cjs`, `server.mjs`, `app.js`, `index.html`, `styles.css`, `service-worker.js` e `test_proposal_public_runtime.mjs`.
+
+
+## TERR-01A — Territory Readiness
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** a Prospecção passa a mostrar cobertura de cidade/UF, endereço completo e concentração territorial; cidades com mais contas aparecem como atalhos e podem filtrar a mesma fila de prospecção.
+- **Integridade:** nenhuma latitude/longitude é inferida; o serviço somente lê fatos já presentes nos leads e não cria uma segunda base.
+- **Dados:** suporta `cidadeUf` e campos explícitos de cidade/UF/endereço quando disponíveis; frota é agregada somente quando existe valor registrado.
+- **Arquitetura:** TERR-01B continua separado para escolha de geocoding/mapas, política de custo/cache/privacidade e validação de precisão.
+- **Validação:** `og:territory:test` entra na suíte completa, além dos gates de Security, Brain, audit e Release.
+- **Arquivos principais:** `services/territory-readiness-service.js`, Prospecção em `app.js`, PWA, estilos e story TERR-01A.

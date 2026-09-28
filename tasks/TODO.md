@@ -181,9 +181,9 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 ## TERR-01 — Territory Intelligence
 
 - **Objetivo:** converter deslocamento e carteira em inteligência territorial de prospecção.
-- **Escopo:** leads/clientes por mapa, cidades, concentração, rota e oportunidades próximas; nenhuma geolocalização inventada.
-- **Dependências:** endereços normalizados e política de geocoding.
-- **Status:** futura.
+- **Escopo:** leads/clientes por cidade e, futuramente, mapa/rota/proximidade; nenhuma geolocalização inventada.
+- **Dependências:** qualidade de cidade/UF; para mapa, política e provedor de geocoding.
+- **Status:** TERR-01A (readiness + concentração + filtro por cidade/UF) concluída em 2026-09-28. TERR-01B (mapa/geocoding/rota) permanece futura e não deve iniciar sem provedor e gate de qualidade.
 
 ## SCALE-01 — Auth/Organization/Persistence canônica
 
