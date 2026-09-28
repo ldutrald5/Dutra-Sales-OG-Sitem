@@ -644,6 +644,10 @@
 
 <section id="crm-excel-preview-panel" class="clean-card p-4 hidden" aria-live="polite">
         <div class="og-section-head"><div><span class="og-kicker">IMPORTAÇÃO SEGURA</span><h2>Planilha × base atual</h2><p id="crm-excel-summary">Nenhum arquivo analisado.</p></div><button id="crm-excel-close" type="button">Fechar</button></div>
+        <div id="crm-import-sheet-picker" class="spreadsheet-sheet-picker hidden">
+          <div><b>Escolha a aba que contém os clientes</b><span id="crm-import-sheet-note">Quando houver mais de uma tabela compatível, o sistema não escolhe sozinho.</span></div>
+          <select id="crm-import-sheet-select" aria-label="Aba da planilha para importar"><option value="">Selecione uma aba…</option></select>
+        </div>
         <div id="crm-import-mapping" class="spreadsheet-mapping hidden">
           <div class="spreadsheet-mapping-head"><div><b>Mapeamento de colunas</b><span id="crm-import-mapping-note">O sistema tentou reconhecer os campos automaticamente.</span></div><button id="crm-import-remap-preview" type="button">Atualizar preview</button></div>
           <div id="crm-import-mapping-fields" class="spreadsheet-mapping-grid"></div>

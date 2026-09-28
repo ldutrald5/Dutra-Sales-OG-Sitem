@@ -138,6 +138,48 @@ assert.match(appSource,/crm-import-reset-recommendations/);
 assert.match(htmlSource,/Decisões recomendadas já vêm prontas/);
 assert.match(htmlSource,/crm-import-auto-note/);
 
+const multiSheetBook={
+  SheetNames:['Como usar','Lista 2','Pós-Venda','Clientes Únicos'],
+  sheets:{
+    'Como usar':[
+      ['OBJETIVO','Planilha de instruções'],
+      ['Código','Código do cliente no cadastro.']
+    ],
+    'Lista 2':[
+      ['LISTA 2'],[],[],[],
+      ['TP','Código','Nome','Razão Social','Número do cliente','Email','UF','Data cadastro','Últ. compra','OBS','Data ult. conversa'],
+      ['Pessoa Jurídica','117','','TRANSPORTADORA A','44900000001','a@example.com','PR','','','',''],
+      ['Pessoa Jurídica','118','','TRANSPORTADORA B','44900000002','b@example.com','PR','','','',''],
+      ['Pessoa Jurídica','119','','TRANSPORTADORA C','44900000003','c@example.com','PR','','','','']
+    ],
+    'Pós-Venda':[
+      ['PÓS-VENDA'],[],[],[],
+      ['TP','Código','Nome','Razão Social','Número do cliente','Email','UF','Data cadastro','Últ. compra','OBS','Data ult. conversa'],
+      ['Pessoa Jurídica','14571','JUCEMAR','BRESSAN LTDA','66999840001','j@example.com','','','','Ainda não instalou',''],
+      ['Pessoa Jurídica','14575','FRANCIE','DEPOSITO LTDA','61981600001','','','','','Retornar','']
+    ],
+    'Clientes Únicos':[
+      ['Código','RAZÃO SOCIAL / Nome ','NUMERO DO CLIENTE','EMAIL','NOME','CONVERSA ','cnpj'],
+      ['14571','BRESSAN LTDA','66999840001','j@example.com','JUCEMAR','','']
+    ]
+  }
+};
+const sources=service.detectTabularSources(multiSheetBook);
+assert.deepEqual(sources.map(item=>item.sheetName),['Lista 2','Pós-Venda','Clientes Únicos']);
+assert.equal(sources[0].rowCount,3);
+assert.equal(sources[1].rowCount,2);
+assert.equal(sources[0].mapped,8);
+assert.equal(sources[1].mapped,8);
+assert.equal(service.sourceForSheet(multiSheetBook,'Pós-Venda').rowCount,2);
+assert.throws(()=>service.sourceForSheet(multiSheetBook,'Como usar'),/não possui uma tabela/);
+assert.equal(service.detectTabularSource(multiSheetBook).sheetName,'Lista 2','compatibilidade mantém o melhor candidato, mas a UI deve exigir escolha quando houver múltiplas abas');
+
+assert.match(appSource,/renderCrmImportSheetPicker/);
+assert.match(appSource,/detectTabularSources\(workbook\)/);
+assert.match(appSource,/crm-import-sheet-select/);
+assert.match(htmlSource,/Escolha a aba que contém os clientes/);
+assert.match(htmlSource,/Selecione uma aba/);
+
 assert.throws(()=>service.preflightFile({name:'dados.xls',size:100}),/\.xlsx ou \.csv/);
 assert.equal(service.preflightFile({name:'dados.csv',type:'text/csv',size:100}),true);
 assert.throws(()=>service.preflightFile({name:'dados.xlsx',size:5_000_001}),/5 MB/);

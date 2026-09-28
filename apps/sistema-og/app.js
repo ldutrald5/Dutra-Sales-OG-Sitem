@@ -5063,12 +5063,30 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return decisions;
   }
 
+  function renderCrmImportSheetPicker(sources = []) {
+    const panel = document.getElementById('crm-import-sheet-picker');
+    const select = document.getElementById('crm-import-sheet-select');
+    const note = document.getElementById('crm-import-sheet-note');
+    if (!panel || !select) return;
+    const generic = sources.filter(source => !source.canonical);
+    if (sources.length <= 1 || sources[0]?.canonical) {
+      panel.classList.add('hidden');
+      select.innerHTML = '<option value="">Selecione uma aba…</option>';
+      return;
+    }
+    panel.classList.remove('hidden');
+    select.innerHTML = '<option value="">Selecione uma aba…</option>' + generic.map(source =>
+      `<option value="${escapeHtml(source.sheetName)}">${escapeHtml(source.sheetName)} · ${source.rowCount} linha(s) · ${source.mapped} campo(s) reconhecido(s)</option>`
+    ).join('');
+    if (note) note.textContent = `${generic.length} abas compatíveis encontradas. Escolha qual base deseja analisar antes de gerar o preview.`;
+  }
+
   function renderCrmImportMapping(source) {
     const panel = document.getElementById('crm-import-mapping');
     const root = document.getElementById('crm-import-mapping-fields');
     const note = document.getElementById('crm-import-mapping-note');
     if (!panel || !root) return;
-    if (source?.canonical) {
+    if (!source || source?.canonical) {
       panel.classList.add('hidden');
       root.innerHTML = '';
       return;
@@ -5145,13 +5163,29 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         const workbook=/\.csv$/i.test(file.name)
           ? OG_SPREADSHEET_IMPORT.csvToWorkbook(await file.text())
           : await OG_SPREADSHEET_IMPORT.readArrayBuffer(bytes,{name:file.name,type:file.type,size:file.size});
-        const source=OG_SPREADSHEET_IMPORT.detectTabularSource(workbook);
-        crmExcelReview={workbook,source,hash,fileName:file.name,analyzedAt:new Date().toISOString(),preview:[],rows:[],mapping:source.mapping||{}};
+        const sources=OG_SPREADSHEET_IMPORT.detectTabularSources(workbook);
+        if(!sources.length)throw new Error('Nenhuma aba com clientes reconhecível foi encontrada.');
+        const source=sources.length===1?sources[0]:null;
+        crmExcelReview={workbook,sources,source,hash,fileName:file.name,analyzedAt:new Date().toISOString(),preview:[],rows:[],mapping:source?.mapping||{}};
+        renderCrmImportSheetPicker(sources);
         renderCrmImportMapping(source);
-        refreshCrmImportPreview(source.mapping);
+        if(source){
+          refreshCrmImportPreview(source.mapping);
+          showNotification('Preview pronto. Nada foi gravado ainda.','success');
+        }else{
+          renderCrmExcelReview([]);
+          const summaryEl=document.getElementById('crm-excel-summary');
+          const counters=document.getElementById('crm-excel-counters');
+          const note=document.getElementById('crm-excel-review-note');
+          const apply=document.getElementById('crm-excel-apply');
+          if(summaryEl)summaryEl.textContent=`${file.name} · ${sources.length} abas compatíveis · escolha a base para analisar`;
+          if(counters)counters.innerHTML='';
+          if(note)note.textContent='Nada foi gravado. Escolha a aba correta antes de gerar qualquer decisão de importação.';
+          if(apply)apply.disabled=true;
+          showNotification('Mais de uma aba de clientes foi encontrada. Escolha qual deseja importar.','info');
+        }
         panel.classList.remove('hidden');
         panel.scrollIntoView({behavior:'smooth',block:'start'});
-        showNotification('Preview pronto. Nada foi gravado ainda.','success');
       }catch(error){
         crmExcelReview=null;
         showNotification(error.message||'Não foi possível ler a planilha.','error');
@@ -5162,8 +5196,28 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
     });
 
+    document.getElementById('crm-import-sheet-select')?.addEventListener('change',event=>{
+      if(!crmExcelReview?.workbook)return;
+      const sheetName=event.target.value;
+      if(!sheetName){
+        crmExcelReview.source=null;
+        crmExcelReview.preview=[];
+        crmExcelReview.rows=[];
+        renderCrmImportMapping(null);
+        renderCrmExcelReview([]);
+        document.getElementById('crm-excel-apply').disabled=true;
+        return;
+      }
+      const source=OG_SPREADSHEET_IMPORT.sourceForSheet(crmExcelReview.workbook,sheetName);
+      crmExcelReview.source=source;
+      crmExcelReview.mapping=source.mapping||{};
+      renderCrmImportMapping(source);
+      refreshCrmImportPreview(source.mapping);
+      showNotification(`Aba "${source.sheetName}" selecionada: ${source.rowCount} linha(s) para revisar.`,'success');
+    });
+
     document.getElementById('crm-import-remap-preview')?.addEventListener('click',()=>{
-      if(!crmExcelReview)return;
+      if(!crmExcelReview?.source)return showNotification('Escolha primeiro a aba que contém os clientes.','info');
       refreshCrmImportPreview(collectCrmImportMapping());
       showNotification('Mapeamento atualizado. Revise o preview antes de confirmar.','info');
     });

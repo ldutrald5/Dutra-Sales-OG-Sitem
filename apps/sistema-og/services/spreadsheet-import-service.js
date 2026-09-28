@@ -139,23 +139,47 @@
     return mapping;
   }
 
-  function detectTabularSource(workbook){
-    validateSanitizedWorkbook(workbook);
-    const canonical=validateWorkbook(workbook).valid;
-    if(canonical)return{canonical:true,sheetName:'📋 CRM',headerRow:6,headers:CRM_HEADERS.slice(),mapping:Object.fromEntries(FIELD_DEFS.map(def=>[def.key,CRM_HEADERS.findIndex(header=>def.aliases.some(alias=>norm(alias)===norm(header)))]).filter(([,index])=>index>=0))};
+  function bestTabularSourceForSheet(workbook,sheetName,sheetIndex=0){
+    const rows=workbook.sheets[sheetName]||[];
     let best=null;
-    for(const sheetName of workbook.SheetNames){
-      const rows=workbook.sheets[sheetName]||[];
-      for(let index=0;index<Math.min(rows.length,15);index++){
-        const headers=rows[index]||[];
-        const mapping=suggestMapping(headers);
-        const mapped=Object.keys(mapping).length;
-        const score=headers.reduce((sum,value)=>sum+headerAliasScore(value),0)+(mapping.company!=null?8:0)+(mapping.externalCode!=null||mapping.phone!=null||mapping.document!=null?5:0);
-        if(!best||score>best.score)best={canonical:false,sheetName,headerRow:index,headers:headers.map(value=>String(value??'')),mapping,score,mapped};
+    for(let index=0;index<Math.min(rows.length,15);index++){
+      const headers=rows[index]||[];
+      const mapping=suggestMapping(headers);
+      const mapped=Object.keys(mapping).length;
+      const score=headers.reduce((sum,value)=>sum+headerAliasScore(value),0)+(mapping.company!=null?8:0)+(mapping.externalCode!=null||mapping.phone!=null||mapping.document!=null?5:0);
+      if(!best||score>best.score){
+        const rowCount=rows.slice(index+1).filter(row=>Array.isArray(row)&&row.some(value=>String(value??'').trim())).length;
+        best={canonical:false,sheetName,sheetIndex,headerRow:index,headers:headers.map(value=>String(value??'')),mapping,score,mapped,rowCount};
       }
     }
-    if(!best)throw new Error('A planilha não possui linhas utilizáveis.');
     return best;
+  }
+
+  function detectTabularSources(workbook){
+    validateSanitizedWorkbook(workbook);
+    const canonical=validateWorkbook(workbook).valid;
+    if(canonical)return[{canonical:true,sheetName:'📋 CRM',sheetIndex:workbook.SheetNames.indexOf('📋 CRM'),headerRow:6,headers:CRM_HEADERS.slice(),mapping:Object.fromEntries(FIELD_DEFS.map(def=>[def.key,CRM_HEADERS.findIndex(header=>def.aliases.some(alias=>norm(alias)===norm(header)))]).filter(([,index])=>index>=0)),score:999,mapped:CRM_HEADERS.length,rowCount:Math.max(0,(workbook.sheets['📋 CRM']||[]).length-7)}];
+
+    const all=workbook.SheetNames.map((sheetName,sheetIndex)=>bestTabularSourceForSheet(workbook,sheetName,sheetIndex)).filter(Boolean);
+    const candidates=all.filter(source=>{
+      const hasCompany=source.mapping.company!=null;
+      const hasStrongIdentity=source.mapping.externalCode!=null||source.mapping.phone!=null||source.mapping.document!=null||source.mapping.email!=null;
+      return source.mapped>=3&&source.score>=15&&hasCompany&&hasStrongIdentity&&source.rowCount>0;
+    });
+    const pool=candidates.length?candidates:all.filter(source=>source.mapped>0&&source.rowCount>0);
+    return pool.sort((a,b)=>b.score-a.score||a.sheetIndex-b.sheetIndex);
+  }
+
+  function sourceForSheet(workbook,sheetName){
+    const source=detectTabularSources(workbook).find(item=>item.sheetName===sheetName);
+    if(!source)throw new Error('A aba selecionada não possui uma tabela de clientes reconhecível.');
+    return source;
+  }
+
+  function detectTabularSource(workbook){
+    const sources=detectTabularSources(workbook);
+    if(!sources.length)throw new Error('A planilha não possui linhas utilizáveis.');
+    return sources[0];
   }
 
   function rowFromValues(values,mapping,sourceRow){
@@ -360,5 +384,5 @@
 
   function protectedContract(){return{formula:['📋 CRM!Q:Q','🚀 HOJE!A:W'],manual:['📋 CRM!P:P','👥 CONTATOS!H:H'],derived:['📋 CRM!I:I','📋 CRM!W:W'],structure:['tables','merges','validations','conditionalFormatting'],writable:CRM_HEADERS.filter(item=>!['Score','Nº contatos'].includes(item))};}
 
-  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,digits,norm};
+  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSources,sourceForSheet,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,digits,norm};
 });
