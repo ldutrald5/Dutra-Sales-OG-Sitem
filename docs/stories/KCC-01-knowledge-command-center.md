@@ -1,6 +1,6 @@
 # KCC-01 — Knowledge Command Center
 
-Status: **em revisão**
+Status: **concluída**
 
 ## Problema
 
@@ -36,3 +36,10 @@ Transformar o conhecimento comercial em uma capacidade contextual reutilizável 
 ## Rollback
 
 Reverter o pacote remove somente o serviço/atalho contextual. Nenhum dado comercial é migrado.
+
+## Evidência de conclusão
+
+- PR: **#39 — feat: KCC-01 contextual Knowledge Command Center**.
+- CI de implementação: Package 00R CI run **155**, conclusão **success**.
+- Gates aprovados: `npm run validate`, Brain, Security, npm audit e Release Gate.
+- O KCC não cria uma base de conhecimento paralela; apenas compõe consultas contextuais para o Sales Brain existente.
