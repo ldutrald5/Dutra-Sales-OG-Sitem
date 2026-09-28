@@ -3514,6 +3514,63 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     };
   }
 
+  function renderSignalCenter() {
+    const root = document.getElementById('signal-center');
+    if (!root) return;
+    const now = new Date();
+    const signals = OG_SIGNAL_CENTER.buildSignalCenter(state.leads, now).slice(0, 5);
+    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference));
+    const guidance = document.getElementById('day-guidance');
+
+    if (guidance) {
+      if (!mission) guidance.textContent = 'Sua carteira ativa está em dia. Cadastre ou reative uma oportunidade para iniciar uma missão.';
+      else {
+        const missionLead = OG_CRM_SERVICE.getLeadById(state.leads, mission.leadId);
+        const name = missionLead?.empresa || missionLead?.nome || 'próxima conta';
+        guidance.textContent = `Próxima missão: ${name}. ${mission.reason}`;
+      }
+    }
+
+    root.innerHTML = `<div class="signal-center-head"><div><span class="og-kicker">SIGNAL CENTER</span><h2>Sinais que pedem ação</h2></div><span class="signal-center-count">${signals.length}</span></div>${
+      signals.length
+        ? `<div class="signal-center-list">${signals.map(signal => {
+            const lead = OG_CRM_SERVICE.getLeadById(state.leads, signal.leadId);
+            const name = lead?.empresa || lead?.nome || 'Conta';
+            return `<button type="button" class="signal-center-item" data-signal-lead="${escapeHtml(signal.leadId)}" data-severity="${escapeHtml(signal.severity)}"><span class="signal-center-dot" aria-hidden="true"></span><span class="signal-center-copy"><strong>${escapeHtml(name)}</strong><b>${escapeHtml(signal.title)}</b><small>${escapeHtml(signal.reason)}</small><em>→ ${escapeHtml(signal.recommendedAction)}</em></span></button>`;
+          }).join('')}</div>`
+        : '<div class="signal-center-empty"><strong>Nenhum alerta comercial crítico agora.</strong><span>Continue registrando resultados e próximos passos; os sinais aparecem a partir dos fatos do CRM.</span></div>'
+    }`;
+
+    root.querySelectorAll('[data-signal-lead]').forEach(button => button.addEventListener('click', () => {
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.signalLead);
+      if (!lead) return;
+      state.selectedLeadId = lead.id;
+      dayFilter = 'all';
+      document.querySelectorAll('.og-chip[data-day-filter]').forEach(item => item.classList.toggle('active', item.dataset.dayFilter === 'all'));
+      renderDayDashboard();
+      document.getElementById('sales-desk-client')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  }
+
+  function startNextMission() {
+    const now = new Date();
+    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference));
+    if (!mission) {
+      showNotification('Nenhuma oportunidade ativa disponível para uma próxima missão.', 'info');
+      return;
+    }
+    const lead = OG_CRM_SERVICE.getLeadById(state.leads, mission.leadId);
+    if (!lead) return;
+    dayFilter = 'all';
+    state.salesDeskSearch = '';
+    state.selectedLeadId = lead.id;
+    const search = document.getElementById('sales-desk-search');
+    if (search) search.value = '';
+    renderDayDashboard();
+    document.getElementById('sales-desk-client')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showNotification(`Próxima missão · ${lead.empresa || lead.nome}: ${mission.recommendedAction}`, 'info');
+  }
+
   function renderDayDashboard() {
     const list = document.getElementById('day-opportunity-list');
     if (!list) return;
@@ -3552,6 +3609,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('coach-title').textContent = coaching.title;
     document.getElementById('coach-message').textContent = coaching.message;
     document.getElementById('coach-prompts').innerHTML = coaching.prompts.map(item => `<div class="og-coach-prompt">${escapeHtml(item)}</div>`).join('');
+    renderSignalCenter();
     renderSalesDeskClient();
     updateDayClock();
   }
@@ -6492,10 +6550,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function initPremiumExperience() {
-    document.getElementById('btn-hero-start')?.addEventListener('click', () => {
-      document.querySelector('[data-day-filter="priority"]')?.click();
-      document.getElementById('day-opportunity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    document.getElementById('btn-hero-start')?.addEventListener('click', startNextMission);
 
     document.getElementById('btn-hero-quote')?.addEventListener('click', () => switchTab('cotacao'));
     document.getElementById('btn-product-application')?.addEventListener('click', () => switchTab('guia'));
