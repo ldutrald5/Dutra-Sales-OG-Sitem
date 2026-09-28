@@ -1,3 +1,46 @@
+# DUTRA OS — PROJECT OVERLAY
+
+Estas regras de projeto têm prioridade sobre exemplos genéricos do framework quando o trabalho envolve o DUTRA OS.
+
+## Antes de alterar o produto
+
+1. Leia `EXECUTION_CONTEXT.md`.
+2. Leia `docs/roadmap/BASELINE_2026-09-28.md`.
+3. Leia `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`.
+4. Consulte `docs/second-brain/BRAIN_INDEX.md` e somente os registros relevantes.
+5. Verifique o código existente antes de criar um módulo, entidade, score, fila ou fonte de verdade.
+
+## Guardrails do DUTRA OS
+
+- GitHub `main` é a fonte canônica de código.
+- Evolução incremental e reversível; sem rewrite e sem big bang.
+- Não trocar a stack por referência externa.
+- Não criar segunda fonte de verdade para cliente, Company, Contact, Opportunity, Activity, Task, próxima ação ou score.
+- Preservar `lead.id` e contratos legados enquanto a migração canônica não autorizar retirada.
+- IA sugere; fatos importantes exigem contrato controlado e/ou confirmação explícita.
+- Não gravar envio, contato, visualização, venda ou aceite sem evento comprovado.
+- Não alterar dados reais ou históricos silenciosamente.
+- Mudança estrutural exige teste, documentação e rollback.
+- Secrets nunca entram no Git ou em storage persistente do navegador.
+- Performance e mobile fazem parte do aceite.
+- Para APIs/bibliotecas externas, usar documentação atual da versão instalada; Context7 pode ser usado quando disponível, mas nunca inventar API ausente.
+
+## Runtime real do projeto
+
+- Node: `>=24 <25`.
+- npm: `>=11`.
+- Validação principal: `npm run validate`.
+- Segurança: `npm run og:security:test`.
+- Builder Brain: `npm run og:brain:check`.
+- Release gate: `npm run release:gate`.
+- O `package.json` é a autoridade para comandos existentes. Exemplos genéricos do AIOX não devem ser tratados como scripts disponíveis sem conferência.
+
+## Regra de produto
+
+Antes de implementar, responda: **isso ajuda o vendedor a vender mais, vender melhor, perder menos oportunidades ou gastar menos tempo administrando informação?** Se não houver resposta clara, mantenha fora do caminho crítico.
+
+---
+
 # Synkra AIOX Development Rules for Claude Code
 
 You are working with Synkra AIOX, an AI-Orchestrated System for Full Stack Development.
