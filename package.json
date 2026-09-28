@@ -59,7 +59,8 @@
     "og:spreadsheet-export:test": "node scripts/test_spreadsheet_export.mjs",
     "og:spreadsheet-xlsx-builder:test": "node scripts/test_spreadsheet_xlsx_builder.mjs",
     "og:signal-center:test": "node scripts/test_signal_center.mjs",
-    "og:mission-control:ui:test": "node scripts/test_mission_control_ui.mjs"
+    "og:mission-control:ui:test": "node scripts/test_mission_control_ui.mjs",
+    "og:lead-io:smoke": "node scripts/test_native_lead_import_export_smoke.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
