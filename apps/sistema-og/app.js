@@ -2215,6 +2215,28 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     return msg;
   }
 
+  function proposalDraftSignature(quoteData = {}) {
+    return JSON.stringify({
+      template:state.activePdfTemplate,
+      total:Number(quoteData.totalFinalVenda || 0),
+      pieces:Number(quoteData.totalPecas || 0),
+      client:{
+        nome:state.client.nome || '',
+        empresa:state.client.empresa || '',
+        cnpj:state.client.cnpj || '',
+        cidadeUf:state.client.cidadeUf || '',
+        paymentMethod:state.client.paymentMethod || '',
+        parcelasCount:state.client.parcelasCount || 0,
+        freteTexto:state.client.freteTexto || ''
+      },
+      vehicles:(state.vehicles || []).map(vehicle => ({
+        id:vehicle.id,name:vehicle.name,vehicleTypeId:vehicle.vehicleTypeId,libras:vehicle.libras,includeDianteira:Boolean(vehicle.includeDianteira),qty:vehicle.qty,
+        items:(vehicle.items || []).map(item=>({code:item.code,qty:item.qty,customPrice:item.customPrice}))
+      })),
+      extraItems:(state.extraItems || []).map(item=>({code:item.code,qty:item.qty,customPrice:item.customPrice}))
+    });
+  }
+
   function proposalDocumentForContext() {
     if (!activeProposalContext?.proposalId) return null;
     return (state.operations.generatedDocuments || []).find(item =>
@@ -2379,6 +2401,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function setupExportButtons(quoteData) {
+    if (activeProposalContext?.signature && activeProposalContext.signature !== proposalDraftSignature(quoteData)) activeProposalContext = null;
     const btnWhatsappSimple = document.getElementById('btn-copy-whatsapp-simple');
     const btnWhatsappStandard = document.getElementById('btn-copy-whatsapp-standard');
     const btnWhatsappRoi = document.getElementById('btn-copy-whatsapp-roi');
@@ -2446,7 +2469,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         const proposalDocument = (state.operations.generatedDocuments || []).find(item =>
           item.documentType === 'proposal_tracking' && String(item.quoteId) === String(newQuote.id)
         );
-        activeProposalContext = proposalDocument ? { quoteId:newQuote.id, proposalId:proposalDocument.id, clientId:relatedLead.id } : null;
+        activeProposalContext = proposalDocument ? { quoteId:newQuote.id, proposalId:proposalDocument.id, clientId:relatedLead.id, signature:proposalDraftSignature(quoteData) } : null;
         saveOperationsToStorage();
       }
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
