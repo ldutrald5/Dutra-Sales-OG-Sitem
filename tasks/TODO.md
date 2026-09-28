@@ -170,6 +170,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Dependências:** PROP-01 para automações de proposta e contratos de Task/Activity.
 - **Status:** concluída em 2026-09-28; evidência em `tasks/DONE.md`, story AUTO-01 e PR #41.
 
+## CIC-04 — Commercial Lifecycle Signals + Proposal Event Taxonomy
+
+- **Objetivo:** ampliar o Signal Center para pós-venda, intenção, expansão, indicação e reposição usando somente fatos explícitos; unificar a taxonomia de eventos de proposta.
+- **Escopo:** proposta reaberta, instalação pendente, teste próximo do fim, satisfação sem indicação, gap de expansão e revisão de reposição; normalização compatível de eventos `proposal.*`.
+- **Critério de aceite:** sinais derivados não mutam fatos; clientes fechados recebem somente sinais de ciclo de cliente; eventos públicos continuam restritos a backend confiável; aliases legados permanecem compatíveis.
+- **Dependências:** CIC-02, PROP-01A e AUTO-01.
+- **Status:** em andamento em 2026-09-28; story `docs/stories/CIC-04-commercial-lifecycle-signals.md`.
+
 ## TERR-01 — Territory Intelligence
 
 - **Objetivo:** converter deslocamento e carteira em inteligência territorial de prospecção.
