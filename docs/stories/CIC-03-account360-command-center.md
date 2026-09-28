@@ -1,6 +1,6 @@
 # CIC-03 — Account 360 operacional + Command Center 2.0
 
-Status: **em revisão**
+Status: **concluída**
 
 ## Problema
 
@@ -56,3 +56,11 @@ Entregar uma evolução aditiva que:
 ## Rollback
 
 Reverter os commits desta branch restaura o Account/Command Center anterior sem migração de dados. Nenhum dado real é transformado por CIC-03.
+
+## Evidência de conclusão
+
+- PR: **#38 — feat: consolidate baseline, Account 360 and Command Center 2.0**.
+- CI final: workflow **Package 00R CI**, run **151**, conclusão **success**.
+- Gates aprovados: `npm ci`, lockfile íntegro, `npm run validate`, `npm run og:brain:check`, `npm run og:security:test`, `npm audit --audit-level=high` e `npm run release:gate`.
+- Merge no `main`: `dafe21cf442fa37d8e0ce157b0e15a169b72bbb7`.
+- Nenhuma migração de dados foi executada.
