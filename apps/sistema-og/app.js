@@ -4278,19 +4278,159 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function openCommandCenter(initial = '') {
     closeCommandCenter();
-    const overlay = document.createElement('div'); overlay.className = 'command-center-overlay';
-    overlay.innerHTML = `<section class="command-center clean-card" role="dialog" aria-modal="true" aria-labelledby="command-title"><header><div><span class="og-kicker">COMMAND CENTER</span><h2 id="command-title">Buscar ou executar</h2></div><kbd>Esc</kbd></header><input id="command-input" type="search" value="${escapeHtml(initial)}" placeholder="Empresa, telefone, CNPJ, código ou comando natural"><div id="command-results"></div><footer><span>Digite “novo” para cadastrar · “prospecção” para abrir a fila</span><button type="button" id="command-natural">Interpretar como comando</button></footer></section>`;
+    const overlay = document.createElement('div');
+    overlay.className = 'command-center-overlay';
+    overlay.innerHTML = `<section class="command-center clean-card" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <header><div><span class="og-kicker">COMMAND CENTER 2.0</span><h2 id="command-title">Buscar, agir ou consultar o Sales Brain</h2></div><kbd>Esc</kbd></header>
+      <input id="command-input" type="search" value="${escapeHtml(initial)}" placeholder="Ex.: Oleoplan · call ai Oleoplan · cotação Transalves · brain rodotrem 9 eixos">
+      <div id="command-results"></div>
+      <footer><span>Ctrl/Cmd + K · conta, módulo, ação ou “brain + assunto”</span><button type="button" id="command-natural">Interpretar conversa</button></footer>
+    </section>`;
     document.body.appendChild(overlay);
+
     const input = overlay.querySelector('#command-input');
-    const render = () => {
-      const q = input.value.trim().toLowerCase();
-      const matches = q ? state.leads.filter(lead => [lead.empresa, lead.nome, lead.telefone, lead.cnpj, lead.internalCode].some(value => String(value || '').toLowerCase().includes(q))).slice(0, 8) : [];
-      const commands = [{ id: 'new', label: '＋ Novo prospect', match: 'novo' }, { id: 'desk', label: 'Abrir Mesa de Vendas', match: 'mesa' }, { id: 'prospecting', label: 'Abrir Modo Prospecção', match: 'prospecção prospectar caixa' }].filter(item => !q || item.match.includes(q));
-      overlay.querySelector('#command-results').innerHTML = `${commands.map(item => `<button type="button" data-command="${item.id}">${item.label}</button>`).join('')}${matches.map(lead => `<button type="button" data-command-lead="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || '')} · ${escapeHtml(formatPhone(lead.telefone))} · ${escapeHtml(lead.internalCode || '')}</span></button>`).join('') || (!commands.length ? '<p>Nenhum resultado. Você pode interpretar o texto como comando.</p>' : '')}`;
-      overlay.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', () => { const command = button.dataset.command; closeCommandCenter(); if (command === 'new') openQuickLead('dia'); if (command === 'desk') switchTab('dia'); if (command === 'prospecting') { switchTab('prospeccao'); setProspectingView('queue'); } }));
-      overlay.querySelectorAll('[data-command-lead]').forEach(button => button.addEventListener('click', () => { const leadId = button.dataset.commandLead; closeCommandCenter(); openClientSheet(leadId); }));
+    const resultsRoot = overlay.querySelector('#command-results');
+    let renderSequence = 0;
+    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const moduleCommands = [
+      { id: 'new', label: '＋ Novo prospect', terms: 'novo cadastrar cliente prospect' },
+      { id: 'desk', label: '◉ Meu Dia / Mission Control', terms: 'meu dia mesa mission control agenda hoje' },
+      { id: 'prospecting', label: '🎯 Prospecção', terms: 'prospeccao prospectar fila caixa' },
+      { id: 'crm', label: '👤 CRM / Leads', terms: 'crm leads clientes ficha account 360' },
+      { id: 'call-ai', label: '🎧 Call AI', terms: 'call ai ligação roteiro' },
+      { id: 'communication', label: '✉ Central de Comunicação', terms: 'comunicacao whatsapp email mensagem' },
+      { id: 'quote', label: '⚡ Cotação', terms: 'cotacao orçamento proposta investimento' },
+      { id: 'library', label: '🎞 Biblioteca Comercial', terms: 'biblioteca material pdf video case' },
+      { id: 'operations', label: '📊 Performance & Operações', terms: 'performance operacoes funil metricas' },
+      { id: 'history', label: '📜 Histórico', terms: 'historico atividades timeline' },
+      { id: 'knowledge', label: '🧠 Central de Vendas & ROI', terms: 'sales brain conhecimento scripts roi objecoes' },
+      { id: 'catalog', label: '📦 Peças & Códigos', terms: 'catalogo pecas codigos produto' },
+      { id: 'supports', label: '🚛 Consultor de Suportes', terms: 'guia suporte eixo veiculo aplicacao' }
+    ];
+
+    const leadAction = raw => {
+      const patterns = [
+        ['call-ai', /^(?:call\s*ai|preparar\s+ligacao)\s+(.+)$/i],
+        ['quote', /^(?:cotacao|cotar|orcamento|proposta)\s+(.+)$/i],
+        ['whatsapp', /^(?:whatsapp|zap|mensagem)\s+(.+)$/i],
+        ['call', /^(?:ligar|telefone|telefonar)\s+(.+)$/i],
+        ['communication', /^(?:comunicacao|email)\s+(.+)$/i],
+        ['account', /^(?:abrir|ficha|account|cliente)\s+(.+)$/i]
+      ];
+      for (const [action, pattern] of patterns) {
+        const match = raw.match(pattern);
+        if (match) return { action, term: match[1].trim() };
+      }
+      return { action: 'account', term: raw.trim() };
     };
-    input.addEventListener('input', render); render(); input.focus();
+
+    const runModule = id => {
+      closeCommandCenter();
+      if (id === 'new') return openQuickLead('dia');
+      if (id === 'desk') return switchTab('dia');
+      if (id === 'prospecting') { switchTab('prospeccao'); return setProspectingView('queue'); }
+      const tabByCommand = { crm:'crm', 'call-ai':'call-ai', communication:'comunicacao', quote:'cotacao', library:'biblioteca', operations:'operacoes', history:'historico', knowledge:'scripts', catalog:'catalogo', supports:'guia' };
+      if (tabByCommand[id]) {
+        switchTab(tabByCommand[id]);
+        if (id === 'communication') renderCommunication();
+      }
+    };
+
+    const runLeadAction = (lead, action) => {
+      if (!lead) return;
+      state.selectedLeadId = lead.id;
+      if (action === 'whatsapp') {
+        closeCommandCenter();
+        return openDeskWhatsApp(lead);
+      }
+      if (action === 'call') {
+        closeCommandCenter();
+        if (!lead.telefone) return showNotification('Este cliente ainda não tem telefone cadastrado.', 'warning');
+        window.location.href = `tel:${lead.telefone}`;
+        return;
+      }
+      if (action === 'call-ai') {
+        closeCommandCenter();
+        state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
+        state.callAI.returnTab = state.currentTab || 'dia';
+        state.callAI.selectedLeadId = lead.id;
+        switchTab('call-ai');
+        return selectCallClient(lead.id);
+      }
+      if (action === 'quote') {
+        state.client.nome = lead.nome || '';
+        state.client.empresa = lead.empresa || '';
+        state.client.cnpj = lead.cnpj || '';
+        state.client.telefone = lead.telefone || '';
+        state.client.cidadeUf = lead.cidadeUf || '';
+        state.client.segmentId = lead.segmentId || 'transportadora';
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        setVal('client-name', state.client.nome);
+        setVal('client-company', state.client.empresa);
+        setVal('client-cnpj', state.client.cnpj);
+        setVal('client-phone', state.client.telefone);
+        setVal('client-city', state.client.cidadeUf);
+        refreshQuoteClientSheetAccess();
+        closeCommandCenter();
+        switchTab('cotacao');
+        return recalculateQuote();
+      }
+      if (action === 'communication') {
+        state.communication.selectedLeadId = lead.id;
+        closeCommandCenter();
+        switchTab('comunicacao');
+        return renderCommunication();
+      }
+      closeCommandCenter();
+      openClientSheet(lead.id);
+    };
+
+    const render = async () => {
+      const sequence = ++renderSequence;
+      const raw = input.value.trim();
+      const q = normalize(raw);
+      const brainMatch = raw.match(/^(?:brain|sales\s*brain|conhecimento|pesquisar)\s+(.+)$/i);
+      const actionRequest = brainMatch ? { action:'account', term:'' } : leadAction(raw);
+      const searchTerm = normalize(actionRequest.term);
+      const matches = searchTerm
+        ? state.leads.filter(lead => [lead.empresa, lead.nome, lead.telefone, lead.cnpj, lead.internalCode, lead.cidadeUf].some(value => normalize(value).includes(searchTerm))).slice(0, 8)
+        : [];
+      const commands = moduleCommands.filter(item => !q || normalize(item.label + ' ' + item.terms).includes(q)).slice(0, q ? 8 : 10);
+
+      const actionLabel = { account:'Abrir Account 360', 'call-ai':'Preparar Call AI', quote:'Abrir cotação', whatsapp:'Abrir WhatsApp', call:'Ligar', communication:'Abrir comunicação' }[actionRequest.action] || 'Abrir';
+      resultsRoot.innerHTML = `
+        <div class="command-section">${commands.length ? '<small class="command-section-title">ATALHOS</small>' : ''}${commands.map(item => `<button type="button" data-command="${item.id}"><b>${item.label}</b><span>${item.terms.split(' ').slice(0,5).join(' · ')}</span></button>`).join('')}</div>
+        <div class="command-section">${matches.length ? '<small class="command-section-title">CONTAS</small>' : ''}${matches.map(lead => `<button type="button" data-command-lead="${escapeHtml(lead.id)}" data-lead-action="${actionRequest.action}"><b>${escapeHtml(lead.empresa || lead.nome)}</b><span>${escapeHtml(actionLabel)} · ${escapeHtml(lead.nome || '')} · ${escapeHtml(formatPhone(lead.telefone))} · ${escapeHtml(lead.internalCode || '')}</span></button>`).join('')}</div>
+        ${brainMatch ? '<div class="command-section" data-command-brain><small class="command-section-title">SALES BRAIN</small><p class="command-loading">Pesquisando conhecimento relevante…</p></div>' : ''}
+        ${!commands.length && !matches.length && !brainMatch ? '<p class="command-empty">Nenhum resultado. Tente o nome da empresa, um módulo ou “brain + assunto”.</p>' : ''}`;
+
+      resultsRoot.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', () => runModule(button.dataset.command)));
+      resultsRoot.querySelectorAll('[data-command-lead]').forEach(button => button.addEventListener('click', () => runLeadAction(OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.commandLead), button.dataset.leadAction)));
+
+      if (brainMatch) {
+        const brainRoot = resultsRoot.querySelector('[data-command-brain]');
+        try {
+          const response = await apiFetch('/api/knowledge/search', { method:'POST', body:JSON.stringify({ query:brainMatch[1], limit:6 }) });
+          if (sequence !== renderSequence || input.value.trim() !== raw) return;
+          if (!response.ok) throw new Error('Busca indisponível');
+          const payload = await response.json();
+          const records = payload.results || [];
+          brainRoot.innerHTML = `<small class="command-section-title">SALES BRAIN · ${records.length} RESULTADO(S)</small>${records.map((item,index) => `<button type="button" data-command-knowledge="${index}"><b>${escapeHtml(item.title || item.id || 'Conhecimento')}</b><span>${escapeHtml([item.category,item.status].filter(Boolean).join(' · '))}</span><small>${escapeHtml(String(item.text || '').slice(0,220))}${String(item.text || '').length > 220 ? '…' : ''}</small></button>`).join('') || '<p class="command-empty">Nenhum conhecimento encontrado para esta busca.</p>'}`;
+          brainRoot.querySelectorAll('[data-command-knowledge]').forEach(button => button.addEventListener('click', async () => {
+            const item = records[Number(button.dataset.commandKnowledge)];
+            const text = [item?.title, item?.text].filter(Boolean).join('\n\n');
+            try { await navigator.clipboard.writeText(text); showNotification('Conhecimento copiado para usar na conversa.', 'success'); }
+            catch (_) { showNotification('Resultado encontrado. Selecione o texto para copiar.', 'info'); }
+          }));
+        } catch (_) {
+          if (sequence === renderSequence && brainRoot) brainRoot.innerHTML = '<small class="command-section-title">SALES BRAIN</small><p class="command-empty">Busca remota indisponível agora. O restante do DUTRA OS continua funcionando.</p>';
+        }
+      }
+    };
+
+    input.addEventListener('input', () => { render(); });
+    render();
+    input.focus();
     overlay.addEventListener('click', event => { if (event.target === overlay) closeCommandCenter(); });
     overlay.querySelector('#command-natural').addEventListener('click', () => {
       const parsed = OG_PROSPECT_PARSER.parseNaturalCommand(input.value);
@@ -4301,7 +4441,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (!lead) { lead = OG_CRM_SERVICE.createProspect({ empresa: parsed.company, nome: parsed.contact, sourceChannel: 'command_center' }); state.leads.unshift(lead); }
       if (parsed.result) OG_INTERACTION_SERVICE.recordResult(lead, parsed.result, input.value);
       if (parsed.suggestedAction) OG_INTERACTION_SERVICE.setNextAction(lead, parsed.suggestedAction, parsed.followUpAt);
-      saveLeadsToStorage(); closeCommandCenter(); state.selectedLeadId = lead.id; switchTab('dia'); renderDayDashboard();
+      saveLeadsToStorage();
+      closeCommandCenter();
+      state.selectedLeadId = lead.id;
+      switchTab('dia');
+      renderDayDashboard();
     });
   }
 
@@ -4631,41 +4775,69 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function buildCompany360BetaPanel(lead) {
     const service = window.OG_COMPANY_360;
     const operations = state.operations || {};
-    if (!service?.buildCompany360 || !lead?.id) return '';
+    if (!lead?.id) return '';
+
     const company = (operations.companies || []).find(item => item?.entityType === 'company' && String(item.legacyLeadId || '') === String(lead.id));
-    if (!company) {
-      return `
-        <section class="company-360-beta company-360-beta-empty" aria-label="Company 360 Beta">
-          <div><span class="og-kicker">COMPANY 360 · BETA</span><strong>Conta ainda não reconciliada</strong></div>
-          <p>Este lead continua no modelo legado. Nenhuma Company canônica será criada automaticamente.</p>
-          <button type="button" class="company-360-action" data-company360-create>Revisar e criar Company</button>
-        </section>`;
-    }
-    const view = service.buildCompany360(operations, company.id);
-    if (!view) return '';
+    const view = company && service?.buildCompany360 ? service.buildCompany360(operations, company.id) : null;
+    const nextBest = window.OG_LEAD_INTELLIGENCE?.nextBestAction?.(lead) || {};
+    const signals = window.OG_SIGNAL_CENTER?.signalsForLead?.(lead) || [];
+    const primarySignal = signals[0] || null;
     const money = (cents, currency = 'BRL') => cents == null ? '—' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: currency || 'BRL' }).format(cents / 100);
-    const pipelineCurrencies = Object.keys(view.summary.pipelineValueByCurrency || {});
-    const pipelineLabel = view.summary.pipelineCurrency
+    const date = value => {
+      if (!value) return '—';
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    };
+    const fleet = Number(lead.fleetSize || lead.estimatedFleetSize || lead.confirmedFleetSize || 0) || 0;
+    const pipelineCurrencies = Object.keys(view?.summary?.pipelineValueByCurrency || {});
+    const pipelineLabel = view?.summary?.pipelineCurrency
       ? money(view.summary.pipelineValueCents, view.summary.pipelineCurrency)
-      : pipelineCurrencies.length > 1 ? 'Múltiplas moedas' : money(0, 'BRL');
-    const date = value => value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
-    const contactNames = view.contacts.slice(0, 3).map(item => `<li><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.role || 'Contato')}${item.isDecisionMaker ? ' · Decisor' : ''}</span></li>`).join('');
-    const opportunityNames = view.openOpportunities.slice(0, 3).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents, item.currency || 'BRL')}</span></li>`).join('');
+      : pipelineCurrencies.length > 1 ? 'Múltiplas moedas' : view ? money(0, 'BRL') : '—';
+    const contactNames = view?.contacts?.slice(0, 4).map(item => `<li><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.role || 'Contato')}${item.isDecisionMaker ? ' · Decisor' : ''}</span></li>`).join('') || '';
+    const opportunityNames = view?.openOpportunities?.slice(0, 4).map(item => `<li><b>${escapeHtml(item.title || 'Oportunidade')}</b><span>${escapeHtml(item.stage || 'open')} · ${money(item.valueCents, item.currency || 'BRL')}</span></li>`).join('') || '';
+    const operationalContacts = [lead.decisionMaker, lead.nome].filter(Boolean).filter((value, index, list) => list.indexOf(value) === index);
+    const operationalContactHtml = operationalContacts.map((name, index) => `<li><b>${escapeHtml(name)}</b><span>${index === 0 && lead.decisionMaker ? 'Decisor / referência operacional' : 'Contato legado'}</span></li>`).join('');
+    const accountStatus = view ? 'CANÔNICO + LEGADO' : 'LEGADO CONTROLADO';
+
     return `
-      <section class="company-360-beta" aria-label="Company 360 Beta">
-        <header><div><span class="og-kicker">COMPANY 360 · BETA</span><strong>${escapeHtml(view.company.name)}</strong></div><span class="company-360-canonical">CANÔNICO</span></header>
-        <div class="company-360-metrics">
-          <div><small>Contatos</small><b>${view.summary.contacts}</b></div>
-          <div><small>Decisores</small><b>${view.summary.decisionMakers}</b></div>
+      <section class="company-360-beta account-360-panel" aria-label="Account 360">
+        <header>
+          <div><span class="og-kicker">ACCOUNT 360</span><strong>${escapeHtml(view?.company?.name || lead.empresa || lead.nome || 'Conta')}</strong><small>Uma conta, uma ficha, contexto operacional + modelo canônico quando disponível.</small></div>
+          <span class="company-360-canonical">${accountStatus}</span>
+        </header>
+
+        <div class="company-360-metrics account-360-metrics">
+          <div><small>Frota</small><b>${fleet || '—'}</b></div>
+          <div><small>Score</small><b>${Number(nextBest.score || 0)} pts</b></div>
+          <div><small>Sinais</small><b>${signals.length}</b></div>
           <div><small>Pipeline</small><b>${pipelineLabel}</b></div>
-          <div><small>Tarefas</small><b>${view.summary.openTasks}</b></div>
         </div>
-        <div class="company-360-dates"><span>Última atividade <b>${date(view.summary.lastActivityAt)}</b></span><span>Próxima tarefa <b>${date(view.summary.nextTaskAt)}</b></span></div>
+
+        <div class="account-360-now">
+          <div><small>O QUE FAZER AGORA</small><strong>${escapeHtml(nextBest.action || lead.nextAction || 'Definir próxima ação')}</strong><span>${escapeHtml(nextBest.reason || primarySignal?.reason || 'Sem motivo registrado')} · ${escapeHtml(date(nextBest.dueAt || lead.followUpAt))}</span></div>
+          <div data-account-signal-severity="${escapeHtml(primarySignal?.severity || 'none')}"><small>SINAL MAIS IMPORTANTE</small><strong>${escapeHtml(primarySignal?.title || 'Nenhum sinal crítico')}</strong><span>${escapeHtml(primarySignal?.recommendedAction || 'Continue pelo próximo movimento registrado.')}</span></div>
+        </div>
+
+        <div class="account-360-context-grid">
+          <div><small>DOR / DIAGNÓSTICO</small><strong>${escapeHtml(lead.pain || 'Ainda não validada')}</strong><span>Objeção: ${escapeHtml(lead.objection || lead.objections || 'não registrada')}</span></div>
+          <div><small>CONTA / POTENCIAL</small><strong>${escapeHtml(lead.potential || 'Potencial não definido')}</strong><span>${escapeHtml([lead.segmentId, lead.cidadeUf, lead.internalCode ? 'Código OG ' + lead.internalCode : ''].filter(Boolean).join(' · ') || 'Dados de potencial ainda incompletos')}</span></div>
+        </div>
+
+        <div class="company-360-dates">
+          <span>Última atividade <b>${date(view?.summary?.lastActivityAt || lead.lastContactAt || lead.updatedAt)}</b></span>
+          <span>Próxima tarefa <b>${date(view?.summary?.nextTaskAt || lead.followUpAt)}</b></span>
+        </div>
+
         <div class="company-360-columns">
-          <div><small>CONTATOS</small><ul>${contactNames || '<li><span>Nenhum contato canônico</span></li>'}</ul></div>
-          <div><small>OPORTUNIDADES ABERTAS</small><ul>${opportunityNames || '<li><span>Nenhuma oportunidade aberta</span></li>'}</ul></div>
+          <div><small>CONTATOS / DECISORES</small><ul>${contactNames || operationalContactHtml || '<li><span>Nenhum decisor confirmado</span></li>'}</ul></div>
+          <div><small>OPORTUNIDADES ABERTAS</small><ul>${opportunityNames || `<li><b>${escapeHtml(lead.nextAction || 'Sem oportunidade canônica')}</b><span>${view ? 'Nenhuma oportunidade canônica aberta' : 'Reconcilie quando houver necessidade real; nada é criado automaticamente.'}</span></li>`}</ul></div>
         </div>
-        <div class="company-360-actions"><button type="button" class="company-360-action" data-company360-edit>Editar Company</button><button type="button" class="company-360-action" data-company360-contact>＋ Contato</button></div>
+
+        <div class="company-360-actions">
+          ${view
+            ? '<button type="button" class="company-360-action" data-company360-edit>Editar Company</button><button type="button" class="company-360-action" data-company360-contact>＋ Contato</button>'
+            : '<button type="button" class="company-360-action" data-company360-create>Revisar e criar Company canônica</button>'}
+        </div>
       </section>`;
   }
 
