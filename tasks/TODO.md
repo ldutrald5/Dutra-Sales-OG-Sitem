@@ -144,7 +144,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Compatibilidade:** `lead.id` e Company `legacyLeadId` permanecem ponte; score continua em `OG_LEAD_INTELLIGENCE`; sinais continuam derivados.
 - **Critério de aceite:** nenhuma segunda fonte de verdade; mobile; busca por Código OG; Account 360 abre em qualquer superfície; Command Center não grava fatos por mera navegação.
 - **Dependências:** TASK-007, OG-18, CIC-01, CIC-02 e Company 360 beta.
-- **Status:** em andamento em 2026-09-28.
+- **Status:** concluída em 2026-09-28; evidência em `tasks/DONE.md`, story CIC-03 e PR #38.
 
 ## KCC-01 — Knowledge Command Center
 
@@ -152,7 +152,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** busca global por produto, veículo, eixos, objeção, segmento, case, ROI, instalação e pós-venda; reutilizar `/api/knowledge/search` e materiais existentes.
 - **Critério de aceite:** mesma base de conhecimento atende Command Center, Call AI e Account 360; resultados mostram origem/status; fallback local seguro.
 - **Dependências:** CIC-03.
-- **Status:** pronta após CIC-03.
+- **Status:** em andamento em 2026-09-28.
 
 ## PROP-01 — Proposal Tracking seguro
 
