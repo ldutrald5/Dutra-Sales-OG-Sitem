@@ -136,6 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let legacyReconciliationPlan = null;
   let serverSyncInFlight = false;
   let serverSyncGeneration = 0;
+  let activeProposalContext = null;
+  let proposalEventsSyncInFlight = false;
+  let proposalEventsLastPollAt = 0;
+  let proposalEventsSince = '';
 
   // Carrega histórico e leads
   try {
@@ -2211,12 +2215,176 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     return msg;
   }
 
+  function proposalDocumentForContext() {
+    if (!activeProposalContext?.proposalId) return null;
+    return (state.operations.generatedDocuments || []).find(item =>
+      item.documentType === 'proposal_tracking'
+      && String(item.id) === String(activeProposalContext.proposalId)
+      && String(item.quoteId) === String(activeProposalContext.quoteId)
+    ) || null;
+  }
+
+  function renderProposalTrackingStatus() {
+    const root = document.getElementById('proposal-tracking-status');
+    const publishButton = document.getElementById('btn-publish-proposal');
+    if (!root || !publishButton) return;
+    const documentRecord = proposalDocumentForContext();
+    publishButton.disabled = !documentRecord;
+    if (!documentRecord) {
+      publishButton.textContent = '🔗 Link rastreável';
+      root.classList.add('hidden');
+      root.innerHTML = '';
+      return;
+    }
+    const publication = documentRecord.publication || {};
+    const active = publication.publicEnabled === true && !publication.revokedAt;
+    publishButton.textContent = active ? '🔄 Gerar novo link' : '🔗 Gerar link rastreável';
+    root.classList.remove('hidden');
+    root.innerHTML = active
+      ? `<div><strong>Proposta rastreável ativa</strong><span>Publicada ${publication.publishedAt ? escapeHtml(new Date(publication.publishedAt).toLocaleString('pt-BR')) : 'agora'} · o endereço público não fica salvo no CRM.</span></div><div class="proposal-tracking-actions"><button type="button" data-proposal-sent>✓ Confirmar envio</button><button type="button" data-proposal-revoke>Revogar link</button></div>`
+      : '<div><strong>Rascunho seguro pronto</strong><span>Gere um link exclusivo quando estiver pronto para enviar. Abrir ou copiar não registra envio.</span></div>';
+
+    root.querySelector('[data-proposal-sent]')?.addEventListener('click', confirmActiveProposalSent);
+    root.querySelector('[data-proposal-revoke]')?.addEventListener('click', revokeActiveProposal);
+  }
+
+  async function publishActiveProposal() {
+    const documentRecord = proposalDocumentForContext();
+    if (!documentRecord) {
+      showNotification('Salve esta cotação primeiro para preparar a proposta rastreável.', 'info');
+      return;
+    }
+    const button = document.getElementById('btn-publish-proposal');
+    if (button) button.disabled = true;
+    try {
+      const response = await apiFetch('/api/proposals/publish', {
+        method:'POST',
+        body:JSON.stringify({ proposalId:documentRecord.id })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Não foi possível publicar a proposta.');
+      const current = proposalDocumentForContext();
+      if (current) {
+        current.publication = {
+          ...(current.publication || {}),
+          publicEnabled:true,
+          publicToken:null,
+          publicUrl:null,
+          publishedAt:result.publishedAt || new Date().toISOString(),
+          expiresAt:result.expiresAt || null,
+          revokedAt:null,
+          linkIssued:true
+        };
+        saveOperationsToStorage();
+      }
+      try {
+        await navigator.clipboard.writeText(result.publicUrl);
+        showNotification('Link rastreável gerado e copiado. O envio ainda não foi marcado.', 'success');
+      } catch {
+        window.prompt('Copie o link rastreável. Ele não ficará salvo no CRM:', result.publicUrl);
+        showNotification('Link rastreável gerado. O envio ainda não foi marcado.', 'success');
+      }
+      renderProposalTrackingStatus();
+    } catch (error) {
+      showNotification(error.message || 'Falha ao gerar link rastreável.', 'error');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  function confirmActiveProposalSent() {
+    const documentRecord = proposalDocumentForContext();
+    if (!documentRecord) return;
+    if (!window.confirm('Confirma que o link desta proposta já foi enviado ao cliente?')) return;
+    try {
+      state.operations = OG_PROPOSAL_INTELLIGENCE.recordUserEvent(state.operations, {
+        type:'proposal.sent',
+        clientId:documentRecord.clientId,
+        proposalId:documentRecord.id,
+        quoteId:documentRecord.quoteId,
+        at:new Date().toISOString()
+      }, { operationsModel:OG_OPERATIONS_MODEL, confirmedByUser:true });
+      saveOperationsToStorage();
+      showNotification('Envio confirmado. O follow-up agora pode ser acompanhado pelas automações.', 'success');
+      renderProposalTrackingStatus();
+      if (state.currentTab === 'dia') renderDayDashboard();
+    } catch (error) {
+      showNotification(error.message || 'Não foi possível confirmar o envio.', 'error');
+    }
+  }
+
+  async function revokeActiveProposal() {
+    const documentRecord = proposalDocumentForContext();
+    if (!documentRecord) return;
+    if (!window.confirm('Revogar este link público? O cliente não conseguirá mais abrir a proposta.')) return;
+    try {
+      const response = await apiFetch('/api/proposals/revoke', {
+        method:'POST',
+        body:JSON.stringify({ proposalId:documentRecord.id })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Não foi possível revogar a proposta.');
+      state.operations = OG_PROPOSAL_INTELLIGENCE.recordUserEvent(state.operations, {
+        type:'proposal.revoked',
+        clientId:documentRecord.clientId,
+        proposalId:documentRecord.id,
+        quoteId:documentRecord.quoteId,
+        at:result.revokedAt || new Date().toISOString()
+      }, { operationsModel:OG_OPERATIONS_MODEL, confirmedByUser:true });
+      const current = proposalDocumentForContext();
+      if (current) current.publication = { ...(current.publication || {}), publicEnabled:false, publicUrl:null, publicToken:null, revokedAt:result.revokedAt || new Date().toISOString() };
+      saveOperationsToStorage();
+      renderProposalTrackingStatus();
+      showNotification('Link público revogado.', 'success');
+    } catch (error) {
+      showNotification(error.message || 'Falha ao revogar link.', 'error');
+    }
+  }
+
+  async function syncProposalTrackingEvents(force = false) {
+    const now = Date.now();
+    if (proposalEventsSyncInFlight || (!force && now - proposalEventsLastPollAt < 60_000)) return;
+    proposalEventsSyncInFlight = true;
+    proposalEventsLastPollAt = now;
+    try {
+      const suffix = proposalEventsSince ? `?since=${encodeURIComponent(proposalEventsSince)}` : '';
+      const response = await apiFetch('/api/proposals/events' + suffix, { cache:'no-store' });
+      if (!response.ok) return;
+      const payload = await response.json();
+      const allowed = new Set(OG_PROPOSAL_INTELLIGENCE.PUBLIC_EVENT_TYPES || []);
+      const existing = new Set((state.operations.activityEvents || []).map(item => String(item.id)));
+      let changed = false;
+      let newest = proposalEventsSince ? Date.parse(proposalEventsSince) || 0 : 0;
+      for (const event of Array.isArray(payload.events) ? payload.events : []) {
+        const eventAt = Date.parse(event.at || '') || 0;
+        if (eventAt > newest) newest = eventAt;
+        if (!event?.id || existing.has(String(event.id)) || event.source !== 'trusted_server' || !allowed.has(event.type)) continue;
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, event);
+        existing.add(String(event.id));
+        changed = true;
+      }
+      if (newest) proposalEventsSince = new Date(newest).toISOString();
+      if (changed) {
+        saveOperationsToStorage();
+        if (state.currentTab === 'dia') {
+          renderSignalCenter();
+          renderAutomationCenter();
+        }
+      }
+    } catch (error) {
+      console.warn('Eventos de proposta rastreável indisponíveis.', error);
+    } finally {
+      proposalEventsSyncInFlight = false;
+    }
+  }
+
   function setupExportButtons(quoteData) {
     const btnWhatsappSimple = document.getElementById('btn-copy-whatsapp-simple');
     const btnWhatsappStandard = document.getElementById('btn-copy-whatsapp-standard');
     const btnWhatsappRoi = document.getElementById('btn-copy-whatsapp-roi');
     const btnPrint = document.getElementById('btn-print-quote');
     const btnSave = document.getElementById('btn-save-quote');
+    const btnPublish = document.getElementById('btn-publish-proposal');
 
     const handleCopySend = (type) => {
       const text = generateWhatsappText(quoteData, type);
@@ -2247,6 +2415,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         saveQuoteToHistory(quoteData);
       };
     }
+    if (btnPublish) btnPublish.onclick = publishActiveProposal;
+    renderProposalTrackingStatus();
   }
 
   function saveQuoteToHistory(quoteData) {
@@ -2273,6 +2443,10 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id },
           { operationsModel:OG_OPERATIONS_MODEL }
         );
+        const proposalDocument = (state.operations.generatedDocuments || []).find(item =>
+          item.documentType === 'proposal_tracking' && String(item.quoteId) === String(newQuote.id)
+        );
+        activeProposalContext = proposalDocument ? { quoteId:newQuote.id, proposalId:proposalDocument.id, clientId:relatedLead.id } : null;
         saveOperationsToStorage();
       }
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
@@ -2289,9 +2463,11 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         saveLeadsToStorage();
       }
       showNotification(relatedLead ? 'Cotação salva e rascunho de proposta rastreável preparado com segurança.' : 'Cotação salva com sucesso!', 'success');
+      renderProposalTrackingStatus();
     } catch (e) {
       console.error(e);
     }
+    return newQuote;
   }
 
   // =========================================================================
@@ -3650,6 +3826,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('coach-message').textContent = coaching.message;
     document.getElementById('coach-prompts').innerHTML = coaching.prompts.map(item => `<div class="og-coach-prompt">${escapeHtml(item)}</div>`).join('');
     renderSignalCenter();
+    renderAutomationCenter();
+    syncProposalTrackingEvents();
     renderSalesDeskClient();
     updateDayClock();
   }
