@@ -124,4 +124,4 @@ Próxima recomendação: **TASK-010 — Templates comerciais e governança**.
 - **Arquivos relevantes:** `modules/signal-center.js`, `modules/lead-intelligence.js`, `app.js`, `index.html`, `styles.css`.
 - **Critério de aceite:** sem segundo score; sinais não mutam fatos; cada sinal termina em ação; missão seleciona conta ativa; offline e mobile preservados.
 - **Dependências:** CIC-01, TASK-007 e TASK-018.
-- **Status:** em andamento; aguardando CI e release gate.
+- **Status:** concluída em 2026-09-27; evidência em `tasks/DONE.md` e PR #29.
