@@ -3522,6 +3522,38 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     };
   }
 
+  function renderAutomationCenter() {
+    const root = document.getElementById('automation-center');
+    if (!root || !window.OG_AUTOMATION_ENGINE) return;
+    const suggestions = OG_AUTOMATION_ENGINE.buildSuggestions(state.leads, state.operations, new Date()).slice(0, 5);
+    root.innerHTML = `<div class="automation-center-head"><div><span class="og-kicker">AUTOMATION ENGINE V1</span><h2>Rotinas que merecem virar ação</h2></div><span class="automation-center-count">${suggestions.length}</span></div>${
+      suggestions.length
+        ? `<div class="automation-center-list">${suggestions.map(item => {
+            const lead = OG_CRM_SERVICE.getLeadById(state.leads, item.leadId);
+            return `<article class="automation-center-item" data-severity="${escapeHtml(item.severity)}"><div><strong>${escapeHtml(lead?.empresa || lead?.nome || 'Conta')}</strong><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.reason)}</small><em>→ ${escapeHtml(item.action)}</em></div><button type="button" data-automation-apply="${escapeHtml(item.id)}">Criar próxima ação</button></article>`;
+          }).join('')}</div>`
+        : '<div class="automation-center-empty"><strong>Nenhuma automação pendente agora.</strong><span>O motor só sugere quando existe um fato verificável; nada é executado silenciosamente.</span></div>'
+    }`;
+
+    root.querySelectorAll('[data-automation-apply]').forEach(button => button.addEventListener('click', () => {
+      const suggestion = suggestions.find(item => item.id === button.dataset.automationApply);
+      if (!suggestion) return;
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, suggestion.leadId);
+      if (!lead) return;
+      try {
+        OG_AUTOMATION_ENGINE.applyToLead(lead, suggestion, { interactionService:OG_INTERACTION_SERVICE });
+        state.operations = OG_AUTOMATION_ENGINE.markApplied(state.operations, suggestion, { operationsModel:OG_OPERATIONS_MODEL });
+        saveLeadsToStorage();
+        saveOperationsToStorage();
+        state.selectedLeadId = lead.id;
+        renderDayDashboard();
+        showNotification(`Próxima ação criada: ${suggestion.action}`, 'success');
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível aplicar a sugestão.', 'warning');
+      }
+    }));
+  }
+
   function renderSignalCenter() {
     const root = document.getElementById('signal-center');
     if (!root) return;
