@@ -371,9 +371,12 @@
             </button>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap justify-end">
             <button id="btn-save-quote" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition" title="Salvar no histórico">
               💾 Salvar
+            </button>
+            <button id="btn-publish-proposal" disabled class="px-3 py-2 rounded-lg bg-violet-500/15 hover:bg-violet-500/25 disabled:opacity-40 disabled:cursor-not-allowed text-violet-200 text-xs font-bold border border-violet-400/30 transition" title="Gera um link público exclusivo depois que a cotação for salva">
+              🔗 Link rastreável
             </button>
             <button id="btn-print-quote" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
               <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -382,6 +385,8 @@
           </div>
 
         </div>
+
+        <div id="proposal-tracking-status" class="proposal-tracking-status hidden" aria-live="polite"></div>
 
         <!-- SANFONA / CONTAINER DE VEÍCULOS -->
         <div id="vehicles-accordion-container" class="space-y-3 pt-2">
