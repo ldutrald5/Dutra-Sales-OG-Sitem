@@ -211,3 +211,13 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Arquitetura:** TERR-01B continua separado para escolha de geocoding/mapas, política de custo/cache/privacidade e validação de precisão.
 - **Validação:** `og:territory:test` entra na suíte completa, além dos gates de Security, Brain, audit e Release.
 - **Arquivos principais:** `services/territory-readiness-service.js`, Prospecção em `app.js`, PWA, estilos e story TERR-01A.
+
+
+## TASK-003 a TASK-006 — Ações comerciais essenciais
+
+- **Data de reconciliação:** 2026-09-28.
+- **WhatsApp One Click:** telefone brasileiro é normalizado, link é montado pelo serviço dedicado e abrir o canal não registra envio.
+- **Quick Actions:** Mesa, Ficha Universal e Prospecção expõem ações contextuais sem criar outra cópia do cliente.
+- **Resultado rápido:** `interaction-service.recordResult()` grava somente resultado confirmado e mantém histórico.
+- **Próxima ação:** `interaction-service.setNextAction()` é o contrato compartilhado por Mesa, Prospecção, Next Best Action e Automation Engine; mudança material invalida contexto antigo e mudança só de data preserva contexto.
+- **Evidência:** `scripts/test_sales_desk.mjs`, `services/whatsapp-service.js`, `services/interaction-service.js` e suíte completa.

@@ -27,7 +27,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/05-MESA-DE-VENDAS.md`, `docs/07-CENTRAL-COMUNICACAO.md`, `apps/sistema-og/app.js`.
 - **Critério de aceite:** telefone válido abre WhatsApp; inválido orienta correção; abrir não registra envio.
 - **Dependências:** TASK-001.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-28; normalização/link e proteção contra falso envio cobertas por `og:sales-desk:test`.
 
 ## TASK-004 — Quick Actions
 
@@ -36,7 +36,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/03-DESIGN-SYSTEM.md`, `docs/05-MESA-DE-VENDAS.md`, `apps/sistema-og/app.js`.
 - **Critério de aceite:** ações aparecem conforme contexto, são acessíveis e registram apenas fatos confirmados.
 - **Dependências:** TASK-001 e TASK-003.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-28; ações contextuais estão nas superfícies de Mesa/Ficha/Prospecção e permanecem explícitas.
 
 ## TASK-005 — Registro rápido de resultado
 
@@ -45,7 +45,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/02-BANCO-DE-DADOS.md`, `docs/04-CRM.md`, `apps/sistema-og/operations-model.js`, `app.js`.
 - **Critério de aceite:** resultado confirmado aparece na timeline e Performance; nenhuma inferência por abrir canal.
 - **Dependências:** TASK-004.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-28; `interaction-service.recordResult()` e fluxos de Mesa/Prospecção registram resultado confirmado.
 
 ## TASK-006 — Próxima ação
 
@@ -54,7 +54,7 @@ Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclu
 - **Arquivos relevantes:** `docs/04-CRM.md`, `docs/05-MESA-DE-VENDAS.md`, `apps/sistema-og/app.js`.
 - **Critério de aceite:** salvar atualiza conta e fila; atrasados e hoje são distinguíveis; funciona offline.
 - **Dependências:** TASK-005.
-- **Status:** pronta.
+- **Status:** concluída em 2026-09-28; `interaction-service.setNextAction()` é o contrato canônico reutilizado por Mesa, Prospecção, NBA e Automation Engine.
 
 ## TASK-007 — Painel lateral do cliente
 

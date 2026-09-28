@@ -53,3 +53,12 @@ TERR-01B poderá adicionar mapa e proximidade somente depois de:
 ## Rollback
 
 Reverter a fase remove painel/filtro e serviço de readiness. Nenhum dado de cliente precisa ser migrado ou apagado.
+
+
+## Evidência de conclusão
+
+- PR: **#44 — TERR-01A inteligência territorial por cidade e prontidão**.
+- CI: **Package 00R CI run 178 — success**.
+- Merge: `cce75cda4aa02ec3c2387e2d13ecb6a7db005184`.
+- Railway: deployment `09be4804-9d54-44a9-8be4-a795ff70b934` — **SUCCESS**.
+- Produção preservou volume `/data` e healthcheck configurado.

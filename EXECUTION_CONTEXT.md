@@ -21,8 +21,8 @@ Packages 00R–06R, Ficha Universal, OG-18, CIC-01–04, KCC-01, PROP-01A/B e AU
 - Service: `sistema-og`
 - Service ID: `f5bf6592-1ef6-40d0-89d4-518c65fae12d`
 - URL: `https://sistema-og-production.up.railway.app`
-- Deployment verificado na abertura do TERR-01A: `3fdd91dd-1069-4874-b4c0-e8157889f5ca`
-- Commit publicado verificado: `727bc940f64895d89b6474b34a2e58e7389ce6f8`
+- Deployment de produção verificado após TERR-01A: `09be4804-9d54-44a9-8be4-a795ff70b934`
+- Commit publicado verificado: `cce75cda4aa02ec3c2387e2d13ecb6a7db005184`
 - Status: `SUCCESS`
 - Volume: `sistema-og-data` montado em `/data`, 500 MB, região `sfo`.
 
@@ -51,3 +51,11 @@ A fundação de Auth/Organization existe sob feature flag e permanece fail-close
 ## Gate de avanço
 
 Mudanças estruturais seguem: auditoria → decisão → branch/pacote reversível → testes → security/release gate → PR → merge → deploy → verificação. Nenhum bloco futuro deve ser implementado como big bang.
+
+
+## Bloqueios externos atuais
+
+- **SCALE-01:** a fundação Supabase está no código, mas a validação real de projeto/Auth/RLS/Postgres exige conexão/configuração externa; não ativar por suposição.
+- **TERR-01B:** mapa, geocoding e rotas exigem provedor aprovado e qualidade suficiente de endereços; TERR-01A já entrega concentração por cidade/UF sem enviar dados a terceiros.
+- **Context7:** útil para documentação de desenvolvimento, mas não é requisito de runtime e não está conectado neste ambiente.
+- **WhatsApp Cloud API:** não é necessária para o fluxo atual; abrir WhatsApp continua separado de envio confirmado.
