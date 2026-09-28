@@ -28,6 +28,23 @@
     const key = categoryKey(value);
     return ['first_contact','talked','no_reply','waiting_response','interested','proposal','negotiation','customer','loyal_customer','not_interested'].includes(key) ? key : '';
   };
+  const normalizeInstallationStatus = value => {
+    const key = categoryKey(value);
+    return ['pending','scheduled','completed','not_applicable'].includes(key) ? key : '';
+  };
+  const normalizeTestStatus = value => {
+    const key = categoryKey(value);
+    return ['active','completed','cancelled'].includes(key) ? key : '';
+  };
+  const normalizeSatisfactionStatus = value => {
+    const key = categoryKey(value);
+    return ['satisfied','neutral','dissatisfied'].includes(key) ? key : '';
+  };
+  const optionalNonNegativeNumber = value => {
+    if (value === '' || value === null || value === undefined) return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number >= 0 ? number : null;
+  };
   const normalizeAdditionalPhones = value => {
     const seen = new Set();
     return (Array.isArray(value) ? value : []).map(item => typeof item === 'string' ? { label: '', phone: item } : item || {}).map(item => ({
@@ -68,6 +85,13 @@
       accountSummary: clean(lead.accountSummary || lead.summary),
       importMeta: lead.importMeta && typeof lead.importMeta === 'object' ? { ...lead.importMeta } : null,
       fleetSize: Number.isFinite(Number(lead.fleetSize)) ? Number(lead.fleetSize) : 0,
+      equippedVehicles: optionalNonNegativeNumber(lead.equippedVehicles ?? lead.protectedVehicleCount ?? lead.installedVehicleCount ?? lead.vehiclesProtected),
+      installationStatus: normalizeInstallationStatus(lead.installationStatus || lead.installStatus),
+      installationCompletedAt: clean(lead.installationCompletedAt),
+      testStatus: normalizeTestStatus(lead.testStatus || lead.trialStatus),
+      testEndsAt: clean(lead.testEndsAt || lead.trialEndsAt),
+      satisfactionStatus: normalizeSatisfactionStatus(lead.satisfactionStatus || lead.customerSatisfaction),
+      replacementReviewAt: clean(lead.replacementReviewAt || lead.reorderDueAt || lead.nextReplacementReviewAt),
       pain: clean(lead.pain),
       objections: Array.isArray(lead.objections) ? lead.objections : [],
       decisionMaker: clean(lead.decisionMaker),
@@ -150,6 +174,8 @@
       item.nextActionObjective, item.nextActionExpectedResult, item.pain,
       item.sourceChannel, item.sourceLabel, item.sourceList, item.batchTag, item.conversationStage,
       item.temperature, item.potential, item.priorityBand, item.accountSummary,
+      item.installationStatus, item.installationCompletedAt, item.testStatus, item.testEndsAt,
+      item.satisfactionStatus, item.replacementReviewAt, item.equippedVehicles,
       ...item.additionalPhones.flatMap(phone => [phone.label, phone.phone]),
       ...item.referrals.flatMap(referral => [referral.name, referral.company, referral.phone, referral.note])
     ];
@@ -187,7 +213,7 @@
 
   const EDITABLE_PROFILE_FIELDS = Object.freeze([
     'empresa','nome','internalCode','telefone','additionalPhones','email','cnpj','cpf','cidadeUf','segmentId',
-    'status','priority','priorityBand','conversationStage','temperature','potential','decisionMaker','fleetSize','pain','objections','nextAction','followUpAt','nextActionReason','nextActionObjective','nextActionExpectedResult','sourceChannel','sourceLabel','sourceList','accountSummary',
+    'status','priority','priorityBand','conversationStage','temperature','potential','decisionMaker','fleetSize','equippedVehicles','installationStatus','installationCompletedAt','testStatus','testEndsAt','satisfactionStatus','replacementReviewAt','pain','objections','nextAction','followUpAt','nextActionReason','nextActionObjective','nextActionExpectedResult','sourceChannel','sourceLabel','sourceList','accountSummary',
     'referrals','observacoes'
   ]);
 
