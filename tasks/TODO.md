@@ -160,7 +160,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** snapshot versionado, token público opaco/revogável, eventos `proposal_sent/opened/reopened/contact_clicked/accepted/revoked`, Signal Center e próxima ação.
 - **Critério de aceite:** página pública acessa somente snapshot publicado; rate limit e validação; nenhuma visualização inventada; eventos auditáveis.
 - **Dependências:** Security Gate, persistência remota adequada e contrato Quote/GeneratedDocument.
-- **Status:** PROP-01A em andamento em 2026-09-28; contratos internos seguros primeiro, publicação pública permanece bloqueada até os gates.
+- **Status:** PROP-01A concluída em 2026-09-28; publicação pública permanece bloqueada até backend/persistência/Auth adequados.
 
 ## AUTO-01 — Automation Engine V1
 
