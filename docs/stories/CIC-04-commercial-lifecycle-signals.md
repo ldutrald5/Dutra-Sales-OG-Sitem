@@ -1,6 +1,6 @@
 # CIC-04 — Commercial Lifecycle Signals + Proposal Event Taxonomy
 
-Status: **em andamento**
+Status: **concluída**
 
 ## Objetivo
 
@@ -64,3 +64,11 @@ Eventos de abertura/clique/aceite continuam restritos a backend confiável. Envi
 ## Rollback
 
 Reverter este pacote remove somente os sinais derivados adicionais e a normalização de eventos. Nenhum dado comercial existente precisa ser migrado ou apagado.
+
+
+## Evidência de conclusão
+
+- PR: **#42 — feat: CIC-04 sinais comerciais e eventos canônicos de proposta**.
+- CI de implementação: **Package 00R CI run 168 — success**.
+- `npm run validate`, Security, Brain, npm audit e Release Gate passaram.
+- O primeiro run (167) detectou corretamente um falso positivo de expansão quando o número de veículos equipados estava ausente; o gate bloqueou a entrega e o pacote foi corrigido para exigir contagem explícita antes de sinalizar expansão.
