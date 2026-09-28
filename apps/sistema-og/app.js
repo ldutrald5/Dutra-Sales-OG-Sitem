@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     leadSourceFilter: 'all',
     leadPriorityFilter: 'all',
     salesDeskSearch: '',
-    prospecting: { view: 'inbox', previewRows: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    prospecting: { view: 'inbox', previewRows: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
     communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
     ocrImageBase64: null,
     ocrExtractedText: '',
@@ -4464,17 +4464,49 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function uniqueLeadValues(key) { return [...new Set(state.leads.map(lead => lead[key]).filter(Boolean))].sort(); }
 
+  function prospectingTerritorySummary() {
+    return window.OG_TERRITORY_READINESS
+      ? OG_TERRITORY_READINESS.summarize(state.leads)
+      : { total:state.leads.length, cityReady:0, addressReady:0, coveragePercent:0, topClusters:[] };
+  }
+
+  function prospectingQueueWithTerritory() {
+    const base = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
+    if (!window.OG_TERRITORY_READINESS) return base;
+    return OG_TERRITORY_READINESS.filterByPlace(base, state.prospecting.territory || 'all');
+  }
+
+  function nextProspectInTerritory(currentId) {
+    const queue = prospectingQueueWithTerritory();
+    const skipped = new Set((state.prospecting.skippedIds || []).map(String));
+    const index = queue.findIndex(item => String(item.id) === String(currentId || ''));
+    return queue.slice(index + 1).find(item => !skipped.has(String(item.id)))
+      || queue.find(item => !skipped.has(String(item.id)))
+      || null;
+  }
+
   function renderProspectQueue(root) {
-    const queue = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
-    root.innerHTML = `<section class="clean-card prospect-queue"><header><div><span class="og-kicker">AINDA NÃO PROSPECTADOS</span><h2>${queue.length} aguardando primeira ação</h2></div><button type="button" id="start-prospect-session" class="og-button og-button-primary">▶ Prospectar agora</button></header><div class="prospect-filters"><select data-prospect-filter="origin"><option value="all">Todas as origens</option>${uniqueLeadValues('sourceChannel').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="batch"><option value="all">Todos os lotes</option>${uniqueLeadValues('batchTag').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="priority"><option value="all">Todas as prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div><div class="prospect-queue-list">${queue.length ? queue.map(lead => `<article><button type="button" data-prospect-open="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</span><small>${escapeHtml(lead.internalCode || 'Sem código')} · ${escapeHtml(lead.sourceChannel || 'Sem origem')} · ${escapeHtml(lead.batchTag || 'Sem lote')}</small></button><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}">Ligar</a><button type="button" data-prospect-wa="${escapeHtml(lead.id)}">WhatsApp</button></article>`).join('') : '<div class="sales-desk-empty">Fila concluída para estes filtros.</div>'}</div></section>`;
+    const queue = prospectingQueueWithTerritory();
+    const territory = prospectingTerritorySummary();
+    root.innerHTML = `<section class="territory-readiness clean-card"><div class="territory-readiness-head"><div><span class="og-kicker">TERRITORY INTELLIGENCE · FASE A</span><h2>Carteira pronta para inteligência territorial</h2><p>Sem inventar coordenadas: primeiro garantimos cidade/UF confiáveis.</p></div><span class="territory-readiness-score">${territory.coveragePercent}%</span></div><div class="territory-readiness-stats"><div><small>Com cidade/UF</small><b>${territory.cityReady}</b></div><div><small>Endereço completo</small><b>${territory.addressReady}</b></div><div><small>Sem localização suficiente</small><b>${Math.max(0, territory.total - territory.cityReady)}</b></div></div>${territory.topClusters.length ? `<div class="territory-clusters">${territory.topClusters.slice(0,6).map(item => `<button type="button" data-prospect-territory="${escapeHtml(item.key)}" class="${state.prospecting.territory === item.key ? 'active' : ''}"><b>${escapeHtml(item.label)}</b><span>${item.total} conta(s) · frota registrada ${Math.round(item.fleet || 0)}</span></button>`).join('')}</div>` : '<div class="territory-empty">Cadastre cidade e UF nas fichas para começar a enxergar concentração territorial.</div>'}</section><section class="clean-card prospect-queue"><header><div><span class="og-kicker">AINDA NÃO PROSPECTADOS</span><h2>${queue.length} aguardando primeira ação</h2></div><button type="button" id="start-prospect-session" class="og-button og-button-primary">▶ Prospectar agora</button></header><div class="prospect-filters"><select data-prospect-filter="origin"><option value="all">Todas as origens</option>${uniqueLeadValues('sourceChannel').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="batch"><option value="all">Todos os lotes</option>${uniqueLeadValues('batchTag').map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select><select data-prospect-filter="priority"><option value="all">Todas as prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select><select data-prospect-territory><option value="all">Todas as cidades</option>${territory.topClusters.map(item => `<option value="${escapeHtml(item.key)}">${escapeHtml(item.label)} (${item.total})</option>`).join('')}</select></div><div class="prospect-queue-list">${queue.length ? queue.map(lead => { const place = window.OG_TERRITORY_READINESS ? OG_TERRITORY_READINESS.locationForLead(lead) : null; return `<article><button type="button" data-prospect-open="${escapeHtml(lead.id)}"><b>${escapeHtml(lead.empresa)}</b><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</span><small>${escapeHtml(lead.internalCode || 'Sem código')} · ${escapeHtml(place?.label || 'Localização pendente')} · ${escapeHtml(lead.sourceChannel || 'Sem origem')}</small></button><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}">Ligar</a><button type="button" data-prospect-wa="${escapeHtml(lead.id)}">WhatsApp</button></article>`; }).join('') : '<div class="sales-desk-empty">Fila concluída para estes filtros.</div>'}</div></section>`;
     root.querySelectorAll('[data-prospect-filter]').forEach(select => { select.value = state.prospecting.filters[select.dataset.prospectFilter]; select.addEventListener('change', () => { state.prospecting.filters[select.dataset.prospectFilter] = select.value; renderProspecting(); }); });
+    root.querySelectorAll('[data-prospect-territory]').forEach(control => {
+      if (control.tagName === 'SELECT') control.value = state.prospecting.territory || 'all';
+      control.addEventListener('click', event => {
+        if (control.tagName === 'SELECT') return;
+        event.preventDefault();
+        state.prospecting.territory = state.prospecting.territory === control.dataset.prospectTerritory ? 'all' : control.dataset.prospectTerritory;
+        renderProspecting();
+      });
+      if (control.tagName === 'SELECT') control.addEventListener('change', () => { state.prospecting.territory = control.value; renderProspecting(); });
+    });
     root.querySelectorAll('[data-prospect-open]').forEach(button => button.addEventListener('click', () => { state.prospecting.currentId = button.dataset.prospectOpen; setProspectingView('focus'); }));
     root.querySelectorAll('[data-prospect-wa]').forEach(button => button.addEventListener('click', () => { const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.dataset.prospectWa); if (lead) { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); } }));
     root.querySelector('#start-prospect-session')?.addEventListener('click', () => { state.prospecting.currentId = queue[0]?.id || null; setProspectingView('focus'); });
   }
 
   function renderProspectFocus(root) {
-    const queue = OG_PROSPECTING.prospectQueue(state.leads, state.prospecting.filters);
+    const queue = prospectingQueueWithTerritory();
     let lead = OG_CRM_SERVICE.getLeadById(state.leads, state.prospecting.currentId);
     if (!lead || OG_PROSPECTING.wasProspected(lead)) lead = queue.find(item => !state.prospecting.skippedIds.includes(item.id)) || queue[0];
     state.prospecting.currentId = lead?.id || null;
@@ -4486,8 +4518,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root.querySelector('[data-session-call]')?.addEventListener('click', () => state.prospecting.session.events.push({ type: 'attempt', channel: 'call', at: new Date().toISOString(), leadId: lead.id }));
     root.querySelector('[data-session-whatsapp]').addEventListener('click', () => { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); });
     root.querySelector('[data-session-call-ai]').addEventListener('click', () => { state.callAI.context = OG_CALL_AI_CONTEXT.build(lead); state.callAI.returnTab = 'prospeccao'; state.callAI.selectedLeadId = lead.id; switchTab('call-ai'); selectCallClient(lead.id); });
-    root.querySelector('[data-session-skip]').addEventListener('click', () => { state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null; renderProspecting(); });
-    root.querySelector('[data-session-delay]').addEventListener('click', () => { const when = window.prompt('Adiar para: mais tarde, amanhã ou AAAA-MM-DD HH:MM', 'amanhã'); if (!when) return; const mode = /amanh/i.test(when) ? 'tomorrow' : /mais tarde/i.test(when) ? 'today' : 'specific'; const value = mode === 'specific' ? when.replace(' ', 'T') : ''; const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, 'Retomar prospecção', followUpValue(mode, value)); persistSalesDeskActivity(lead, interaction, 'prospect.deferred'); state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null; renderProspecting(); });
+    root.querySelector('[data-session-skip]').addEventListener('click', () => { state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null; renderProspecting(); });
+    root.querySelector('[data-session-delay]').addEventListener('click', () => { const when = window.prompt('Adiar para: mais tarde, amanhã ou AAAA-MM-DD HH:MM', 'amanhã'); if (!when) return; const mode = /amanh/i.test(when) ? 'tomorrow' : /mais tarde/i.test(when) ? 'today' : 'specific'; const value = mode === 'specific' ? when.replace(' ', 'T') : ''; const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, 'Retomar prospecção', followUpValue(mode, value)); persistSalesDeskActivity(lead, interaction, 'prospect.deferred'); state.prospecting.skippedIds.push(lead.id); state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null; renderProspecting(); });
     root.querySelector('[data-prospect-feedback]').addEventListener('click', captureOperationalFeedback);
     const mode = root.querySelector('#prospect-follow-mode'); mode.addEventListener('change', () => root.querySelector('#prospect-date-wrap').classList.toggle('hidden', mode.value !== 'specific'));
     root.querySelector('#prospect-save-next').addEventListener('click', () => {
@@ -4499,7 +4531,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (nextAction || mode.value === 'none') OG_INTERACTION_SERVICE.setNextAction(lead, nextAction, followUpValue(mode.value, root.querySelector('#prospect-specific-date').value));
       persistSalesDeskActivity(lead, interaction, 'prospect.processed');
       state.prospecting.session.events.push({ type: 'processed', result, at: interaction.at, leadId: lead.id });
-      state.prospecting.currentId = OG_PROSPECTING.nextProspect(state.leads, lead.id, state.prospecting.skippedIds, state.prospecting.filters)?.id || null;
+      state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null;
       renderProspecting();
     });
   }
