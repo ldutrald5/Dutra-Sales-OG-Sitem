@@ -26,4 +26,25 @@ assert.equal(risky.status, "pending");
 assert.equal(risky.action.type, "email.send");
 
 assert.throws(() => core.normalizeMission({}), /capability/);
+
+const log = core.createExecutionLog();
+log.append({ missionId: "m1", agentId: "account-analyst", status: "started" });
+assert.equal(log.forMission("m1").length, 1);
+
+const queue = core.createApprovalQueue();
+const approval = queue.enqueue({ autonomy: core.AUTONOMY.EXTERNAL_WRITE, type: "email.send" }, { accountId: "a1" });
+assert.equal(queue.pending().length, 1);
+queue.approve(approval.id, "lucas", "2026-09-28T12:00:00.000Z");
+assert.equal(queue.pending().length, 0);
+
+const adapter = core.createAdapter({
+  id: "test-mail",
+  operations: ["read", "external_write"],
+  read: async () => ({ ok: true }),
+  execute: async () => ({ sent: true })
+});
+assert.deepEqual(await adapter.read({}), { ok: true });
+await assert.rejects(() => adapter.execute({ approved: false }), /approval/);
+assert.deepEqual(await adapter.execute({ approved: true }), { sent: true });
+
 console.log("command core tests: ok");
