@@ -20,14 +20,14 @@ const lead={
 };
 let ops=operationsModel.createEmptyOperations('2026-09-18T00:00:00.000Z');
 ops.activityEvents.push(
-  {id:'E-PROP',type:'proposal.sent',at:'2026-09-25T10:00:00.000Z',clientId:'LEAD-1',proposalId:'PROP-1'},
+  {id:'E-PROP',type:'proposal_sent',at:'2026-09-25T10:00:00.000Z',clientId:'LEAD-1',proposalId:'PROP-1'},
   {id:'E-INSTALL',type:'installation.completed',at:'2026-09-20T10:00:00.000Z',clientId:'LEAD-1',installationId:'INST-1'},
   {id:'E-SAT',type:'customer.satisfaction.confirmed',at:'2026-09-27T10:00:00.000Z',clientId:'LEAD-1'}
 );
 
 const suggestions=engine.suggestionsForLead(lead,ops,now);
 const rules=new Set(suggestions.map(item=>item.ruleId));
-assert.ok(rules.has('proposal_48h_followup'));
+assert.ok(rules.has('proposal_48h_followup'),'alias legado proposal_sent deve alimentar contrato canônico');
 assert.ok(rules.has('post_sale_15d'));
 assert.ok(rules.has('request_referral'));
 assert.ok(rules.has('test_end_followup'));
