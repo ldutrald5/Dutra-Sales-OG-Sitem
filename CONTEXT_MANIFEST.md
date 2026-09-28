@@ -1,34 +1,51 @@
-# Context Manifest — Package 00R
+# Context Manifest — Baseline 2026-09-28 / CIC-03
 
 ## Source of truth
 
 - Repository: `ldutrald5/Dutra-Sales-OG-Sitem`
-- Baseline: `main@655d5243c6227aadbe441eef2d878a4f08106dd3`
-- Working branch: `package-00r-reconciliation`
+- Canonical code branch: `main`
+- Baseline before CIC-03: `1fdafed8b60e7f3bcf0df894e0127a11dc4b7368`
+- Working branch: `feat/baseline-account360-command-center-20260928`
 
-## Consulted inputs
+## Required context
+
+1. `EXECUTION_CONTEXT.md`
+2. `docs/roadmap/BASELINE_2026-09-28.md`
+3. `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
+4. `docs/second-brain/BRAIN_INDEX.md`
+5. task/story specific to the change
+
+## Current architectural facts
+
+- Vanilla JS/CSS/HTML frontend remains the approved V1 stack.
+- Domain contracts for Company, Contact, Opportunity, Activity and Task exist additively.
+- `state.leads` remains the operational compatibility layer during controlled reconciliation.
+- Supabase Auth/Organization foundation exists under feature flag; remote pilot validation is still pending.
+- Company 360 beta, Sync Bridge, conflict review and legacy reconciliation are implemented.
+- Mission Control and Signal Center are implemented and derive from current CRM facts.
+- `OG_LEAD_INTELLIGENCE` is the single deterministic score source.
+- Railway HTTPS is live and the main service currently has a persistent volume mounted at `/data`.
+- Proposal Tracking, Automation Engine and Territory Intelligence are not yet implemented.
+
+## Authority of external inputs
 
 | Source | Role | Authority |
 |---|---|---|
-| GitHub baseline | Executable code and current behavior | Canonical |
-| `DUTRA_BUILDER_BRAIN_V2.zip` | Engineering governance and knowledge model | Advisory, reconciled |
-| `DUTRA_OS_ARCHITECTURE_V1.md` | Target architecture decisions | Advisory |
-| `DUTRA_OS_MASTER_IMPLEMENTATION_PLAN.md` | Sequencing and gates | Advisory |
-| Package 02/03 reports | Prior implementation evidence | Non-canonical; no changesets imported |
+| GitHub `main` | executable code and current behavior | canonical |
+| Railway live state | current deployment/runtime evidence | authoritative for runtime state |
+| attached spreadsheets/PDFs | business evidence, templates and import sources | business input; not code authority |
+| external UI/CRM references | pattern/inspiration | advisory only |
 
-## Context loaded for implementation
+## Explicit prohibitions
 
-- `AGENTS.md`
-- `package.json`, `package-lock.json`, `scripts/validate.mjs`
-- local and Cloudflare state APIs
-- spreadsheet import path and its tests
-- data safety backup service and tests
-- Builder Brain skill, schemas, JSONL collections, checker, index and metrics
+- no big-bang migration;
+- no React/Laravel/Twenty rewrite;
+- no automatic Company creation from weak legacy identity;
+- no second score/queue/source of truth;
+- no secret in Git/browser persistent storage;
+- no silent overwrite of historical facts;
+- no feature marked complete without test/gate evidence.
 
-## Explicit exclusions
+## CIC-03 scope
 
-Supabase, Auth, SQL migrations, canonical Company 360, production deployment, real customer data and remote repository settings.
-
-## Provenance rule
-
-Decisions created by this package cite the baseline or supplied decision artifacts through `source_ids`, `derived_from` and, when replacing an earlier decision, `supersedes`. Generated Brain surfaces are refreshed only after product gates pass.
+CIC-03 may refine Account 360, Command Center, documentation and tests. It must not start Proposal Tracking, Automation Engine, Territory Intelligence or activate remote Supabase auth.
