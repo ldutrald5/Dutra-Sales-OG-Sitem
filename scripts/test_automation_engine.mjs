@@ -48,6 +48,7 @@ const app=fs.readFileSync('apps/sistema-og/app.js','utf8');
 const html=fs.readFileSync('apps/sistema-og/index.html','utf8');
 const sw=fs.readFileSync('apps/sistema-og/service-worker.js','utf8');
 assert.match(app,/function renderAutomationCenter/);
+assert.match(app,/renderSignalCenter\(\);\s*renderAutomationCenter\(\);/,'Meu Dia precisa realmente renderizar o Automation Center');
 assert.match(app,/OG_AUTOMATION_ENGINE\.buildSuggestions/);
 assert.match(app,/Criar próxima ação/);
 assert.match(html,/id="automation-center"/);
