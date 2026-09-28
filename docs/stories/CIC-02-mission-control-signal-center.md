@@ -67,7 +67,7 @@ Cada sinal precisa conter:
 - [x] estados terminais não entram nas missões.
 - [x] novo módulo entra no shell offline.
 - [x] testes unitários e de contrato de UI foram adicionados.
-- [ ] CI completo / release gate aprovado.
+- [x] CI completo / release gate aprovado.
 
 ## Arquivos principais
 
