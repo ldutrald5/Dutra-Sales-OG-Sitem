@@ -174,3 +174,15 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Segurança:** o motor não cria contato, envio, visualização, venda, instalação ou satisfação; esses fatos precisam existir antes da regra.
 - **PWA:** removidos artefatos literais `\\n` acumulados em HTML/Service Worker; `service-worker.js` agora entra no `node --check` obrigatório.
 - **Validação:** suíte completa, Brain, Security, npm audit e Release Gate passaram no CI run 163 da PR #41.
+
+
+## CIC-04 — Commercial Lifecycle Signals + Proposal Event Taxonomy
+
+- **Data:** 2026-09-28.
+- **Mudança observável:** Signal Center passa a trabalhar também o ciclo de cliente quando há fatos explícitos: proposta reaberta, instalação pendente, teste perto do fechamento, satisfação sem indicação, gap comprovado entre frota e veículos equipados e revisão de reposição próxima.
+- **Sem ruído:** clientes fechados não recebem os sinais genéricos de prospecção; expansão só aparece quando a quantidade equipada/protegida está explicitamente registrada; clientes perdidos continuam fora do motor.
+- **Proposal Intelligence:** eventos convergem para a taxonomia `proposal.prepared/sent/opened/reopened/contact_clicked/accepted/revoked`; aliases legados com underscore continuam aceitos.
+- **Segurança:** abertura, reabertura, clique e aceite continuam exclusivos de backend confiável; envio/revogação exigem confirmação humana; nenhum tracking público ou token foi criado.
+- **Integração:** Signal Center pode consumir `activityEvents`; Automation Engine normaliza eventos canônicos/legados e mantém as mesmas regras determinísticas.
+- **Validação:** CI run 168 passou suíte completa, Brain, Security, npm audit e Release Gate. O run 167 bloqueou um falso positivo de expansão e resultou em correção antes do merge.
+- **Arquivos principais:** `modules/signal-center.js`, `services/proposal-intelligence-service.js`, `services/automation-engine-service.js`, `app.js` e testes associados.

@@ -5,8 +5,17 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createProposalIntelligence() {
   'use strict';
 
-  const PUBLIC_EVENT_TYPES = Object.freeze(['proposal_opened','proposal_reopened','proposal_contact_clicked','proposal_accepted']);
-  const USER_EVENT_TYPES = Object.freeze(['proposal_prepared','proposal_sent','proposal_revoked']);
+  const PUBLIC_EVENT_TYPES = Object.freeze(['proposal.opened','proposal.reopened','proposal.contact_clicked','proposal.accepted']);
+  const USER_EVENT_TYPES = Object.freeze(['proposal.sent','proposal.revoked']);
+  const EVENT_ALIASES = Object.freeze({
+    proposal_prepared:'proposal.prepared',
+    proposal_sent:'proposal.sent',
+    proposal_opened:'proposal.opened',
+    proposal_reopened:'proposal.reopened',
+    proposal_contact_clicked:'proposal.contact_clicked',
+    proposal_accepted:'proposal.accepted',
+    proposal_revoked:'proposal.revoked'
+  });
   const FORBIDDEN_PUBLIC_KEYS = new Set(['password','secret','token','accessToken','authorization','apiKey','session']);
 
   function clean(value) { return String(value ?? '').trim(); }
@@ -19,6 +28,11 @@
   function safeNumber(value) {
     const n = Number(value);
     return Number.isFinite(n) ? n : 0;
+  }
+  function normalizeProposalEventType(value) {
+    const raw = clean(value);
+    const normalized = raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+    return EVENT_ALIASES[normalized] || raw;
   }
   function safeVehicle(vehicle = {}) {
     return {
@@ -154,7 +168,7 @@
 
   function recordServerEvent(publication, event = {}, options = {}) {
     if (!publication?.id) throw new Error('Publicação inválida');
-    const type = clean(event.type);
+    const type = normalizeProposalEventType(event.type);
     if (!PUBLIC_EVENT_TYPES.includes(type)) throw new Error('Evento público inválido');
     if (options.trustedServer !== true) throw new Error('Eventos públicos só podem ser registrados por backend confiável');
     return Object.freeze({
@@ -164,6 +178,28 @@
       at: iso(event.at),
       source: 'trusted_server',
       metadata: clone(event.metadata || {})
+    });
+  }
+
+  function recordUserEvent(operations, event = {}, options = {}) {
+    const model = options.operationsModel;
+    if (!model?.migrateOperations || !model?.appendActivity) throw new Error('Operations Model é obrigatório');
+    if (options.confirmedByUser !== true) throw new Error('Evento de proposta exige confirmação explícita do usuário');
+    const type = normalizeProposalEventType(event.type);
+    if (!USER_EVENT_TYPES.includes(type)) throw new Error('Evento de proposta do usuário inválido');
+    const clientId = clean(event.clientId);
+    const proposalIdValue = clean(event.proposalId);
+    if (!clientId || !proposalIdValue) throw new Error('Evento de proposta exige clientId e proposalId');
+    const at = iso(event.at);
+    return model.appendActivity(model.migrateOperations(operations), {
+      id: clean(event.id) || `EVT-${proposalIdValue}-${type.replace(/[^a-z0-9]+/gi,'-').toUpperCase()}-${Date.parse(at)}`,
+      type,
+      at,
+      clientId,
+      proposalId:proposalIdValue,
+      quoteId:clean(event.quoteId) || null,
+      source:'user_confirmed',
+      metadata:clone(event.metadata || {})
     });
   }
 
@@ -179,10 +215,13 @@
   return {
     PUBLIC_EVENT_TYPES,
     USER_EVENT_TYPES,
+    EVENT_ALIASES,
+    normalizeProposalEventType,
     buildSnapshot,
     validatePublicSnapshot,
     prepareTrackingDraft,
     recordServerEvent,
+    recordUserEvent,
     canPublish
   };
 }));

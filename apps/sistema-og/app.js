@@ -3558,8 +3558,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const root = document.getElementById('signal-center');
     if (!root) return;
     const now = new Date();
-    const signals = OG_SIGNAL_CENTER.buildSignalCenter(state.leads, now).slice(0, 5);
-    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference));
+    const signals = OG_SIGNAL_CENTER.buildSignalCenter(state.leads, now, state.operations).slice(0, 5);
+    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference), state.operations);
     const guidance = document.getElementById('day-guidance');
 
     if (guidance) {
@@ -3594,7 +3594,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function startNextMission() {
     const now = new Date();
-    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference));
+    const mission = OG_SIGNAL_CENTER.nextMission(state.leads, now, (lead, reference) => OG_LEAD_INTELLIGENCE.score(lead, reference), state.operations);
     if (!mission) {
       showNotification('Nenhuma oportunidade ativa disponível para uma próxima missão.', 'info');
       return;

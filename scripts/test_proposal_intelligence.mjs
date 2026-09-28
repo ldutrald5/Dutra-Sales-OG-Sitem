@@ -37,6 +37,20 @@ assert.equal(proposal.canPublish(prepared.generatedDocuments[0]),true);
 assert.throws(()=>proposal.recordServerEvent({id:'PROP-1'},{type:'proposal_opened'}),/backend confiável/);
 const opened=proposal.recordServerEvent({id:'PROP-1'},{id:'EV-1',type:'proposal_opened',at:'2026-09-28T05:03:00Z'},{trustedServer:true});
 assert.equal(opened.source,'trusted_server');
+assert.equal(opened.type,'proposal.opened','ingresso legado deve ser normalizado para taxonomia canônica');
+assert.equal(proposal.normalizeProposalEventType('proposal_reopened'),'proposal.reopened');
+assert.equal(proposal.normalizeProposalEventType('proposal.sent'),'proposal.sent');
+
+assert.throws(()=>proposal.recordUserEvent(prepared,{type:'proposal.sent',clientId:'LEAD-1',proposalId:'PROP-1'},{operationsModel}),/confirmação explícita/);
+const sentOps=proposal.recordUserEvent(prepared,{
+  id:'EV-SENT',
+  type:'proposal_sent',
+  at:'2026-09-28T05:05:00Z',
+  clientId:'LEAD-1',
+  proposalId:'PROP-1',
+  quoteId:'COT-123456'
+},{operationsModel,confirmedByUser:true});
+assert.ok(sentOps.activityEvents.some(item=>item.id==='EV-SENT'&&item.type==='proposal.sent'&&item.source==='user_confirmed'));
 
 const app=fs.readFileSync('apps/sistema-og/app.js','utf8');
 const html=fs.readFileSync('apps/sistema-og/index.html','utf8');

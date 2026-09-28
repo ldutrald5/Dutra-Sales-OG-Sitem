@@ -27,10 +27,29 @@
     ].map(asDate).filter(Boolean).sort((a,b)=>b-a);
     return values[0] || null;
   }
+  function canonicalEventType(value) {
+    const normalized=key(value);
+    const aliases={
+      proposal_prepared:'proposal.prepared',
+      proposal_sent:'proposal.sent',
+      proposal_opened:'proposal.opened',
+      proposal_reopened:'proposal.reopened',
+      proposal_contact_clicked:'proposal.contact_clicked',
+      proposal_accepted:'proposal.accepted',
+      proposal_revoked:'proposal.revoked',
+      installation_completed:'installation.completed',
+      customer_satisfaction_confirmed:'customer.satisfaction.confirmed',
+      referral_requested:'referral.requested',
+      referral_received:'referral.received',
+      test_completed:'test.completed',
+      test_cancelled:'test.cancelled'
+    };
+    return aliases[normalized] || clean(value);
+  }
   function eventsForLead(operations = {}, leadId) {
     return (Array.isArray(operations.activityEvents) ? operations.activityEvents : [])
       .filter(item => clean(item.clientId || item.leadId) === clean(leadId))
-      .slice()
+      .map(item => ({...item,type:canonicalEventType(item.type)}))
       .sort((a,b)=>(asDate(a.at)?.getTime()||0)-(asDate(b.at)?.getTime()||0));
   }
   function alreadyApplied(events, ruleId, sourceId) {
