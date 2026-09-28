@@ -1,6 +1,6 @@
 # PROP-01A — Proposal Intelligence Contracts
 
-Status: **em revisão**
+Status: **concluída**
 
 ## Objetivo
 
@@ -32,3 +32,10 @@ Eventos `proposal_opened`, `proposal_reopened`, `proposal_contact_clicked` e `pr
 ## Rollback
 
 Reverter o pacote remove a preparação automática do rascunho. Como os novos registros são aditivos dentro de coleções já existentes, dados históricos de CRM não são reescritos.
+
+## Evidência de conclusão
+
+- PR: **#40 — feat: PROP-01A secure proposal intelligence contracts**.
+- CI de implementação: Package 00R CI run **159**, conclusão **success**.
+- Gates aprovados: validate, Brain, Security, npm audit e Release Gate.
+- Nenhuma rota pública, token público ou evento de abertura foi habilitado nesta fase.
