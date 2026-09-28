@@ -1190,3 +1190,34 @@ body {
 .signal-center-empty strong{color:#cbd5e1;font-size:.68rem}.signal-center-empty span{color:#748295;font-size:.58rem;line-height:1.45}
 @media(max-width:640px){.signal-center-item{min-height:60px;padding:.78rem}.signal-center-copy strong{font-size:.74rem}.signal-center-copy b{font-size:.67rem}}
 @media(prefers-reduced-motion:reduce){.signal-center-item{transition:none!important}.signal-center-item:hover{transform:none}}
+
+
+/* CIC-03 — Account 360 + Command Center 2.0 */
+.account-360-panel { border-color: rgba(255,222,23,.28); background: linear-gradient(145deg, rgba(19,22,25,.98), rgba(8,12,17,.98)); }
+.account-360-panel header > div { min-width: 0; }
+.account-360-panel header small { display:block; margin-top:.2rem; color:var(--og-muted); font-size:.62rem; line-height:1.4; }
+.account-360-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.account-360-now { display:grid; grid-template-columns:1.15fr .85fr; gap:.65rem; margin-top:.75rem; }
+.account-360-now > div, .account-360-context-grid > div { padding:.75rem; border:1px solid var(--og-border); border-radius:.72rem; background:#090f17; }
+.account-360-now small, .account-360-now strong, .account-360-now span, .account-360-context-grid small, .account-360-context-grid strong, .account-360-context-grid span { display:block; }
+.account-360-now small, .account-360-context-grid small { color:var(--og-muted); font-size:.56rem; font-weight:850; letter-spacing:.08em; }
+.account-360-now strong, .account-360-context-grid strong { margin:.28rem 0; color:var(--og-text); font-size:.72rem; }
+.account-360-now span, .account-360-context-grid span { color:#9aa7b8; font-size:.61rem; line-height:1.42; }
+.account-360-now [data-account-signal-severity="critical"] { border-color:rgba(239,68,68,.52); box-shadow: inset 3px 0 #ef4444; }
+.account-360-now [data-account-signal-severity="high"] { border-color:rgba(249,115,22,.48); box-shadow: inset 3px 0 #f97316; }
+.account-360-now [data-account-signal-severity="medium"] { border-color:rgba(255,222,23,.38); box-shadow: inset 3px 0 #ffde17; }
+.account-360-context-grid { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; margin-top:.65rem; }
+
+.command-section { display:grid; gap:.3rem; }
+.command-section + .command-section { margin-top:.55rem; padding-top:.55rem; border-top:1px solid rgba(48,52,58,.72); }
+.command-section-title { display:block; padding:.2rem .15rem; color:var(--og-brand); font-size:.54rem; font-weight:900; letter-spacing:.14em; }
+#command-results button small { display:block; margin-top:.32rem; color:#94a3b8; font-size:.59rem; line-height:1.4; }
+#command-results button:hover, #command-results button:focus-visible { border-color:rgba(255,222,23,.45); background:rgba(255,222,23,.06); outline:none; }
+.command-loading, .command-empty { padding:.75rem; color:var(--og-muted); font-size:.65rem; line-height:1.45; }
+
+@media (max-width: 700px) {
+  .account-360-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .account-360-now, .account-360-context-grid { grid-template-columns:1fr; }
+  .command-center-overlay { padding-top:5vh; }
+  .command-center { max-height:90vh; overflow:auto; }
+}
