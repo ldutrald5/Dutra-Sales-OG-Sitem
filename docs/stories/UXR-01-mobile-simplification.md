@@ -1,6 +1,6 @@
 # UXR-01 — Mobile simplification + safe spreadsheet import
 
-Status: **implementado em branch; aguardando validação visual e merge**
+Status: **implementado em branch; preview Railway isolado preparado; aguardando validação visual e merge**
 
 ## Problema observado
 
@@ -51,3 +51,8 @@ Esta story não altera schema, persistência, regras de merge, decisões de cria
 6. Mapeamento avançado continua disponível.
 7. `og:spreadsheet:test` e CI passam antes de merge.
 8. Validar visualmente em celular antes de produção.
+
+
+## Preview isolado
+
+Foi criado um ambiente temporário separado da produção, sem volume e sem seed de dados reais. Ele existe apenas para validação visual/mobile desta story e deve ser removido após aprovação ou descarte.
