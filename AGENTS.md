@@ -50,6 +50,10 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 - `npm run og:cloud:dev`
 - `npm run og:cloud:deploy`
 
+## Memória canônica do DUTRA OS
+
+Antes de qualquer mudança relevante em `apps/sistema-og/`, leia `DUTRA_OS_CONTEXT.md` e `AI_HANDOFF.md`, além de `ROADMAP.md` e `CHANGELOG.md`. Ao concluir uma versão, atualize esses documentos quando aplicável. Nunca considere ZIP, GitHub e Railway sincronizados sem verificação explícita.
+
 ## Sistema OG — regras de execução
 
 Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tarefas em `apps/sistema-og/`.
