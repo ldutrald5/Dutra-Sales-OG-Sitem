@@ -10,7 +10,7 @@
   function reviewInbox(researchResults=[]){
     const jobs=Array.isArray(researchResults)?researchResults:[];
     return jobs.flatMap(job=>(Array.isArray(job?.candidates)?job.candidates:[])
-      .filter(c=>c.reviewStatus==='ready_for_review')
+      .filter(c=>c.reviewStatus==='ready_for_review' || c.importAllowed===true || c.duplicate===true)
       .map(c=>Object.freeze({
         researchJobId:clean(job.id),providerId:clean(job.providerId),
         companyName:clean(c.companyName),city:clean(c.city),state:clean(c.state),
