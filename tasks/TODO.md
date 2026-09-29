@@ -191,3 +191,29 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** sessão, organizations, memberships, RLS, persistência canônica, backups e política de recuperação.
 - **Critério de aceite:** isolamento entre organizações comprovado; fail-closed; nenhum secret privilegiado no browser.
 - **Status:** bloqueada por validação/configuração real do Supabase.
+
+
+## DUTRA-INT-01 — DUTRA Intelligence Core
+
+- **Objetivo:** evoluir CIC, DUTRA Force, Customer Revenue, OG Technical Brain, Aplicação Visual 360°, Proposal/ROI e Coach como superfícies do mesmo núcleo, sem segunda fonte de verdade.
+- **Princípios:** evolução aditiva; fatos confirmados separados de sugestões; score e próxima ação canônicos preservados; evidência/confiança para dados estimados.
+- **Story:** `docs/stories/DUTRA-INT-01-intelligence-core-roadmap.md`.
+- **Status:** em andamento.
+
+## DIARY-01 — Diário Inteligente Revisável
+
+- **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.
+- **Escopo inicial:** contrato de preview, evidências por campo, parser conservador, revisão humana e aplicação pelos serviços canônicos.
+- **Dependências:** TASK-005, TASK-006, CIC-01 e PRECALL-01.
+- **Story:** `docs/stories/DIARY-01-smart-commercial-diary.md`.
+- **Status:** pronta.
+
+## Roadmap de evolução do Intelligence Core
+
+1. **WAVE-01:** coração comercial — DIARY-01 e fechamento do ciclo pré/pós-contato.
+2. **WAVE-02:** DUTRA Force — discovery, research, qualification e evidência.
+3. **WAVE-03:** Customer Revenue Engine — cobertura, expansão, reposição e indicação.
+4. **WAVE-04:** OG Technical Brain — veículo, aplicação, suporte, regra e evidência.
+5. **WAVE-05:** Aplicação Visual 360° — projeção visual do Technical Brain.
+6. **WAVE-06:** Proposal + ROI Engine — uma fonte para mensagem, proposta e cenários financeiros.
+7. **WAVE-07:** Coach DUTRA — orientação baseada em dados reais estruturados.
