@@ -192,8 +192,8 @@ button,input,select{font:inherit}.shell{max-width:720px;margin:0 auto;min-height
 <div class="toast" id="toast"></div>
 
 <script>
-const screens=[...document.querySelectorAll('.screen')], navs=[...document.querySelectorAll('.nav')];
-function go(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));navs.forEach(n=>n.classList.toggle('active',n.dataset.go===id));document.getElementById('command').classList.remove('open');window.scrollTo({top:0,behavior:'instant'});lucide.createIcons()}
+const navs=[...document.querySelectorAll('.nav')];
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));navs.forEach(n=>n.classList.toggle('active',n.dataset.go===id));document.getElementById('command').classList.remove('open');window.scrollTo({top:0,behavior:'instant'});lucide.createIcons()}
 document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>go(el.dataset.go)));
 const command=document.getElementById('command'),cmdInput=document.getElementById('cmdInput');
 document.getElementById('openCommand').onclick=()=>{command.classList.add('open');setTimeout(()=>cmdInput.focus(),60)};
