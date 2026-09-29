@@ -1,1 +1,1 @@
-{"name":"dutra-os-v2-preview","version":"2.0.0","type":"module","scripts":{"start":"node server.mjs"},"engines":{"node":">=20"}}
+{"name":"dutra-os-v3-premium","version":"3.0.0","type":"module","scripts":{"start":"node --check server.mjs && node --check core-bridge.js && node server.mjs"},"engines":{"node":">=20"}}
