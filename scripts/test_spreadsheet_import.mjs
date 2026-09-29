@@ -151,7 +151,7 @@ assert.match(htmlSource,/crm-import-toggle-advanced/);
 assert.match(htmlSource,/crm-import-recognized/);
 assert.match(appSource,/data-mobile-more/);
 assert.match(appSource,/Abra só quando precisar/);
-assert.match(appSource,/correspondências seguras/i);
+assert.match(appSource,/reconhecido\(s\) com segurança/i);
 
 const multiSheetBook={
   SheetNames:['Como usar','Lista 2','Pós-Venda','Clientes Únicos'],
