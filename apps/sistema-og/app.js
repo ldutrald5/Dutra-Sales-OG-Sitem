@@ -4486,10 +4486,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const recent = OG_SALES_DESK.lastInteraction(lead);
+    const resumeRegister = sessionStorage.getItem('og_sales_desk_register_open') === lead.id;
     root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
+      <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
+        <span><b>1</b> Contatar</span><span><b>2</b> Registrar resultado</span><span><b>3</b> Salvar e avançar</span>
+      </div>
       <div class="sales-desk-primary-actions">
         <a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a>
         <button type="button" data-client-whatsapp>WhatsApp</button>
+        <button type="button" data-client-register>Registrar</button>
         <button type="button" data-client-call-ai>Call AI</button>
         <button type="button" data-client-crm class="sales-desk-secondary-action">Ficha</button>
       </div>
@@ -4498,10 +4503,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong>
         <small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small>
       </section>
-      <details class="sales-desk-register">
+      <details class="sales-desk-register" ${resumeRegister ? 'open' : ''}>
         <summary>Registrar conversa / retorno</summary>
         <div class="sales-desk-register-body">
           <label class="og-field"><span>Resultado</span><select id="desk-result"><option value="">Escolha o resultado…</option>${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
+          <div class="sales-desk-result-quick" aria-label="Resultados rápidos">
+            <button type="button" data-desk-result-quick="nao_atendeu">Não atendeu</button>
+            <button type="button" data-desk-result-quick="atendeu">Atendeu</button>
+            <button type="button" data-desk-result-quick="falar_depois">Falar depois</button>
+            <button type="button" data-desk-result-quick="enviar_orcamento">Enviar orçamento</button>
+          </div>
           <label class="og-field"><span>Nota</span><textarea id="desk-note" rows="2" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label>
           <div class="sales-desk-next">
             <label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label>
@@ -4516,7 +4527,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </details>
       <details class="sales-desk-actions"><summary>Mensagens e outras ações</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details>
       <details class="sales-desk-history"><summary>Histórico recente</summary><div class="sales-desk-history-body">${OG_UI_COMPONENTS.timeline(lead.interactions)}</div></details>`
+    const registerDetails = root.querySelector('.sales-desk-register');
+    function openDeskRegister() {
+      sessionStorage.setItem('og_sales_desk_register_open', lead.id);
+      registerDetails.open = true;
+      requestAnimationFrame(() => root.querySelector('#desk-result')?.focus());
+    }
+    root.querySelector('[data-client-call]')?.addEventListener('click', () => openDeskRegister());
     root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
+    root.querySelector('[data-client-register]').addEventListener('click', () => openDeskRegister());
+    registerDetails.addEventListener('toggle', () => {
+      if (registerDetails.open) sessionStorage.setItem('og_sales_desk_register_open', lead.id);
+      else if (sessionStorage.getItem('og_sales_desk_register_open') === lead.id) sessionStorage.removeItem('og_sales_desk_register_open');
+    });
     root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
       state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
       state.callAI.returnTab = 'dia';
@@ -4552,6 +4575,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       specificWrap.classList.toggle('hidden', followMode.value !== 'specific');
     }
 
+    root.querySelectorAll('[data-desk-result-quick]').forEach(button => button.addEventListener('click', () => {
+      resultSelect.value = button.dataset.deskResultQuick;
+      syncDeskOutcomeFields();
+      root.querySelector('#desk-note')?.focus();
+    }));
+
     function saveDeskOutcome(advance = false) {
       const result = resultSelect.value;
       if (!result) return showNotification('Escolha o resultado da conversa.', 'info');
@@ -4565,6 +4594,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
       if (mode !== 'none' && !action) return showNotification('Defina a próxima ação ou escolha "Sem próxima ação".', 'info');
       if (mode === 'specific' && !dueAt) return showNotification('Informe a data específica.', 'info');
+
+      root.querySelectorAll('#desk-save-stay,#desk-save-advance').forEach(button => { button.disabled = true; });
+      sessionStorage.removeItem('og_sales_desk_register_open');
 
       const resultInteraction = OG_INTERACTION_SERVICE.recordResult(lead, result, note);
       persistSalesDeskActivity(lead, resultInteraction, 'interaction.result_recorded');
@@ -4641,6 +4673,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (event.key.toLowerCase() === 'w') {
         const lead = OG_CRM_SERVICE.getLeadById(state.leads, state.selectedLeadId);
         if (lead) { event.preventDefault(); openDeskWhatsApp(lead); }
+      }
+      if (event.key.toLowerCase() === 'r') {
+        const register = document.querySelector('.sales-desk-register');
+        if (register) {
+          event.preventDefault();
+          register.open = true;
+          requestAnimationFrame(() => document.getElementById('desk-result')?.focus());
+        }
       }
       if (event.key.toLowerCase() === 'a') { event.preventDefault(); document.querySelector('.sales-desk-actions summary')?.click(); }
     });

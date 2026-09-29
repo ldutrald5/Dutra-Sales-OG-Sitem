@@ -566,9 +566,13 @@ body {
 .sales-desk-client-head h2 { margin-top: .25rem; color: var(--og-text); font-size: 1.15rem; font-weight: 850; }
 .sales-desk-client-head p { color: var(--og-muted); font-size: .72rem; }
 .sales-desk-status { align-self: start; padding: .35rem .55rem; border: 1px solid rgba(246,201,69,.35); border-radius: 999px; color: var(--og-brand); font-size: .62rem; font-weight: 800; text-transform: uppercase; }
-.sales-desk-primary-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem; margin: .9rem 0; }
+.sales-desk-flow-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.35rem; margin:.75rem 0 -.25rem; }
+.sales-desk-flow-strip span { display:flex; align-items:center; gap:.35rem; min-width:0; color:#94a3b8; font-size:.57rem; font-weight:750; }
+.sales-desk-flow-strip b { display:grid; place-items:center; flex:0 0 20px; width:20px; height:20px; border:1px solid rgba(255,222,23,.3); border-radius:999px; color:#ffde17; background:rgba(255,222,23,.08); font-size:.56rem; }
+.sales-desk-primary-actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .45rem; margin: .9rem 0; }
 .sales-desk-primary-actions button, .sales-desk-primary-actions a { display: grid; place-items: center; min-height: 42px; padding: .45rem; border: 1px solid var(--og-border); border-radius: .65rem; background: #111827; color: #e5e7eb; font-size: .65rem; font-weight: 800; text-align: center; }
 .sales-desk-primary-actions [data-client-whatsapp] { border-color: rgba(34,197,94,.45); color: #86efac; }
+.sales-desk-primary-actions [data-client-register] { border-color: rgba(255,222,23,.55); background:rgba(255,222,23,.1); color:#ffde17; }
 .sales-desk-primary-actions [data-client-call-ai] { border-color: rgba(246,201,69,.45); color: var(--og-brand); }
 .sales-desk-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
 .sales-desk-facts > div { padding: .7rem; border: 1px solid var(--og-border); border-radius: .7rem; background: #090e17; }
@@ -586,6 +590,9 @@ body {
 .sales-desk-register > summary::after, .sales-desk-history > summary::after { content:'＋'; float:right; color:#ffde17; }
 .sales-desk-register[open] > summary::after, .sales-desk-history[open] > summary::after { content:'−'; }
 .sales-desk-register-body { display:grid; gap:.65rem; padding:.7rem 0 0; }
+.sales-desk-result-quick { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:-.15rem; }
+.sales-desk-result-quick button { padding:.42rem .55rem; border:1px solid #30343a; border-radius:999px; background:#0b1118; color:#cbd5e1; font-size:.58rem; font-weight:800; }
+.sales-desk-result-quick button:hover, .sales-desk-result-quick button:focus-visible { border-color:rgba(255,222,23,.45); color:#ffde17; outline:none; }
 .sales-desk-save-row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
 .sales-desk-save-row button { min-height:42px; }
 .sales-desk-save-row #desk-save-advance { font-weight:900; }
@@ -627,6 +634,8 @@ body {
   .sales-desk-queue { max-height: none; }
   .sales-desk-select { grid-template-columns: 1fr; }
   .sales-desk-primary-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sales-desk-primary-actions [data-client-register] { grid-column:1/-1; min-height:46px; }
+  .sales-desk-flow-strip { grid-template-columns:1fr; gap:.25rem; padding:.55rem .65rem; border:1px solid rgba(255,222,23,.14); border-radius:.7rem; background:rgba(255,222,23,.035); }
 }
 
 @media (max-width: 520px) {
