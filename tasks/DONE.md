@@ -221,3 +221,12 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Resultado rápido:** `interaction-service.recordResult()` grava somente resultado confirmado e mantém histórico.
 - **Próxima ação:** `interaction-service.setNextAction()` é o contrato compartilhado por Mesa, Prospecção, Next Best Action e Automation Engine; mudança material invalida contexto antigo e mudança só de data preserva contexto.
 - **Evidência:** `scripts/test_sales_desk.mjs`, `services/whatsapp-service.js`, `services/interaction-service.js` e suíte completa.
+## PRECALL-02 — Ficha de Ataque + Playbook Vivo
+
+- **Data:** 2026-09-29.
+- **Mudança observável:** o Call AI passa a exibir uma Ficha de Ataque por conta com momento comercial, objetivo da conversa, abordagem recomendada, abertura de ligação, mensagem inicial de WhatsApp, preparação técnica e próximo passo esperado.
+- **Cobertura:** primeiro contato, retomada, não respondeu, aguardando resposta, interessado, proposta enviada, negociação, cliente, cliente fidelizado e sem interesse.
+- **Integridade:** o playbook é derivado; não altera status, dor, frota, prioridade, envio ou qualquer fato do CRM. Aplicação/pressão/veículo desconhecidos continuam pendentes de validação.
+- **Arquivos principais:** `services/sales-brief-service.js`, `app.js`, `styles.css`, `service-worker.js`, `scripts/test_sales_brief.mjs` e story PRECALL-02.
+- **Validação esperada:** `og:sales-brief:test` e suíte/gates do CI antes do merge.
+- **Limites:** Diário Inteligente pós-contato e persistência de templates continuam em incrementos separados.
