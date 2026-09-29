@@ -3976,6 +3976,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       list.querySelectorAll('[data-desk-select]').forEach(button => button.addEventListener('click', () => {
         state.selectedLeadId = button.dataset.deskSelect;
         renderDayDashboard();
+        if (window.innerWidth <= 850) requestAnimationFrame(() => document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:'smooth', block:'start' }));
       }));
       list.querySelectorAll('[data-desk-whatsapp]').forEach(button => button.addEventListener('click', event => {
         event.stopPropagation();
@@ -4471,7 +4472,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <details class="sales-desk-register">
         <summary>Registrar conversa / retorno</summary>
         <div class="sales-desk-register-body">
-          <label class="og-field"><span>Resultado</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
+          <label class="og-field"><span>Resultado</span><select id="desk-result"><option value="">Escolha o resultado…</option>${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
           <label class="og-field"><span>Nota</span><textarea id="desk-note" rows="2" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label>
           <div class="sales-desk-next">
             <label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label>
@@ -4479,8 +4480,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
             <label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label>
           </div>
           <div class="sales-desk-save-row">
-            <button type="button" id="desk-save-result" class="og-button og-button-secondary">Salvar resultado</button>
-            <button type="button" id="desk-save-next" class="og-button og-button-primary">Salvar próxima ação</button>
+            <button type="button" id="desk-save-stay" class="og-button og-button-secondary">Salvar e ficar</button>
+            <button type="button" id="desk-save-advance" class="og-button og-button-primary">Salvar e próximo cliente →</button>
           </div>
         </div>
       </details>
@@ -4501,26 +4502,79 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       showNotification(`${button.dataset.futureAction}: entrada preparada para uma próxima tarefa.`, 'info');
     }));
     const followMode = root.querySelector('#desk-follow-mode');
-    followMode.addEventListener('change', () => root.querySelector('#desk-specific-wrap').classList.toggle('hidden', followMode.value !== 'specific'));
-    root.querySelector('#desk-save-result').addEventListener('click', () => {
-      const result = root.querySelector('#desk-result').value;
+    const resultSelect = root.querySelector('#desk-result');
+    const nextActionInput = root.querySelector('#desk-next-action');
+    const specificWrap = root.querySelector('#desk-specific-wrap');
+    const specificDate = root.querySelector('#desk-specific-date');
+
+    function syncDeskOutcomeFields() {
+      const definition = OG_INTERACTION_SERVICE.RESULT_DEFINITIONS[resultSelect.value];
+      const clearsNext = Boolean(definition?.clearNextAction);
+      nextActionInput.disabled = clearsNext;
+      followMode.disabled = clearsNext;
+      specificDate.disabled = clearsNext;
+      if (clearsNext) {
+        nextActionInput.value = '';
+        followMode.value = 'none';
+        specificWrap.classList.add('hidden');
+        return;
+      }
+      if (definition?.nextAction && !nextActionInput.value.trim()) nextActionInput.value = definition.nextAction;
+      specificWrap.classList.toggle('hidden', followMode.value !== 'specific');
+    }
+
+    function nextDeskLead(currentId) {
+      const filtered = OG_SALES_DESK.selectQueue(state.leads, dayFilter, state.salesDeskSearch).filter(item => String(item.id) !== String(currentId));
+      const fallback = OG_SALES_DESK.selectQueue(state.leads, 'all', '').filter(item => String(item.id) !== String(currentId));
+      return filtered[0] || fallback[0] || null;
+    }
+
+    function saveDeskOutcome(advance = false) {
+      const result = resultSelect.value;
+      if (!result) return showNotification('Escolha o resultado da conversa.', 'info');
+
+      const definition = OG_INTERACTION_SERVICE.RESULT_DEFINITIONS[result] || OG_INTERACTION_SERVICE.RESULT_DEFINITIONS.outro;
       const note = root.querySelector('#desk-note').value.trim();
-      const interaction = OG_INTERACTION_SERVICE.recordResult(lead, result, note);
-      persistSalesDeskActivity(lead, interaction, 'interaction.result_recorded');
-      showNotification('Resultado registrado no histórico.', 'success');
-      renderDayDashboard();
-    });
-    root.querySelector('#desk-save-next').addEventListener('click', () => {
-      const mode = followMode.value;
-      const action = mode === 'none' ? '' : root.querySelector('#desk-next-action').value.trim();
-      const dueAt = followUpValue(mode, root.querySelector('#desk-specific-date').value);
-      if (mode !== 'none' && !action) return showNotification('Informe a próxima ação.', 'info');
+      const mode = definition.clearNextAction ? 'none' : followMode.value;
+      const fallbackAction = definition.nextAction || '';
+      const action = mode === 'none' ? '' : (nextActionInput.value.trim() || fallbackAction);
+      const dueAt = followUpValue(mode, specificDate.value);
+
+      if (mode !== 'none' && !action) return showNotification('Defina a próxima ação ou escolha "Sem próxima ação".', 'info');
       if (mode === 'specific' && !dueAt) return showNotification('Informe a data específica.', 'info');
-      const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, action, dueAt);
-      persistSalesDeskActivity(lead, interaction, 'task.next_action_set');
-      showNotification('Próxima ação atualizada.', 'success');
+
+      const resultInteraction = OG_INTERACTION_SERVICE.recordResult(lead, result, note);
+      persistSalesDeskActivity(lead, resultInteraction, 'interaction.result_recorded');
+
+      if (!definition.clearNextAction) {
+        const taskInteraction = OG_INTERACTION_SERVICE.setNextAction(lead, action, dueAt);
+        persistSalesDeskActivity(lead, taskInteraction, 'task.next_action_set');
+      }
+
+      if (!advance) {
+        showNotification('Conversa registrada e próxima ação salva.', 'success');
+        renderDayDashboard();
+        return;
+      }
+
+      const next = nextDeskLead(lead.id);
+      if (!next) {
+        showNotification('Conversa registrada. Sua fila ativa terminou.', 'success');
+        renderDayDashboard();
+        return;
+      }
+
+      state.selectedLeadId = next.id;
       renderDayDashboard();
-    });
+      requestAnimationFrame(() => document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:'smooth', block:'start' }));
+      showNotification(`Salvo. Próximo cliente: ${next.empresa || next.nome || 'conta'}.`, 'success');
+    }
+
+    followMode.addEventListener('change', syncDeskOutcomeFields);
+    resultSelect.addEventListener('change', syncDeskOutcomeFields);
+    root.querySelector('#desk-save-stay').addEventListener('click', () => saveDeskOutcome(false));
+    root.querySelector('#desk-save-advance').addEventListener('click', () => saveDeskOutcome(true));
+    syncDeskOutcomeFields();
   }
 
   function updateDayClock() {
