@@ -298,14 +298,15 @@ footer{margin-top:28px;border-top:1px solid #202a35;padding-top:16px;color:#6474
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
-  if (url.pathname === '/health' && (req.method === 'GET' || req.method === 'HEAD')) {
+  if (['/health', '/api/health'].includes(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) {
+    const release = String(process.env.OG_RELEASE_SHA || '').trim();
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff'
     });
     if (req.method === 'HEAD') return res.end();
-    return res.end(JSON.stringify({ ok: true, service: 'sistema-og' }));
+    return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null }));
   }
 
   const publicProposalMatch = url.pathname.match(/^\/p\/([A-Za-z0-9_-]{24,160})$/);
