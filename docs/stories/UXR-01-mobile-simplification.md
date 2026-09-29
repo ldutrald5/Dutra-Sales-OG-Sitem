@@ -1,6 +1,6 @@
 # UXR-01 — Mobile simplification + safe spreadsheet import
 
-Status: **implementado em branch; preview Railway isolado preparado; aguardando validação visual e merge**
+Status: **incorporado à main; fluxo móvel simplificado em produção. QA físico final em aparelho real permanece no gate da 1.0.**
 
 ## Problema observado
 
