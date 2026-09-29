@@ -1,0 +1,1 @@
+{"name":"dutra-os-v2-preview","version":"2.0.0","type":"module","scripts":{"start":"node server.mjs"},"engines":{"node":">=20"}}
