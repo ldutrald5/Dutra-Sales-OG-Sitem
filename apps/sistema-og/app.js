@@ -5406,6 +5406,43 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function buildCustomerJourneyPanel(lead) {
+    const engine=window.OG_CUSTOMER_JOURNEY;
+    if(!engine?.snapshot || !window.OG_CUSTOMER_REVENUE?.isCustomer(lead)) return '';
+    const journey=engine.snapshot(lead,state.operations);
+    const steps=[
+      ['COMPRA',true],
+      ['INSTALAÇÃO',journey.installed],
+      ['RESULTADO',journey.satisfied],
+      ['EXPANSÃO',Boolean(window.OG_CUSTOMER_REVENUE.opportunity(lead)?.actionable)],
+      ['INDICAÇÃO',journey.referralRequested]
+    ];
+    return `<section class="rounded-xl border border-slate-700 bg-slate-900/70 p-3.5 space-y-3" data-customer-journey>
+      <div class="flex items-start justify-between gap-3"><div><span class="og-kicker">JORNADA DO CLIENTE</span><h3 class="font-bold text-sm text-slate-100 mt-1">Pós-venda → expansão → indicação</h3></div><span class="text-[10px] font-black px-2 py-1 rounded-full border border-slate-700 text-amber-300">${escapeHtml(journey.referralReadiness.label)}</span></div>
+      <div class="grid grid-cols-5 gap-1">${steps.map(([label,done])=>`<div class="rounded-lg border ${done?'border-emerald-500/30 bg-emerald-500/10':'border-slate-800 bg-slate-950'} p-2 text-center"><b class="text-[9px] ${done?'text-emerald-300':'text-slate-500'}">${done?'✓ ':''}${label}</b></div>`).join('')}</div>
+      <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5"><b class="text-xs text-slate-200">Próxima ação: ${escapeHtml(journey.next.action)}</b><p class="text-[11px] text-slate-400 mt-1">${escapeHtml(journey.next.reason)}</p><p class="text-[10px] text-amber-300 mt-1">Indicação: ${escapeHtml(journey.referralReadiness.reason)}</p></div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" data-journey-install class="px-3 py-2 rounded-lg bg-slate-800 text-xs font-bold text-slate-200">✓ Instalação concluída</button>
+        <button type="button" data-journey-satisfied class="px-3 py-2 rounded-lg bg-slate-800 text-xs font-bold text-slate-200">🙂 Satisfação confirmada</button>
+        <button type="button" data-journey-referral class="px-3 py-2 rounded-lg bg-amber-500 text-xs font-black text-slate-950">🤝 Indicação solicitada</button>
+        <button type="button" data-journey-referral-received class="px-3 py-2 rounded-lg bg-emerald-600 text-xs font-black text-white">🎯 Indicação recebida</button>
+      </div>
+    </section>`;
+  }
+
+  function bindCustomerJourneyPanel(lead,root){
+    const record=(type,field)=>{
+      const now=new Date().toISOString();
+      if(field) lead[field]=now;
+      state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:newLibraryId('evt'),type,at:now,clientId:lead.id});
+      saveLeadsToStorage();saveOperationsToStorage();renderLeadInspector();renderLeadsTable();showNotification('Marco do pós-venda registrado.','success');
+    };
+    root?.querySelector('[data-journey-install]')?.addEventListener('click',()=>{lead.installationStatus='concluido';record('installation.completed');});
+    root?.querySelector('[data-journey-satisfied]')?.addEventListener('click',()=>{lead.satisfactionStatus='satisfeito';record('customer.satisfaction.confirmed');});
+    root?.querySelector('[data-journey-referral]')?.addEventListener('click',()=>record('referral.requested','referralRequestedAt'));
+    root?.querySelector('[data-journey-referral-received]')?.addEventListener('click',()=>record('referral.received','referralReceivedAt'));
+  }
+
   function buildCustomer360RevenuePanel(lead) {
     const engine = window.OG_CUSTOMER_REVENUE;
     if (!engine?.opportunity || !engine.isCustomer(lead)) return '';
@@ -5558,6 +5595,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     `;
 
     inspector.insertAdjacentHTML('beforeend', buildCustomer360RevenuePanel(lead));
+    inspector.insertAdjacentHTML('beforeend', buildCustomerJourneyPanel(lead));
+    bindCustomerJourneyPanel(lead, inspector);
     bindCustomer360RevenuePanel(lead, inspector);
     inspector.insertAdjacentHTML('beforeend', buildCompany360BetaPanel(lead));
     bindCompany360BetaPanel(lead);
