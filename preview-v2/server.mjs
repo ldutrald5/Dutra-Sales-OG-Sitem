@@ -114,10 +114,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/' || url.pathname === '/index.html') {
-    return sendFile(res, path.join(dir, 'index.html'), req.method);
+    const file = path.join(dir, 'index.html');
+    const html = fs.readFileSync(file, 'utf8').replace('</body>', '<script src="/core-pricing.js"></script></body>');
+    res.writeHead(200, {'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'});
+    if (req.method === 'HEAD') return res.end();
+    return res.end(html);
   }
-  if (url.pathname === '/core-bridge.js') {
-    return sendFile(res, path.join(dir, 'core-bridge.js'), req.method);
+  if (url.pathname === '/core-bridge.js' || url.pathname === '/core-pricing.js') {
+    return sendFile(res, path.join(dir, url.pathname.slice(1)), req.method);
   }
 
   res.writeHead(404, {'content-type':'text/plain; charset=utf-8'});
