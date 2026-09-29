@@ -10,7 +10,7 @@
     'companies', 'contacts', 'opportunities', 'activities', 'tasks', 'callSessions', 'materials', 'materialShares', 'materialPackages',
     'quotes', 'quoteTemplates', 'messageTemplates', 'documentTemplates',
     'generatedDocuments', 'sales', 'commissions', 'partners', 'transporters',
-    'transporterCoverage', 'users', 'goals', 'activityEvents'
+    'transporterCoverage', 'users', 'goals', 'activityEvents', 'referrals'
     , 'communications'
   ]);
 
