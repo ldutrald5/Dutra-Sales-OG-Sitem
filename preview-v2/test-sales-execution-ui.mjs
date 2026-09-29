@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const ui=fs.readFileSync('./prospecting-execution-v3.js','utf8');
 const server=fs.readFileSync('./server.mjs','utf8');
 const bridge=fs.readFileSync('./core-bridge.js','utf8');
+const actionCenter=fs.readFileSync('./sales-action-center-v3.js','utf8');
 
 assert.match(server,/spreadsheet-import-service\.js/,'V3 deve carregar o importador XLSX existente');
 assert.match(server,/\/workers\/spreadsheet-worker\.js/,'V3 deve expor o worker XLSX isolado');
@@ -21,4 +22,10 @@ assert.match(ui,/SHOW RATE/,'dashboard deve acompanhar presença em reunião');
 for(const token of ['pxFPeriod','pxFList','pxFSeller','pxFOrigin','pxFSegment']) assert.match(ui,new RegExp(token),'dashboard precisa filtrar por '+token);
 assert.match(ui,/MARCAR REUNIÃO/,'Call AI deve mudar objetivo para reunião');
 assert.match(bridge,/\['Meu Dia','Prospecção'\]/,'Prospecção premium não deve cair no legacy fallback');
+assert.match(server,/sales-action-center-v3\.js/,'V3 deve carregar o centro de próximas ações');
+assert.match(actionCenter,/Agora faça isso/,'fila operacional precisa ser orientada a execução');
+assert.match(actionCenter,/scheduleAction/,'ações estruturadas devem persistir no domínio');
+assert.match(actionCenter,/completeAction/,'conclusão deve ser explícita');
+assert.match(actionCenter,/Salvar \+ executar/,'ação externa deve exigir gesto explícito');
+assert.match(ui,/\['RETURN_LATER','SEND_MATERIAL','PROPOSAL'\]/,'resultados que exigem próximo passo devem abrir fluxo estruturado');
 console.log('Sales Execution UI integration: PASS');
