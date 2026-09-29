@@ -113,6 +113,8 @@ assert.match(appSource, /Escolha o resultado…/,'resultado não pode vir pré-s
 assert.match(appSource, /desk-save-advance/,'fluxo deve oferecer salvar e avançar');
 assert.match(appSource, /OG_SALES_DESK\.nextLead/,'avanço deve usar seletor determinístico compartilhado');
 assert.match(appSource, /Sua fila ativa terminou/,'fim da fila precisa ser explícito');
+assert.match(appSource, /data-empty-quick-lead/,'fila vazia deve permitir cadastrar prospect sem trocar de módulo');
+assert.match(appSource, /data-empty-clear-filter/,'filtro vazio deve oferecer retorno direto à fila completa');
 assert.match(appSource, /data-client-register/,'cliente atual deve expor registro de resultado em um toque');
 assert.match(appSource, /sales-desk-result-quick/,'registro deve oferecer resultados rápidos sem pré-seleção silenciosa');
 assert.match(appSource, /og_sales_desk_register_open/,'fluxo de ligação deve preservar o registro aberto ao retornar');

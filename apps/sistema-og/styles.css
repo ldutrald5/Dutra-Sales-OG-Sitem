@@ -311,6 +311,35 @@ body {
   }
 }
 
+/* Feedback operacional seguro e consistente. */
+.og-toast {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  max-width: min(420px, calc(100vw - 2rem));
+  padding: .8rem 1rem;
+  border: 1px solid rgba(148,163,184,.28);
+  border-radius: .8rem;
+  background: rgba(15,23,42,.98);
+  color: #f8fafc;
+  box-shadow: 0 18px 48px rgba(0,0,0,.48);
+  font-size: .76rem;
+  font-weight: 750;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.og-toast-dot { color:#facc15; }
+.og-toast[data-type="success"] { border-color:rgba(34,197,94,.42); }
+.og-toast[data-type="success"] .og-toast-dot { color:#4ade80; }
+.og-toast[data-type="warning"] { border-color:rgba(245,158,11,.48); }
+.og-toast[data-type="warning"] .og-toast-dot { color:#fbbf24; }
+.og-toast[data-type="error"] { border-color:rgba(239,68,68,.48); }
+.og-toast[data-type="error"] .og-toast-dot { color:#f87171; }
+.og-toast-copy { min-width:0; line-height:1.45; }
+
 /* Aplicação única: desktop completo e navegação otimizada para celular. */
 .og-mobile-nav { display: none; }
 
@@ -331,6 +360,8 @@ body {
 }
 .og-sync-status[data-mode="ok"] { color: #6ee7b7; border-color: rgba(16,185,129,.35); }
 .og-sync-status[data-mode="busy"] { color: #fde68a; border-color: rgba(255,222,23,.35); }
+.og-sync-status[data-mode="offline"] { color: #fdba74; border-color: rgba(249,115,22,.38); }
+.og-sync-status[data-mode="conflict"] { color: #fca5a5; border-color: rgba(239,68,68,.45); }
 
 @media (max-width: 767px) {
   body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
@@ -410,6 +441,7 @@ body {
   .og-mobile-more-sheet button span { font-size: .9rem; }
   .og-mobile-more-sheet button small { font-size: .67rem; font-weight: 800; }
   .og-sync-status { right: .75rem; bottom: calc(75px + env(safe-area-inset-bottom)); }
+  .og-toast { left:.75rem; right:.75rem; bottom:calc(88px + env(safe-area-inset-bottom)); max-width:none; }
 
   .crm-command-copy p, .crm-list-head span { display: none; }
   .crm-command-actions #crm-status-filter, .crm-export-menu, .crm-tools-menu { display: none; }
@@ -657,6 +689,8 @@ body {
 .prospect-batch-fields, .prospect-capture-actions, .prospect-filters, .prospect-focus-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
 .prospect-batch-fields label { flex: 1 1 180px; color: var(--og-muted); font-size: .65rem; }
 .prospect-batch-fields input, .prospect-batch-fields select, .prospect-filters select { width: 100%; margin-top: .25rem; padding: .65rem; border: 1px solid var(--og-border); border-radius: .6rem; background: #0b1220; color: var(--og-text); }
+.prospect-research-status { min-height:1.25rem; margin-top:.55rem; color:#94a3b8; font-size:.64rem; line-height:1.45; }
+#research-run[aria-busy="true"] { cursor:wait; opacity:.78; }
 .prospect-capture-actions button, .prospect-layer-card button { margin-top: .65rem; padding: .65rem .75rem; border: 1px solid var(--og-border); border-radius: .65rem; color: #dbe3ee; font-size: .68rem; font-weight: 800; }
 .prospect-capture > p, .prospect-layer-card p { margin-top: .65rem; color: var(--og-muted); font-size: .66rem; line-height: 1.5; }
 .prospect-preview { margin-top: 1rem; }
@@ -735,6 +769,10 @@ body {
 @media (max-width: 800px) { .prospect-inbox-grid { grid-template-columns: 1fr; } .prospecting-hero { align-items: stretch; flex-direction: column; } .prospect-session-metrics { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 520px) { .prospect-result-grid { grid-template-columns: 1fr; } .prospect-queue-list article { grid-template-columns: 1fr 1fr; } .prospect-queue-list article > button:first-child { grid-column: 1 / -1; } }
 .og-empty { padding: 2.2rem 1rem; border: 1px dashed var(--og-border); border-radius: 1rem; color: var(--og-muted); text-align: center; font-size: .78rem; }
+.og-empty-actionable { display:grid; justify-items:center; gap:.6rem; }
+.og-empty-actionable strong { color:var(--og-text); font-size:.86rem; }
+.og-empty-actionable span { max-width:520px; line-height:1.5; }
+.og-empty-actionable > div { display:flex; flex-wrap:wrap; justify-content:center; gap:.45rem; margin-top:.2rem; }
 
 .og-coach-card { background: linear-gradient(155deg, rgba(246, 201, 69, .1), rgba(17, 24, 39, 1) 45%); }
 .og-coach-card > p { margin: .7rem 0 1rem; color: #b7c2d1; font-size: .78rem; line-height: 1.65; }

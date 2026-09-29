@@ -170,8 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function setSyncStatus(label, mode = 'idle') {
     const badge = document.getElementById('og-sync-status');
     if (!badge) return;
-    badge.textContent = label;
+    const text = String(label || 'Sincronização');
+    badge.textContent = text;
     badge.dataset.mode = mode;
+    badge.dataset.updatedAt = new Date().toISOString();
+    badge.setAttribute('aria-label', `Sincronização: ${text}`);
+    badge.title = mode === 'ok'
+      ? `Última confirmação: ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+      : text;
   }
 
   async function importLucas2026Leads() {
@@ -3994,7 +4000,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
 
     if (!selected.length) {
-      list.innerHTML = '<div class="og-empty">Nenhuma oportunidade neste filtro. Abra o CRM para cadastrar ou completar um cliente.</div>';
+      list.innerHTML = `<div class="og-empty og-empty-actionable"><strong>Nenhum cliente nesta fila.</strong><span>${dayFilter === 'all' ? 'Cadastre um prospect ou use a pesquisa para abastecer sua próxima missão.' : 'Este filtro está limpo. Você pode voltar à fila completa ou cadastrar um novo prospect.'}</span><div><button type="button" class="og-button og-button-primary" data-empty-quick-lead>＋ Novo prospect</button>${dayFilter !== 'all' ? '<button type="button" class="og-button og-button-secondary" data-empty-clear-filter>Ver fila completa</button>' : ''}</div></div>`;
+      list.querySelector('[data-empty-quick-lead]')?.addEventListener('click', () => openQuickLead('dia'));
+      list.querySelector('[data-empty-clear-filter]')?.addEventListener('click', () => {
+        dayFilter = 'all';
+        renderDayDashboard();
+      });
     } else {
       if (!state.selectedLeadId || !state.leads.some(lead => lead.id === state.selectedLeadId)) state.selectedLeadId = selected[0]?.id || null;
       list.innerHTML = selected.slice(0, 30).map(lead => OG_UI_COMPONENTS.clientRow(lead, {
@@ -4714,25 +4725,45 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function renderProspectInbox(root) {
     const rows = state.prospecting.previewRows;
     const researchItems = window.OG_PROSPECTING_REVIEW?.reviewInbox(state.prospecting.researchResults || [], state.leads) || [];
-    const researchHtml = (window.OG_PROSPECTING_REVIEW_UI?.render(researchItems) || '') + `<section class="clean-card prospect-research-launcher"><span class="og-kicker">DUTRA RESEARCH</span><h2>Pesquisar empresas reais</h2><p>Busca pública orientada por evidências. Nada entra no CRM sem sua confirmação.</p><div class="prospect-batch-fields"><label>Cidade<input id="research-city" value="Maringá" maxlength="80"></label><label>UF<input id="research-state" value="PR" maxlength="2"></label><label>Segmento<input id="research-segment" value="transportadora" maxlength="80"></label><label>Frota mínima<input id="research-min-fleet" type="number" min="0" max="10000" value="20"></label><label>Quantidade<input id="research-count" type="number" min="1" max="25" value="10"></label></div><label>Palavras-chave<input id="research-keywords" placeholder="frota própria, logística, carga"></label><div class="prospect-capture-actions"><button type="button" id="research-run" class="og-button og-button-primary">🔎 Pesquisar empresas</button></div></section>`;
+    const researchHtml = (window.OG_PROSPECTING_REVIEW_UI?.render(researchItems) || '') + `<section class="clean-card prospect-research-launcher"><span class="og-kicker">DUTRA RESEARCH</span><h2>Pesquisar empresas reais</h2><p>Busca pública orientada por evidências. Nada entra no CRM sem sua confirmação.</p><div class="prospect-batch-fields"><label>Cidade<input id="research-city" value="Maringá" maxlength="80"></label><label>UF<input id="research-state" value="PR" maxlength="2"></label><label>Segmento<input id="research-segment" value="transportadora" maxlength="80"></label><label>Frota mínima<input id="research-min-fleet" type="number" min="0" max="10000" value="20"></label><label>Quantidade<input id="research-count" type="number" min="1" max="25" value="10"></label></div><label>Palavras-chave<input id="research-keywords" placeholder="frota própria, logística, carga"></label><div class="prospect-capture-actions"><button type="button" id="research-run" class="og-button og-button-primary">🔎 Pesquisar empresas</button></div><div id="research-status" class="prospect-research-status" role="status" aria-live="polite" aria-atomic="true"></div></section>`;
     const counts = rows.reduce((acc, row) => { acc[row.duplicateStatus] = (acc[row.duplicateStatus] || 0) + 1; if (row.confidence === 'review') acc.review += 1; return acc; }, { NEW: 0, POSSIBLE: 0, EXISTING: 0, review: 0 });
     root.innerHTML = researchHtml + `<section class="prospect-inbox-grid"><div class="clean-card prospect-capture"><span class="og-kicker">ENTRADA BRUTA</span><h2>Cole uma linha por prospect</h2><textarea id="prospect-bulk-input" rows="12" placeholder="014508    AJBAM SOLUÇÕES    Beatriz    5544991426479&#10;Rodolog Transportes, Carlos, gestor de frota, 44988888888"></textarea><div class="prospect-batch-fields"><label>Origem do lote<select id="prospect-batch-origin">${PROSPECT_ORIGINS.map(item => `<option>${escapeHtml(item)}</option>`).join('')}</select></label><label>Tag do lote<input id="prospect-batch-tag" placeholder="Transportadoras PR - 24/09"></label></div><div class="prospect-capture-actions"><button type="button" id="prospect-process" class="og-button og-button-primary">Processar localmente</button><button type="button" disabled title="Somente linhas ambíguas usarão IA em uma fase futura">✨ Interpretar ambíguas com IA · em breve</button></div><p>Processamento local, sem IA e sem enviar dados para fora.</p></div><aside class="clean-card prospect-layer-card"><span class="og-kicker">AUTOMAÇÃO × INTELIGÊNCIA</span><h3>Esta etapa custa zero IA</h3><p><b>Automação:</b> parser, duplicidade, fila, datas, templates e métricas.</p><p><b>Inteligência:</b> estratégia, objeções e análise profunda ficam no Call AI.</p><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></aside></section>${rows.length ? `<section class="clean-card prospect-preview"><header><div><span class="og-kicker">PREVIEW EDITÁVEL</span><h2>${rows.length} prospects encontrados</h2><p>${counts.NEW} novos · ${counts.POSSIBLE} possíveis duplicados · ${counts.EXISTING} existentes · ${counts.review} para revisar</p></div><button type="button" id="prospect-import" class="og-button og-button-primary">Importar ${counts.NEW} novos</button></header><div class="prospect-table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>Telefone</th><th>CNPJ/CPF</th><th>Código</th><th>Observação</th><th>Status</th></tr></thead><tbody>${rows.map((row, index) => `<tr class="${row.confidence === 'review' ? 'needs-review' : ''}"><td><input data-preview-index="${index}" data-preview-field="empresa" value="${escapeHtml(row.empresa)}"></td><td><input data-preview-index="${index}" data-preview-field="contato" value="${escapeHtml(row.contato)}"></td><td><input data-preview-index="${index}" data-preview-field="telefone" value="${escapeHtml(row.telefone)}"></td><td><input data-preview-index="${index}" data-preview-field="cnpj" value="${escapeHtml(row.cnpj || row.cpf)}"></td><td><input data-preview-index="${index}" data-preview-field="codigo" value="${escapeHtml(row.codigo)}"></td><td><input data-preview-index="${index}" data-preview-field="observacao" value="${escapeHtml(row.observacao)}"></td><td><select data-preview-index="${index}" data-preview-action><option value="import" ${row.duplicateStatus === 'NEW' ? 'selected' : ''}>${row.confidence === 'review' ? '⚠ Revisar/importar' : '✓ Novo'}</option><option value="ignore" ${row.duplicateStatus !== 'NEW' ? 'selected' : ''}>Ignorar · ${row.duplicateStatus}</option>${row.duplicateId ? '<option value="update">Atualizar dados faltantes</option>' : ''}</select></td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
     root.querySelector('#research-run')?.addEventListener('click', async () => {
       const button=root.querySelector('#research-run');
+      const status=root.querySelector('#research-status');
       const input={ city:root.querySelector('#research-city')?.value, state:root.querySelector('#research-state')?.value, segment:root.querySelector('#research-segment')?.value, minFleet:root.querySelector('#research-min-fleet')?.value, requestedCount:root.querySelector('#research-count')?.value, keywords:(root.querySelector('#research-keywords')?.value||'').split(',').map(v=>v.trim()).filter(Boolean), requestedBy:'user' };
       try {
-        button.disabled=true; button.textContent='Pesquisando…';
+        button.disabled=true; button.setAttribute('aria-busy','true'); button.textContent='Pesquisando…';
+        if(status) status.textContent='Consultando fontes públicas e preparando evidências…';
         const mission=OG_PROSPECTING_INTAKE.buildResearchMission(input,{territoryReadiness:window.OG_TERRITORY_READINESS});
         const response=await apiFetch('/api/prospects/research',{method:'POST',body:JSON.stringify(mission.payload.criteria)});
         const payload=await response.json().catch(()=>({}));
-        if(!response.ok) throw new Error(payload.error||payload.message||'Pesquisa indisponível');
+        if(!response.ok) {
+          const friendly = response.status === 429 ? 'Muitas pesquisas em sequência. Aguarde um instante e tente novamente.'
+            : response.status === 503 ? 'A pesquisa pública está temporariamente indisponível.'
+            : response.status === 504 ? 'A pesquisa demorou mais que o esperado. Tente novamente.'
+            : response.status === 401 ? 'Seu acesso expirou. Informe o PIN novamente e repita a pesquisa.'
+            : 'Não foi possível concluir a pesquisa agora.';
+          throw new Error(friendly);
+        }
         const provider=OG_PROSPECTING_RESEARCH.createProvider({id:payload.provider||'server_public_search',search:async()=>payload.candidates||[]});
         const job=OG_PROSPECTING_RESEARCH.createResearchJob(mission,{id:'RESEARCH-'+Date.now().toString(36).toUpperCase()});
         const completed=await OG_PROSPECTING_RESEARCH.runResearchJob(job,{provider,intake:OG_PROSPECTING_INTAKE,leads:state.leads});
         state.prospecting.researchResults=[completed,...(state.prospecting.researchResults||[])].slice(0,20);
         localStorage.setItem('og_prospect_research_results', JSON.stringify(state.prospecting.researchResults));
+        if(status) status.textContent=`${completed.summary.readyForReview} oportunidade(s) pronta(s) para revisão.`;
         showNotification(completed.summary.readyForReview+' oportunidade(s) pronta(s) para revisão.','success'); renderProspecting();
-      } catch(error) { showNotification(error.message||'Falha na pesquisa.','warning'); button.disabled=false; button.textContent='🔎 Pesquisar empresas'; }
+      } catch(error) {
+        const message=error?.message||'Falha na pesquisa.';
+        if(status) status.textContent=message;
+        showNotification(message,'warning');
+      } finally {
+        if(button?.isConnected) {
+          button.disabled=false;
+          button.removeAttribute('aria-busy');
+          button.textContent='🔎 Pesquisar empresas';
+        }
+      }
     });
     root.querySelectorAll('[data-research-sources]').forEach(button => button.addEventListener('click', () => {
       const item = researchItems[Number(button.dataset.researchSources)];
@@ -7749,6 +7780,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const status = document.createElement('div');
     status.id = 'og-sync-status';
     status.className = 'og-sync-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    status.setAttribute('aria-atomic', 'true');
     status.textContent = 'Conectando…';
     document.body.appendChild(status);
 
@@ -7767,7 +7801,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
     await restoreSyncRecovery();
-    window.addEventListener('online', loadSharedState);
+    window.addEventListener('offline', () => setSyncStatus('Sem conexão · salvo neste aparelho', 'offline'));
+    window.addEventListener('online', () => {
+      setSyncStatus('Reconectando…', 'busy');
+      loadSharedState();
+    });
     if (!pendingSyncConflict() && !pendingSyncReview()) {
       const importedCount = await importLucas2026Leads();
       if (importedCount) {
@@ -7852,11 +7890,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function showNotification(msg, type = 'info') {
+    const normalizedType = ['success', 'warning', 'error', 'info'].includes(type) ? type : 'info';
     const toast = document.createElement('div');
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
-    toast.className = 'fixed bottom-6 right-6 z-50 bg-slate-900 border border-amber-500/40 text-slate-100 font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 transform transition-all duration-300 translate-y-4 opacity-0 text-sm';
-    toast.innerHTML = `<span class="text-amber-400 font-bold">●</span><span>${msg}</span>`;
+    toast.setAttribute('role', ['warning', 'error'].includes(normalizedType) ? 'alert' : 'status');
+    toast.setAttribute('aria-live', ['warning', 'error'].includes(normalizedType) ? 'assertive' : 'polite');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.className = 'og-toast translate-y-4 opacity-0';
+    toast.dataset.type = normalizedType;
+
+    const dot = document.createElement('span');
+    dot.className = 'og-toast-dot';
+    dot.setAttribute('aria-hidden', 'true');
+    dot.textContent = '●';
+
+    const copy = document.createElement('span');
+    copy.className = 'og-toast-copy';
+    copy.textContent = String(msg || '');
+
+    toast.append(dot, copy);
     document.body.appendChild(toast);
 
     setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);

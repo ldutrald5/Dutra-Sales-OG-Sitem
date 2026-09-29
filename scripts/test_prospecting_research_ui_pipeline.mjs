@@ -3,4 +3,10 @@ const app=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'
 assert.match(app,/DUTRA RESEARCH/); assert.match(app,/id="research-run"/); assert.match(app,/\/api\/prospects\/research/);
 assert.match(app,/OG_PROSPECTING_INTAKE\.buildResearchMission/); assert.match(app,/OG_PROSPECTING_RESEARCH\.runResearchJob/);
 assert.match(app,/OG_PROSPECTING_REVIEW\?\.reviewInbox/); assert.match(app,/window\.confirm\('Adicionar '/);
-assert.match(app,/researchResults=\[completed/); console.log('DUTRA-PROSPECT-07 research UI pipeline: PASS');
+assert.match(app,/researchResults=\[completed/);
+assert.match(app,/id="research-status".*role="status".*aria-live="polite"/s,'pesquisa deve expor progresso acessível');
+assert.match(app,/button\.setAttribute\('aria-busy','true'\)/,'botão de pesquisa deve declarar estado ocupado');
+assert.match(app,/response\.status === 429/,'rate limit deve virar mensagem operacional');
+assert.match(app,/response\.status === 503/,'indisponibilidade deve virar mensagem operacional');
+assert.doesNotMatch(app,/throw new Error\(payload\.error\|\|payload\.message/,'erro técnico do provedor não deve ser exibido diretamente');
+console.log('DUTRA-PROSPECT-07 research UI pipeline: PASS');
