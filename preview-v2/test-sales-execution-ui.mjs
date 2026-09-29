@@ -15,6 +15,9 @@ assert.match(ui,/selectedContactByLead/,'sessão deve persistir a pessoa atual p
 assert.match(ui,/Preparar 60 contatos/,'pré-processamento em lote deve existir');
 assert.match(ui,/Conversão operacional/,'dashboard deve priorizar conversão');
 assert.match(ui,/GATEKEEPER/,'Call Mode precisa suportar gatekeeper');
+assert.match(ui,/pxPerson/,'mapeamento de pessoas deve usar modal rápido, não sequência de prompts');
+assert.match(ui,/data-mstatus/,'dashboard deve permitir avançar ciclo da reunião');
+assert.match(ui,/SHOW RATE/,'dashboard deve acompanhar presença em reunião');
 assert.match(ui,/MARCAR REUNIÃO/,'Call AI deve mudar objetivo para reunião');
 assert.match(bridge,/\['Meu Dia','Prospecção'\]/,'Prospecção premium não deve cair no legacy fallback');
 console.log('Sales Execution UI integration: PASS');
