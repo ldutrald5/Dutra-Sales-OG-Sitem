@@ -763,21 +763,60 @@ document.addEventListener('DOMContentLoaded', () => {
     restoreSyncRecovery().catch(error => console.warn('Falha ao reconciliar estado entre abas.', error));
   });
 
-  // Navegação de Abas
+  // Navegação de módulos: recuperável por URL, acessível por teclado e compacta no desktop.
   const tabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
+  const tabIds = new Set([...tabs].map(tab => tab.getAttribute('data-tab')).filter(Boolean));
+  const desktopSecondaryTabs = new Set(['comunicacao','guia','catalogo','transportadoras','scripts','biblioteca','operacoes','historico']);
+
+  function tabFromLocation() {
+    const raw = decodeURIComponent(String(location.hash || '').replace(/^#\/?/, '').trim());
+    return tabIds.has(raw) ? raw : 'dia';
+  }
+
+  function syncTabRoute(tabId, mode = 'push') {
+    const nextHash = `#${encodeURIComponent(tabId)}`;
+    if (location.hash === nextHash) return;
+    const nextUrl = `${location.pathname}${location.search}${nextHash}`;
+    if (mode === 'replace') history.replaceState({ tab: tabId }, '', nextUrl);
+    else history.pushState({ tab: tabId }, '', nextUrl);
+  }
+
+  function focusTabHeading(tabId) {
+    const panel = document.getElementById(`tab-${tabId}`);
+    const heading = panel?.querySelector('h1,h2,h3');
+    if (!heading) return;
+    const hadTabIndex = heading.hasAttribute('tabindex');
+    if (!hadTabIndex) heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+    if (!hadTabIndex) heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
+  }
+
+  function updateDesktopMoreState(tabId) {
+    const details = document.getElementById('desktop-nav-more');
+    const summary = details?.querySelector('summary');
+    if (!summary) return;
+    const active = desktopSecondaryTabs.has(tabId);
+    summary.classList.toggle('active', active);
+    if (active) summary.setAttribute('aria-current', 'page');
+    else summary.removeAttribute('aria-current');
+  }
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchTab(tab.getAttribute('data-tab'));
+    tab.addEventListener('click', (event) => {
+      event.preventDefault();
+      switchTab(tab.getAttribute('data-tab'), { updateRoute: true, routeMode: 'push', focus: true });
     });
   });
 
-  function switchTab(tabId) {
-    state.currentTab = tabId;
+  function switchTab(tabId, options = {}) {
+    const safeTabId = tabIds.has(tabId) ? tabId : 'dia';
+    const updateRoute = options.updateRoute !== false;
+    const routeMode = options.routeMode || 'push';
+    const shouldFocus = options.focus !== false;
+    state.currentTab = safeTabId;
     tabs.forEach(t => {
-      if (t.getAttribute('data-tab') === tabId) {
+      if (t.getAttribute('data-tab') === safeTabId) {
         t.setAttribute('aria-current', 'page');
         t.classList.add('bg-amber-500', 'text-slate-950', 'font-bold', 'shadow-md');
         t.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
@@ -789,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('[data-mobile-tab]').forEach(button => {
-      const active = button.dataset.mobileTab === tabId;
+      const active = button.dataset.mobileTab === safeTabId;
       button.classList.toggle('active', active);
       if (active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
@@ -797,36 +836,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMore = document.querySelector('[data-mobile-more]');
     if (mobileMore) {
       const secondaryTabs = new Set(['cotacao','prospeccao','guia','scripts','biblioteca','operacoes','historico','catalogo','transportadoras','comunicacao']);
-      const active = secondaryTabs.has(tabId);
+      const active = secondaryTabs.has(safeTabId);
       mobileMore.classList.toggle('active', active);
       if (active) mobileMore.setAttribute('aria-current', 'page');
       else mobileMore.removeAttribute('aria-current');
     }
+    updateDesktopMoreState(safeTabId);
 
-    tabContents.forEach(c => {
-      if (c.id === `tab-${tabId}`) {
-        c.classList.remove('hidden');
-      } else {
-        c.classList.add('hidden');
-      }
+    tabContents.forEach(panel => {
+      if (panel.id === `tab-${safeTabId}`) panel.classList.remove('hidden');
+      else panel.classList.add('hidden');
     });
 
-    if (tabId === 'dia') renderDayDashboard();
-    else if (tabId === 'cotacao') refreshQuoteClientSheetAccess();
-    else if (tabId === 'prospeccao') renderProspecting();
-    else if (tabId === 'historico') renderHistory();
-    else if (tabId === 'catalogo') renderCatalog();
-    else if (tabId === 'transportadoras') renderTransporters();
-    else if (tabId === 'scripts') renderSalesKnowledge();
-    else if (tabId === 'crm') renderCrmModule();
-    else if (tabId === 'guia') renderConsultantEngine();
-    else if (tabId === 'call-ai') renderCallAIContext();
-    else if (tabId === 'biblioteca') renderMaterialLibrary();
-    else if (tabId === 'operacoes') renderOperationsFoundation();
-    document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
+    if (safeTabId === 'dia') renderDayDashboard();
+    else if (safeTabId === 'cotacao') refreshQuoteClientSheetAccess();
+    else if (safeTabId === 'prospeccao') renderProspecting();
+    else if (safeTabId === 'historico') renderHistory();
+    else if (safeTabId === 'catalogo') renderCatalog();
+    else if (safeTabId === 'transportadoras') renderTransporters();
+    else if (safeTabId === 'scripts') renderSalesKnowledge();
+    else if (safeTabId === 'crm') renderCrmModule();
+    else if (safeTabId === 'guia') renderConsultantEngine();
+    else if (safeTabId === 'call-ai') renderCallAIContext();
+    else if (safeTabId === 'biblioteca') renderMaterialLibrary();
+    else if (safeTabId === 'operacoes') renderOperationsFoundation();
+
+    document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === safeTabId));
     document.querySelector('.og-mobile-more-sheet')?.classList.add('hidden');
     document.querySelector('[data-mobile-more]')?.setAttribute('aria-expanded', 'false');
+    document.getElementById('desktop-nav-more')?.removeAttribute('open');
+
+    if (updateRoute) syncTabRoute(safeTabId, routeMode);
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (shouldFocus) requestAnimationFrame(() => focusTabHeading(safeTabId));
+  }
+
+  function restoreTabFromLocation() {
+    const routeTab = tabFromLocation();
+    if (routeTab === state.currentTab) return;
+    switchTab(routeTab, { updateRoute: false, focus: true });
+  }
+
+  window.addEventListener('popstate', restoreTabFromLocation);
+  window.addEventListener('hashchange', restoreTabFromLocation);
+
+  function initDesktopNavigation() {
+    const container = document.getElementById('nav-tabs-container');
+    if (!container || document.getElementById('desktop-nav-more')) return;
+    const details = document.createElement('details');
+    details.id = 'desktop-nav-more';
+    details.className = 'desktop-nav-more';
+    details.innerHTML = '<summary aria-haspopup="menu"><span>Mais</span><span aria-hidden="true">⌄</span></summary><div class="desktop-nav-more-menu" role="menu" aria-label="Mais módulos"></div>';
+    const menu = details.querySelector('.desktop-nav-more-menu');
+    desktopSecondaryTabs.forEach(tabId => {
+      const tab = container.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+      if (!tab) return;
+      tab.classList.add('desktop-nav-more-item');
+      tab.setAttribute('role', 'menuitem');
+      menu.appendChild(tab);
+    });
+    container.appendChild(details);
+    menu.addEventListener('click', event => {
+      if (event.target.closest('.nav-tab')) details.removeAttribute('open');
+    });
+    details.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && details.open) {
+        event.preventDefault();
+        details.open = false;
+        details.querySelector('summary')?.focus();
+      }
+    });
+  }
+
+  function restoreInitialTabRoute() {
+    const initialTab = tabFromLocation();
+    switchTab(initialTab, { updateRoute: false, focus: false });
+    if (!location.hash) syncTabRoute(initialTab, 'replace');
   }
 
   // =========================================================================
