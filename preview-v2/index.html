@@ -209,10 +209,18 @@ const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).
 function updateProposal(){const qty=Math.max(1,parseInt(document.getElementById('proposalQty')?.value)||1),inst=Math.max(1,parseInt(document.getElementById('proposalInstallments')?.value)||1),units=qty*16,eq=units*249,kit=1678,total=eq+kit,tires=qty*32;document.getElementById('proposalTires').value=tires;document.getElementById('eqItemLabel').textContent='EQ-120 · '+units+' unidades';document.getElementById('eqItemTotal').textContent=money(eq);document.getElementById('proposalProductsTotal').textContent=money(total);document.getElementById('proposalTotal').textContent=money(total);document.getElementById('proposalCondition').textContent=inst+'x de '+money(total/inst);}
 ['proposalQty','proposalInstallments'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateProposal));updateProposal();
 document.getElementById('previewProposal')?.addEventListener('click',()=>showToast('Prévia atualizada com os valores da proposta.'));
-document.getElementById('generateProposal')?.addEventListener('click',()=>showToast('V3 pronta para conectar esta ação ao gerador oficial de proposta.'));
+
 const roi=document.getElementById('roiModal');function updateRoi(){const inv=parseFloat(document.getElementById('roiInvestment')?.value)||0,monthly=parseFloat(document.getElementById('roiMonthlyTires')?.value)||0,pct=parseFloat(document.getElementById('roiSavingPct')?.value)||0,saving=monthly*(pct/100),annual=saving*12,payback=saving>0?inv/saving:0;document.getElementById('roiMonthlySaving').textContent=money(saving);document.getElementById('roiAnnualSaving').textContent=money(annual);document.getElementById('roiInvestmentView').textContent=money(inv);document.getElementById('roiPayback').textContent=payback?payback.toFixed(1).replace('.',',')+' meses':'—';}
 function openRoi(){roi.classList.add('open');updateRoi();lucide.createIcons()}
 ['openRoi','openRoi2','cmdRoi'].forEach(id=>document.getElementById(id)?.addEventListener('click',openRoi));document.getElementById('closeRoi').onclick=()=>roi.classList.remove('open');['roiInvestment','roiMonthlyTires','roiSavingPct','roiFleet'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateRoi));document.getElementById('roiUseProposal')?.addEventListener('click',()=>{roi.classList.remove('open');go('proposal');showToast('Premissas do ROI prontas para acompanhar a proposta.')});
 lucide.createIcons();
 </script>
+<script src="/core/data.js"></script>
+<script src="/core/operations-model.js"></script>
+<script src="/core/services/crm-service.js"></script>
+<script src="/core/services/interaction-service.js"></script>
+<script src="/core/services/whatsapp-service.js"></script>
+<script src="/core/modules/lead-intelligence.js"></script>
+<script src="/core/services/proposal-intelligence-service.js"></script>
+<script src="/core-bridge.js"></script>
 </body></html>
