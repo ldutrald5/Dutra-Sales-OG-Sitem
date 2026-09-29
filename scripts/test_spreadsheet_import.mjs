@@ -51,6 +51,16 @@ assert.equal(genericRows.length,1);
 assert.equal(genericRows[0].company,'Trans Paraná');
 assert.equal(genericRows[0].priority,'Urgente');
 
+const riskyHeaders=['Telefone principal','E-mail','Cidade / UF','Usuário responsável','Data de início','Título do negócio'];
+const riskyMapping=service.suggestMapping(riskyHeaders);
+assert.equal(riskyMapping.phone,0);
+assert.equal(riskyMapping.email,1);
+assert.equal(riskyMapping.city,2);
+assert.equal(riskyMapping.contact,undefined,'substring de responsável não pode virar contato automaticamente');
+assert.equal(riskyMapping.nextActionAt,undefined,'campo de data genérico não pode virar retorno automaticamente');
+assert.equal(riskyMapping.company,undefined,'título de negócio não pode virar empresa automaticamente');
+
+
 const genericPreview=service.preview(genericRows,[]);
 assert.equal(genericPreview[0].status,'NEW');
 const genericCreated=service.applyPreview(genericPreview,[],{'2':{action:'create'}},{now:'2026-09-27T12:00:00.000Z',idFactory:()=> 'CSV1'});
@@ -137,6 +147,11 @@ assert.match(appSource,/recommendDecision\(item\)/);
 assert.match(appSource,/crm-import-reset-recommendations/);
 assert.match(htmlSource,/Decisões recomendadas já vêm prontas/);
 assert.match(htmlSource,/crm-import-auto-note/);
+assert.match(htmlSource,/crm-import-toggle-advanced/);
+assert.match(htmlSource,/crm-import-recognized/);
+assert.match(appSource,/data-mobile-more/);
+assert.match(appSource,/Abra só quando precisar/);
+assert.match(appSource,/correspondências seguras/i);
 
 const multiSheetBook={
   SheetNames:['Como usar','Lista 2','Pós-Venda','Clientes Únicos'],
