@@ -113,5 +113,10 @@ assert.match(appSource, /Escolha o resultado…/,'resultado não pode vir pré-s
 assert.match(appSource, /desk-save-advance/,'fluxo deve oferecer salvar e avançar');
 assert.match(appSource, /OG_SALES_DESK\.nextLead/,'avanço deve usar seletor determinístico compartilhado');
 assert.match(appSource, /Sua fila ativa terminou/,'fim da fila precisa ser explícito');
+assert.match(appSource, /data-client-register/,'cliente atual deve expor registro de resultado em um toque');
+assert.match(appSource, /sales-desk-result-quick/,'registro deve oferecer resultados rápidos sem pré-seleção silenciosa');
+assert.match(appSource, /og_sales_desk_register_open/,'fluxo de ligação deve preservar o registro aberto ao retornar');
+assert.match(appSource, /event\.key\.toLowerCase\(\) === 'r'/,'atalho R deve abrir o registro no Meu Dia');
+assert.doesNotMatch(appSource, /call_opened/,'abrir o discador não pode registrar contato antes de um resultado confirmado');
 
 console.log('Sales Desk critical flows: PASS');
