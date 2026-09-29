@@ -4946,7 +4946,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     if (diaryButton && diaryInput && diaryRoot) diaryButton.addEventListener('click', () => {
       try {
-        diaryPreview = window.OG_SMART_DIARY.preview(diaryInput.value);
+        diaryPreview = window.OG_SMART_DIARY.preview(diaryInput.value, { baseDate: new Date().toISOString() });
         renderSmartDiaryPreview(diaryRoot, diaryPreview);
         diaryRoot.querySelector('[data-diary-confirm]')?.addEventListener('click', () => {
           if (!diaryPreview) return;
@@ -4957,13 +4957,30 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           accepted.forEach(item => {
             if (item.field === 'fleetSizeMentioned') lead.fleetSize = Math.max(0, Number(item.value) || 0);
             if (item.field === 'painMentioned') lead.pain = String(item.value || '').trim();
+            if (item.field === 'commitmentMentioned') {
+              const currentAction = lead.nextAction || '';
+              const currentDate = lead.followUpAt || '';
+              const suggestedAction = item.suggestedAction || currentAction || 'Retomar contato';
+              const suggestedDate = item.suggestedFollowUpAt || currentDate;
+              const action = prompt('Próxima ação confirmada:', suggestedAction);
+              if (action === null) return;
+              const date = prompt('Data/hora confirmada (ISO ou YYYY-MM-DDTHH:MM):', suggestedDate);
+              if (date === null) return;
+              const reason = prompt('Por que esse retorno existe?', item.value || '');
+              if (reason === null) return;
+              const objective = prompt('Objetivo da próxima conversa:', lead.nextActionObjective || '');
+              if (objective === null) return;
+              const expectedResult = prompt('Resultado esperado:', lead.nextActionExpectedResult || '');
+              if (expectedResult === null) return;
+              OG_INTERACTION_SERVICE.setNextAction(lead, action, date, { reason, objective, expectedResult });
+            }
           });
 
           const now = new Date().toISOString();
           OG_INTERACTION_SERVICE.addInteraction(lead, {
             type: 'conversa',
             note: diaryPreview.originalText,
-            changedFields: ['interactions', 'lastContactAt', ...accepted.flatMap(item => item.field === 'fleetSizeMentioned' ? ['fleetSize'] : item.field === 'painMentioned' ? ['pain'] : [])]
+            changedFields: ['interactions', 'lastContactAt', ...accepted.flatMap(item => item.field === 'fleetSizeMentioned' ? ['fleetSize'] : item.field === 'painMentioned' ? ['pain'] : item.field === 'commitmentMentioned' ? ['nextAction', 'followUpAt', 'nextActionReason', 'nextActionObjective', 'nextActionExpectedResult'] : [])]
           }, { now });
           if (lead.status === 'novo') lead.status = 'contatado';
           state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'smart_diary_reviewed' });
