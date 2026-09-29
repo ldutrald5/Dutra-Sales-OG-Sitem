@@ -183,9 +183,16 @@ function executeAction(lead,type,contactId){
 
 async function completeQueueItem(leadId){
   const lead=leadById(leadId); if(!lead) return;
+  const completedType=clean(lead.nextActionType).toUpperCase();
   if(!confirm('Marcar “'+(lead.nextAction||'próxima ação')+'” como concluída?')) return;
-  const x=S().completeAction(leads(),ops(),lead.id,{result:'completed_from_action_queue'},new Date());
-  await C().commit({leads:x.leads,operations:x.operations},'Próxima ação concluída.');
+  let x=S().completeAction(leads(),ops(),lead.id,{result:'completed_from_action_queue'},new Date());
+  let message='Próxima ação concluída.';
+  if(completedType==='SEND_MATERIAL'){
+    const due=new Date();due.setDate(due.getDate()+2);
+    x=S().scheduleAction(x.leads,x.operations,lead.id,{type:'FOLLOW_UP',dueAt:due,description:'Confirmar recebimento do material',reason:'Material marcado como enviado; validar recebimento e reação do cliente.',priority:'MEDIUM',objective:'Descobrir se o material foi visto e avançar o próximo passo.',expectedResult:'Obter resposta e definir avanço comercial.'},new Date());
+    message='Material concluído e follow-up de recebimento criado automaticamente.';
+  }
+  await C().commit({leads:x.leads,operations:x.operations},message);
   renderQueue();
 }
 
@@ -212,6 +219,7 @@ function renderQueue(filter='all'){
 function wireEntrances(){
   const cmd=$('.cmdItems');
   if(cmd&&!$('#cmdActionQueue')){const i=document.createElement('div');i.id='cmdActionQueue';i.className='cmdItem';i.innerHTML='<i data-lucide="list-checks"></i> Abrir próximas ações';i.onclick=()=>{globalThis.go?.('executionQueue');renderQueue();$('#command')?.classList.remove('open')};cmd.prepend(i)}
+  const more=$('#more .section');if(more&&!$('#moreActionQueue')){const row=document.createElement('div');row.id='moreActionQueue';row.className='moduleRow';row.innerHTML='<i data-lucide="list-checks"></i><div class="rowBody"><b>Próximas Ações</b><small>Fila de retornos, materiais, propostas e compromissos.</small></div><i data-lucide="chevron-right"></i>';row.onclick=()=>{globalThis.go?.('executionQueue');renderQueue()};const prospect=[...more.querySelectorAll('.moduleRow')].find(r=>r.querySelector('b')?.textContent?.trim()==='Prospecção');prospect?.after(row)}
   const root=$('#prospectContent');
   if(root&&!$('#openActionQueue')){
     const hero=root.querySelector('.pxHero .pxActions');
