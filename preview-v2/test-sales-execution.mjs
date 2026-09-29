@@ -41,12 +41,17 @@ assert.equal(qualified.lead.pipelineStage,'QUALIFIED');
 const meeting=s.scheduleMeeting(qualified.operations,{leadId:qualified.lead.id,listId:qualified.session.listId,sessionId:qualified.session.id,contactId:people.find(c=>c.name==='Marcos').id,decisionMaker:'Marcos',scheduledAt:new Date('2026-09-30T14:00:00Z'),durationMinutes:30,objective:'Diagnóstico de frota'},new Date('2026-09-29T12:11:00Z'));
 assert.equal(meeting.meeting.meetingStatus,'MEETING_SCHEDULED');
 assert.equal(meeting.operations.meetings.length,1);
+assert.ok(meeting.operations.opportunities.some(o=>o.clientId===qualified.lead.id&&o.stage==='QUALIFIED'),'qualificação deve criar oportunidade operacional');
+assert.ok(meeting.operations.activities.some(a=>a.type==='meeting'),'reunião deve gerar atividade');
+assert.ok(meeting.operations.activities.some(a=>a.type==='follow_up'&&a.title==='Confirmar reunião'),'reunião deve gerar follow-up pré-reunião');
 
 // CASE D — existing customer remains customer when re-imported.
 const customer=[{id:'CUST-1',empresa:'Cliente OG',cnpj:'12345678000199',telefone:'+5544999990000',relationshipStatus:'CUSTOMER',interactions:[]}];
 const custImport=s.importRows(customer,{}, {name:'Clientes'},[{empresa:'Cliente OG',cnpj:'12.345.678/0001-99'}],new Date('2026-09-29T12:20:00Z'));
 assert.equal(custImport.leads.length,1);
 assert.equal(custImport.leads[0].relationshipStatus,'CUSTOMER');
+assert.equal(s.callMode(custImport.leads[0],{}),'CUSTOMER','cliente existente deve entrar em CUSTOMER MODE');
+assert.equal(s.callMode({status:'novo',relationshipStatus:'COLD'}, {roleCategory:'GATEKEEPER'}),'GATEKEEPER');
 
 // CASE E — same company in two lists does not duplicate central account.
 const one=[{empresa:'Duplicada',cnpj:'98765432000188',telefone:'(44) 99999-3333'}];
@@ -62,6 +67,10 @@ const restored=s.ensureOperations(JSON.parse(JSON.stringify(sr.operations)));
 const resumed=s.getActiveSession(restored);
 assert.equal(resumed.id,sr.session.id);
 assert.equal(resumed.targetCalls,10);
+
+const metrics=s.listMetrics(outcome.operations, imported.list.id, outcome.leads);
+assert.equal(metrics.attempted,1);
+assert.equal(metrics.rates.contactRate,0);
 
 assert.equal(s.normalizeBrazilPhone('(44) 99999-9999'),'+5544999999999');
 console.log('Sales Execution acceptance A-F: PASS');
