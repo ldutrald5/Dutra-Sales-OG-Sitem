@@ -6,7 +6,7 @@
   'use strict';
 
   const CONVERSATION_STAGES = Object.freeze([
-    { id: 'first_contact', label: 'Primeiro contato', tone: 'blue', weight: 8 },
+    { id: 'first_contact', label: 'Ainda não conversei', tone: 'blue', weight: 8 },
     { id: 'talked', label: 'Já conversei', tone: 'slate', weight: 12 },
     { id: 'no_reply', label: 'Não respondeu', tone: 'rose', weight: 15 },
     { id: 'waiting_response', label: 'Aguardando resposta', tone: 'yellow', weight: 20 },
