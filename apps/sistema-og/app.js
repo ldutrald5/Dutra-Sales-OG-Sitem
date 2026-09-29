@@ -4175,6 +4175,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Nenhuma conversa registrada')}</span></div>
         </div>
 
+        <button type="button" class="client-sheet-more-toggle" data-client-sheet-more aria-expanded="false">Mostrar dados completos</button>
+
         <section class="client-sheet-next-move" aria-label="Próximo movimento comercial">
           <div class="client-sheet-section-title"><div><span>PRÓXIMO MOVIMENTO</span><small>Mesma inteligência da fila, com prioridade explicada.</small></div><strong class="client-sheet-score">${scoreExplanation.total} pts</strong></div>
           <div class="client-sheet-next-move-grid">
@@ -4264,6 +4266,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const form = overlay.querySelector('#client-sheet-form');
     const extraList = overlay.querySelector('[data-extra-phone-list]');
     const referralList = overlay.querySelector('[data-referral-list]');
+
+    overlay.querySelector('[data-client-sheet-more]')?.addEventListener('click', event => {
+      const expanded = panel.classList.toggle('mobile-expanded');
+      event.currentTarget.setAttribute('aria-expanded', String(expanded));
+      event.currentTarget.textContent = expanded ? 'Ocultar dados extras' : 'Mostrar dados completos';
+    });
 
     overlay.querySelectorAll('[data-client-sheet-close]').forEach(button => button.addEventListener('click', closeClientSheet));
     overlay.addEventListener('click', event => { if (event.target === overlay) closeClientSheet(); });
@@ -4448,7 +4456,36 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const recent = OG_SALES_DESK.lastInteraction(lead);
-    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header><div class="sales-desk-primary-actions"><button type="button" data-client-whatsapp>WhatsApp</button><a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a><button type="button" data-client-call-ai>Call AI</button><button type="button" data-client-crm>Ficha completa</button></div><section class="sales-desk-facts"><div><small>Próxima ação</small><strong>${escapeHtml(lead.nextAction || 'Não definida')}</strong><span>${escapeHtml(formatFollowUp(lead.followUpAt))}</span></div><div><small>Última interação</small><strong>${escapeHtml(recent?.result || recent?.type || 'Sem histórico')}</strong><span>${escapeHtml(recent?.note || 'Registre a primeira conversa')}</span></div></section><section class="sales-desk-register"><label class="og-field"><span>Resultado rápido</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label class="og-field"><span>Nota rápida</span><textarea id="desk-note" rows="3" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label><button type="button" id="desk-save-result" class="og-button og-button-primary">Registrar resultado e nota</button><div class="sales-desk-next"><label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label><label class="og-field"><span>Quando</span><select id="desk-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem próxima ação</option></select></label><label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label><button type="button" id="desk-save-next">Salvar próxima ação</button></div></section><details class="sales-desk-actions"><summary>Ações e comunicação</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details><section class="sales-desk-history"><h3>Histórico recente</h3>${OG_UI_COMPONENTS.timeline(lead.interactions)}</section>`;
+    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
+      <div class="sales-desk-primary-actions">
+        <a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a>
+        <button type="button" data-client-whatsapp>WhatsApp</button>
+        <button type="button" data-client-call-ai>Call AI</button>
+        <button type="button" data-client-crm class="sales-desk-secondary-action">Ficha</button>
+      </div>
+      <section class="sales-desk-now">
+        <span>AGORA</span>
+        <strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong>
+        <small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small>
+      </section>
+      <details class="sales-desk-register">
+        <summary>Registrar conversa / retorno</summary>
+        <div class="sales-desk-register-body">
+          <label class="og-field"><span>Resultado</span><select id="desk-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
+          <label class="og-field"><span>Nota</span><textarea id="desk-note" rows="2" placeholder="O que aconteceu e o que ficou combinado?"></textarea></label>
+          <div class="sales-desk-next">
+            <label class="og-field"><span>Próxima ação</span><input id="desk-next-action" value="${escapeHtml(lead.nextAction || '')}" placeholder="Ex.: ligar para João"></label>
+            <label class="og-field"><span>Quando</span><select id="desk-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem próxima ação</option></select></label>
+            <label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label>
+          </div>
+          <div class="sales-desk-save-row">
+            <button type="button" id="desk-save-result" class="og-button og-button-secondary">Salvar resultado</button>
+            <button type="button" id="desk-save-next" class="og-button og-button-primary">Salvar próxima ação</button>
+          </div>
+        </div>
+      </details>
+      <details class="sales-desk-actions"><summary>Mensagens e outras ações</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details>
+      <details class="sales-desk-history"><summary>Histórico recente</summary><div class="sales-desk-history-body">${OG_UI_COMPONENTS.timeline(lead.interactions)}</div></details>`
     root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
     root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
       state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
