@@ -180,6 +180,71 @@ document.addEventListener('DOMContentLoaded', () => {
       : text;
   }
 
+  const appDialogState = new WeakMap();
+
+  function visibleFocusable(root) {
+    if (!root) return [];
+    return [...root.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+      .filter(item => !item.closest('[hidden]') && !item.classList.contains('hidden') && item.getAttribute('aria-hidden') !== 'true');
+  }
+
+  function openAppDialog(modal, options = {}) {
+    if (!modal) return;
+    const trigger = options.trigger || document.activeElement;
+    appDialogState.set(modal, { returnFocus: trigger?.focus ? trigger : null });
+    modal.classList.remove('hidden');
+    document.body.classList.add('og-dialog-open');
+    const target = options.initialFocus
+      ? modal.querySelector(options.initialFocus)
+      : visibleFocusable(modal)[0];
+    requestAnimationFrame(() => (target || modal).focus?.());
+  }
+
+  function closeAppDialog(modal, options = {}) {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    if (!document.querySelector('[role="dialog"][aria-modal="true"]:not(.hidden)')) {
+      document.body.classList.remove('og-dialog-open');
+    }
+    const returnFocus = appDialogState.get(modal)?.returnFocus;
+    appDialogState.delete(modal);
+    if (options.restoreFocus !== false && returnFocus?.isConnected) {
+      requestAnimationFrame(() => returnFocus.focus());
+    }
+  }
+
+  function bindAppDialog(modal) {
+    if (!modal || modal.dataset.ogDialogBound === 'true') return;
+    modal.dataset.ogDialogBound = 'true';
+    if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeAppDialog(modal);
+    });
+    modal.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeAppDialog(modal);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = visibleFocusable(modal);
+      if (!focusable.length) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
   async function importLucas2026Leads() {
     try {
       const response = await fetch('/imports/lucas-2026.json', { cache: 'no-store' });
