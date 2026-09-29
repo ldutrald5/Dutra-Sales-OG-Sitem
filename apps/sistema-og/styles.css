@@ -968,6 +968,18 @@ body {
 .crm-search-box input{width:100%;min-height:44px;border:0!important;outline:0;background:transparent!important;color:var(--og-text);font-size:.7rem}
 .crm-command-actions>select,.crm-tools-menu>summary{min-height:44px;padding:.55rem .7rem;border:1px solid var(--og-border);border-radius:.7rem;background:#0b1016;color:#d7dee8;font-size:.65rem;font-weight:750}
 .crm-new-client{min-height:44px!important}
+.crm-account-views{padding:.9rem 1rem;border:1px solid rgba(255,222,23,.16);border-radius:1rem;background:linear-gradient(120deg,#10151b,#0c1117 72%,rgba(255,222,23,.04))}
+.crm-account-views-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:.65rem}
+.crm-account-views-head strong,.crm-account-views-head small{display:block}
+.crm-account-views-head strong{margin-top:.2rem;color:#edf2f7;font-size:.78rem;font-weight:900}
+.crm-account-views-head small{max-width:360px;color:#758191;font-size:.56rem;text-align:right}
+.crm-account-view-tabs{display:flex;gap:.42rem;overflow-x:auto;padding:.1rem 0 .18rem;scrollbar-width:thin}
+.crm-account-view-tabs button{display:flex;flex:0 0 auto;align-items:center;gap:.45rem;min-height:42px;padding:.5rem .68rem;border:1px solid #303a45;border-radius:.72rem;background:#0a0f14;color:#9eabb9;font-size:.62rem;font-weight:850;transition:border-color 140ms ease,background 140ms ease,color 140ms ease}
+.crm-account-view-tabs button b{display:grid;place-items:center;min-width:25px;height:22px;padding:0 .38rem;border-radius:999px;background:#171e26;color:#d6dee7;font-size:.56rem}
+.crm-account-view-tabs button:hover{border-color:rgba(255,222,23,.35);color:#eef2f7}
+.crm-account-view-tabs button[data-active="true"]{border-color:#ffde17;background:rgba(255,222,23,.1);color:#ffe75c;box-shadow:inset 0 0 0 1px rgba(255,222,23,.08)}
+.crm-account-view-tabs button[data-active="true"] b{background:#ffde17;color:#151207}
+.crm-account-view-note{margin:.55rem 0 0;color:#7f8b99;font-size:.58rem;line-height:1.45}
 .crm-tools-menu{position:relative}
 .crm-tools-menu>summary{display:grid;place-items:center;cursor:pointer;list-style:none}
 .crm-tools-menu>summary::-webkit-details-marker{display:none}
@@ -1068,6 +1080,11 @@ body {
   .crm-tools-menu>summary{width:100%}
   .crm-tools-menu[open]>div{right:0;left:auto}
   .lead-smart-head,.crm-select-all{display:none}
+  .crm-account-views{padding:.62rem .7rem;border-radius:.82rem}
+  .crm-account-views-head{display:none}
+  .crm-account-view-tabs{margin:0 -.12rem;padding:.02rem .12rem .08rem}
+  .crm-account-view-tabs button{min-height:40px;padding:.45rem .6rem;font-size:.59rem}
+  .crm-account-view-note{margin-top:.42rem;font-size:.54rem}
   .lead-smart-toolbar{padding:.55rem .65rem}
   .crm-list-head{display:none}
   .crm-list-card{border:0;background:transparent}
