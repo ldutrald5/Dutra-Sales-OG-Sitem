@@ -706,6 +706,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
     });
+    const mobileMore = document.querySelector('[data-mobile-more]');
+    if (mobileMore) {
+      const secondaryTabs = new Set(['cotacao','prospeccao','guia','scripts','biblioteca','operacoes','historico','catalogo','transportadoras','comunicacao']);
+      const active = secondaryTabs.has(tabId);
+      mobileMore.classList.toggle('active', active);
+      if (active) mobileMore.setAttribute('aria-current', 'page');
+      else mobileMore.removeAttribute('aria-current');
+    }
 
     tabContents.forEach(c => {
       if (c.id === `tab-${tabId}`) {
@@ -727,7 +735,9 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (tabId === 'call-ai') renderCallAIContext();
     else if (tabId === 'biblioteca') renderMaterialLibrary();
     else if (tabId === 'operacoes') renderOperationsFoundation();
-    document.querySelectorAll('.og-mobile-nav button').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
+    document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
+    document.querySelector('.og-mobile-more-sheet')?.classList.add('hidden');
+    document.querySelector('[data-mobile-more]')?.setAttribute('aria-expanded', 'false');
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -5671,21 +5681,52 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const panel = document.getElementById('crm-import-mapping');
     const root = document.getElementById('crm-import-mapping-fields');
     const note = document.getElementById('crm-import-mapping-note');
+    const recognized = document.getElementById('crm-import-recognized');
+    const advanced = document.getElementById('crm-import-advanced');
+    const toggle = document.getElementById('crm-import-toggle-advanced');
     if (!panel || !root) return;
     if (!source || source?.canonical) {
       panel.classList.add('hidden');
       root.innerHTML = '';
+      if (recognized) recognized.innerHTML = '';
       return;
     }
+
     panel.classList.remove('hidden');
-    if (note) note.textContent = source?.mapped
-      ? `${source.mapped} campo(s) reconhecido(s) automaticamente na aba ${source.sheetName}.`
-      : `Nenhum campo foi reconhecido automaticamente na aba ${source?.sheetName || 'selecionada'}. Faça o mapeamento abaixo.`;
     const headers = source?.headers || [];
+    const mappingEntries = Object.entries(source.mapping || {})
+      .filter(([,index]) => Number.isInteger(Number(index)) && headers[Number(index)] != null);
+    const defByKey = new Map(OG_SPREADSHEET_IMPORT.FIELD_DEFS.map(def => [def.key, def]));
+    const importantOrder = ['company','externalCode','contact','phone','document','email','city','status','conversationStage','priority'];
+    const important = mappingEntries
+      .slice()
+      .sort(([left],[right]) => {
+        const li = importantOrder.indexOf(left), ri = importantOrder.indexOf(right);
+        return (li < 0 ? 999 : li) - (ri < 0 ? 999 : ri);
+      });
+
+    if (note) note.textContent = mappingEntries.length
+      ? `${mappingEntries.length} campo(s) reconhecido(s) com segurança em ${source.sheetName}. Você só precisa abrir o modo avançado se algo estiver errado.`
+      : `Não encontrei campos seguros em ${source?.sheetName || 'selecionada'}. Abra o modo avançado para indicar o mínimo necessário.`;
+
+    if (recognized) {
+      recognized.innerHTML = important.length
+        ? important.map(([key,index]) => {
+            const def = defByKey.get(key);
+            return `<span class="spreadsheet-recognized-chip"><b>${escapeHtml(def?.label || key)}</b><small>${escapeHtml(headers[Number(index)] || '')}</small></span>`;
+          }).join('')
+        : '<span class="spreadsheet-recognized-empty">Nenhum campo selecionado automaticamente.</span>';
+    }
+
     root.innerHTML = OG_SPREADSHEET_IMPORT.FIELD_DEFS.map(def => {
       const selected = source.mapping?.[def.key];
       return `<label><span>${escapeHtml(def.label)}</span><select data-import-map-field="${escapeHtml(def.key)}"><option value="">Não importar</option>${headers.map((header,index) => `<option value="${index}" ${Number(selected) === index ? 'selected' : ''}>${escapeHtml(header || `Coluna ${index + 1}`)}</option>`).join('')}</select></label>`;
     }).join('');
+
+    const openAdvanced = mappingEntries.length === 0;
+    advanced?.classList.toggle('hidden', !openAdvanced);
+    toggle?.setAttribute('aria-expanded', String(openAdvanced));
+    if (toggle) toggle.textContent = openAdvanced ? 'Ocultar mapeamento' : 'Ajustar campos';
   }
 
   function collectCrmImportMapping() {
@@ -5802,10 +5843,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       showNotification(`Aba "${source.sheetName}" selecionada: ${source.rowCount} linha(s) para revisar.`,'success');
     });
 
+    document.getElementById('crm-import-toggle-advanced')?.addEventListener('click',event=>{
+      const advanced=document.getElementById('crm-import-advanced');
+      if(!advanced)return;
+      const willOpen=advanced.classList.contains('hidden');
+      advanced.classList.toggle('hidden',!willOpen);
+      event.currentTarget.setAttribute('aria-expanded',String(willOpen));
+      event.currentTarget.textContent=willOpen?'Ocultar mapeamento':'Ajustar campos';
+    });
+
     document.getElementById('crm-import-remap-preview')?.addEventListener('click',()=>{
       if(!crmExcelReview?.source)return showNotification('Escolha primeiro a aba que contém os clientes.','info');
       refreshCrmImportPreview(collectCrmImportMapping());
-      showNotification('Mapeamento atualizado. Revise o preview antes de confirmar.','info');
+      renderCrmImportMapping({...crmExcelReview.source,mapping:collectCrmImportMapping(),mapped:Object.keys(collectCrmImportMapping()).length});
+      showNotification('Campos atualizados. Revise apenas as linhas que pedem atenção.','info');
     });
 
     document.getElementById('crm-import-reset-recommendations')?.addEventListener('click',()=>{
@@ -7246,13 +7297,26 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <button type="button" data-mobile-tab="dia" class="active"><span>◉</span><small>Meu Dia</small></button>
       <button type="button" data-mobile-tab="crm"><span>◎</span><small>Clientes</small></button>
       <button type="button" data-mobile-tab="call-ai"><span>🎧</span><small>Call AI</small></button>
-      <button type="button" data-mobile-tab="cotacao"><span>＋</span><small>Cotação</small></button>
-      <button type="button" data-mobile-tab="scripts"><span>💬</span><small>Vendas</small></button>
-      <button type="button" data-mobile-tab="biblioteca"><span>🎞️</span><small>Biblioteca</small></button>
-      <button type="button" data-mobile-tab="operacoes"><span>📊</span><small>Operações</small></button>
-      <button type="button" data-mobile-tab="historico"><span>≡</span><small>Histórico</small></button>`;
+      <button type="button" data-mobile-more aria-expanded="false"><span>＋</span><small>Mais</small></button>
+      <div class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
+        <div class="og-mobile-more-head"><strong>Mais ferramentas</strong><small>Abra só quando precisar.</small></div>
+        <button type="button" data-mobile-tab="cotacao" role="menuitem"><span>⚡</span><small>Cotação</small></button>
+        <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
+        <button type="button" data-mobile-tab="guia" role="menuitem"><span>🚛</span><small>Suportes</small></button>
+        <button type="button" data-mobile-tab="scripts" role="menuitem"><span>💬</span><small>Vendas</small></button>
+        <button type="button" data-mobile-tab="biblioteca" role="menuitem"><span>🎞️</span><small>Biblioteca</small></button>
+        <button type="button" data-mobile-tab="operacoes" role="menuitem"><span>📊</span><small>Operações</small></button>
+        <button type="button" data-mobile-tab="historico" role="menuitem"><span>≡</span><small>Histórico</small></button>
+      </div>`;
     document.body.appendChild(nav);
-    nav.querySelectorAll('button').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.mobileTab)));
+    nav.querySelectorAll('[data-mobile-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.mobileTab)));
+    const moreButton = nav.querySelector('[data-mobile-more]');
+    const moreSheet = nav.querySelector('.og-mobile-more-sheet');
+    moreButton?.addEventListener('click', () => {
+      const willOpen = moreSheet?.classList.contains('hidden');
+      moreSheet?.classList.toggle('hidden', !willOpen);
+      moreButton.setAttribute('aria-expanded', String(Boolean(willOpen)));
+    });
 
     const status = document.createElement('div');
     status.id = 'og-sync-status';
