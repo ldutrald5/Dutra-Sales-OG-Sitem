@@ -48,6 +48,32 @@
     const mission = signalCenter.nextMission(leads,now,(lead,reference)=>intelligence.score(lead,reference),operations);
     const suggestions = automation?.buildSuggestions ? automation.buildSuggestions(leads,operations,now) : [];
 
+    const commitments = all
+      .filter(lead => clean(lead.nextActionReason) || clean(lead.nextActionObjective) || clean(lead.nextActionExpectedResult))
+      .map(lead => {
+        const when = asDate(lead.followUpAt);
+        const delta = when ? when.getTime() - now.getTime() : null;
+        const state = !when ? 'unscheduled' : delta < 0 ? 'overdue' : delta <= 86400000 ? 'today' : 'upcoming';
+        return Object.freeze({
+          leadId:clean(lead.id),
+          label:leadLabel(lead),
+          action:clean(lead.nextAction) || 'Próxima ação',
+          followUpAt:clean(lead.followUpAt) || null,
+          reason:clean(lead.nextActionReason),
+          objective:clean(lead.nextActionObjective),
+          expectedResult:clean(lead.nextActionExpectedResult),
+          state,
+          score:intelligence.score(lead,now)
+        });
+      })
+      .sort((a,b) => {
+        const band={overdue:0,today:1,upcoming:2,unscheduled:3};
+        if (band[a.state] !== band[b.state]) return band[a.state]-band[b.state];
+        const ad=asDate(a.followUpAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const bd=asDate(b.followUpAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return ad-bd || b.score-a.score;
+      });
+
     const proposalEvents = (Array.isArray(operations.activityEvents) ? operations.activityEvents : [])
       .filter(item => ['proposal.sent','proposal.opened','proposal.reopened'].includes(item?.type))
       .filter(item => {
@@ -80,10 +106,14 @@
       automations:suggestions.length,
       proposalSignals7d:proposalEvents.length,
       lifecycle:lifecycleSignals.length,
-      calendar:calendarEvents.length
+      calendar:calendarEvents.length,
+      commitments:commitments.length,
+      commitmentOverdue:commitments.filter(item=>item.state==='overdue').length,
+      commitmentToday:commitments.filter(item=>item.state==='today').length
     });
 
     const lines = [];
+    if (counts.commitments) lines.push(`${counts.commitments} compromisso(s) comercial(is) estruturado(s) estão na carteira.`);
     if (counts.overdue) lines.push(`${counts.overdue} retorno(s) vencido(s) precisam de decisão.`);
     if (counts.today) lines.push(`${counts.today} retorno(s) estão marcados para hoje.`);
     if (counts.signals) lines.push(`${counts.signals} sinal(is) comercial(is) estão ativos.`);
@@ -100,6 +130,7 @@
       signals:Object.freeze(signals.slice(0,8)),
       automations:Object.freeze(suggestions.slice(0,8)),
       lifecycleSignals:Object.freeze(lifecycleSignals.slice(0,8)),
+      commitments:Object.freeze(commitments.slice(0,10)),
       calendar:Object.freeze({
         connected:calendarConnected,
         events:Object.freeze(calendarEvents),
