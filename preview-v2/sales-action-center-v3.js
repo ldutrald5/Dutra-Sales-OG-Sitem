@@ -84,7 +84,7 @@ function openActionFlow(leadOrId,type='FOLLOW_UP',context={}){
   ensureModal();
   const lead=typeof leadOrId==='object'?leadOrId:leadById(leadOrId); if(!lead) return;
   selectedLeadId=lead.id;
-  const modal=$('#actionFlowModal'); modal.dataset.sessionId=context.sessionId||''; modal.dataset.contactId=context.contactId||'';
+  const modal=$('#actionFlowModal'); modal.dataset.sessionId=context.sessionId||''; modal.dataset.memberId=context.memberId||''; modal.dataset.outcome=context.outcome||''; modal.dataset.startedAt=context.startedAt||''; modal.dataset.contactId=context.contactId||'';
   $('#afTitle').textContent=(lead.empresa||lead.nome||'Conta')+' · '+defaultAction(type);
   $('#afType').value=type;
   $('#afAt').value=defaultAt(type);
@@ -123,15 +123,25 @@ function refreshDraft(){
 
 async function saveAction(execute){
   const lead=leadById(selectedLeadId); if(!lead) return;
-  const type=$('#afType').value,at=$('#afAt').value,contactId=$('#afContact').value||null;
-  const result=S().scheduleAction(leads(),ops(),lead.id,{
+  const modal=$('#actionFlowModal'),type=$('#afType').value,at=$('#afAt').value,contactId=$('#afContact').value||modal.dataset.contactId||null;
+  let baseLeads=leads(),baseOps=ops(),leadId=lead.id,session=null;
+  if(modal.dataset.outcome&&modal.dataset.sessionId&&modal.dataset.memberId){
+    const recorded=S().recordOutcome(baseLeads,baseOps,modal.dataset.sessionId,modal.dataset.memberId,modal.dataset.outcome,{startedAt:modal.dataset.startedAt||null,phone:lead.telefone,contactId},new Date());
+    baseLeads=recorded.leads;baseOps=recorded.operations;leadId=recorded.lead.id;session=recorded.session;
+  }
+  const result=S().scheduleAction(baseLeads,baseOps,leadId,{
     type,dueAt:at?new Date(at):null,description:$('#afDescription').value,reason:$('#afReason').value,priority:$('#afPriority').value,
-    objective:$('#afObjective').value,expectedResult:$('#afExpected').value,contactId,sessionId:$('#actionFlowModal').dataset.sessionId||null
+    objective:$('#afObjective').value,expectedResult:$('#afExpected').value,contactId,sessionId:modal.dataset.sessionId||null
   },new Date());
-  await C().commit({leads:result.leads,operations:result.operations},'Próxima ação salva no CRM.');
+  if(session){
+    const next=S().nextMember(result.operations,session);
+    if(next){session.currentMemberId=next.id;next.workStatus='IN_PROGRESS';}
+  }
+  await C().commit({leads:result.leads,operations:result.operations},modal.dataset.outcome?'Resultado salvo, próxima ação criada e próximo contato preparado.':'Próxima ação salva no CRM.');
   $('#actionFlowModal').classList.remove('open');
   if(execute) executeAction(result.lead,type,contactId);
-  renderQueue();
+  if(modal.dataset.outcome){globalThis.go?.('prospecting');}
+  else renderQueue();
 }
 
 function executeAction(lead,type,contactId){
