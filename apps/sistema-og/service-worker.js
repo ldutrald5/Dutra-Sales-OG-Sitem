@@ -42,6 +42,7 @@ const SHELL_URLS = [
   '/services/morning-command-service.js',
   '/services/customer-revenue-service.js',
   '/services/customer-journey-service.js',
+  '/services/referral-intelligence-service.js',
   '/services/sales-brief-service.js',
   '/services/smart-diary-service.js',
   '/services/call-ai-prompts.js',
