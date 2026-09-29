@@ -47,6 +47,8 @@ function ensureModal(){
       <div><label>CONTATO</label><select id="afContact"></select></div>
       <div class="full"><label>OBJETIVO</label><input id="afObjective"></div>
       <div class="full"><label>RESULTADO ESPERADO</label><input id="afExpected"></div>
+      <div class="full"><label>NOTA DA LIGAÇÃO / CONTEXTO</label><textarea id="afNote" placeholder="Resumo curto do que foi combinado."></textarea></div>
+      <div class="full" id="afDiaryWrap" style="display:none"><label>SINAL EXTRAÍDO DA NOTA</label><div class="actionPreview" id="afDiary"></div></div>
       <div class="full" id="afDraftWrap"><label>MENSAGEM SUGERIDA</label><div class="actionPreview" id="afDraft"></div></div>
     </div>
     <div class="actionFooter"><button id="afSave">Salvar ação</button><button class="primary" id="afExecute">Salvar + executar</button></div>
@@ -93,6 +95,8 @@ function openActionFlow(leadOrId,type='FOLLOW_UP',context={}){
   $('#afPriority').value=context.priority||(['CREATE_PROPOSAL','MEETING','PROPOSAL_FOLLOW_UP'].includes(type)?'HIGH':'MEDIUM');
   $('#afObjective').value=context.objective||'Avançar a conta sem perder o contexto da conversa.';
   $('#afExpected').value=context.expectedResult||'Sair com resposta, compromisso ou próximo passo claro.';
+  $('#afNote').value=context.note||'';
+  applyDiarySuggestion(context.note||'',type);
   const ps=people(lead.id);
   $('#afContact').innerHTML='<option value="">Contato principal da conta</option>'+ps.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+esc(p.role||p.roleCategory||'')+'</option>').join('');
   if(context.contactId) $('#afContact').value=context.contactId;
@@ -100,6 +104,22 @@ function openActionFlow(leadOrId,type='FOLLOW_UP',context={}){
   modal.classList.add('open');
 }
 
+function applyDiarySuggestion(note,type){
+  const wrap=$('#afDiaryWrap'),box=$('#afDiary'); if(!wrap||!box){return}
+  wrap.style.display='none';box.textContent='';
+  if(!clean(note)||!globalThis.OG_SMART_DIARY?.preview) return;
+  try{
+    const preview=globalThis.OG_SMART_DIARY.preview(note,{baseDate:new Date().toISOString()});
+    const commitment=preview.candidates?.find(c=>c.field==='commitmentMentioned');
+    const fleet=preview.candidates?.find(c=>c.field==='fleetSizeMentioned');
+    const pain=preview.candidates?.find(c=>c.field==='painMentioned');
+    const lines=[];
+    if(commitment?.suggestedFollowUpAt){const d=new Date(commitment.suggestedFollowUpAt);$('#afAt').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);lines.push('Data sugerida: '+d.toLocaleString('pt-BR'))}
+    if(fleet) lines.push('Frota mencionada: '+fleet.value+' veículos — revisar antes de gravar como fato.');
+    if(pain) lines.push('Dor mencionada: '+pain.value+' — revisar antes de gravar como fato.');
+    if(lines.length){box.textContent=lines.join('\n');wrap.style.display='block';}
+  }catch(_){}
+}
 function draftFor(lead,type,contact){
   const vars={first_name:contact?.name||lead.nome||'',contact_name:contact?.name||lead.nome||'',company:lead.empresa||lead.nome||'',seller:'Lucas',next_action:$('#afDescription')?.value||defaultAction(type)};
   const comm=globalThis.OG_COMMUNICATION_SERVICE;
@@ -126,7 +146,7 @@ async function saveAction(execute){
   const modal=$('#actionFlowModal'),type=$('#afType').value,at=$('#afAt').value,contactId=$('#afContact').value||modal.dataset.contactId||null;
   let baseLeads=leads(),baseOps=ops(),leadId=lead.id,session=null;
   if(modal.dataset.outcome&&modal.dataset.sessionId&&modal.dataset.memberId){
-    const recorded=S().recordOutcome(baseLeads,baseOps,modal.dataset.sessionId,modal.dataset.memberId,modal.dataset.outcome,{startedAt:modal.dataset.startedAt||null,phone:lead.telefone,contactId},new Date());
+    const recorded=S().recordOutcome(baseLeads,baseOps,modal.dataset.sessionId,modal.dataset.memberId,modal.dataset.outcome,{startedAt:modal.dataset.startedAt||null,phone:lead.telefone,contactId,notes:$('#afNote').value},new Date());
     baseLeads=recorded.leads;baseOps=recorded.operations;leadId=recorded.lead.id;session=recorded.session;
   }
   const result=S().scheduleAction(baseLeads,baseOps,leadId,{
