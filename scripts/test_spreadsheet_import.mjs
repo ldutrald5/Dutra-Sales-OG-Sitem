@@ -152,6 +152,8 @@ assert.match(htmlSource,/crm-import-recognized/);
 assert.match(appSource,/data-mobile-more/);
 assert.match(appSource,/Abra só quando precisar/);
 assert.match(appSource,/reconhecido\(s\) com segurança/i);
+assert.match(appSource,/Cliente OG/,'cliente histórico não deve parecer uma venda recém-fechada na fila');
+assert.match(appSource,/item\.count > 0/,'filtros sem clientes devem sair da primeira camada');
 
 const multiSheetBook={
   SheetNames:['Como usar','Lista 2','Pós-Venda','Clientes Únicos'],
@@ -187,6 +189,13 @@ assert.equal(sources[0].mapped,7,'auto-mapping deve contar apenas aliases exatos
 assert.equal(sources[1].mapped,7,'colunas de data/conversa ambíguas não devem ser pré-selecionadas');
 assert.equal(sources[0].mapping.conversationStage,undefined,'Data ult. conversa não pode virar situação da conversa por substring');
 assert.equal(service.sourceForSheet(multiSheetBook,'Pós-Venda').rowCount,2);
+const postSaleSource=service.sourceForSheet(multiSheetBook,'Pós-Venda');
+const postSaleRows=service.rowsFromSource(multiSheetBook,postSaleSource);
+assert.equal(postSaleRows[0].conversationStage,'talked','OBS de conversa deve recuperar estágio mesmo sem coluna Situação');
+assert.equal(postSaleRows[1].conversationStage,'waiting_response','OBS com retorno deve recuperar aguardando resposta');
+assert.equal(service.inferConversationStageFromNotes('Não atende'),'no_reply');
+assert.equal(service.inferConversationStageFromNotes('Recusou chamada'),'no_reply');
+assert.equal(service.inferConversationStageFromNotes('Está em reunião, entrar em contato mais tarde'),'waiting_response');
 assert.throws(()=>service.sourceForSheet(multiSheetBook,'Como usar'),/não possui uma tabela/);
 assert.equal(service.detectTabularSource(multiSheetBook).sheetName,'Lista 2','compatibilidade mantém o melhor candidato, mas a UI deve exigir escolha quando houver múltiplas abas');
 
