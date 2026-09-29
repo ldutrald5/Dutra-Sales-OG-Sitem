@@ -998,11 +998,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnApply = document.getElementById('btn-apply-quote-import');
     const status = document.getElementById('quote-ocr-status');
 
-    const close = () => modal?.classList.add('hidden');
-    if (btnOpen) btnOpen.addEventListener('click', () => modal?.classList.remove('hidden'));
-    if (btnClose) btnClose.addEventListener('click', close);
-    if (btnCancel) btnCancel.addEventListener('click', close);
-    if (modal) modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+    const close = (restoreFocus = true) => closeAppDialog(modal, { restoreFocus });
+    bindAppDialog(modal);
+    if (btnOpen) btnOpen.addEventListener('click', () => openAppDialog(modal, { trigger: btnOpen, initialFocus: '#quote-ocr-text' }));
+    if (btnClose) btnClose.addEventListener('click', () => close());
+    if (btnCancel) btnCancel.addEventListener('click', () => close());
 
     const setImage = (file) => {
       if (!file || !file.type.startsWith('image/')) {
@@ -1076,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const itemCount = state.quoteImportItems.reduce((total, item) => total + item.qty, 0);
       recalculateQuote();
-      close();
+      close(false);
       showNotification(`${itemCount} peça${itemCount !== 1 ? 's' : ''} do orçamento adicionada${itemCount !== 1 ? 's' : ''} à cotação.`, 'success');
     });
 
@@ -3257,18 +3257,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       tiersEl.appendChild(row);
     });
 
-    modal.classList.remove('hidden');
+    openAppDialog(modal, { trigger: document.activeElement, initialFocus: '#btn-close-modal-item-pricing' });
   }
 
   function initItemPricingModal() {
     const modal = document.getElementById('modal-item-pricing');
     const btnClose = document.getElementById('btn-close-modal-item-pricing');
-    if (btnClose) btnClose.addEventListener('click', () => modal.classList.add('hidden'));
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
-      });
-    }
+    bindAppDialog(modal);
+    if (btnClose) btnClose.addEventListener('click', () => closeAppDialog(modal));
   }
 
   function renderCatalog() {
@@ -3302,6 +3298,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         const card = document.createElement('div');
         card.className = 'clean-card p-4 flex flex-col justify-between cursor-pointer';
         card.title = 'Clique para ver o preço por tipo de cliente e aplicação';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Ver preços e aplicação de ${item.name}`);
 
         let badgeCat = 'bg-blue-500/10 text-blue-400 border-blue-500/25';
         if (item.category === 'equalizador') badgeCat = 'bg-amber-500/10 text-amber-400 border-amber-500/25';
@@ -3337,7 +3336,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             </div>
           </div>
         `;
-        card.addEventListener('click', () => openItemPricingModal(item));
+        const openPricing = () => openItemPricingModal(item);
+        card.addEventListener('click', openPricing);
+        card.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPricing();
+          }
+        });
         grid.appendChild(card);
       });
     }
@@ -3637,17 +3643,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const inputDor = document.getElementById('input-nova-dor');
     const inputGancho = document.getElementById('input-novo-gancho');
 
+    bindAppDialog(modal);
     if (btnOpen && modal) {
       btnOpen.addEventListener('click', () => {
         renderDoresGanchosList();
-        modal.classList.remove('hidden');
+        openAppDialog(modal, { trigger: btnOpen, initialFocus: '#input-nova-dor' });
       });
     }
     if (btnClose && modal) {
-      btnClose.addEventListener('click', () => modal.classList.add('hidden'));
-    }
-    if (modal) {
-      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+      btnClose.addEventListener('click', () => closeAppDialog(modal));
     }
     if (btnAdd) {
       btnAdd.addEventListener('click', () => {
@@ -3690,21 +3694,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     form.reset();
     document.getElementById('quick-lead-priority').value = 'media';
     document.getElementById('quick-lead-segment').value = 'transportadora';
-    modal.classList.remove('hidden');
-    setTimeout(() => document.getElementById('quick-lead-company')?.focus(), 30);
+    openAppDialog(modal, { trigger: document.activeElement, initialFocus: '#quick-lead-company' });
   }
 
-  function closeQuickLead() {
-    document.getElementById('modal-quick-lead')?.classList.add('hidden');
+  function closeQuickLead(restoreFocus = true) {
+    closeAppDialog(document.getElementById('modal-quick-lead'), { restoreFocus });
   }
 
   function initQuickLead() {
     const segment = document.getElementById('quick-lead-segment');
+    const modal = document.getElementById('modal-quick-lead');
+    bindAppDialog(modal);
     if (segment) segment.innerHTML = OG_DATA.segments.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.icon)} ${escapeHtml(item.name)}</option>`).join('');
     document.querySelectorAll('[data-quick-lead]').forEach(button => button.addEventListener('click', () => openQuickLead(button.dataset.quickLead)));
-    document.getElementById('quick-lead-close')?.addEventListener('click', closeQuickLead);
-    document.getElementById('quick-lead-cancel')?.addEventListener('click', closeQuickLead);
-    document.getElementById('modal-quick-lead')?.addEventListener('click', event => { if (event.target.id === 'modal-quick-lead') closeQuickLead(); });
+    document.getElementById('quick-lead-close')?.addEventListener('click', () => closeQuickLead());
+    document.getElementById('quick-lead-cancel')?.addEventListener('click', () => closeQuickLead());
     document.getElementById('quick-lead-form')?.addEventListener('submit', event => {
       event.preventDefault();
       const empresa = document.getElementById('quick-lead-company').value.trim();
@@ -5342,8 +5346,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       state.leadConversationFilter = button.dataset.conversationFilter || 'all';
       renderLeadsTable();
     });
-    if (btnImportModal && modalImport) btnImportModal.addEventListener('click', () => modalImport.classList.remove('hidden'));
-    if (btnCloseModal && modalImport) btnCloseModal.addEventListener('click', () => modalImport.classList.add('hidden'));
+    bindAppDialog(modalImport);
+    if (btnImportModal && modalImport) btnImportModal.addEventListener('click', () => openAppDialog(modalImport, { trigger: btnImportModal, initialFocus: '#ocr-prompt-input' }));
+    if (btnCloseModal && modalImport) btnCloseModal.addEventListener('click', () => closeAppDialog(modalImport));
 
     if (fileImportInput) {
       fileImportInput.addEventListener('change', (e) => {
@@ -5361,7 +5366,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         if (!rawText) return;
         const count = parseAndAddLeads(rawText);
         textareaImport.value = '';
-        if (modalImport) modalImport.classList.add('hidden');
+        if (modalImport) closeAppDialog(modalImport, { restoreFocus: false });
         saveLeadsToStorage();
         renderLeadsTable();
         showNotification(`${count} leads importados com sucesso!`, 'success');
