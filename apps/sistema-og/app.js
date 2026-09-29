@@ -4862,6 +4862,36 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function smartDiaryCandidateLabel(field) {
+    return {
+      fleetSizeMentioned: 'Frota mencionada',
+      testFleetMentioned: 'Veículos em teste',
+      painMentioned: 'Dor mencionada',
+      commitmentMentioned: 'Compromisso mencionado',
+      decisionProcessMentioned: 'Pessoa/cargo citado'
+    }[field] || field;
+  }
+
+  function renderSmartDiaryPreview(root, preview) {
+    if (!root) return;
+    const candidates = preview?.candidates || [];
+    root.innerHTML = `
+      <div class="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3 space-y-3">
+        <div><span class="og-kicker">PREVIEW · NADA FOI SALVO</span><p class="text-xs text-slate-300 mt-1">Marque somente o que você confirma. O trecho original fica visível como evidência.</p></div>
+        <div class="space-y-2">
+          ${candidates.length ? candidates.map((item, index) => `
+            <label class="block rounded-lg border border-slate-700 bg-slate-950/70 p-2.5 cursor-pointer">
+              <div class="flex items-start gap-2">
+                <input type="checkbox" data-diary-candidate="${index}" class="mt-1">
+                <div class="min-w-0"><b class="text-xs text-slate-100">${escapeHtml(smartDiaryCandidateLabel(item.field))}: ${escapeHtml(String(item.value))}</b><p class="text-[11px] text-slate-400 mt-1">“${escapeHtml(item.evidence?.quote || '')}”</p>${item.note ? `<p class="text-[10px] text-amber-300 mt-1">${escapeHtml(item.note)}</p>` : ''}</div>
+              </div>
+            </label>`).join('') : '<p class="text-xs text-slate-400">Nenhum campo seguro foi extraído. Você ainda pode registrar o relato como conversa.</p>'}
+        </div>
+        <div class="text-[10px] text-slate-500">${(preview?.warnings || []).map(escapeHtml).join(' · ')}</div>
+        <button type="button" data-diary-confirm class="w-full px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black">CONFIRMAR E REGISTRAR</button>
+      </div>`;
+  }
+
   function buildCommercialPanel(lead) {
     const interactions = lead.interactions.slice().reverse().slice(0, 8);
     return `
@@ -4876,8 +4906,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div class="og-field og-field-full"><label for="lead-next-action">Próxima ação</label><input id="lead-next-action" value="${escapeHtml(lead.nextAction)}" placeholder="Ex.: ligar para validar a frota e apresentar proposta"></div>
         </div>
         <button id="btn-save-commercial-context" class="w-full px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold">Salvar contexto e retorno</button>
-        <div class="og-field"><label for="lead-interaction-note">Nota rápida após conversa</label><textarea id="lead-interaction-note" rows="3" placeholder="O que o cliente confirmou? O que ficou combinado?"></textarea></div>
-        <button id="btn-add-interaction" class="w-full px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Registrar conversa agora</button>
+
+        <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-3.5 space-y-3">
+          <div><span class="og-kicker">DIÁRIO INTELIGENTE · BETA</span><h4 class="font-bold text-sm text-slate-100 mt-1">Conte o que aconteceu. Revise antes de salvar.</h4><p class="text-[11px] text-slate-400 mt-1">Cole uma transcrição ou escreva como você falaria. O DUTRA só aplica os campos que você marcar e confirmar.</p></div>
+          <textarea id="lead-smart-diary" rows="4" placeholder="Ex.: Falei com João. Tem 32 caminhões, está testando em 3. Pediu retorno sexta depois de falar com o sócio..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 leading-relaxed focus:outline-none focus:border-amber-400"></textarea>
+          <button id="btn-smart-diary-preview" type="button" class="w-full px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs font-bold">🧠 ENTENDER RELATO</button>
+          <div id="smart-diary-preview" aria-live="polite"></div>
+        </div>
+
+        <details class="rounded-xl border border-slate-800 p-3">
+          <summary class="text-xs font-bold text-slate-300 cursor-pointer">Nota rápida manual</summary>
+          <div class="og-field mt-3"><label for="lead-interaction-note">Registrar sem interpretação</label><textarea id="lead-interaction-note" rows="3" placeholder="O que o cliente confirmou? O que ficou combinado?"></textarea></div>
+          <button id="btn-add-interaction" class="w-full px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">Registrar nota manual</button>
+        </details>
         <div><span class="og-kicker">HISTÓRICO RECENTE</span><div class="og-interaction-list mt-2">${interactions.length ? interactions.map(item => `<article class="og-interaction"><time>${escapeHtml(new Date(item.at).toLocaleString('pt-BR'))}</time><p>${escapeHtml(item.note)}</p></article>`).join('') : '<div class="text-xs text-slate-500">Nenhuma conversa registrada.</div>'}</div></div>
       </section>`;
   }
@@ -4885,24 +4926,64 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function bindCommercialPanel(lead) {
     const saveButton = document.getElementById('btn-save-commercial-context');
     const addButton = document.getElementById('btn-add-interaction');
+    const diaryButton = document.getElementById('btn-smart-diary-preview');
+    const diaryInput = document.getElementById('lead-smart-diary');
+    const diaryRoot = document.getElementById('smart-diary-preview');
+    let diaryPreview = null;
+
     if (saveButton) saveButton.addEventListener('click', () => {
       lead.priority = document.getElementById('lead-priority').value;
       lead.fleetSize = Math.max(0, Number(document.getElementById('lead-fleet-size').value) || 0);
       lead.pain = document.getElementById('lead-pain').value.trim();
       lead.decisionMaker = document.getElementById('lead-decision-maker').value.trim();
-      lead.followUpAt = document.getElementById('lead-follow-up').value;
-      lead.nextAction = document.getElementById('lead-next-action').value.trim();
+      const followUpAt = document.getElementById('lead-follow-up').value;
+      const nextAction = document.getElementById('lead-next-action').value.trim();
+      OG_INTERACTION_SERVICE.setNextAction(lead, nextAction, followUpAt);
       saveLeadsToStorage();
       renderLeadsTable();
       showNotification('Contexto e próximo retorno salvos.', 'success');
     });
+
+    if (diaryButton && diaryInput && diaryRoot) diaryButton.addEventListener('click', () => {
+      try {
+        diaryPreview = window.OG_SMART_DIARY.preview(diaryInput.value);
+        renderSmartDiaryPreview(diaryRoot, diaryPreview);
+        diaryRoot.querySelector('[data-diary-confirm]')?.addEventListener('click', () => {
+          if (!diaryPreview) return;
+          const accepted = [...diaryRoot.querySelectorAll('[data-diary-candidate]:checked')]
+            .map(input => diaryPreview.candidates[Number(input.dataset.diaryCandidate)])
+            .filter(Boolean);
+
+          accepted.forEach(item => {
+            if (item.field === 'fleetSizeMentioned') lead.fleetSize = Math.max(0, Number(item.value) || 0);
+            if (item.field === 'painMentioned') lead.pain = String(item.value || '').trim();
+          });
+
+          const now = new Date().toISOString();
+          OG_INTERACTION_SERVICE.addInteraction(lead, {
+            type: 'conversa',
+            note: diaryPreview.originalText,
+            changedFields: ['interactions', 'lastContactAt', ...accepted.flatMap(item => item.field === 'fleetSizeMentioned' ? ['fleetSize'] : item.field === 'painMentioned' ? ['pain'] : [])]
+          }, { now });
+          if (lead.status === 'novo') lead.status = 'contatado';
+          state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'smart_diary_reviewed' });
+          saveLeadsToStorage();
+          saveOperationsToStorage();
+          renderLeadsTable();
+          renderLeadInspector();
+          showNotification(accepted.length ? 'Relato registrado e campos confirmados aplicados.' : 'Relato registrado sem alterar campos comerciais.', 'success');
+        });
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível interpretar o relato.', 'warning');
+      }
+    });
+
     if (addButton) addButton.addEventListener('click', () => {
       const note = document.getElementById('lead-interaction-note').value.trim();
       if (!note) return showNotification('Escreva uma nota curta antes de registrar.', 'info');
       const now = new Date().toISOString();
-      lead.interactions.push({ id: `INT-${Date.now()}`, at: now, type: 'conversa', note });
+      OG_INTERACTION_SERVICE.addInteraction(lead, { type: 'conversa', note }, { now });
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'conversation' });
-      lead.lastContactAt = now;
       if (lead.status === 'novo') lead.status = 'contatado';
       saveLeadsToStorage();
       saveOperationsToStorage();
