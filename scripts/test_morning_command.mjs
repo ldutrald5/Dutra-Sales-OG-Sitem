@@ -13,7 +13,7 @@ const operationsModel=require('../apps/sistema-og/operations-model.js');
 const now=new Date('2026-09-28T15:00:00.000Z');
 const leads=[
   {id:'L1',empresa:'Vencida',status:'negociacao',priority:'alta',followUpAt:'2026-09-27T12:00:00.000Z',nextAction:'Ligar',updatedAt:'2026-09-20T12:00:00.000Z',fleetSize:40,decisionMaker:'Ana',pain:'Desgaste',interactions:[]},
-  {id:'L2',empresa:'Hoje',status:'novo',priority:'media',followUpAt:'2026-09-28T18:00:00.000Z',nextAction:'Retornar',updatedAt:'2026-09-28T10:00:00.000Z',interactions:[]},
+  {id:'L2',empresa:'Hoje',status:'novo',priority:'media',followUpAt:'2026-09-28T18:00:00.000Z',nextAction:'Retornar',nextActionReason:'Cliente pediu retorno',nextActionObjective:'Validar teste',nextActionExpectedResult:'Definir próximo passo',updatedAt:'2026-09-28T10:00:00.000Z',interactions:[]},
   {id:'L3',empresa:'Sem ação',status:'negociacao',priority:'media',followUpAt:'',nextAction:'',updatedAt:'2026-09-18T10:00:00.000Z',decisionMaker:'Carlos',pain:'Pressão',interactions:[]},
   {id:'L4',empresa:'Fechada',status:'fechado',conversationStage:'customer',priority:'alta',followUpAt:'2026-09-27T10:00:00.000Z',nextAction:'',updatedAt:'2026-09-27T10:00:00.000Z',interactions:[]}
 ];
@@ -30,6 +30,10 @@ const report=morning.build({leads,operations:ops,now},{
 assert.equal(report.counts.active,3);
 assert.equal(report.counts.overdue,1);
 assert.equal(report.counts.today,1);
+assert.equal(report.counts.commitments,1);
+assert.equal(report.counts.commitmentToday,1);
+assert.equal(report.commitments[0].leadId,'L2');
+assert.equal(report.commitments[0].objective,'Validar teste');
 assert.equal(report.counts.priority,1);
 assert.ok(report.counts.noAction>=1);
 assert.ok(report.mission);
