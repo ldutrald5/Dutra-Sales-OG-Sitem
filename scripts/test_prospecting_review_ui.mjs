@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+const require=createRequire(import.meta.url);
+const ui=require('../apps/sistema-og/services/prospecting-review-ui.js');
+const html=fs.readFileSync(new URL('../apps/sistema-og/index.html',import.meta.url),'utf8');
+const app=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'utf8');
+const sw=fs.readFileSync(new URL('../apps/sistema-og/service-worker.js',import.meta.url),'utf8');
+const rendered=ui.render([{companyName:'Nova Log',city:'Cascavel',state:'PR',segment:'transportadora',fleetSize:45,sources:[{url:'https://example.org'}],fitReasons:['fleet_threshold'],importAllowed:true}]);
+assert.match(rendered,/Nova Log/);
+assert.match(rendered,/Adicionar ao CRM/);
+assert.match(rendered,/data-research-sources/);
+assert.match(html,/prospecting-review-service\.js/);
+assert.match(html,/prospecting-review-ui\.js/);
+assert.match(app,/OG_PROSPECTING_REVIEW\.importCandidate/);
+assert.match(app,/window\.confirm\('Adicionar /);
+assert.match(sw,/prospecting-review-ui\.js/);
+console.log('prospecting review UI tests: PASS');
