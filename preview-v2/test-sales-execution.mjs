@@ -83,8 +83,11 @@ targetMember.workStatus='IN_PROGRESS';
 const targetDone=s.recordOutcome(l2.leads,oneTarget.operations,oneTarget.session.id,targetMember.id,'NO_ANSWER',{},new Date('2026-09-29T12:41:00Z'));
 assert.equal(s.nextMember(targetDone.operations,targetDone.session),null,'sessão deve parar ao atingir a meta');
 
-const metrics=s.listMetrics(outcome.operations, imported.list.id, outcome.leads);
+const metricOps=s.ensureOperations(outcome.operations);
+metricOps.generatedDocuments=[{id:'DOC-1',documentType:'proposal_tracking',clientId:outcome.lead.id,preparedAt:'2026-09-29T12:20:00Z'}];
+const metrics=s.listMetrics(metricOps, imported.list.id, outcome.leads);
 assert.equal(metrics.attempted,1);
+assert.equal(metrics.proposals,1,'métrica de proposta deve contar documento real, não intenção de proposta');
 assert.equal(metrics.rates.contactRate,0);
 
 const action=s.scheduleAction(outcome.leads,outcome.operations,outcome.lead.id,{type:'FOLLOW_UP',description:'Retornar contato',dueAt:new Date('2026-09-30T15:00:00Z'),reason:'Retorno combinado',priority:'HIGH'},new Date('2026-09-29T13:00:00Z'));
