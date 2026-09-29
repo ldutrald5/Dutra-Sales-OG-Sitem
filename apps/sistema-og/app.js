@@ -3824,7 +3824,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         salesDesk:OG_SALES_DESK,
         leadIntelligence:OG_LEAD_INTELLIGENCE,
         signalCenter:OG_SIGNAL_CENTER,
-        automationEngine:OG_AUTOMATION_ENGINE
+        automationEngine:OG_AUTOMATION_ENGINE,
+        customerJourney:window.OG_CUSTOMER_JOURNEY
       });
       state.operations = OG_COMMAND_EXECUTION.finishMission(state.operations, {
         missionId,
