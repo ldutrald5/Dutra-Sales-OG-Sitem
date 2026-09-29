@@ -45,7 +45,8 @@ const child = spawn(process.execPath, ['scripts/start-og-hosted.mjs'], {
     PORT: String(port),
     RAILWAY_VOLUME_MOUNT_PATH: dataDir,
     RAILWAY_PUBLIC_DOMAIN: 'sistema-og-preview.up.railway.app',
-    OG_ACCESS_TOKEN: token
+    OG_ACCESS_TOKEN: token,
+    OG_RELEASE_SHA: 'test-release-sha'
   },
   stdio: ['ignore', 'pipe', 'pipe']
 });
@@ -55,7 +56,11 @@ try {
 
   let response = await fetch(`http://127.0.0.1:${port}/health`);
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { ok: true, service: 'sistema-og' });
+  assert.deepEqual(await response.json(), { ok: true, service: 'sistema-og', release: 'test-release-sha' });
+
+  response = await fetch(`http://127.0.0.1:${port}/api/health`);
+  assert.equal(response.status, 200, '/api/health deve permanecer público para diagnóstico');
+  assert.deepEqual(await response.json(), { ok: true, service: 'sistema-og', release: 'test-release-sha' });
 
   response = await fetch(`http://127.0.0.1:${port}/api/state`);
   assert.equal(response.status, 401, 'API hosted deve exigir código de acesso');
