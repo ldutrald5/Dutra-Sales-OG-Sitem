@@ -734,14 +734,14 @@
     </div>
 
     <!-- MODAL DE IMPORTAÇÃO & OCR -->
-    <div id="modal-import-leads" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="modal-import-leads" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="import-leads-title">
       <div class="clean-card max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div class="flex items-center gap-2">
             <span class="text-xl">📸</span>
-            <h3 class="font-bold text-base text-slate-100">Importação de Leads & Transcrição OCR</h3>
+            <h3 id="import-leads-title" class="font-bold text-base text-slate-100">Importação de Leads & Transcrição OCR</h3>
           </div>
-          <button id="btn-close-modal-import" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+          <button id="btn-close-modal-import" type="button" class="text-slate-400 hover:text-slate-200 text-lg p-1" aria-label="Fechar importação de leads">✕</button>
         </div>
 
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
@@ -754,7 +754,7 @@
           </div>
 
           <div id="ocr-image-container" class="hidden flex items-center gap-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-            <img id="ocr-preview-img" class="w-20 h-20 object-cover rounded-lg border border-slate-700">
+            <img id="ocr-preview-img" class="w-20 h-20 object-cover rounded-lg border border-slate-700" alt="Prévia da imagem carregada para OCR">
             <div class="text-xs text-slate-300">
               <div class="font-bold text-slate-100">Imagem Carregada</div>
               <div class="text-[11px] text-slate-400 mt-0.5">Pronta para reconhecimento OCR.</div>
@@ -837,14 +837,14 @@
     </div>
 
     <!-- MODAL: PREÇOS POR TIPO DE CLIENTE (Vitrine de Peças) -->
-    <div id="modal-item-pricing" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="modal-item-pricing" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="item-pricing-name">
       <div class="clean-card w-full max-w-lg p-5 space-y-4 animate-fade-in">
         <div class="flex items-start justify-between border-b border-slate-800 pb-3">
           <div>
             <span id="item-pricing-code" class="font-mono font-bold text-sm bg-slate-900 text-amber-400 px-2 py-0.5 rounded border border-slate-700">EQ-000</span>
             <h3 id="item-pricing-name" class="font-bold text-slate-100 text-sm mt-2">Nome da peça</h3>
           </div>
-          <button id="btn-close-modal-item-pricing" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+          <button id="btn-close-modal-item-pricing" type="button" class="text-slate-400 hover:text-slate-200 text-lg p-1" aria-label="Fechar preços da peça">✕</button>
         </div>
 
         <div>
@@ -976,11 +976,11 @@
       </div>
 
       <!-- MODAL: DORES E GANCHOS -->
-      <div id="modal-dores-ganchos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div id="modal-dores-ganchos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="dores-ganchos-title">
         <div class="clean-card w-full max-w-2xl max-h-[85vh] flex flex-col p-5 space-y-3 animate-fade-in">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 class="font-bold text-slate-100 text-sm">🎯 Dores e Ganchos de Abordagem</h3>
-            <button id="btn-close-modal-dores-ganchos" class="text-slate-400 hover:text-slate-200 text-lg p-1">✕</button>
+            <h3 id="dores-ganchos-title" class="font-bold text-slate-100 text-sm">🎯 Dores e Ganchos de Abordagem</h3>
+            <button id="btn-close-modal-dores-ganchos" type="button" class="text-slate-400 hover:text-slate-200 text-lg p-1" aria-label="Fechar dores e ganchos">✕</button>
           </div>
 
           <div id="dores-ganchos-list" class="overflow-y-auto space-y-2 flex-1 pr-1">
@@ -1294,15 +1294,15 @@
   </div>
 
   <!-- IMPORTAÇÃO DE ORÇAMENTO PARA REPOSIÇÃO / NOVA COTAÇÃO -->
-  <div id="modal-import-quote" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div id="modal-import-quote" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="quote-import-title">
     <div class="clean-card max-w-4xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-3">
         <div>
           <span class="eyebrow">IMPORTAÇÃO INTELIGENTE</span>
-          <h3 class="font-bold text-lg text-slate-100 mt-1">Transcrever orçamento e criar nova cotação</h3>
+          <h3 id="quote-import-title" class="font-bold text-lg text-slate-100 mt-1">Transcrever orçamento e criar nova cotação</h3>
           <p class="text-xs text-slate-400 mt-1">Envie uma foto ou cole o texto. Revise os itens antes de adicioná-los à área de reposição.</p>
         </div>
-        <button id="btn-close-import-quote" class="text-slate-400 hover:text-white text-lg p-1" aria-label="Fechar">✕</button>
+        <button id="btn-close-import-quote" type="button" class="text-slate-400 hover:text-white text-lg p-1" aria-label="Fechar importação de orçamento">✕</button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
