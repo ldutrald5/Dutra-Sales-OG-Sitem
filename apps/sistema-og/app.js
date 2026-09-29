@@ -5406,6 +5406,72 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function buildCustomer360RevenuePanel(lead) {
+    const engine = window.OG_CUSTOMER_REVENUE;
+    if (!engine?.opportunity || !engine.isCustomer(lead)) return '';
+    const item = engine.opportunity(lead);
+    const c = item.coverage || {};
+    const metric = value => value === null || value === undefined ? '—' : escapeHtml(String(value));
+    const coverageLabel = c.percent === null || c.percent === undefined ? 'DESCONHECIDA' : c.percent + '%';
+    const gapLabel = c.gap === null || c.gap === undefined ? '—' : c.gap;
+    const tone = item.actionable ? 'text-amber-300' : c.status === 'unknown' ? 'text-slate-400' : 'text-emerald-300';
+    return `
+      <section class="rounded-xl border border-amber-500/20 bg-gradient-to-br from-slate-900 to-slate-950 p-3.5 space-y-3" data-customer360-revenue>
+        <div class="flex items-start justify-between gap-3">
+          <div><span class="og-kicker">CUSTOMER 360 · RECEITA</span><h3 class="font-bold text-sm text-slate-100 mt-1">Cobertura OG e próxima oportunidade</h3></div>
+          <span class="text-[10px] font-black px-2 py-1 rounded-full border border-slate-700 ${tone}">${escapeHtml(coverageLabel)}</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Frota registrada</small><b class="block text-sm text-slate-100">${metric(c.totalFleet)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Elegíveis validados</small><b class="block text-sm text-slate-100">${metric(c.eligibleValidated)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Protegidos OG</small><b class="block text-sm text-slate-100">${metric(c.protectedVehicles)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Gap conhecido</small><b class="block text-sm ${tone}">${metric(gapLabel)}</b></div>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5">
+          <b class="text-xs text-slate-200">${escapeHtml(item.reason || 'Cobertura ainda não calculável.')}</b>
+          ${c.warning ? `<p class="text-[11px] text-amber-300 mt-1">⚠ ${escapeHtml(c.warning)}</p>` : ''}
+          <p class="text-[11px] text-slate-400 mt-1">${escapeHtml(item.nextStep || 'Complete os dados confirmados antes de sugerir expansão.')}</p>
+        </div>
+        <details class="rounded-lg border border-slate-800 p-2.5">
+          <summary class="text-xs font-bold text-slate-300 cursor-pointer">Atualizar cobertura confirmada</summary>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+            <label class="og-field"><span>Frota total</span><input id="customer360-fleet" type="number" min="0" value="${escapeHtml(lead.fleetSize ?? '')}"></label>
+            <label class="og-field"><span>Elegíveis validados</span><input id="customer360-eligible" type="number" min="0" value="${escapeHtml(lead.eligibleVehicleCount ?? '')}"></label>
+            <label class="og-field"><span>Protegidos OG</span><input id="customer360-protected" type="number" min="0" value="${escapeHtml(lead.equippedVehicles ?? '')}"></label>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-2">Só informe elegíveis depois de validação técnica. Campo vazio permanece desconhecido.</p>
+          <button type="button" data-customer360-save class="w-full mt-2 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black">SALVAR COBERTURA CONFIRMADA</button>
+        </details>
+      </section>`;
+  }
+
+  function bindCustomer360RevenuePanel(lead, root) {
+    root?.querySelector('[data-customer360-save]')?.addEventListener('click', () => {
+      const parseOptional = id => {
+        const raw = document.getElementById(id)?.value?.trim() || '';
+        return raw === '' ? null : Math.max(0, Number(raw) || 0);
+      };
+      const fleet = parseOptional('customer360-fleet');
+      const eligible = parseOptional('customer360-eligible');
+      const protectedVehicles = parseOptional('customer360-protected');
+      if (fleet === null) delete lead.fleetSize; else lead.fleetSize = fleet;
+      if (eligible === null) delete lead.eligibleVehicleCount; else lead.eligibleVehicleCount = eligible;
+      if (protectedVehicles === null) delete lead.equippedVehicles; else lead.equippedVehicles = protectedVehicles;
+      const now = new Date().toISOString();
+      OG_INTERACTION_SERVICE.addInteraction(lead, {
+        type:'customer_coverage_confirmed',
+        note:'Cobertura OG revisada manualmente no Customer 360.',
+        changedFields:['fleetSize','eligibleVehicleCount','equippedVehicles']
+      }, { now });
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:newLibraryId('evt'), type:'customer.coverage.confirmed', at:now, clientId:lead.id });
+      saveLeadsToStorage();
+      saveOperationsToStorage();
+      renderLeadsTable();
+      renderLeadInspector();
+      showNotification('Cobertura confirmada atualizada.', 'success');
+    });
+  }
+
   function renderLeadInspector() {
     const inspector = document.getElementById('crm-lead-inspector');
     if (!inspector) return;
@@ -5491,6 +5557,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </div>
     `;
 
+    inspector.insertAdjacentHTML('beforeend', buildCustomer360RevenuePanel(lead));
+    bindCustomer360RevenuePanel(lead, inspector);
     inspector.insertAdjacentHTML('beforeend', buildCompany360BetaPanel(lead));
     bindCompany360BetaPanel(lead);
     inspector.insertAdjacentHTML('beforeend', buildCommercialPanel(lead));
