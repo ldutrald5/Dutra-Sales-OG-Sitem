@@ -9,6 +9,8 @@ const hosted=fs.readFileSync('scripts/start-og-hosted.mjs','utf8');
 const proposalStore=fs.readFileSync('apps/sistema-og/server-proposal-store.cjs','utf8');
 assert.doesNotMatch(app,/localStorage\.getItem\('og_cloud_access_token'/);
 assert.match(app,/sessionStorage\.getItem\('og_cloud_access_token'/);
+assert.match(app,/currentToken && currentToken !== usedToken/,'401 concorrente não deve apagar um PIN novo já informado');
+assert.match(app,/response = await request\(currentToken\)/,'401 concorrente deve tentar o PIN de sessão mais recente antes de pedir de novo');
 assert.doesNotMatch(app,/forceMerge:true|\/api\/state\?merge=1/);
 assert.doesNotMatch(sw,/forceMerge:\s*true/);
 assert.doesNotMatch(syncBridge,/Authorization|Bearer|og_cloud_access_token/,'Sync Bridge não deve persistir credenciais');
