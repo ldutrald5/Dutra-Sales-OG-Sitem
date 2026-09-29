@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+await import('./quote-handoff-v3.js');
+const q=globalThis.DUTRA_QUOTE_HANDOFF;
+assert.ok(q,'quote handoff must attach');
+const store=new Map();
+const storage={setItem:(k,v)=>store.set(k,v),getItem:k=>store.get(k)||null,removeItem:k=>store.delete(k)};
+const payload=q.payloadFromLead({id:'L1',empresa:'Transportadora Teste',cnpj:'12.345.678/0001-90',telefone:'44999999999',cidadeUf:'Maringá - PR'},{name:'Marcos',phone:'44988888888'},{installments:6,tier:'lead_ie'});
+q.store(payload,storage);
+const read=q.read(storage);
+assert.equal(read.leadId,'L1');
+assert.equal(read.client.company,'Transportadora Teste');
+assert.equal(read.client.name,'Marcos');
+assert.equal(read.commercial.installments,6);
+assert.equal(read.commercial.tier,'lead_ie');
+q.clear(storage);
+assert.equal(q.read(storage),null);
+console.log('Quote handoff tests: PASS');
