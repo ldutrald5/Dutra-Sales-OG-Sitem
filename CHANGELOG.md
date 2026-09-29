@@ -2,6 +2,13 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — Playbook Vivo de Abordagem
+
+- Call AI ganhou Ficha de Ataque por momento comercial: primeiro contato, retomada, recuperação, interesse, proposta, negociação e pós-venda.
+- Cada conta recebe objetivo da conversa, abordagem recomendada, abertura de ligação, mensagem inicial de WhatsApp e próximo passo esperado.
+- Preparação técnica permanece conservadora: veículo, pressão e aplicação desconhecidos são marcados para validação; nenhum dado OG é inferido.
+- O playbook é derivado e não altera CRM, estágio, envio ou fatos da conta.
+
 ## [3.0] — Ciclo Comercial Conectado
 
 - Adicionada central de Ciclo Comercial: Entrada → Contato → Proposta → Negociação → Venda → Pós-venda.

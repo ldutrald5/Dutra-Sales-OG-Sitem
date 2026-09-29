@@ -6665,7 +6665,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!context || !lead) return;
     const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead);
     state.callAI.context = compact;
-    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[] };
+    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[], playbook:null };
     const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
       <div class="call-ai-account-row"><div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>
@@ -6678,7 +6678,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}
       <div class="call-ai-context-scope"><b>Contexto compacto</b><span>${compact.recentInteractions.length} interações recentes · ${compact.objections.length} objeções · sem carregar o CRM inteiro</span></div>
       <section class="call-ai-prebrief" aria-label="Briefing de diagnóstico">
-        <div class="call-ai-prebrief-head"><span class="og-kicker">BRIEFING PRÉ-LIGAÇÃO</span><small>${preCall.gaps.length ? `${preCall.gaps.length} lacuna(s) para descobrir` : 'Contexto essencial preenchido'}</small></div>
+        <div class="call-ai-prebrief-head"><span class="og-kicker">FICHA DE ATAQUE · PLAYBOOK VIVO</span><small>${preCall.gaps.length ? `${preCall.gaps.length} lacuna(s) para descobrir` : 'Contexto essencial preenchido'}</small></div>
+        ${preCall.playbook ? `
+          <div class="call-ai-playbook-head">
+            <div><small>MOMENTO DO CLIENTE</small><strong>${escapeHtml(preCall.playbook.label)}</strong></div>
+            <div><small>OBJETIVO DESTA CONVERSA</small><strong>${escapeHtml(preCall.playbook.objective)}</strong></div>
+          </div>
+          <div class="call-ai-playbook-approach"><b>COMO CHEGAR</b><p>${escapeHtml(preCall.playbook.approach)}</p></div>
+          <div class="call-ai-playbook-copy-grid">
+            <div><b>ABERTURA DE LIGAÇÃO</b><p>${escapeHtml(preCall.playbook.opening)}</p></div>
+            <div><b>WHATSAPP DE ENTRADA</b><p>${escapeHtml(preCall.playbook.whatsapp)}</p></div>
+          </div>
+          <div class="call-ai-tech-prep"><b>PREPARAÇÃO TÉCNICA ANTES DE PROPOR</b>${preCall.playbook.technicalPrep.map(item => `<div data-state="${escapeHtml(item.status)}"><span>${escapeHtml(item.label)}</span><p>${escapeHtml(item.value)}</p></div>`).join('')}</div>
+          <div class="call-ai-playbook-next"><b>SAIR DA CONVERSA COM</b><p>${escapeHtml(preCall.playbook.nextStep)}</p></div>
+        ` : ''}
         ${preCall.gaps.length ? `<div class="call-ai-gap-chips">${preCall.gaps.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>` : ''}
         <div class="call-ai-prebrief-grid">
           <div><b>PERGUNTAS PARA DESCOBRIR</b><ol>${preCall.questions.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>
