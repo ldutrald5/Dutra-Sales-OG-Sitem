@@ -9,6 +9,7 @@ const intelligence=require('../apps/sistema-og/modules/lead-intelligence.js');
 const signals=require('../apps/sistema-og/modules/signal-center.js');
 const automation=require('../apps/sistema-og/services/automation-engine-service.js');
 const operationsModel=require('../apps/sistema-og/operations-model.js');
+const customerJourney=require('../apps/sistema-og/services/customer-journey-service.js');
 
 const now=new Date('2026-09-28T15:00:00.000Z');
 const leads=[
@@ -25,7 +26,8 @@ const report=morning.build({leads,operations:ops,now},{
   salesDesk,
   leadIntelligence:intelligence,
   signalCenter:signals,
-  automationEngine:automation
+  automationEngine:automation,
+  customerJourney
 });
 assert.equal(report.counts.active,3);
 assert.equal(report.counts.overdue,1);
@@ -39,6 +41,8 @@ assert.equal(report.workQueue.find(item=>item.leadId==='L2').lane.id,'fulfill');
 assert.equal(report.workQueue.find(item=>item.leadId==='L3').lane.id,'relate');
 assert.ok(report.counts.lanes.fulfill>=1);
 assert.equal(report.counts.priority,1);
+assert.equal(report.counts.customerActions,1);
+assert.equal(report.customerActions[0].leadId,'L4');
 assert.ok(report.counts.noAction>=1);
 assert.ok(report.mission);
 assert.equal(report.calendar.connected,false);
@@ -52,7 +56,7 @@ const withCalendar=morning.build({
   now,
   calendarConnected:true,
   calendarEvents:[{id:'CAL-1',summary:'Reunião comercial',start:'2026-09-28T17:00:00Z'}]
-},{salesDesk,leadIntelligence:intelligence,signalCenter:signals,automationEngine:automation});
+},{salesDesk,leadIntelligence:intelligence,signalCenter:signals,automationEngine:automation,customerJourney});
 assert.equal(withCalendar.counts.calendar,1);
 assert.equal(withCalendar.calendar.events[0].title,'Reunião comercial');
 
