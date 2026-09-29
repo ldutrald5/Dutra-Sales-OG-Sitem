@@ -30,6 +30,8 @@ assert.match(actionCenter,/completeAction/,'conclusão deve ser explícita');
 assert.match(actionCenter,/OG_SMART_DIARY/,'notas devem reutilizar o Smart Diary para sugerir compromissos');
 assert.match(ui,/pxCallNote/,'Call Mode deve preservar contexto curto da ligação');
 assert.match(actionCenter,/Salvar \+ executar/,'ação externa deve exigir gesto explícito');
+assert.match(actionCenter,/Material marcado como enviado/,'material concluído deve gerar follow-up de recebimento');
+assert.match(actionCenter,/moreActionQueue/,'fila de execução deve ser acessível pelo menu Mais');
 assert.match(index,/document\.querySelectorAll\('\.screen'\)\.forEach/,'navegação deve reconhecer telas premium injetadas dinamicamente');
 assert.match(ui,/\['RETURN_LATER','SEND_MATERIAL','PROPOSAL'\]/,'resultados que exigem próximo passo devem abrir fluxo estruturado');
 console.log('Sales Execution UI integration: PASS');
