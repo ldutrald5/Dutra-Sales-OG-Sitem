@@ -6,4 +6,6 @@ assert.match(server,/api\.firecrawl\.dev/); assert.match(server,/firecrawl_v2_se
 assert.match(server,/requestedCount=Math\.max\(1,Math\.min\(25/); assert.match(server,/setTimeout\(\(\)=>controller\.abort\(\),8000\)/);
 assert.match(server,/mutationPolicy:'prepare_only'/); assert.match(server,/evidencePolicy:'public_sources_required'/);
 assert.doesNotMatch(server,/OG_PROSPECT_SEARCH_TOKEN[^\n]*console/);
+assert.ok(server.includes("replace(/\\s+[|–—-]\\s+.*$/,'')"),'título público deve separar empresa de sufixo usando espaços reais');
+assert.ok(!server.includes("replace(/\\\\s*"),'regex de título não pode procurar barra invertida literal');
 console.log('DUTRA-PROSPECT-06 secure research endpoint: PASS');
