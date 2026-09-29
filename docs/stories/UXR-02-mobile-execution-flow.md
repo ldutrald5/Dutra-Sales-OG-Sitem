@@ -1,6 +1,6 @@
 # UXR-02 — Fluxo móvel de execução comercial
 
-Status: **implementado na branch de preview; aguardando validação visual**
+Status: **incorporado à main; fluxo móvel de execução está em produção. QA físico final em aparelho real permanece no gate da 1.0.**
 
 ## Problema observado
 
