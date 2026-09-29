@@ -27,6 +27,8 @@ assert.match(server,/sales-action-center-v3\.js/,'V3 deve carregar o centro de p
 assert.match(actionCenter,/Agora faça isso/,'fila operacional precisa ser orientada a execução');
 assert.match(actionCenter,/scheduleAction/,'ações estruturadas devem persistir no domínio');
 assert.match(actionCenter,/completeAction/,'conclusão deve ser explícita');
+assert.match(actionCenter,/OG_SMART_DIARY/,'notas devem reutilizar o Smart Diary para sugerir compromissos');
+assert.match(ui,/pxCallNote/,'Call Mode deve preservar contexto curto da ligação');
 assert.match(actionCenter,/Salvar \+ executar/,'ação externa deve exigir gesto explícito');
 assert.match(index,/document\.querySelectorAll\('\.screen'\)\.forEach/,'navegação deve reconhecer telas premium injetadas dinamicamente');
 assert.match(ui,/\['RETURN_LATER','SEND_MATERIAL','PROPOSAL'\]/,'resultados que exigem próximo passo devem abrir fluxo estruturado');
