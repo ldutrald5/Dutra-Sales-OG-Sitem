@@ -83,5 +83,19 @@ const metrics=s.listMetrics(outcome.operations, imported.list.id, outcome.leads)
 assert.equal(metrics.attempted,1);
 assert.equal(metrics.rates.contactRate,0);
 
+const action=s.scheduleAction(outcome.leads,outcome.operations,outcome.lead.id,{type:'FOLLOW_UP',description:'Retornar contato',dueAt:new Date('2026-09-30T15:00:00Z'),reason:'Retorno combinado',priority:'HIGH'},new Date('2026-09-29T13:00:00Z'));
+assert.equal(action.lead.nextActionType,'FOLLOW_UP');
+assert.equal(s.actionQueue(action.leads,action.operations,new Date('2026-09-30T16:00:00Z'))[0].state,'OVERDUE');
+const completedAction=s.completeAction(action.leads,action.operations,action.lead.id,{result:'done'},new Date('2026-09-30T16:01:00Z'));
+assert.equal(completedAction.lead.nextAction,'');
+assert.ok(completedAction.operations.activities.some(a=>a.status==='completed'));
+
+const proposalMember=s.nextMember(outcome.operations,outcome.session);
+proposalMember.workStatus='IN_PROGRESS';
+const proposalIntent=s.recordOutcome(outcome.leads,outcome.operations,outcome.session.id,proposalMember.id,'PROPOSAL',{},new Date('2026-09-29T13:10:00Z'));
+assert.equal(proposalIntent.lead.pipelineStage,'PROPOSAL');
+assert.equal(proposalIntent.lead.nextActionType,'CREATE_PROPOSAL');
+assert.notEqual(proposalIntent.lead.status,'proposta_enviada','solicitação de proposta não pode fingir que proposta foi enviada');
+
 assert.equal(s.normalizeBrazilPhone('(44) 99999-9999'),'+5544999999999');
 console.log('Sales Execution acceptance A-F: PASS');
