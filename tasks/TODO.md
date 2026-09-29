@@ -200,6 +200,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Story:** `docs/stories/DUTRA-INT-01-intelligence-core-roadmap.md`.
 - **Status:** em andamento.
 
+## PRECALL-02 — Ficha de Ataque + Playbook Vivo
+
+- **Objetivo:** preparar a abordagem de cada conta conforme o momento comercial real, com objetivo, abertura, WhatsApp inicial, preparação técnica e próximo passo esperado.
+- **Escopo:** extensão determinística do `sales-brief-service`; sem IA obrigatória, sem segunda base e sem mutação do CRM.
+- **Critério de aceite:** cobrir primeiro contato, retomada, recuperação, interesse, proposta, negociação e pós-venda; dados técnicos desconhecidos permanecem para validação.
+- **Dependências:** PRECALL-01, TASK-008, CIC-01.
+- **Story:** `docs/stories/PRECALL-02-playbook-vivo.md`.
+- **Status:** concluída no código em 2026-09-29; aguardando merge/release.
 ## DIARY-01 — Diário Inteligente Revisável
 
 - **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.
