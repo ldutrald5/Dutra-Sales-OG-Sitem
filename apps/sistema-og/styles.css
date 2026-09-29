@@ -1303,3 +1303,20 @@ body {
 .morning-command-foot b{color:#cbd5e1}.morning-command-foot small{margin-left:auto}
 @media(max-width:900px){.morning-command-kpis{grid-template-columns:repeat(3,1fr)}.morning-command-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.morning-command-kpis{grid-template-columns:repeat(2,1fr)}.morning-command-head{align-items:center}.morning-command-foot small{width:100%;margin-left:0}}
+
+
+/* PRECALL-01 — diagnóstico e guardrails comerciais */
+.call-ai-prebrief{margin-top:.65rem;padding:.7rem;border:1px solid rgba(255,222,23,.2);border-radius:.7rem;background:#080d14}
+.call-ai-prebrief-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.call-ai-prebrief-head small{font-size:.52rem;color:#94a3b8}
+.call-ai-gap-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+.call-ai-gap-chips span{padding:.25rem .4rem;border-radius:999px;border:1px solid rgba(251,146,60,.25);background:rgba(251,146,60,.08);color:#fdba74;font-size:.48rem}
+.call-ai-prebrief-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem}
+.call-ai-prebrief-grid>div{padding:.58rem;border:1px solid #1f2937;border-radius:.6rem;background:#070b11}
+.call-ai-prebrief-grid b{display:block;margin-bottom:.4rem;color:#e2e8f0;font-size:.53rem;letter-spacing:.04em}
+.call-ai-prebrief-grid ol,.call-ai-prebrief-grid ul{display:grid;gap:.28rem;margin:0;padding-left:1rem}
+.call-ai-prebrief-grid li{color:#cbd5e1;font-size:.52rem;line-height:1.4}
+.call-ai-dont-say{border-color:rgba(248,113,113,.22)!important;background:rgba(127,29,29,.08)!important}
+.call-ai-dont-say b{color:#fca5a5}
+.call-ai-dont-say li{color:#fecaca}
+@media(max-width:700px){.call-ai-prebrief-grid{grid-template-columns:1fr}}
