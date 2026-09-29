@@ -105,7 +105,7 @@ async function searchPublicProspects(criteria) {
     if (!response.ok) throw new Error(`Provider respondeu HTTP ${response.status}`);
     const raw=await response.json(); const rows=raw?.data?.web||raw?.web||raw?.results||[];
     const candidates=cleanArray(rows,criteria.requestedCount).map(row=>({companyName:String(row.title||row.name||'').replace(/\\s*[|–—-].*$/,'').trim(),sourceSnippet:String(row.description||row.snippet||'').slice(0,500),sources:row.url?[{url:String(row.url).slice(0,2048),title:String(row.title||row.url).slice(0,200),observedAt:new Date().toISOString(),supports:['public_search']}]:[]})).filter(x=>x.companyName&&x.sources.length);
-    return { available:true,provider:'server_public_search',candidates };
+    return { available:true,provider:endpoint.includes('api.firecrawl.dev')?'firecrawl_v2_search':'server_public_search',candidates };
   } finally { clearTimeout(timer); }
 }
 
