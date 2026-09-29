@@ -46,6 +46,10 @@ assert.equal(meeting.operations.meetings.length,1);
 assert.ok(meeting.operations.opportunities.some(o=>o.clientId===qualified.lead.id&&o.stage==='QUALIFIED'),'qualificação deve criar oportunidade operacional');
 assert.ok(meeting.operations.activities.some(a=>a.type==='meeting'),'reunião deve gerar atividade');
 assert.ok(meeting.operations.activities.some(a=>a.type==='follow_up'&&a.title==='Confirmar reunião'),'reunião deve gerar follow-up pré-reunião');
+const confirmed=s.updateMeetingStatus(meeting.operations,meeting.meeting.id,'MEETING_CONFIRMED',new Date('2026-09-29T13:00:00Z'));
+assert.equal(confirmed.meeting.meetingStatus,'MEETING_CONFIRMED');
+const completed=s.updateMeetingStatus(confirmed.operations,meeting.meeting.id,'MEETING_COMPLETED',new Date('2026-09-30T14:40:00Z'));
+assert.equal(completed.meeting.meetingStatus,'MEETING_COMPLETED');
 
 // CASE D — existing customer remains customer when re-imported.
 const customer=[{id:'CUST-1',empresa:'Cliente OG',cnpj:'12345678000199',telefone:'+5544999990000',relationshipStatus:'CUSTOMER',interactions:[]}];
