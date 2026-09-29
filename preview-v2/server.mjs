@@ -124,6 +124,12 @@ const server = http.createServer(async (req, res) => {
   res.end('DUTRA OS V3 — rota não encontrada');
 });
 
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, '0.0.0.0', async () => {
   console.log(`DUTRA OS V3 premium on ${port} · core ${coreBase}`);
+  try {
+    const response = await fetch(coreBase + '/health', { cache:'no-store' });
+    console.log(`DUTRA OS core health: ${response.status} ${response.ok ? 'OK' : 'WARN'}`);
+  } catch (error) {
+    console.warn('DUTRA OS core health: indisponível', error.message);
+  }
 });
