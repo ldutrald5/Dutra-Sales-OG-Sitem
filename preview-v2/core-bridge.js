@@ -561,6 +561,7 @@
     save:saveState,
     getState:()=>state.snapshot,
     getLeads:()=>state.leads,
+    commit:async(payload={},message='Alterações salvas.')=>{if(Array.isArray(payload.leads))state.leads=payload.leads.map(normalize);if(payload.operations&&typeof payload.operations==='object'){if(!state.snapshot)throw new Error('Base ainda não carregada.');state.snapshot.operations=payload.operations;}return saveState(message);},
     selectClient:id=>{state.selectedLeadId=id;renderClient();globalThis.go?.('clients');}
   };
 
