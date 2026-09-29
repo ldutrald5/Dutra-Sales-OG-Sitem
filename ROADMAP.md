@@ -14,6 +14,7 @@ Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado pe
 - Dutra Force contextual e Central.
 - Ciclo Comercial Conectado V3.0.
 - Protocolo canônico de contexto e handoff para múltiplas IAs/agentes.
+- Ficha de Ataque / Playbook Vivo pré-contato por momento comercial, sem segunda fonte de verdade.
 
 ## Próxima frente prioritária
 
