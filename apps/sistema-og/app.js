@@ -5573,6 +5573,30 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root?.querySelector('[data-journey-referral-received]')?.addEventListener('click',()=>record('referral.received','referralReceivedAt'));
   }
 
+  function buildReferralGraphPanel(lead) {
+    const engine=window.OG_REFERRAL_INTELLIGENCE;
+    if(!engine?.graph || !window.OG_CUSTOMER_REVENUE?.isCustomer(lead)) return '';
+    const referrals=(state.operations?.referrals||[]).filter(item=>String(item.referrerClientId||'')===String(lead.id));
+    const graph=engine.graph(referrals,state.leads),portfolio=engine.portfolio(referrals);
+    const money=value=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(value)||0);
+    const cards=graph.edges.map(edge=>{const node=graph.nodes.find(n=>n.id===edge.target);return `<article class="rounded-lg border border-slate-800 bg-slate-950 p-2.5"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span><b class="text-xs text-slate-100">${escapeHtml(node?.label||'Indicado')}</b></div><small class="block text-[10px] text-slate-500 mt-1">${escapeHtml(edge.status||'received')} · ${edge.saleId?'VENDA '+money(edge.revenue):edge.opportunityId?'OPORTUNIDADE':'INDICAÇÃO'}</small></article>`;}).join('');
+    return `<section class="rounded-xl border border-amber-500/20 bg-slate-900/70 p-3.5 space-y-3" data-referral-graph>
+      <div class="flex items-start justify-between gap-3"><div><span class="og-kicker">REFERRAL GRAPH</span><h3 class="font-bold text-sm text-slate-100 mt-1">Rede de indicações desta conta</h3><p class="text-[11px] text-slate-400 mt-1">Cliente → indicado → oportunidade → venda. Somente fatos confirmados entram na rede.</p></div><span class="text-[10px] font-black px-2 py-1 rounded-full border border-amber-500/30 text-amber-300">${portfolio.total} indicações</span></div>
+      <div class="grid grid-cols-3 gap-2"><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Oportunidades</small><b class="block text-sm text-slate-100">${portfolio.converted}</b></div><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Vendas</small><b class="block text-sm text-emerald-300">${portfolio.sales}</b></div><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Receita atribuída</small><b class="block text-sm text-amber-300">${money(portfolio.attributedRevenue)}</b></div></div>
+      <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><div class="flex items-center gap-2 text-xs"><b class="text-emerald-300">${escapeHtml(lead.empresa||lead.nome||'Cliente')}</b><span class="text-slate-600">→</span><span class="text-amber-300">rede indicada</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">${cards||'<p class="text-[11px] text-slate-500">Nenhuma indicação estruturada ainda.</p>'}</div></div>
+      <details class="rounded-lg border border-slate-800 p-2.5"><summary class="text-xs font-bold text-slate-300 cursor-pointer">＋ Registrar indicação confirmada</summary><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3"><label class="og-field"><span>Empresa indicada</span><input data-ref-company maxlength="120"></label><label class="og-field"><span>Contato indicado</span><input data-ref-contact maxlength="100"></label><label class="og-field"><span>Telefone</span><input data-ref-phone inputmode="tel" maxlength="24"></label><label class="og-field"><span>Contexto</span><input data-ref-context maxlength="220" placeholder="Como surgiu a indicação"></label></div><button type="button" data-ref-save class="w-full mt-2 px-3 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black">CONFIRMAR E REGISTRAR INDICAÇÃO</button></details>
+    </section>`;
+  }
+
+  function bindReferralGraphPanel(lead,root){
+    root?.querySelector('[data-ref-save]')?.addEventListener('click',()=>{
+      const company=root.querySelector('[data-ref-company]')?.value?.trim()||'',contact=root.querySelector('[data-ref-contact]')?.value?.trim()||'',phone=root.querySelector('[data-ref-phone]')?.value?.trim()||'',context=root.querySelector('[data-ref-context]')?.value?.trim()||'';
+      if(!company&&!contact)return showNotification('Informe a empresa ou o contato indicado.','warning');
+      if(!confirm(`Confirmar indicação de "${company||contact}" feita por ${lead.empresa||lead.nome}?`))return;
+      try{const now=new Date().toISOString(),record=OG_REFERRAL_INTELLIGENCE.create({id:newLibraryId('ref'),referrerClientId:lead.id,referredCompany:company,referredContact:contact,referredPhone:phone,context,status:'received',receivedAt:now,confirmedByUser:true},{leads:state.leads,referrals:state.operations.referrals||[]});state.operations.referrals=state.operations.referrals||[];state.operations.referrals.unshift({...record,duplicateCandidates:[...record.duplicateCandidates]});state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:newLibraryId('evt'),type:'referral.received.structured',at:now,clientId:lead.id,referralId:record.id});saveOperationsToStorage();renderLeadInspector();showNotification(record.dedupStatus==='review'?'Indicação registrada; possível duplicidade exige revisão.':'Indicação adicionada ao Referral Graph.','success');}catch(error){showNotification(error.message||'Não foi possível registrar a indicação.','warning');}
+    });
+  }
+
   function buildCustomer360RevenuePanel(lead) {
     const engine = window.OG_CUSTOMER_REVENUE;
     if (!engine?.opportunity || !engine.isCustomer(lead)) return '';
@@ -5726,7 +5750,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     inspector.insertAdjacentHTML('beforeend', buildCustomer360RevenuePanel(lead));
     inspector.insertAdjacentHTML('beforeend', buildCustomerJourneyPanel(lead));
+    inspector.insertAdjacentHTML('beforeend', buildReferralGraphPanel(lead));
     bindCustomerJourneyPanel(lead, inspector);
+    bindReferralGraphPanel(lead, inspector);
     bindCustomer360RevenuePanel(lead, inspector);
     inspector.insertAdjacentHTML('beforeend', buildCompany360BetaPanel(lead));
     bindCompany360BetaPanel(lead);
