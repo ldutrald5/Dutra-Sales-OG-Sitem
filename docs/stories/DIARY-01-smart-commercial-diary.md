@@ -1,6 +1,6 @@
 # DIARY-01 — Diário Inteligente Revisável
 
-Status: **pronta**
+Status: **em andamento**
 
 ## Problema
 
@@ -59,4 +59,4 @@ Saída proposta, sempre como preview:
 
 ## Próxima fatia
 
-Implementar contrato de preview e parser conservador, depois ligar a uma única superfície de pós-contato antes de expandir para Call AI, Mesa e Prospecção.
+Contrato de preview e parser conservador implementados em `smart-diary-service.js`, com testes de imutabilidade e evidência. Próxima fatia: ligar o preview a uma única superfície de pós-contato, mantendo confirmação humana antes de persistir.
