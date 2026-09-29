@@ -13,6 +13,22 @@ assert.equal(intelligence.conversationStage(noReply),'no_reply');
 const explicit={id:'C',conversationStage:'waiting_response',priority:'alta',interactions:[{type:'conversation'}]};
 assert.equal(intelligence.conversationStage(explicit),'waiting_response','estado explícito deve prevalecer');
 
+const closedUntouched={id:'CLOSED-1',status:'fechado',interactions:[],observacoes:''};
+assert.equal(intelligence.conversationStage(closedUntouched),'first_contact','cliente histórico sem evidência de conversa deve entrar como primeiro contato da rotina');
+
+const closedNoReply={id:'CLOSED-2',status:'fechado',observacoes:'Não atende',interactions:[]};
+assert.equal(intelligence.conversationStage(closedNoReply),'no_reply','anotação de tentativa sem resposta deve prevalecer sobre venda histórica');
+
+const closedWaiting={id:'CLOSED-3',status:'fechado',observacoes:'Está em reunião, entrar em contato mais tarde',interactions:[]};
+assert.equal(intelligence.conversationStage(closedWaiting),'waiting_response','anotação de retorno deve virar aguardando resposta');
+
+const closedTalked={id:'CLOSED-4',status:'fechado',observacoes:'Ainda não instalou os equipamentos por falta de tempo',interactions:[]};
+assert.equal(intelligence.conversationStage(closedTalked),'talked','anotação de conversa sem outro sinal deve virar já conversei');
+
+assert.equal(intelligence.inferStageFromText('Recusou chamada'),'no_reply');
+assert.equal(intelligence.inferStageFromText('Cliente já instalou e indicou conhecidos'),'talked');
+assert.equal(intelligence.inferStageFromText('Sem interesse em continuar'),'not_interested');
+
 assert.equal(intelligence.priorityBand({priority:'alta',priorityBand:'urgente'}),'urgente');
 const priorityCase={priorityBand:'urgente',conversationStage:'negotiation',followUpAt:'2026-09-27T09:00:00-03:00',temperature:'quente',potential:'alto',nextAction:'Ligar para o gestor',nextActionReason:'Proposta enviada e retorno combinado',nextActionObjective:'Descobrir o bloqueio',nextActionExpectedResult:'Definir avanço ou nova data'};
 assert.ok(intelligence.score(priorityCase,now) > intelligence.score({priority:'media',conversationStage:'first_contact'},now));

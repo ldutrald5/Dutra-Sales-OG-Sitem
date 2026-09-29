@@ -658,8 +658,16 @@
           <select id="crm-import-sheet-select" aria-label="Aba da planilha para importar"><option value="">Selecione uma aba…</option></select>
         </div>
         <div id="crm-import-mapping" class="spreadsheet-mapping hidden">
-          <div class="spreadsheet-mapping-head"><div><b>Mapeamento de colunas</b><span id="crm-import-mapping-note">O sistema tentou reconhecer os campos automaticamente.</span></div><button id="crm-import-remap-preview" type="button">Atualizar preview</button></div>
-          <div id="crm-import-mapping-fields" class="spreadsheet-mapping-grid"></div>
+          <div class="spreadsheet-mapping-head">
+            <div><b>Campos reconhecidos</b><span id="crm-import-mapping-note">O sistema usa apenas correspondências seguras automaticamente.</span></div>
+            <button id="crm-import-toggle-advanced" type="button" aria-expanded="false">Ajustar campos</button>
+          </div>
+          <div id="crm-import-recognized" class="spreadsheet-recognized" aria-live="polite"></div>
+          <div id="crm-import-advanced" class="spreadsheet-advanced hidden">
+            <div class="spreadsheet-advanced-head"><b>Mapeamento avançado</b><span>Use somente se alguma coluna importante não foi reconhecida.</span></div>
+            <div id="crm-import-mapping-fields" class="spreadsheet-mapping-grid"></div>
+            <button id="crm-import-remap-preview" type="button" class="spreadsheet-apply-mapping">Aplicar mapeamento</button>
+          </div>
         </div>
         <div id="crm-excel-counters" class="prospect-session-metrics"></div>
         <div class="spreadsheet-auto-actions">

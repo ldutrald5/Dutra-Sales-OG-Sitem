@@ -11,11 +11,23 @@
   const codeKey=value=>{const raw=String(value??'').trim().replace(/\s+/g,'');if(!raw)return'';if(/^\d+$/.test(raw))return String(Number.parseInt(raw,10));return compact(raw);};
   const clean=value=>String(value??'').trim();
 
+  function inferConversationStageFromNotes(value){
+    const text=norm(value);
+    if(!text)return'';
+    if(/\bsem interesse\b|\bnao tem interesse\b|\bnao quer (comprar|seguir|continuar)\b|\bdesistiu\b/.test(text))return'not_interested';
+    if(/\bnao atende\b|\bnao atendeu\b|\brecusou chamada\b|\bchamada recusada\b|\bnao respondeu\b|\bsem resposta\b|\bnao consegui contato\b|\bcaixa postal\b/.test(text))return'no_reply';
+    if(/\bem reuniao\b|\bentrar em contato mais tarde\b|\bligar mais tarde\b|\bligar depois\b|\bretornar\b|\bretorno combinado\b|\baguardando resposta\b|\baguardando retorno\b/.test(text))return'waiting_response';
+    if(/\bproposta enviada\b|\borcamento enviado\b|\bcotacao enviada\b/.test(text))return'proposal';
+    if(/\bem negociacao\b|\bnegociando\b|\bcontraproposta\b/.test(text))return'negotiation';
+    if(/\binteressad[oa]\b|\bdemonstrou interesse\b/.test(text))return'interested';
+    return'talked';
+  }
+
   const FIELD_DEFS=Object.freeze([
     {key:'externalCode',label:'Código OG',aliases:['codigo cliente','codigo og','codigo','cod cliente','cod','id cliente'],current:l=>l.internalCode||l.externalCode||'',incoming:r=>r.externalCode},
     {key:'company',label:'Empresa',aliases:['empresa nome','empresa','razao social nome','razao social','cliente','nome empresa'],current:l=>l.empresa||'',incoming:r=>r.company},
     {key:'contact',label:'Contato',aliases:['contato principal','contato','nome contato','responsavel','nome'],current:l=>l.nome||'',incoming:r=>r.primaryContact},
-    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
+    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone principal','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
     {key:'document',label:'CNPJ / CPF',aliases:['cnpj cpf','cnpj','cpf','documento'],current:l=>l.cnpj||l.cpf||'',incoming:r=>r.document},
     {key:'email',label:'E-mail',aliases:['email','e mail','e-mail'],current:l=>l.email||'',incoming:r=>r.email},
     {key:'city',label:'Cidade / UF',aliases:['cidade uf','cidade estado','cidade','localizacao','uf'],current:l=>l.cidadeUf||'',incoming:r=>r.city},
@@ -120,21 +132,24 @@
   }
 
   function suggestMapping(headers=[]){
+    // Auto-mapping is intentionally conservative. Partial substring matches such as
+    // "responsável" inside "usuário responsável" or "data" inside unrelated fields
+    // are never preselected. Ambiguous columns remain available in the advanced UI.
     const used=new Set(),mapping={};
     FIELD_DEFS.forEach(def=>{
       let best={index:-1,score:0};
       headers.forEach((header,index)=>{
         if(used.has(index))return;
         const key=norm(header);
+        if(!key)return;
         let score=0;
         for(const alias of def.aliases){
           const a=norm(alias);
           if(key===a)score=Math.max(score,100+a.length);
-          else if(key&&a&&(key.includes(a)||a.includes(key)))score=Math.max(score,50+Math.min(key.length,a.length));
         }
         if(score>best.score)best={index,score};
       });
-      if(best.index>=0&&best.score>=50){mapping[def.key]=best.index;used.add(best.index);}
+      if(best.index>=0&&best.score>=100){mapping[def.key]=best.index;used.add(best.index);}
     });
     return mapping;
   }
@@ -184,8 +199,9 @@
 
   function rowFromValues(values,mapping,sourceRow){
     const get=key=>mapping[key]==null?'':String(values[mapping[key]]??'').trim();
+    const notes=get('notes'),summary=get('summary'),explicitConversation=get('conversationStage');
     return{
-      sourceRow,externalCode:get('externalCode'),company:get('company'),primaryContact:get('contact'),phone:get('phone'),document:get('document'),email:get('email'),city:get('city'),segment:get('segment'),status:get('status'),conversationStage:get('conversationStage'),priority:get('priority'),temperature:get('temperature'),potential:get('potential'),decisionMaker:get('decisionMaker'),fleetSize:get('fleetSize'),pain:get('pain'),objections:get('objections'),nextAction:get('nextAction'),nextActionAt:get('nextActionAt'),summary:get('summary'),notes:get('notes'),origin:get('sourceLabel'),referral:get('referral')
+      sourceRow,externalCode:get('externalCode'),company:get('company'),primaryContact:get('contact'),phone:get('phone'),document:get('document'),email:get('email'),city:get('city'),segment:get('segment'),status:get('status'),conversationStage:explicitConversation||inferConversationStageFromNotes([summary,notes].filter(Boolean).join(' ')),priority:get('priority'),temperature:get('temperature'),potential:get('potential'),decisionMaker:get('decisionMaker'),fleetSize:get('fleetSize'),pain:get('pain'),objections:get('objections'),nextAction:get('nextAction'),nextActionAt:get('nextActionAt'),summary,notes,origin:get('sourceLabel'),referral:get('referral')
     };
   }
 
@@ -384,5 +400,5 @@
 
   function protectedContract(){return{formula:['📋 CRM!Q:Q','🚀 HOJE!A:W'],manual:['📋 CRM!P:P','👥 CONTATOS!H:H'],derived:['📋 CRM!I:I','📋 CRM!W:W'],structure:['tables','merges','validations','conditionalFormatting'],writable:CRM_HEADERS.filter(item=>!['Score','Nº contatos'].includes(item))};}
 
-  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSources,sourceForSheet,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,digits,norm};
+  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSources,sourceForSheet,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,inferConversationStageFromNotes,digits,norm};
 });

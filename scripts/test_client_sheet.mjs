@@ -82,6 +82,11 @@ assert.match(html,/Código OG/,'CRM deve exibir código OG');
 assert.doesNotMatch(html,/id="crm-lead-inspector"/,'inspector antigo não deve competir com a ficha lateral');
 assert.match(css,/\.client-sheet-overlay/,'estilos da ficha lateral ausentes');
 assert.match(css,/\.crm-client-row/,'novo CRM visual ausente');
+assert.match(app,/data-client-sheet-more/,'ficha mobile deve permitir revelar dados avançados sob demanda');
+assert.match(app,/Mostrar dados completos/,'ficha deve começar com linguagem simples e progressiva');
+assert.match(css,/client-sheet-panel:not\(\.mobile-expanded\)/,'dados avançados não devem aparecer todos de uma vez no mobile');
+assert.match(css,/td\[data-label="Contexto"\]/,'lista mobile deve ocultar contexto secundário da primeira camada');
+assert.match(css,/td\[data-label="Origem"\]/,'lista mobile deve ocultar origem da primeira camada');
 
 assert.match(app,/function initUniversalClientSheetAccess\(\)/,'acesso transversal à ficha deve existir');
 assert.match(app,/data-open-client-sheet=.*data-prospect|data-prospect.*data-open-client-sheet/s,'prospecção deve expor ficha do cliente');
