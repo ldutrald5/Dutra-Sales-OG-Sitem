@@ -5,6 +5,7 @@ const ui=fs.readFileSync('./prospecting-execution-v3.js','utf8');
 const server=fs.readFileSync('./server.mjs','utf8');
 const bridge=fs.readFileSync('./core-bridge.js','utf8');
 const actionCenter=fs.readFileSync('./sales-action-center-v3.js','utf8');
+const index=fs.readFileSync('./index.html','utf8');
 
 assert.match(server,/spreadsheet-import-service\.js/,'V3 deve carregar o importador XLSX existente');
 assert.match(server,/\/workers\/spreadsheet-worker\.js/,'V3 deve expor o worker XLSX isolado');
@@ -27,5 +28,6 @@ assert.match(actionCenter,/Agora faça isso/,'fila operacional precisa ser orien
 assert.match(actionCenter,/scheduleAction/,'ações estruturadas devem persistir no domínio');
 assert.match(actionCenter,/completeAction/,'conclusão deve ser explícita');
 assert.match(actionCenter,/Salvar \+ executar/,'ação externa deve exigir gesto explícito');
+assert.match(index,/document\.querySelectorAll\('\.screen'\)\.forEach/,'navegação deve reconhecer telas premium injetadas dinamicamente');
 assert.match(ui,/\['RETURN_LATER','SEND_MATERIAL','PROPOSAL'\]/,'resultados que exigem próximo passo devem abrir fluxo estruturado');
 console.log('Sales Execution UI integration: PASS');
