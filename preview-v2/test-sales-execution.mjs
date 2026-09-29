@@ -23,6 +23,7 @@ let outcome=s.recordOutcome(imported.leads,started.operations,started.session.id
 assert.equal(outcome.session.attemptedCalls,1);
 assert.equal(outcome.member.workStatus,'WORKED');
 assert.notEqual(s.nextMember(outcome.operations,outcome.session)?.id,first.id);
+assert.equal(outcome.lead.relationshipStatus,'COLD','não atendimento não deve inventar relacionamento');
 
 // CASE B — gatekeeper and decision maker coexist.
 let c1=s.addContact(outcome.operations,outcome.lead.id,{name:'Ana',role:'Recepção',phone:'(44) 99999-1111',roleCategory:'GATEKEEPER'},new Date('2026-09-29T12:07:00Z'));
@@ -38,6 +39,7 @@ outcome.session.currentMemberId=member2.id;
 member2.workStatus='IN_PROGRESS';
 let qualified=s.recordOutcome(outcome.leads,c2.operations,outcome.session.id,member2.id,'QUALIFIED',{contactId:people.find(c=>c.name==='Marcos').id},new Date('2026-09-29T12:10:00Z'));
 assert.equal(qualified.lead.pipelineStage,'QUALIFIED');
+assert.equal(qualified.lead.relationshipStatus,'NEGOTIATION');
 const meeting=s.scheduleMeeting(qualified.operations,{leadId:qualified.lead.id,listId:qualified.session.listId,sessionId:qualified.session.id,contactId:people.find(c=>c.name==='Marcos').id,decisionMaker:'Marcos',scheduledAt:new Date('2026-09-30T14:00:00Z'),durationMinutes:30,objective:'Diagnóstico de frota'},new Date('2026-09-29T12:11:00Z'));
 assert.equal(meeting.meeting.meetingStatus,'MEETING_SCHEDULED');
 assert.equal(meeting.operations.meetings.length,1);
@@ -67,6 +69,11 @@ const restored=s.ensureOperations(JSON.parse(JSON.stringify(sr.operations)));
 const resumed=s.getActiveSession(restored);
 assert.equal(resumed.id,sr.session.id);
 assert.equal(resumed.targetCalls,10);
+const oneTarget=s.startSession(l2.operations,l2.list.id,1,'seller-target',new Date('2026-09-29T12:40:00Z'));
+const targetMember=s.nextMember(oneTarget.operations,oneTarget.session);
+targetMember.workStatus='IN_PROGRESS';
+const targetDone=s.recordOutcome(l2.leads,oneTarget.operations,oneTarget.session.id,targetMember.id,'NO_ANSWER',{},new Date('2026-09-29T12:41:00Z'));
+assert.equal(s.nextMember(targetDone.operations,targetDone.session),null,'sessão deve parar ao atingir a meta');
 
 const metrics=s.listMetrics(outcome.operations, imported.list.id, outcome.leads);
 assert.equal(metrics.attempted,1);
