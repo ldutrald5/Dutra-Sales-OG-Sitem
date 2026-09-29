@@ -7,18 +7,22 @@
   const clean=v=>String(v??'').trim();
   const fold=v=>clean(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 
-  function reviewInbox(researchResults=[]){
+  function reviewInbox(researchResults=[],leads=[]){
     const jobs=Array.isArray(researchResults)?researchResults:[];
+    const existing=new Set((Array.isArray(leads)?leads:[]).map(lead=>fold(lead.company||lead.companyName||lead.empresa||lead.name||lead.nome)).filter(Boolean));
     return jobs.flatMap(job=>(Array.isArray(job?.candidates)?job.candidates:[])
       .filter(c=>c.reviewStatus==='ready_for_review' || c.importAllowed===true || c.duplicate===true)
-      .map(c=>Object.freeze({
-        researchJobId:clean(job.id),providerId:clean(job.providerId),
-        companyName:clean(c.companyName),city:clean(c.city),state:clean(c.state),
-        segment:clean(c.segment),fleetSize:c.fleetSize,decisionMaker:clean(c.decisionMaker),
-        contact:clean(c.contact),sources:c.sources||[],fitReasons:c.fitReasons||[],
-        duplicate:c.duplicate===true,importAllowed:c.importAllowed===true,
-        status:c.duplicate?'duplicate':'awaiting_review'
-      })));
+      .map(c=>{
+        const duplicate=c.duplicate===true || existing.has(fold(c.companyName));
+        return Object.freeze({
+          researchJobId:clean(job.id),providerId:clean(job.providerId),
+          companyName:clean(c.companyName),city:clean(c.city),state:clean(c.state),
+          segment:clean(c.segment),fleetSize:c.fleetSize,decisionMaker:clean(c.decisionMaker),
+          contact:clean(c.contact),sourceSnippet:clean(c.sourceSnippet),sources:c.sources||[],fitReasons:c.fitReasons||[],
+          duplicate,importAllowed:c.importAllowed===true && !duplicate,
+          status:duplicate?'duplicate':'awaiting_review'
+        });
+      }));
   }
 
   function prepareCrmImport(item={},options={}){

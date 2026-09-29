@@ -69,6 +69,7 @@
       fleetSize:Number.isFinite(fleet) && fleet >= 0 ? fleet : null,
       decisionMaker:clean(candidate.decisionMaker),
       contact:clean(candidate.contact),
+      sourceSnippet:clean(candidate.sourceSnippet || candidate.snippet || candidate.description).slice(0,500),
       sources:Object.freeze(sources),
       evidenceCount,
       fitReasons:Object.freeze(fitReasons),
