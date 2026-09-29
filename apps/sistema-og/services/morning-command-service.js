@@ -90,7 +90,7 @@
 
     const mission = signalCenter.nextMission(leads,now,(lead,reference)=>intelligence.score(lead,reference),operations);
     const suggestions = automation?.buildSuggestions ? automation.buildSuggestions(leads,operations,now) : [];
-    const customerActions = customerJourney?.snapshot ? all.filter(lead => ['fechado','customer','loyal_customer'].includes(clean(lead.status)) || ['customer','loyal_customer'].includes(clean(lead.conversationStage))).map(lead => { const journey=customerJourney.snapshot(lead,operations); return Object.freeze({leadId:clean(lead.id),label:leadLabel(lead),...journey.next,referralReadiness:journey.referralReadiness}); }).filter(item => item.action) : [];
+    const customerActions = customerJourney?.snapshot ? leads.filter(lead => ['fechado','customer','loyal_customer'].includes(clean(lead.status)) || ['customer','loyal_customer'].includes(clean(lead.conversationStage))).map(lead => { const journey=customerJourney.snapshot(lead,operations); return Object.freeze({leadId:clean(lead.id),label:leadLabel(lead),...journey.next,referralReadiness:journey.referralReadiness}); }).filter(item => item.action) : [];
 
     const commitments = all
       .filter(lead => clean(lead.nextActionReason) || clean(lead.nextActionObjective) || clean(lead.nextActionExpectedResult))
