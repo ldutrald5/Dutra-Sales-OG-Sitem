@@ -1500,6 +1500,27 @@ body {
 @media(max-width:560px){.morning-command-kpis{grid-template-columns:repeat(2,1fr)}.morning-command-head{align-items:center}.morning-command-foot small{width:100%;margin-left:0}}
 
 
+/* PRECALL-02 — ficha de ataque e playbook vivo */
+.call-ai-playbook-head{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:.55rem;margin-top:.7rem}
+.call-ai-playbook-head>div,.call-ai-playbook-copy-grid>div,.call-ai-playbook-approach,.call-ai-playbook-next,.call-ai-tech-prep{border:1px solid rgba(148,163,184,.14);border-radius:.65rem;background:rgba(15,23,42,.56);padding:.65rem}
+.call-ai-playbook-head small{display:block;color:#94a3b8;font-size:.49rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+.call-ai-playbook-head strong{display:block;color:#f8fafc;font-size:.67rem;line-height:1.4}
+.call-ai-playbook-approach{margin-top:.55rem;border-color:rgba(255,222,23,.2);background:rgba(255,222,23,.045)}
+.call-ai-playbook-approach b,.call-ai-playbook-copy-grid b,.call-ai-playbook-next b,.call-ai-tech-prep>b{display:block;color:#fef08a;font-size:.52rem;letter-spacing:.07em;margin-bottom:.25rem}
+.call-ai-playbook-approach p,.call-ai-playbook-copy-grid p,.call-ai-playbook-next p,.call-ai-tech-prep p{margin:0;color:#d6deea;font-size:.62rem;line-height:1.5}
+.call-ai-playbook-copy-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.55rem}
+.call-ai-playbook-next{margin-top:.55rem;border-color:rgba(34,197,94,.18);background:rgba(34,197,94,.045)}
+.call-ai-tech-prep{margin-top:.55rem}
+.call-ai-tech-prep>div{display:grid;grid-template-columns:minmax(7rem,.35fr) minmax(0,1fr);gap:.5rem;padding:.42rem 0;border-top:1px solid rgba(148,163,184,.1)}
+.call-ai-tech-prep>div:first-of-type{border-top:0}
+.call-ai-tech-prep span{font-size:.56rem;font-weight:800;color:#cbd5e1}
+.call-ai-tech-prep [data-state="missing"] span{color:#fbbf24}
+.call-ai-tech-prep [data-state="known"] span{color:#86efac}
+@media(max-width:760px){
+  .call-ai-playbook-head,.call-ai-playbook-copy-grid{grid-template-columns:1fr}
+  .call-ai-tech-prep>div{grid-template-columns:1fr}
+}
+
 /* PRECALL-01 — diagnóstico e guardrails comerciais */
 .call-ai-prebrief{margin-top:.65rem;padding:.7rem;border:1px solid rgba(255,222,23,.2);border-radius:.7rem;background:#080d14}
 .call-ai-prebrief-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
