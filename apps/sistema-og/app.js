@@ -198,20 +198,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return token;
   }
 
-  function apiHeaders(includeContentType = false) {
+  function apiHeaders(includeContentType = false, tokenOverride = null) {
     const headers = {};
-    const token = cloudAccessToken();
+    const token = tokenOverride === null ? cloudAccessToken() : tokenOverride;
     if (token) headers.Authorization = `Bearer ${token}`;
     if (includeContentType) headers['Content-Type'] = 'application/json';
     return headers;
   }
 
   async function apiFetch(url, options = {}) {
-    let response = await fetch(url, { ...options, headers: { ...apiHeaders(Boolean(options.body)), ...(options.headers || {}) } });
-    if (response.status === 401 && location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
-      sessionStorage.removeItem('og_cloud_access_token');
-      const token = cloudAccessToken(true);
-      if (token) response = await fetch(url, { ...options, headers: { ...apiHeaders(Boolean(options.body)), ...(options.headers || {}) } });
+    const hosted = location.hostname !== '127.0.0.1' && location.hostname !== 'localhost';
+    const includeContentType = Boolean(options.body);
+    const usedToken = hosted ? (sessionStorage.getItem('og_cloud_access_token') || cloudAccessToken()) : '';
+    const request = token => fetch(url, { ...options, headers: { ...apiHeaders(includeContentType, token), ...(options.headers || {}) } });
+
+    let response = await request(usedToken);
+    if (response.status === 401 && hosted) {
+      const currentToken = sessionStorage.getItem('og_cloud_access_token') || '';
+      if (currentToken && currentToken !== usedToken) {
+        response = await request(currentToken);
+      } else {
+        sessionStorage.removeItem('og_cloud_access_token');
+        const replacementToken = cloudAccessToken(true);
+        if (replacementToken) response = await request(replacementToken);
+      }
     }
     return response;
   }
