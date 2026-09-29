@@ -142,6 +142,7 @@
     }
     connection(true);
     renderAll();
+    window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads}}));
     return snapshot;
   }
 
@@ -163,6 +164,7 @@
       state.leads = (next.leads || []).map(normalize);
       connection(true);
       renderAll();
+      window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads}}));
       toast(message);
       return next;
     } catch (error) {
