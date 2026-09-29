@@ -47,3 +47,7 @@ Celular (mesma Wi-Fi): use o endereço de rede mostrado no terminal. A versão H
 `apps/sistema-og/` — aplicativo · `docs/stories/` — stories AIOX · `.codex/` — agentes e skills
 
 `.env` e `.data/` não vão para o Git.
+
+## Memória e continuidade do projeto
+
+Para continuar o DUTRA OS em outra IA, agente ou sessão, comece por [`DUTRA_OS_CONTEXT.md`](DUTRA_OS_CONTEXT.md) e [`AI_HANDOFF.md`](AI_HANDOFF.md). O estado executivo fica em [`ROADMAP.md`](ROADMAP.md) e as mudanças por versão em [`CHANGELOG.md`](CHANGELOG.md). Esses arquivos fazem parte da Definition of Done das próximas releases.
