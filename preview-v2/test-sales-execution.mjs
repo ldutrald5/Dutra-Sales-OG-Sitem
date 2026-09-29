@@ -46,9 +46,13 @@ assert.equal(meeting.operations.meetings.length,1);
 assert.ok(meeting.operations.opportunities.some(o=>o.clientId===qualified.lead.id&&o.stage==='QUALIFIED'),'qualificação deve criar oportunidade operacional');
 assert.ok(meeting.operations.activities.some(a=>a.type==='meeting'),'reunião deve gerar atividade');
 assert.ok(meeting.operations.activities.some(a=>a.type==='follow_up'&&a.title==='Confirmar reunião'),'reunião deve gerar follow-up pré-reunião');
-const confirmed=s.updateMeetingStatus(meeting.operations,meeting.meeting.id,'MEETING_CONFIRMED',new Date('2026-09-29T13:00:00Z'));
+const rescheduled=s.rescheduleMeeting(meeting.operations,meeting.meeting.id,{scheduledAt:new Date('2026-10-01T15:00:00Z'),durationMinutes:45},new Date('2026-09-29T12:30:00Z'));
+assert.equal(rescheduled.meeting.meetingStatus,'RESCHEDULED');
+assert.equal(rescheduled.meeting.previousScheduledAt,'2026-09-30T14:00:00.000Z');
+assert.equal(rescheduled.meeting.durationMinutes,45);
+const confirmed=s.updateMeetingStatus(rescheduled.operations,meeting.meeting.id,'MEETING_CONFIRMED',new Date('2026-09-29T13:00:00Z'));
 assert.equal(confirmed.meeting.meetingStatus,'MEETING_CONFIRMED');
-const completed=s.updateMeetingStatus(confirmed.operations,meeting.meeting.id,'MEETING_COMPLETED',new Date('2026-09-30T14:40:00Z'));
+const completed=s.updateMeetingStatus(confirmed.operations,meeting.meeting.id,'MEETING_COMPLETED',new Date('2026-10-01T15:50:00Z'));
 assert.equal(completed.meeting.meetingStatus,'MEETING_COMPLETED');
 
 // CASE D — existing customer remains customer when re-imported.
