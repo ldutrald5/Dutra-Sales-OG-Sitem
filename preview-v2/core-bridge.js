@@ -389,8 +389,9 @@
       }
     });
 
-    $$('.moduleRow').forEach(row => {
-      if (row.dataset.go || row.id === 'openRoi2') return;
+    $('.moduleRow').forEach(row => {
+      const label=$('b',row)?.textContent?.trim()||'';
+      if (row.dataset.go || row.id === 'openRoi2' || ['Meu Dia','Prospecção'].includes(label)) return;
       row.addEventListener('click', () => {
         window.open('/legacy/','_blank','noopener');
       });
