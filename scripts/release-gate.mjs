@@ -7,6 +7,7 @@ const npmVersion=process.platform==='win32'
   : execFileSync('npm',['--version'],{encoding:'utf8'}).trim();
 assert.ok(Number(npmVersion.split('.')[0])>=11,'Release exige npm 11+');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+assert.equal(pkg.packageManager,'npm@11.19.0','Release deve fixar o package manager usado pelo Railway/CI');
 assert.ok(!pkg.dependencies?.xlsx,'xlsx vulnerável não pode permanecer como dependência npm');
 for(const file of ['EXECUTION_CONTEXT.md','CONTEXT_MANIFEST.md','IMPLEMENTATION_PACKAGE_00R_REPORT.md','docs/audits/GITHUB_RECONCILIATION_00R.md','docs/architecture/CANONICAL_MIGRATION_DECISIONS.md','docs/governance/DEFINITION_OF_DONE.md','docs/second-brain/BRAIN_INDEX.md','.github/workflows/package-00r-ci.yml'])assert.ok(fs.existsSync(file),`Arquivo obrigatório ausente: ${file}`);
 const app=fs.readFileSync('apps/sistema-og/app.js','utf8');
