@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedLeadIds: new Set(),
     leadFilterStatus: 'all',
     leadSearchQuery: '',
+    leadAccountView: 'all',
     leadConversationFilter: 'all',
     leadSourceFilter: 'all',
     leadPriorityFilter: 'all',
@@ -5126,6 +5127,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const searchInput = document.getElementById('crm-search-input');
     const sourceFilter = document.getElementById('crm-source-filter');
     const priorityFilter = document.getElementById('crm-priority-filter');
+    const accountViews = document.getElementById('crm-account-view-tabs');
     const conversationFilters = document.getElementById('crm-conversation-filters');
     const btnImportModal = document.getElementById('btn-crm-import-modal');
     const modalImport = document.getElementById('modal-import-leads');
@@ -5143,6 +5145,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (searchInput) searchInput.addEventListener('input', (e) => { state.leadSearchQuery = e.target.value.toLowerCase().trim(); renderLeadsTable(); });
     if (sourceFilter) sourceFilter.addEventListener('change', (e) => { state.leadSourceFilter = e.target.value; renderLeadsTable(); });
     if (priorityFilter) priorityFilter.addEventListener('change', (e) => { state.leadPriorityFilter = e.target.value; renderLeadsTable(); });
+    if (accountViews) accountViews.addEventListener('click', (e) => {
+      const button = e.target.closest('[data-crm-account-view]');
+      if (!button) return;
+      state.leadAccountView = button.dataset.crmAccountView || 'all';
+      renderLeadsTable();
+    });
     if (conversationFilters) conversationFilters.addEventListener('click', (e) => {
       const button = e.target.closest('[data-conversation-filter]');
       if (!button) return;
@@ -5230,6 +5238,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     initOcrEngine();
   }
 
+  function renderCrmAccountViews() {
+    const root = document.getElementById('crm-account-view-tabs');
+    const note = document.getElementById('crm-account-view-note');
+    if (!root) return;
+    const counts = OG_LEAD_INTELLIGENCE.summarizeCrmViews(state.leads);
+    const views = OG_LEAD_INTELLIGENCE.CRM_ACCOUNT_VIEWS || [];
+    root.innerHTML = views.map(view => `
+      <button type="button"
+        data-crm-account-view="${escapeHtml(view.id)}"
+        data-active="${state.leadAccountView === view.id ? 'true' : 'false'}">
+        <span>${escapeHtml(view.label)}</span>
+        <b>${counts[view.id] || 0}</b>
+      </button>
+    `).join('');
+    const active = OG_LEAD_INTELLIGENCE.crmViewDefinition(state.leadAccountView);
+    if (note) note.textContent = active.description;
+  }
+
   function renderSmartLeadFilters() {
     const summary = OG_LEAD_INTELLIGENCE.summarize(state.leads);
     const root = document.getElementById('crm-conversation-filters');
@@ -5259,8 +5285,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function getFilteredLeads() {
     const base = state.leads.filter(lead => {
+      const matchesView = OG_LEAD_INTELLIGENCE.matchesCrmView(lead, state.leadAccountView);
       const matchesStatus = state.leadFilterStatus === 'all' || lead.status === state.leadFilterStatus;
-      return matchesStatus && OG_CRM_SERVICE.matchesSearch(lead, state.leadSearchQuery);
+      return matchesView && matchesStatus && OG_CRM_SERVICE.matchesSearch(lead, state.leadSearchQuery);
     });
     return OG_LEAD_INTELLIGENCE.filterSort(base, {
       conversation: state.leadConversationFilter,
@@ -5282,13 +5309,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const batchSelectedCount = document.getElementById('batch-selected-count');
     if (!tbody) return;
 
+    renderCrmAccountViews();
     renderSmartLeadFilters();
     const filtered = getFilteredLeads();
     if (badgeCount) badgeCount.textContent = `${filtered.length} cliente${filtered.length === 1 ? '' : 's'}`;
     const summaryText = document.getElementById('crm-smart-summary');
-    if (summaryText) summaryText.textContent = filtered.length === state.leads.length
+    const accountView = OG_LEAD_INTELLIGENCE.crmViewDefinition(state.leadAccountView);
+    if (summaryText) summaryText.textContent = state.leadAccountView === 'all' && filtered.length === state.leads.length
       ? 'Fila completa ordenada por importância comercial e próxima ação.'
-      : `${filtered.length} de ${state.leads.length} clientes neste recorte · mais importantes primeiro.`;
+      : `${accountView.label}: ${filtered.length} de ${state.leads.length} clientes · mais importantes primeiro.`;
 
     const selCount = state.selectedLeadIds.size;
     if (batchToolbar && batchSelectedCount) {
@@ -5309,7 +5338,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <tr>
           <td colspan="8" class="text-center py-12 text-slate-500 text-xs">
             <div class="text-slate-400 font-semibold mb-1">Nenhum cliente neste filtro</div>
-            <div>Troque a situação, origem ou prioridade para ampliar a fila.</div>
+            <div>Troque a visão da base, situação, origem ou prioridade para ampliar a fila.</div>
           </td>
         </tr>
       `;
