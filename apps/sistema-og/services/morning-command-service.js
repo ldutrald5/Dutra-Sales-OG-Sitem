@@ -59,6 +59,7 @@
     const intelligence = deps.leadIntelligence;
     const signalCenter = deps.signalCenter;
     const automation = deps.automationEngine;
+    const customerJourney = deps.customerJourney;
 
     if (!salesDesk?.selectQueue) throw new Error('Sales Desk é obrigatório');
     if (!intelligence?.score) throw new Error('Lead Intelligence é obrigatório');
@@ -89,6 +90,7 @@
 
     const mission = signalCenter.nextMission(leads,now,(lead,reference)=>intelligence.score(lead,reference),operations);
     const suggestions = automation?.buildSuggestions ? automation.buildSuggestions(leads,operations,now) : [];
+    const customerActions = customerJourney?.snapshot ? all.filter(lead => ['fechado','customer','loyal_customer'].includes(clean(lead.status)) || ['customer','loyal_customer'].includes(clean(lead.conversationStage))).map(lead => { const journey=customerJourney.snapshot(lead,operations); return Object.freeze({leadId:clean(lead.id),label:leadLabel(lead),...journey.next,referralReadiness:journey.referralReadiness}); }).filter(item => item.action) : [];
 
     const commitments = all
       .filter(lead => clean(lead.nextActionReason) || clean(lead.nextActionObjective) || clean(lead.nextActionExpectedResult))
@@ -152,6 +154,7 @@
       commitments:commitments.length,
       commitmentOverdue:commitments.filter(item=>item.state==='overdue').length,
       commitmentToday:commitments.filter(item=>item.state==='today').length,
+      customerActions:customerActions.length,
       lanes:laneCounts
     });
 
@@ -161,6 +164,7 @@
     if (counts.today) lines.push(`${counts.today} retorno(s) estão marcados para hoje.`);
     if (counts.signals) lines.push(`${counts.signals} sinal(is) comercial(is) estão ativos.`);
     if (counts.automations) lines.push(`${counts.automations} rotina(s) podem virar próxima ação.`);
+    if (counts.customerActions) lines.push(`${counts.customerActions} cliente(s) têm próximo passo de pós-venda definido.`);
     if (counts.lifecycle) lines.push(`${counts.lifecycle} oportunidade(s) de pós-venda/expansão merecem atenção.`);
     if (!lines.length) lines.push('Carteira ativa sem pendência crítica detectada pelos contratos atuais.');
 
@@ -173,6 +177,7 @@
       signals:Object.freeze(signals.slice(0,8)),
       automations:Object.freeze(suggestions.slice(0,8)),
       lifecycleSignals:Object.freeze(lifecycleSignals.slice(0,8)),
+      customerActions:Object.freeze(customerActions.slice(0,8)),
       commitments:Object.freeze(commitments.slice(0,10)),
       workQueue:Object.freeze(workQueue.slice(0,20)),
       calendar:Object.freeze({
