@@ -15,7 +15,7 @@
     {key:'externalCode',label:'Código OG',aliases:['codigo cliente','codigo og','codigo','cod cliente','cod','id cliente'],current:l=>l.internalCode||l.externalCode||'',incoming:r=>r.externalCode},
     {key:'company',label:'Empresa',aliases:['empresa nome','empresa','razao social nome','razao social','cliente','nome empresa'],current:l=>l.empresa||'',incoming:r=>r.company},
     {key:'contact',label:'Contato',aliases:['contato principal','contato','nome contato','responsavel','nome'],current:l=>l.nome||'',incoming:r=>r.primaryContact},
-    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
+    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone principal','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
     {key:'document',label:'CNPJ / CPF',aliases:['cnpj cpf','cnpj','cpf','documento'],current:l=>l.cnpj||l.cpf||'',incoming:r=>r.document},
     {key:'email',label:'E-mail',aliases:['email','e mail','e-mail'],current:l=>l.email||'',incoming:r=>r.email},
     {key:'city',label:'Cidade / UF',aliases:['cidade uf','cidade estado','cidade','localizacao','uf'],current:l=>l.cidadeUf||'',incoming:r=>r.city},
@@ -120,21 +120,24 @@
   }
 
   function suggestMapping(headers=[]){
+    // Auto-mapping is intentionally conservative. Partial substring matches such as
+    // "responsável" inside "usuário responsável" or "data" inside unrelated fields
+    // are never preselected. Ambiguous columns remain available in the advanced UI.
     const used=new Set(),mapping={};
     FIELD_DEFS.forEach(def=>{
       let best={index:-1,score:0};
       headers.forEach((header,index)=>{
         if(used.has(index))return;
         const key=norm(header);
+        if(!key)return;
         let score=0;
         for(const alias of def.aliases){
           const a=norm(alias);
           if(key===a)score=Math.max(score,100+a.length);
-          else if(key&&a&&(key.includes(a)||a.includes(key)))score=Math.max(score,50+Math.min(key.length,a.length));
         }
         if(score>best.score)best={index,score};
       });
-      if(best.index>=0&&best.score>=50){mapping[def.key]=best.index;used.add(best.index);}
+      if(best.index>=0&&best.score>=100){mapping[def.key]=best.index;used.add(best.index);}
     });
     return mapping;
   }

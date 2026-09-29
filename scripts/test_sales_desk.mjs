@@ -81,6 +81,17 @@ assert.deepEqual(
   'Fila do Meu Dia e motor canônico devem produzir a mesma ordem'
 );
 
+const nextCandidates = [
+  { id:'N1', empresa:'Primeira', priorityBand:'urgente', priority:'alta', conversationStage:'negotiation', followUpAt:'2026-09-27T08:00:00-03:00', nextAction:'Ligar' },
+  { id:'N2', empresa:'Segunda', priority:'alta', conversationStage:'waiting_response', followUpAt:'2026-09-27T10:00:00-03:00', nextAction:'Retornar' },
+  { id:'N3', empresa:'Terceira', priority:'media', conversationStage:'first_contact', followUpAt:'2026-09-29T09:00:00-03:00', nextAction:'Primeiro contato' }
+];
+const firstRanked = desk.selectQueue(nextCandidates,'all','',queueNow)[0];
+const nextRanked = desk.nextLead(nextCandidates, firstRanked.id, 'all', '', queueNow);
+assert.ok(nextRanked,'fluxo salvar e próximo precisa encontrar outro cliente ativo');
+assert.notEqual(nextRanked.id,firstRanked.id,'próximo cliente nunca pode repetir a conta atual');
+assert.equal(desk.nextLead([nextCandidates[0]], nextCandidates[0].id, 'all', '', queueNow), null,'fila com uma única conta deve encerrar');
+
 const context = callContext.build(prospect);
 assert.equal(context.company.id, 'L2');
 assert.equal(context.recentInteractions.length, 5, 'as duas mudanças de próxima ação também devem permanecer no histórico recente');
@@ -95,5 +106,12 @@ assert.match(appSource, /message_prepared/);
 assert.match(appSource, /whatsapp_opened/);
 assert.doesNotMatch(appSource, /message_sent.*openDeskWhatsApp/);
 assert.match(htmlSource, /id="sales-desk-client"/);
+assert.match(appSource, /sales-desk-now/,'Meu Dia deve destacar uma única próxima ação');
+assert.match(appSource, /Registrar conversa \/ retorno/,'registro operacional deve ficar em divulgação progressiva');
+assert.match(appSource, /sales-desk-history.*Histórico recente/s,'histórico não deve competir com a ação principal no mobile');
+assert.match(appSource, /Escolha o resultado…/,'resultado não pode vir pré-selecionado silenciosamente');
+assert.match(appSource, /desk-save-advance/,'fluxo deve oferecer salvar e avançar');
+assert.match(appSource, /OG_SALES_DESK\.nextLead/,'avanço deve usar seletor determinístico compartilhado');
+assert.match(appSource, /Sua fila ativa terminou/,'fim da fila precisa ser explícito');
 
 console.log('Sales Desk critical flows: PASS');

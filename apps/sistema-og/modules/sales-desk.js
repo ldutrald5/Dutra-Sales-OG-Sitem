@@ -32,5 +32,13 @@
       return true;
     }).sort((a, b) => score(b, now) - score(a, now));
   }
-  return { lastInteraction, score, selectQueue };
+
+  function nextLead(leads, currentId, filter = 'all', query = '', now = new Date()) {
+    const current = String(currentId || '');
+    const inView = selectQueue(leads, filter, query, now).find(item => String(item.id) !== current);
+    if (inView) return inView;
+    return selectQueue(leads, 'all', '', now).find(item => String(item.id) !== current) || null;
+  }
+
+  return { lastInteraction, score, selectQueue, nextLead };
 }));
