@@ -25,3 +25,14 @@ assert.ok(interested.warnings.some(x=>/não significam venda/i.test(x)));
 assert.equal(interested.candidates.some(x=>x.field==='sale'),false);
 
 console.log('DIARY-01 smart diary preview contract: PASS');
+
+const fs = await import('node:fs');
+const appSource = fs.readFileSync('apps/sistema-og/app.js','utf8');
+const htmlSource = fs.readFileSync('apps/sistema-og/index.html','utf8');
+const swSource = fs.readFileSync('apps/sistema-og/service-worker.js','utf8');
+assert.match(appSource,/DIÁRIO INTELIGENTE · BETA/);
+assert.match(appSource,/OG_SMART_DIARY\.preview/);
+assert.match(appSource,/data-diary-candidate/);
+assert.match(appSource,/OG_INTERACTION_SERVICE\.addInteraction/);
+assert.match(htmlSource,/services\/smart-diary-service\.js/);
+assert.match(swSource,/services\/smart-diary-service\.js/);
