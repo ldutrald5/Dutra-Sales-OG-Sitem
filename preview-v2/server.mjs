@@ -65,7 +65,11 @@ async function proxy(req, res, targetPath) {
     if (location) outHeaders.location = location.replace(coreBase, '');
     res.writeHead(upstream.status, outHeaders);
     if (req.method === 'HEAD') return res.end();
-    const bytes = Buffer.from(await upstream.arrayBuffer());
+    let bytes = Buffer.from(await upstream.arrayBuffer());
+    if ((req.url || '').startsWith('/legacy') && targetPath === '/' && (upstream.headers.get('content-type') || '').includes('text/html')) {
+      const html = bytes.toString('utf8').replace('</body>', `<script>(()=>{const tab=new URLSearchParams(location.search).get('tab');if(!tab)return;const open=()=>{const btn=document.querySelector('[data-tab="'+tab.replace(/"/g,'')+'"]');if(btn){btn.click();btn.scrollIntoView({block:'nearest',inline:'center'});return true}return false};let tries=0;const timer=setInterval(()=>{if(open()||++tries>20)clearInterval(timer)},120)})();</script></body>`);
+      bytes = Buffer.from(html, 'utf8');
+    }
     res.end(bytes);
   } catch (error) {
     res.writeHead(502, {'content-type':'application/json; charset=utf-8','cache-control':'no-store'});
