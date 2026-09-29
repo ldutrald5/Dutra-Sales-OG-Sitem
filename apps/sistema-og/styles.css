@@ -340,6 +340,29 @@ body {
 .og-toast[data-type="error"] .og-toast-dot { color:#f87171; }
 .og-toast-copy { min-width:0; line-height:1.45; }
 
+.og-update-banner {
+  position: fixed;
+  right: 1rem;
+  bottom: 4.6rem;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  width: min(520px, calc(100vw - 2rem));
+  padding: .85rem 1rem;
+  border: 1px solid rgba(255,222,23,.38);
+  border-radius: .95rem;
+  background: rgba(8,17,24,.98);
+  box-shadow: 0 18px 48px rgba(0,0,0,.52);
+  backdrop-filter: blur(16px);
+}
+.og-update-banner > div:first-child { display:grid; gap:.18rem; min-width:0; flex:1; }
+.og-update-banner strong { color:#f8fafc; font-size:.78rem; }
+.og-update-banner span { color:#a8b3c2; font-size:.66rem; line-height:1.45; }
+.og-update-actions { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:flex-end; }
+.og-update-actions button { min-height:40px; padding:.5rem .7rem; border:1px solid #34404d; border-radius:.65rem; background:#111827; color:#dbe5ef; font-size:.65rem; font-weight:850; }
+.og-update-actions [data-pwa-update-now] { border-color:rgba(255,222,23,.45); background:rgba(255,222,23,.12); color:#ffde17; }
+
 /* Aplicação única: desktop completo e navegação otimizada para celular. */
 .og-mobile-nav { display: none; }
 
@@ -388,7 +411,7 @@ body {
   .og-section-head { align-items: flex-start; flex-direction: column; gap: .8rem; }
   .og-filter-row { width: 100%; overflow-x: auto; padding-bottom: .2rem; }
   .clean-card { border-radius: .9rem; }
-  input, select, textarea, button { min-height: 42px; }
+  input, select, textarea, button { min-height: 44px; }
   table { min-width: 720px; }
   .og-mobile-nav {
     position: fixed;
@@ -427,6 +450,9 @@ body {
     grid-column: 1 / -1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .35rem;
+    max-height: min(68vh, 560px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: .65rem;
     border: 1px solid #30343a;
     border-radius: 1rem;
@@ -437,11 +463,14 @@ body {
   .og-mobile-more-head { grid-column: 1 / -1; display: grid; gap: .08rem; padding: .15rem .25rem .45rem; }
   .og-mobile-more-head strong { color: #f8fafc; font-size: .75rem; }
   .og-mobile-more-head small { color: #94a3b8; font-size: .6rem; }
-  .og-mobile-more-sheet button { min-height: 46px; flex-direction: row; justify-content: flex-start; gap: .45rem; padding: .5rem .65rem; border: 1px solid #27313b; background: #0b1118; }
+  .og-mobile-more-sheet button { min-height: 48px; flex-direction: row; justify-content: flex-start; gap: .45rem; padding: .5rem .65rem; border: 1px solid #27313b; background: #0b1118; }
   .og-mobile-more-sheet button span { font-size: .9rem; }
   .og-mobile-more-sheet button small { font-size: .67rem; font-weight: 800; }
   .og-sync-status { right: .75rem; bottom: calc(75px + env(safe-area-inset-bottom)); }
   .og-toast { left:.75rem; right:.75rem; bottom:calc(88px + env(safe-area-inset-bottom)); max-width:none; }
+  .og-update-banner { left:.75rem; right:.75rem; bottom:calc(142px + env(safe-area-inset-bottom)); width:auto; align-items:flex-start; flex-direction:column; }
+  .og-update-actions { width:100%; }
+  .og-update-actions button { min-height:44px; flex:1 1 auto; }
 
   .crm-command-copy p, .crm-list-head span { display: none; }
   .crm-command-actions #crm-status-filter, .crm-export-menu, .crm-tools-menu { display: none; }
