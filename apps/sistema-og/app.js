@@ -180,6 +180,71 @@ document.addEventListener('DOMContentLoaded', () => {
       : text;
   }
 
+  const appDialogState = new WeakMap();
+
+  function visibleFocusable(root) {
+    if (!root) return [];
+    return [...root.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+      .filter(item => item.offsetParent !== null && !item.closest('[hidden]') && !item.classList.contains('hidden') && item.getAttribute('aria-hidden') !== 'true');
+  }
+
+  function openAppDialog(modal, options = {}) {
+    if (!modal) return;
+    const trigger = options.trigger || document.activeElement;
+    appDialogState.set(modal, { returnFocus: trigger?.focus ? trigger : null });
+    modal.classList.remove('hidden');
+    document.body.classList.add('og-dialog-open');
+    const target = options.initialFocus
+      ? modal.querySelector(options.initialFocus)
+      : visibleFocusable(modal)[0];
+    requestAnimationFrame(() => (target || modal).focus?.());
+  }
+
+  function closeAppDialog(modal, options = {}) {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    if (!document.querySelector('[role="dialog"][aria-modal="true"]:not(.hidden)')) {
+      document.body.classList.remove('og-dialog-open');
+    }
+    const returnFocus = appDialogState.get(modal)?.returnFocus;
+    appDialogState.delete(modal);
+    if (options.restoreFocus !== false && returnFocus?.isConnected) {
+      requestAnimationFrame(() => returnFocus.focus());
+    }
+  }
+
+  function bindAppDialog(modal) {
+    if (!modal || modal.dataset.ogDialogBound === 'true') return;
+    modal.dataset.ogDialogBound = 'true';
+    if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeAppDialog(modal);
+    });
+    modal.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeAppDialog(modal);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = visibleFocusable(modal);
+      if (!focusable.length) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
   async function importLucas2026Leads() {
     try {
       const response = await fetch('/imports/lucas-2026.json', { cache: 'no-store' });
@@ -698,21 +763,60 @@ document.addEventListener('DOMContentLoaded', () => {
     restoreSyncRecovery().catch(error => console.warn('Falha ao reconciliar estado entre abas.', error));
   });
 
-  // Navegação de Abas
+  // Navegação de módulos: recuperável por URL, acessível por teclado e compacta no desktop.
   const tabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
+  const tabIds = new Set([...tabs].map(tab => tab.getAttribute('data-tab')).filter(Boolean));
+  const desktopSecondaryTabs = new Set(['comunicacao','guia','catalogo','transportadoras','scripts','biblioteca','operacoes','historico']);
+
+  function tabFromLocation() {
+    const raw = decodeURIComponent(String(location.hash || '').replace(/^#\/?/, '').trim());
+    return tabIds.has(raw) ? raw : 'dia';
+  }
+
+  function syncTabRoute(tabId, mode = 'push') {
+    const nextHash = `#${encodeURIComponent(tabId)}`;
+    if (location.hash === nextHash) return;
+    const nextUrl = `${location.pathname}${location.search}${nextHash}`;
+    if (mode === 'replace') history.replaceState({ tab: tabId }, '', nextUrl);
+    else history.pushState({ tab: tabId }, '', nextUrl);
+  }
+
+  function focusTabHeading(tabId) {
+    const panel = document.getElementById(`tab-${tabId}`);
+    const heading = panel?.querySelector('h1,h2,h3');
+    if (!heading) return;
+    const hadTabIndex = heading.hasAttribute('tabindex');
+    if (!hadTabIndex) heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+    if (!hadTabIndex) heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
+  }
+
+  function updateDesktopMoreState(tabId) {
+    const details = document.getElementById('desktop-nav-more');
+    const summary = details?.querySelector('summary');
+    if (!summary) return;
+    const active = desktopSecondaryTabs.has(tabId);
+    summary.classList.toggle('active', active);
+    if (active) summary.setAttribute('aria-current', 'page');
+    else summary.removeAttribute('aria-current');
+  }
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchTab(tab.getAttribute('data-tab'));
+    tab.addEventListener('click', (event) => {
+      event.preventDefault();
+      switchTab(tab.getAttribute('data-tab'), { updateRoute: true, routeMode: 'push', focus: true });
     });
   });
 
-  function switchTab(tabId) {
-    state.currentTab = tabId;
+  function switchTab(tabId, options = {}) {
+    const safeTabId = tabIds.has(tabId) ? tabId : 'dia';
+    const updateRoute = options.updateRoute !== false;
+    const routeMode = options.routeMode || 'push';
+    const shouldFocus = options.focus !== false;
+    state.currentTab = safeTabId;
     tabs.forEach(t => {
-      if (t.getAttribute('data-tab') === tabId) {
+      if (t.getAttribute('data-tab') === safeTabId) {
         t.setAttribute('aria-current', 'page');
         t.classList.add('bg-amber-500', 'text-slate-950', 'font-bold', 'shadow-md');
         t.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
@@ -724,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('[data-mobile-tab]').forEach(button => {
-      const active = button.dataset.mobileTab === tabId;
+      const active = button.dataset.mobileTab === safeTabId;
       button.classList.toggle('active', active);
       if (active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
@@ -732,36 +836,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMore = document.querySelector('[data-mobile-more]');
     if (mobileMore) {
       const secondaryTabs = new Set(['cotacao','prospeccao','guia','scripts','biblioteca','operacoes','historico','catalogo','transportadoras','comunicacao']);
-      const active = secondaryTabs.has(tabId);
+      const active = secondaryTabs.has(safeTabId);
       mobileMore.classList.toggle('active', active);
       if (active) mobileMore.setAttribute('aria-current', 'page');
       else mobileMore.removeAttribute('aria-current');
     }
+    updateDesktopMoreState(safeTabId);
 
-    tabContents.forEach(c => {
-      if (c.id === `tab-${tabId}`) {
-        c.classList.remove('hidden');
-      } else {
-        c.classList.add('hidden');
-      }
+    tabContents.forEach(panel => {
+      if (panel.id === `tab-${safeTabId}`) panel.classList.remove('hidden');
+      else panel.classList.add('hidden');
     });
 
-    if (tabId === 'dia') renderDayDashboard();
-    else if (tabId === 'cotacao') refreshQuoteClientSheetAccess();
-    else if (tabId === 'prospeccao') renderProspecting();
-    else if (tabId === 'historico') renderHistory();
-    else if (tabId === 'catalogo') renderCatalog();
-    else if (tabId === 'transportadoras') renderTransporters();
-    else if (tabId === 'scripts') renderSalesKnowledge();
-    else if (tabId === 'crm') renderCrmModule();
-    else if (tabId === 'guia') renderConsultantEngine();
-    else if (tabId === 'call-ai') renderCallAIContext();
-    else if (tabId === 'biblioteca') renderMaterialLibrary();
-    else if (tabId === 'operacoes') renderOperationsFoundation();
-    document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === tabId));
+    if (safeTabId === 'dia') renderDayDashboard();
+    else if (safeTabId === 'cotacao') refreshQuoteClientSheetAccess();
+    else if (safeTabId === 'prospeccao') renderProspecting();
+    else if (safeTabId === 'historico') renderHistory();
+    else if (safeTabId === 'catalogo') renderCatalog();
+    else if (safeTabId === 'transportadoras') renderTransporters();
+    else if (safeTabId === 'scripts') renderSalesKnowledge();
+    else if (safeTabId === 'crm') renderCrmModule();
+    else if (safeTabId === 'guia') renderConsultantEngine();
+    else if (safeTabId === 'call-ai') renderCallAIContext();
+    else if (safeTabId === 'biblioteca') renderMaterialLibrary();
+    else if (safeTabId === 'operacoes') renderOperationsFoundation();
+
+    document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === safeTabId));
     document.querySelector('.og-mobile-more-sheet')?.classList.add('hidden');
     document.querySelector('[data-mobile-more]')?.setAttribute('aria-expanded', 'false');
+    document.getElementById('desktop-nav-more')?.removeAttribute('open');
+
+    if (updateRoute) syncTabRoute(safeTabId, routeMode);
     if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (shouldFocus) requestAnimationFrame(() => focusTabHeading(safeTabId));
+  }
+
+  function restoreTabFromLocation() {
+    const routeTab = tabFromLocation();
+    if (routeTab === state.currentTab) return;
+    switchTab(routeTab, { updateRoute: false, focus: true });
+  }
+
+  window.addEventListener('popstate', restoreTabFromLocation);
+  window.addEventListener('hashchange', restoreTabFromLocation);
+
+  function initDesktopNavigation() {
+    const container = document.getElementById('nav-tabs-container');
+    if (!container || document.getElementById('desktop-nav-more')) return;
+    const details = document.createElement('details');
+    details.id = 'desktop-nav-more';
+    details.className = 'desktop-nav-more';
+    details.innerHTML = '<summary aria-haspopup="menu"><span>Mais</span><span aria-hidden="true">⌄</span></summary><div class="desktop-nav-more-menu" role="menu" aria-label="Mais módulos"></div>';
+    const menu = details.querySelector('.desktop-nav-more-menu');
+    desktopSecondaryTabs.forEach(tabId => {
+      const tab = container.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+      if (!tab) return;
+      tab.classList.add('desktop-nav-more-item');
+      tab.setAttribute('role', 'menuitem');
+      menu.appendChild(tab);
+    });
+    container.appendChild(details);
+    menu.addEventListener('click', event => {
+      if (event.target.closest('.nav-tab')) details.removeAttribute('open');
+    });
+    details.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && details.open) {
+        event.preventDefault();
+        details.open = false;
+        details.querySelector('summary')?.focus();
+      }
+    });
+  }
+
+  function restoreInitialTabRoute() {
+    const initialTab = tabFromLocation();
+    switchTab(initialTab, { updateRoute: false, focus: false });
+    if (!location.hash) syncTabRoute(initialTab, 'replace');
   }
 
   // =========================================================================
@@ -933,11 +1083,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnApply = document.getElementById('btn-apply-quote-import');
     const status = document.getElementById('quote-ocr-status');
 
-    const close = () => modal?.classList.add('hidden');
-    if (btnOpen) btnOpen.addEventListener('click', () => modal?.classList.remove('hidden'));
-    if (btnClose) btnClose.addEventListener('click', close);
-    if (btnCancel) btnCancel.addEventListener('click', close);
-    if (modal) modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+    const close = (restoreFocus = true) => closeAppDialog(modal, { restoreFocus });
+    bindAppDialog(modal);
+    if (btnOpen) btnOpen.addEventListener('click', () => openAppDialog(modal, { trigger: btnOpen, initialFocus: '#quote-ocr-text' }));
+    if (btnClose) btnClose.addEventListener('click', () => close());
+    if (btnCancel) btnCancel.addEventListener('click', () => close());
 
     const setImage = (file) => {
       if (!file || !file.type.startsWith('image/')) {
@@ -1011,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const itemCount = state.quoteImportItems.reduce((total, item) => total + item.qty, 0);
       recalculateQuote();
-      close();
+      close(false);
       showNotification(`${itemCount} peça${itemCount !== 1 ? 's' : ''} do orçamento adicionada${itemCount !== 1 ? 's' : ''} à cotação.`, 'success');
     });
 
@@ -3192,18 +3342,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       tiersEl.appendChild(row);
     });
 
-    modal.classList.remove('hidden');
+    openAppDialog(modal, { trigger: document.activeElement, initialFocus: '#btn-close-modal-item-pricing' });
   }
 
   function initItemPricingModal() {
     const modal = document.getElementById('modal-item-pricing');
     const btnClose = document.getElementById('btn-close-modal-item-pricing');
-    if (btnClose) btnClose.addEventListener('click', () => modal.classList.add('hidden'));
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
-      });
-    }
+    bindAppDialog(modal);
+    if (btnClose) btnClose.addEventListener('click', () => closeAppDialog(modal));
   }
 
   function renderCatalog() {
@@ -3237,6 +3383,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         const card = document.createElement('div');
         card.className = 'clean-card p-4 flex flex-col justify-between cursor-pointer';
         card.title = 'Clique para ver o preço por tipo de cliente e aplicação';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Ver preços e aplicação de ${item.name}`);
 
         let badgeCat = 'bg-blue-500/10 text-blue-400 border-blue-500/25';
         if (item.category === 'equalizador') badgeCat = 'bg-amber-500/10 text-amber-400 border-amber-500/25';
@@ -3272,7 +3421,14 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             </div>
           </div>
         `;
-        card.addEventListener('click', () => openItemPricingModal(item));
+        const openPricing = () => openItemPricingModal(item);
+        card.addEventListener('click', openPricing);
+        card.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPricing();
+          }
+        });
         grid.appendChild(card);
       });
     }
@@ -3572,17 +3728,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const inputDor = document.getElementById('input-nova-dor');
     const inputGancho = document.getElementById('input-novo-gancho');
 
+    bindAppDialog(modal);
     if (btnOpen && modal) {
       btnOpen.addEventListener('click', () => {
         renderDoresGanchosList();
-        modal.classList.remove('hidden');
+        openAppDialog(modal, { trigger: btnOpen, initialFocus: '#input-nova-dor' });
       });
     }
     if (btnClose && modal) {
-      btnClose.addEventListener('click', () => modal.classList.add('hidden'));
-    }
-    if (modal) {
-      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+      btnClose.addEventListener('click', () => closeAppDialog(modal));
     }
     if (btnAdd) {
       btnAdd.addEventListener('click', () => {
@@ -3625,21 +3779,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     form.reset();
     document.getElementById('quick-lead-priority').value = 'media';
     document.getElementById('quick-lead-segment').value = 'transportadora';
-    modal.classList.remove('hidden');
-    setTimeout(() => document.getElementById('quick-lead-company')?.focus(), 30);
+    openAppDialog(modal, { trigger: document.activeElement, initialFocus: '#quick-lead-company' });
   }
 
-  function closeQuickLead() {
-    document.getElementById('modal-quick-lead')?.classList.add('hidden');
+  function closeQuickLead(restoreFocus = true) {
+    closeAppDialog(document.getElementById('modal-quick-lead'), { restoreFocus });
   }
 
   function initQuickLead() {
     const segment = document.getElementById('quick-lead-segment');
+    const modal = document.getElementById('modal-quick-lead');
+    bindAppDialog(modal);
     if (segment) segment.innerHTML = OG_DATA.segments.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.icon)} ${escapeHtml(item.name)}</option>`).join('');
     document.querySelectorAll('[data-quick-lead]').forEach(button => button.addEventListener('click', () => openQuickLead(button.dataset.quickLead)));
-    document.getElementById('quick-lead-close')?.addEventListener('click', closeQuickLead);
-    document.getElementById('quick-lead-cancel')?.addEventListener('click', closeQuickLead);
-    document.getElementById('modal-quick-lead')?.addEventListener('click', event => { if (event.target.id === 'modal-quick-lead') closeQuickLead(); });
+    document.getElementById('quick-lead-close')?.addEventListener('click', () => closeQuickLead());
+    document.getElementById('quick-lead-cancel')?.addEventListener('click', () => closeQuickLead());
     document.getElementById('quick-lead-form')?.addEventListener('submit', event => {
       event.preventDefault();
       const empresa = document.getElementById('quick-lead-company').value.trim();
@@ -5277,8 +5431,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       state.leadConversationFilter = button.dataset.conversationFilter || 'all';
       renderLeadsTable();
     });
-    if (btnImportModal && modalImport) btnImportModal.addEventListener('click', () => modalImport.classList.remove('hidden'));
-    if (btnCloseModal && modalImport) btnCloseModal.addEventListener('click', () => modalImport.classList.add('hidden'));
+    bindAppDialog(modalImport);
+    if (btnImportModal && modalImport) btnImportModal.addEventListener('click', () => openAppDialog(modalImport, { trigger: btnImportModal, initialFocus: '#ocr-prompt-input' }));
+    if (btnCloseModal && modalImport) btnCloseModal.addEventListener('click', () => closeAppDialog(modalImport));
 
     if (fileImportInput) {
       fileImportInput.addEventListener('change', (e) => {
@@ -5296,7 +5451,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         if (!rawText) return;
         const count = parseAndAddLeads(rawText);
         textareaImport.value = '';
-        if (modalImport) modalImport.classList.add('hidden');
+        if (modalImport) closeAppDialog(modalImport, { restoreFocus: false });
         saveLeadsToStorage();
         renderLeadsTable();
         showNotification(`${count} leads importados com sucesso!`, 'success');
@@ -8004,7 +8159,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initItemPricingModal();
   initFreightQuoteInfoCard();
   initDoresGanchosModal();
-  initUnifiedExperience();
+  initDesktopNavigation();
+  initUnifiedExperience().finally(restoreInitialTabRoute);
   renderCatalog();
   renderTransporters();
   renderSalesKnowledge();

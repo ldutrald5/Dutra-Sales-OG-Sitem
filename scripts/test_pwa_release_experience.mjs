@@ -24,7 +24,9 @@ assert.match(css, /\.og-mobile-more-sheet[\s\S]*max-height: min\(68vh, 560px\)/,
 assert.match(css, /\.og-update-banner/, 'banner de atualização precisa de estilo próprio');
 assert.match(css, /\.og-update-actions button \{ min-height:44px;/, 'ações do update precisam respeitar alvo móvel');
 
-assert.match(sw, /const SW_VERSION = 'v63';/, 'RC2C precisa invalidar o cache PWA anterior');
+const swVersionMatch = sw.match(/const SW_VERSION = 'v(\d+)';/);
+assert.ok(swVersionMatch, 'Service Worker precisa declarar versão numérica do cache');
+assert.ok(Number(swVersionMatch[1]) >= 63, 'PWA não pode regredir para cache anterior ao RC2C');
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.scope, '/');
 assert.ok(String(manifest.start_url || '').startsWith('/'), 'PWA deve iniciar dentro do escopo');
