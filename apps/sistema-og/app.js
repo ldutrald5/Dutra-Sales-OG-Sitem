@@ -5124,7 +5124,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const summary = OG_LEAD_INTELLIGENCE.summarize(state.leads);
     const root = document.getElementById('crm-conversation-filters');
     if (root) {
-      const buttons = [{ id: 'all', label: 'Todos', count: summary.total }, ...OG_LEAD_INTELLIGENCE.CONVERSATION_STAGES.map(item => ({ ...item, count: summary.stages[item.id] || 0 }))];
+      const stageButtons = OG_LEAD_INTELLIGENCE.CONVERSATION_STAGES
+        .map(item => ({ ...item, count: summary.stages[item.id] || 0 }))
+        .filter(item => item.count > 0 || state.leadConversationFilter === item.id);
+      const buttons = [{ id: 'all', label: 'Todos', count: summary.total }, ...stageButtons];
       root.innerHTML = buttons.map(item => `<button type="button" data-conversation-filter="${escapeHtml(item.id)}" data-active="${state.leadConversationFilter === item.id ? 'true' : 'false'}" data-stage="${escapeHtml(item.id)}"><span>${escapeHtml(item.label)}</span><b>${item.count}</b></button>`).join('');
     }
     const sourceSelect = document.getElementById('crm-source-filter');
@@ -5217,7 +5220,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const recent = OG_SALES_DESK.lastInteraction(lead);
       const context = lead.accountSummary || lead.observacoes || recent?.note || 'Sem resumo da conversa';
       const code = clientCodeLabel(lead);
-      const commercialStatus = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status)?.label || lead.status || 'Novo';
+      const commercialStatus = lead.status === 'fechado'
+        ? 'Cliente OG'
+        : ((OG_DATA.leadStatuses || []).find(item => item.id === lead.status)?.label || lead.status || 'Novo');
       const temp = lead.temperature ? `Temperatura: ${lead.temperature}` : '';
       const potential = lead.potential ? `Potencial: ${lead.potential}` : '';
 
