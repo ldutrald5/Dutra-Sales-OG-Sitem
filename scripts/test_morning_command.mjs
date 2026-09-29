@@ -38,7 +38,7 @@ assert.equal(report.commitments[0].leadId,'L2');
 assert.equal(report.commitments[0].objective,'Validar teste');
 assert.ok(report.workQueue.length>0);
 assert.equal(report.workQueue.find(item=>item.leadId==='L2').lane.id,'fulfill');
-assert.equal(report.workQueue.find(item=>item.leadId==='L3').lane.id,'relate');
+assert.equal(report.workQueue.find(item=>item.leadId==='L3').lane.id,'close');
 assert.ok(report.counts.lanes.fulfill>=1);
 assert.equal(report.counts.priority,1);
 assert.equal(report.counts.customerActions,1);
