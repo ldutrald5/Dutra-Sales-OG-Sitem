@@ -25,6 +25,17 @@
     { id: 'baixa', label: 'Baixa', weight: 15 }
   ]);
 
+  const CRM_ACCOUNT_VIEWS = Object.freeze([
+    { id: 'all', label: 'Todos', description: 'Base completa, sem criar cópias do cliente.' },
+    { id: 'attack', label: 'Fila de ataque', description: 'Prospects ativos fora da conferência ERP, ordenados pela importância comercial.' },
+    { id: 'customers', label: 'Clientes', description: 'Contas com venda fechada ou relação de cliente registrada.' },
+    { id: 'prospects', label: 'Prospects', description: 'Contas comerciais ainda abertas, incluindo primeiro contato, retorno e negociação.' },
+    { id: 'proposals', label: 'Propostas', description: 'Contas com proposta, cotação, orçamento ou negociação registrados.' },
+    { id: 'erp_review', label: 'ERP para conferir', description: 'Registros marcados explicitamente para conferência no ERP antes da abordagem.' },
+    { id: 'strategic', label: 'Estratégicas', description: 'Prioridade alta/urgente, potencial alto ou frota registrada com 50+ veículos.' },
+    { id: 'talked', label: 'Já conversados', description: 'Contas com evidência de conversa, tentativa, retorno ou negociação registrada.' }
+  ]);
+
   const clean = value => String(value ?? '').trim();
   const key = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   const textKey = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -90,6 +101,84 @@
 
   function sourceLabel(lead = {}) {
     return clean(lead.sourceLabel || lead.sourceChannel || lead.origem || lead.origin || lead.sourceList || 'Sistema OG');
+  }
+
+  function needsErpReview(lead = {}) {
+    const reviewText = textKey([
+      lead.nextAction,
+      lead.nextActionReason,
+      lead.accountSummary,
+      lead.observacoes,
+      lead.importMeta?.reviewStatus,
+      lead.importMeta?.reviewReason
+    ].filter(Boolean).join(' '));
+    return /\b(conferir|revisar|validar) erp\b/.test(reviewText);
+  }
+
+  function isCustomerAccount(lead = {}) {
+    const stage = conversationStage(lead);
+    return key(lead.status) === 'fechado' ||
+      key(lead.operationalStatus) === 'customer' ||
+      stage === 'customer' ||
+      stage === 'loyal_customer';
+  }
+
+  function hasProposalEvidence(lead = {}) {
+    const stage = conversationStage(lead);
+    const status = key(lead.status);
+    const source = textKey([lead.sourceLabel, lead.sourceList, lead.batchTag].filter(Boolean).join(' '));
+    return stage === 'proposal' ||
+      stage === 'negotiation' ||
+      status === 'proposta_enviada' ||
+      status === 'negociacao' ||
+      /\b(proposta|cotacao|orcamento)\b/.test(source) ||
+      (Array.isArray(lead.opportunities) && lead.opportunities.length > 0);
+  }
+
+  function isStrategicAccount(lead = {}) {
+    const priority = priorityBand(lead);
+    const fleet = Number(lead.fleetSize || lead.estimatedFleetSize || lead.confirmedFleetSize || 0);
+    return priority === 'urgente' ||
+      priority === 'alta' ||
+      key(lead.potential) === 'alto' ||
+      (Number.isFinite(fleet) && fleet >= 50);
+  }
+
+  function hasConversationEvidence(lead = {}) {
+    const interactions = Array.isArray(lead.interactions) ? lead.interactions : [];
+    if (interactions.length) return true;
+    const stage = conversationStage(lead);
+    if (['talked','no_reply','waiting_response','interested','proposal','negotiation','not_interested'].includes(stage)) return true;
+    return Boolean(inferStageFromText([lead.accountSummary, lead.observacoes].filter(Boolean).join(' ')));
+  }
+
+  function matchesCrmView(lead = {}, viewId = 'all') {
+    const id = clean(viewId || 'all');
+    if (id === 'all') return true;
+    const customer = isCustomerAccount(lead);
+    const stage = conversationStage(lead);
+    if (id === 'customers') return customer;
+    if (id === 'prospects') return !customer && stage !== 'not_interested';
+    if (id === 'proposals') return hasProposalEvidence(lead);
+    if (id === 'erp_review') return needsErpReview(lead);
+    if (id === 'strategic') return isStrategicAccount(lead);
+    if (id === 'talked') return hasConversationEvidence(lead);
+    if (id === 'attack') return !customer && stage !== 'not_interested' && !needsErpReview(lead);
+    return true;
+  }
+
+  function crmViewDefinition(viewId = 'all') {
+    return CRM_ACCOUNT_VIEWS.find(item => item.id === viewId) || CRM_ACCOUNT_VIEWS[0];
+  }
+
+  function summarizeCrmViews(leads = []) {
+    const counts = Object.fromEntries(CRM_ACCOUNT_VIEWS.map(item => [item.id, 0]));
+    for (const lead of leads) {
+      for (const view of CRM_ACCOUNT_VIEWS) {
+        if (matchesCrmView(lead, view.id)) counts[view.id] += 1;
+      }
+    }
+    return counts;
   }
 
   function temperatureWeight(value) {
@@ -207,12 +296,21 @@
   return {
     CONVERSATION_STAGES,
     PRIORITY_BANDS,
+    CRM_ACCOUNT_VIEWS,
     inferStageFromText,
     priorityBand,
     priorityDefinition,
     conversationStage,
     stageDefinition,
     sourceLabel,
+    needsErpReview,
+    isCustomerAccount,
+    hasProposalEvidence,
+    isStrategicAccount,
+    hasConversationEvidence,
+    matchesCrmView,
+    crmViewDefinition,
+    summarizeCrmViews,
     score,
     scoreBreakdown,
     nextBestAction,
