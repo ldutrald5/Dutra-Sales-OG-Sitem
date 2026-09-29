@@ -3730,6 +3730,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const signalItems = (report.signals || []).slice(0, 3);
     const automationItems = (report.automations || []).slice(0, 3);
     const commitmentItems = (report.commitments || []).slice(0, 5);
+    const workItems = (report.workQueue || []).slice(0, 7);
     root.innerHTML = `
       <header class="morning-command-head">
         <div><span class="og-kicker">DUTRA COMMAND · MORNING BRIEF</span><h2>Seu dia foi organizado com os fatos atuais do CRM.</h2><p>${escapeHtml(report.briefing.join(' '))}</p></div>
@@ -3742,6 +3743,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <div><small>Automações</small><b>${report.counts.automations}</b></div>
         <div><small>Pós-venda / expansão</small><b>${report.counts.lifecycle}</b></div>
         <div><small>Compromissos</small><b>${report.counts.commitments || 0}</b></div>
+      </div>
+      <div class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2"><div><span class="og-kicker">ORDEM DE TRABALHO</span><h3 class="text-sm font-bold text-slate-100">O que vem primeiro — sem criar um segundo score</h3></div></div>
+        <div class="morning-command-list">${workItems.length ? workItems.map(item => `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(item.lane.label)} · ${escapeHtml(item.label)}</b><span>${escapeHtml(item.action)}</span><small>${escapeHtml(item.lane.reason)}</small></button>`).join('') : '<p class="morning-command-empty">Nenhuma conta ativa na fila.</p>'}</div>
       </div>
       <div class="morning-command-grid">
         <article class="morning-command-mission">
