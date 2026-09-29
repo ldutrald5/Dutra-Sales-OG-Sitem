@@ -3739,6 +3739,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const missionName = missionLead?.empresa || missionLead?.nome || 'Nenhuma conta crítica';
     const signalItems = (report.signals || []).slice(0, 3);
     const automationItems = (report.automations || []).slice(0, 3);
+    const commitmentItems = (report.commitments || []).slice(0, 5);
+    const workItems = (report.workQueue || []).slice(0, 7);
     root.innerHTML = `
       <header class="morning-command-head">
         <div><span class="og-kicker">DUTRA COMMAND · MORNING BRIEF</span><h2>Seu dia foi organizado com os fatos atuais do CRM.</h2><p>${escapeHtml(report.briefing.join(' '))}</p></div>
@@ -3750,6 +3752,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <div><small>Sinais</small><b>${report.counts.signals}</b></div>
         <div><small>Automações</small><b>${report.counts.automations}</b></div>
         <div><small>Pós-venda / expansão</small><b>${report.counts.lifecycle}</b></div>
+        <div><small>Compromissos</small><b>${report.counts.commitments || 0}</b></div>
+      </div>
+      <div class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2"><div><span class="og-kicker">ORDEM DE TRABALHO</span><h3 class="text-sm font-bold text-slate-100">O que vem primeiro — sem criar um segundo score</h3></div></div>
+        <div class="morning-command-list">${workItems.length ? workItems.map(item => `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(item.lane.label)} · ${escapeHtml(item.label)}</b><span>${escapeHtml(item.action)}</span><small>${escapeHtml(item.lane.reason)}</small></button>`).join('') : '<p class="morning-command-empty">Nenhuma conta ativa na fila.</p>'}</div>
       </div>
       <div class="morning-command-grid">
         <article class="morning-command-mission">
@@ -3758,6 +3765,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <p>${escapeHtml(report.mission?.reason || 'Nenhuma missão crítica detectada agora.')}</p>
           <strong>→ ${escapeHtml(report.mission?.recommendedAction || 'Continuar a rotina comercial registrada')}</strong>
           ${report.mission ? '<button type="button" data-morning-mission>ABRIR PRÓXIMA MISSÃO</button>' : ''}
+        </article>
+        <article>
+          <span class="og-kicker">COMPROMISSOS</span>
+          ${commitmentItems.length ? `<div class="morning-command-list">${commitmentItems.map(item => `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.action)} · ${escapeHtml(item.state === 'overdue' ? 'VENCIDO' : item.state === 'today' ? 'HOJE' : formatFollowUp(item.followUpAt))}</span><small>${escapeHtml(item.objective || item.reason || 'Objetivo ainda não informado')}</small></button>`).join('')}</div>` : '<p class="morning-command-empty">Nenhum compromisso estruturado.</p>'}
         </article>
         <article>
           <span class="og-kicker">SINAIS</span>
@@ -3823,7 +3834,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         salesDesk:OG_SALES_DESK,
         leadIntelligence:OG_LEAD_INTELLIGENCE,
         signalCenter:OG_SIGNAL_CENTER,
-        automationEngine:OG_AUTOMATION_ENGINE
+        automationEngine:OG_AUTOMATION_ENGINE,
+        customerJourney:window.OG_CUSTOMER_JOURNEY
       });
       state.operations = OG_COMMAND_EXECUTION.finishMission(state.operations, {
         missionId,
@@ -4957,6 +4969,36 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function smartDiaryCandidateLabel(field) {
+    return {
+      fleetSizeMentioned: 'Frota mencionada',
+      testFleetMentioned: 'Veículos em teste',
+      painMentioned: 'Dor mencionada',
+      commitmentMentioned: 'Compromisso mencionado',
+      decisionProcessMentioned: 'Pessoa/cargo citado'
+    }[field] || field;
+  }
+
+  function renderSmartDiaryPreview(root, preview) {
+    if (!root) return;
+    const candidates = preview?.candidates || [];
+    root.innerHTML = `
+      <div class="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3 space-y-3">
+        <div><span class="og-kicker">PREVIEW · NADA FOI SALVO</span><p class="text-xs text-slate-300 mt-1">Marque somente o que você confirma. O trecho original fica visível como evidência.</p></div>
+        <div class="space-y-2">
+          ${candidates.length ? candidates.map((item, index) => `
+            <label class="block rounded-lg border border-slate-700 bg-slate-950/70 p-2.5 cursor-pointer">
+              <div class="flex items-start gap-2">
+                <input type="checkbox" data-diary-candidate="${index}" class="mt-1">
+                <div class="min-w-0"><b class="text-xs text-slate-100">${escapeHtml(smartDiaryCandidateLabel(item.field))}: ${escapeHtml(String(item.value))}</b><p class="text-[11px] text-slate-400 mt-1">“${escapeHtml(item.evidence?.quote || '')}”</p>${item.note ? `<p class="text-[10px] text-amber-300 mt-1">${escapeHtml(item.note)}</p>` : ''}</div>
+              </div>
+            </label>`).join('') : '<p class="text-xs text-slate-400">Nenhum campo seguro foi extraído. Você ainda pode registrar o relato como conversa.</p>'}
+        </div>
+        <div class="text-[10px] text-slate-500">${(preview?.warnings || []).map(escapeHtml).join(' · ')}</div>
+        <button type="button" data-diary-confirm class="w-full px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black">CONFIRMAR E REGISTRAR</button>
+      </div>`;
+  }
+
   function buildCommercialPanel(lead) {
     const interactions = lead.interactions.slice().reverse().slice(0, 8);
     return `
@@ -4971,8 +5013,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div class="og-field og-field-full"><label for="lead-next-action">Próxima ação</label><input id="lead-next-action" value="${escapeHtml(lead.nextAction)}" placeholder="Ex.: ligar para validar a frota e apresentar proposta"></div>
         </div>
         <button id="btn-save-commercial-context" class="w-full px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold">Salvar contexto e retorno</button>
-        <div class="og-field"><label for="lead-interaction-note">Nota rápida após conversa</label><textarea id="lead-interaction-note" rows="3" placeholder="O que o cliente confirmou? O que ficou combinado?"></textarea></div>
-        <button id="btn-add-interaction" class="w-full px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Registrar conversa agora</button>
+
+        <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-3.5 space-y-3">
+          <div><span class="og-kicker">DIÁRIO INTELIGENTE · BETA</span><h4 class="font-bold text-sm text-slate-100 mt-1">Conte o que aconteceu. Revise antes de salvar.</h4><p class="text-[11px] text-slate-400 mt-1">Cole uma transcrição ou escreva como você falaria. O DUTRA só aplica os campos que você marcar e confirmar.</p></div>
+          <textarea id="lead-smart-diary" rows="4" placeholder="Ex.: Falei com João. Tem 32 caminhões, está testando em 3. Pediu retorno sexta depois de falar com o sócio..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 leading-relaxed focus:outline-none focus:border-amber-400"></textarea>
+          <button id="btn-smart-diary-preview" type="button" class="w-full px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs font-bold">🧠 ENTENDER RELATO</button>
+          <div id="smart-diary-preview" aria-live="polite"></div>
+        </div>
+
+        <details class="rounded-xl border border-slate-800 p-3">
+          <summary class="text-xs font-bold text-slate-300 cursor-pointer">Nota rápida manual</summary>
+          <div class="og-field mt-3"><label for="lead-interaction-note">Registrar sem interpretação</label><textarea id="lead-interaction-note" rows="3" placeholder="O que o cliente confirmou? O que ficou combinado?"></textarea></div>
+          <button id="btn-add-interaction" class="w-full px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">Registrar nota manual</button>
+        </details>
         <div><span class="og-kicker">HISTÓRICO RECENTE</span><div class="og-interaction-list mt-2">${interactions.length ? interactions.map(item => `<article class="og-interaction"><time>${escapeHtml(new Date(item.at).toLocaleString('pt-BR'))}</time><p>${escapeHtml(item.note)}</p></article>`).join('') : '<div class="text-xs text-slate-500">Nenhuma conversa registrada.</div>'}</div></div>
       </section>`;
   }
@@ -4980,24 +5033,81 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function bindCommercialPanel(lead) {
     const saveButton = document.getElementById('btn-save-commercial-context');
     const addButton = document.getElementById('btn-add-interaction');
+    const diaryButton = document.getElementById('btn-smart-diary-preview');
+    const diaryInput = document.getElementById('lead-smart-diary');
+    const diaryRoot = document.getElementById('smart-diary-preview');
+    let diaryPreview = null;
+
     if (saveButton) saveButton.addEventListener('click', () => {
       lead.priority = document.getElementById('lead-priority').value;
       lead.fleetSize = Math.max(0, Number(document.getElementById('lead-fleet-size').value) || 0);
       lead.pain = document.getElementById('lead-pain').value.trim();
       lead.decisionMaker = document.getElementById('lead-decision-maker').value.trim();
-      lead.followUpAt = document.getElementById('lead-follow-up').value;
-      lead.nextAction = document.getElementById('lead-next-action').value.trim();
+      const followUpAt = document.getElementById('lead-follow-up').value;
+      const nextAction = document.getElementById('lead-next-action').value.trim();
+      OG_INTERACTION_SERVICE.setNextAction(lead, nextAction, followUpAt);
       saveLeadsToStorage();
       renderLeadsTable();
       showNotification('Contexto e próximo retorno salvos.', 'success');
     });
+
+    if (diaryButton && diaryInput && diaryRoot) diaryButton.addEventListener('click', () => {
+      try {
+        diaryPreview = window.OG_SMART_DIARY.preview(diaryInput.value, { baseDate: new Date().toISOString() });
+        renderSmartDiaryPreview(diaryRoot, diaryPreview);
+        diaryRoot.querySelector('[data-diary-confirm]')?.addEventListener('click', () => {
+          if (!diaryPreview) return;
+          const accepted = [...diaryRoot.querySelectorAll('[data-diary-candidate]:checked')]
+            .map(input => diaryPreview.candidates[Number(input.dataset.diaryCandidate)])
+            .filter(Boolean);
+
+          accepted.forEach(item => {
+            if (item.field === 'fleetSizeMentioned') lead.fleetSize = Math.max(0, Number(item.value) || 0);
+            if (item.field === 'painMentioned') lead.pain = String(item.value || '').trim();
+            if (item.field === 'commitmentMentioned') {
+              const currentAction = lead.nextAction || '';
+              const currentDate = lead.followUpAt || '';
+              const suggestedAction = item.suggestedAction || currentAction || 'Retomar contato';
+              const suggestedDate = item.suggestedFollowUpAt || currentDate;
+              const action = prompt('Próxima ação confirmada:', suggestedAction);
+              if (action === null) return;
+              const date = prompt('Data/hora confirmada (ISO ou YYYY-MM-DDTHH:MM):', suggestedDate);
+              if (date === null) return;
+              const reason = prompt('Por que esse retorno existe?', item.value || '');
+              if (reason === null) return;
+              const objective = prompt('Objetivo da próxima conversa:', lead.nextActionObjective || '');
+              if (objective === null) return;
+              const expectedResult = prompt('Resultado esperado:', lead.nextActionExpectedResult || '');
+              if (expectedResult === null) return;
+              OG_INTERACTION_SERVICE.setNextAction(lead, action, date, { reason, objective, expectedResult });
+            }
+          });
+
+          const now = new Date().toISOString();
+          OG_INTERACTION_SERVICE.addInteraction(lead, {
+            type: 'conversa',
+            note: diaryPreview.originalText,
+            changedFields: ['interactions', 'lastContactAt', ...accepted.flatMap(item => item.field === 'fleetSizeMentioned' ? ['fleetSize'] : item.field === 'painMentioned' ? ['pain'] : item.field === 'commitmentMentioned' ? ['nextAction', 'followUpAt', 'nextActionReason', 'nextActionObjective', 'nextActionExpectedResult'] : [])]
+          }, { now });
+          if (lead.status === 'novo') lead.status = 'contatado';
+          state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'smart_diary_reviewed' });
+          saveLeadsToStorage();
+          saveOperationsToStorage();
+          renderLeadsTable();
+          renderLeadInspector();
+          showNotification(accepted.length ? 'Relato registrado e campos confirmados aplicados.' : 'Relato registrado sem alterar campos comerciais.', 'success');
+        });
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível interpretar o relato.', 'warning');
+      }
+    });
+
     if (addButton) addButton.addEventListener('click', () => {
       const note = document.getElementById('lead-interaction-note').value.trim();
       if (!note) return showNotification('Escreva uma nota curta antes de registrar.', 'info');
       const now = new Date().toISOString();
-      lead.interactions.push({ id: `INT-${Date.now()}`, at: now, type: 'conversa', note });
+      OG_INTERACTION_SERVICE.addInteraction(lead, { type: 'conversa', note }, { now });
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'conversation' });
-      lead.lastContactAt = now;
       if (lead.status === 'novo') lead.status = 'contatado';
       saveLeadsToStorage();
       saveOperationsToStorage();
@@ -5397,6 +5507,109 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function buildCustomerJourneyPanel(lead) {
+    const engine=window.OG_CUSTOMER_JOURNEY;
+    if(!engine?.snapshot || !window.OG_CUSTOMER_REVENUE?.isCustomer(lead)) return '';
+    const journey=engine.snapshot(lead,state.operations);
+    const steps=[
+      ['COMPRA',true],
+      ['INSTALAÇÃO',journey.installed],
+      ['RESULTADO',journey.satisfied],
+      ['EXPANSÃO',Boolean(window.OG_CUSTOMER_REVENUE.opportunity(lead)?.actionable)],
+      ['INDICAÇÃO',journey.referralRequested]
+    ];
+    return `<section class="rounded-xl border border-slate-700 bg-slate-900/70 p-3.5 space-y-3" data-customer-journey>
+      <div class="flex items-start justify-between gap-3"><div><span class="og-kicker">JORNADA DO CLIENTE</span><h3 class="font-bold text-sm text-slate-100 mt-1">Pós-venda → expansão → indicação</h3></div><span class="text-[10px] font-black px-2 py-1 rounded-full border border-slate-700 text-amber-300">${escapeHtml(journey.referralReadiness.label)}</span></div>
+      <div class="grid grid-cols-5 gap-1">${steps.map(([label,done])=>`<div class="rounded-lg border ${done?'border-emerald-500/30 bg-emerald-500/10':'border-slate-800 bg-slate-950'} p-2 text-center"><b class="text-[9px] ${done?'text-emerald-300':'text-slate-500'}">${done?'✓ ':''}${label}</b></div>`).join('')}</div>
+      <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5"><b class="text-xs text-slate-200">Próxima ação: ${escapeHtml(journey.next.action)}</b><p class="text-[11px] text-slate-400 mt-1">${escapeHtml(journey.next.reason)}</p><p class="text-[10px] text-amber-300 mt-1">Indicação: ${escapeHtml(journey.referralReadiness.reason)}</p></div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" data-journey-install class="px-3 py-2 rounded-lg bg-slate-800 text-xs font-bold text-slate-200">✓ Instalação concluída</button>
+        <button type="button" data-journey-satisfied class="px-3 py-2 rounded-lg bg-slate-800 text-xs font-bold text-slate-200">🙂 Satisfação confirmada</button>
+        <button type="button" data-journey-referral class="px-3 py-2 rounded-lg bg-amber-500 text-xs font-black text-slate-950">🤝 Indicação solicitada</button>
+        <button type="button" data-journey-referral-received class="px-3 py-2 rounded-lg bg-emerald-600 text-xs font-black text-white">🎯 Indicação recebida</button>
+      </div>
+    </section>`;
+  }
+
+  function bindCustomerJourneyPanel(lead,root){
+    const record=(type,field)=>{
+      const now=new Date().toISOString();
+      if(field) lead[field]=now;
+      state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:newLibraryId('evt'),type,at:now,clientId:lead.id});
+      saveLeadsToStorage();saveOperationsToStorage();renderLeadInspector();renderLeadsTable();showNotification('Marco do pós-venda registrado.','success');
+    };
+    root?.querySelector('[data-journey-install]')?.addEventListener('click',()=>{lead.installationStatus='concluido';record('installation.completed');});
+    root?.querySelector('[data-journey-satisfied]')?.addEventListener('click',()=>{lead.satisfactionStatus='satisfeito';record('customer.satisfaction.confirmed');});
+    root?.querySelector('[data-journey-referral]')?.addEventListener('click',()=>record('referral.requested','referralRequestedAt'));
+    root?.querySelector('[data-journey-referral-received]')?.addEventListener('click',()=>record('referral.received','referralReceivedAt'));
+  }
+
+  function buildCustomer360RevenuePanel(lead) {
+    const engine = window.OG_CUSTOMER_REVENUE;
+    if (!engine?.opportunity || !engine.isCustomer(lead)) return '';
+    const item = engine.opportunity(lead);
+    const c = item.coverage || {};
+    const metric = value => value === null || value === undefined ? '—' : escapeHtml(String(value));
+    const coverageLabel = c.percent === null || c.percent === undefined ? 'DESCONHECIDA' : c.percent + '%';
+    const gapLabel = c.gap === null || c.gap === undefined ? '—' : c.gap;
+    const tone = item.actionable ? 'text-amber-300' : c.status === 'unknown' ? 'text-slate-400' : 'text-emerald-300';
+    return `
+      <section class="rounded-xl border border-amber-500/20 bg-gradient-to-br from-slate-900 to-slate-950 p-3.5 space-y-3" data-customer360-revenue>
+        <div class="flex items-start justify-between gap-3">
+          <div><span class="og-kicker">CUSTOMER 360 · RECEITA</span><h3 class="font-bold text-sm text-slate-100 mt-1">Cobertura OG e próxima oportunidade</h3></div>
+          <span class="text-[10px] font-black px-2 py-1 rounded-full border border-slate-700 ${tone}">${escapeHtml(coverageLabel)}</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Frota registrada</small><b class="block text-sm text-slate-100">${metric(c.totalFleet)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Elegíveis validados</small><b class="block text-sm text-slate-100">${metric(c.eligibleValidated)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Protegidos OG</small><b class="block text-sm text-slate-100">${metric(c.protectedVehicles)}</b></div>
+          <div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Gap conhecido</small><b class="block text-sm ${tone}">${metric(gapLabel)}</b></div>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5">
+          <b class="text-xs text-slate-200">${escapeHtml(item.reason || 'Cobertura ainda não calculável.')}</b>
+          ${c.warning ? `<p class="text-[11px] text-amber-300 mt-1">⚠ ${escapeHtml(c.warning)}</p>` : ''}
+          <p class="text-[11px] text-slate-400 mt-1">${escapeHtml(item.nextStep || 'Complete os dados confirmados antes de sugerir expansão.')}</p>
+        </div>
+        <details class="rounded-lg border border-slate-800 p-2.5">
+          <summary class="text-xs font-bold text-slate-300 cursor-pointer">Atualizar cobertura confirmada</summary>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+            <label class="og-field"><span>Frota total</span><input id="customer360-fleet" type="number" min="0" value="${escapeHtml(lead.fleetSize ?? '')}"></label>
+            <label class="og-field"><span>Elegíveis validados</span><input id="customer360-eligible" type="number" min="0" value="${escapeHtml(lead.eligibleVehicleCount ?? '')}"></label>
+            <label class="og-field"><span>Protegidos OG</span><input id="customer360-protected" type="number" min="0" value="${escapeHtml(lead.equippedVehicles ?? '')}"></label>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-2">Só informe elegíveis depois de validação técnica. Campo vazio permanece desconhecido.</p>
+          <button type="button" data-customer360-save class="w-full mt-2 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black">SALVAR COBERTURA CONFIRMADA</button>
+        </details>
+      </section>`;
+  }
+
+  function bindCustomer360RevenuePanel(lead, root) {
+    root?.querySelector('[data-customer360-save]')?.addEventListener('click', () => {
+      const parseOptional = id => {
+        const raw = document.getElementById(id)?.value?.trim() || '';
+        return raw === '' ? null : Math.max(0, Number(raw) || 0);
+      };
+      const fleet = parseOptional('customer360-fleet');
+      const eligible = parseOptional('customer360-eligible');
+      const protectedVehicles = parseOptional('customer360-protected');
+      if (fleet === null) delete lead.fleetSize; else lead.fleetSize = fleet;
+      if (eligible === null) delete lead.eligibleVehicleCount; else lead.eligibleVehicleCount = eligible;
+      if (protectedVehicles === null) delete lead.equippedVehicles; else lead.equippedVehicles = protectedVehicles;
+      const now = new Date().toISOString();
+      OG_INTERACTION_SERVICE.addInteraction(lead, {
+        type:'customer_coverage_confirmed',
+        note:'Cobertura OG revisada manualmente no Customer 360.',
+        changedFields:['fleetSize','eligibleVehicleCount','equippedVehicles']
+      }, { now });
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:newLibraryId('evt'), type:'customer.coverage.confirmed', at:now, clientId:lead.id });
+      saveLeadsToStorage();
+      saveOperationsToStorage();
+      renderLeadsTable();
+      renderLeadInspector();
+      showNotification('Cobertura confirmada atualizada.', 'success');
+    });
+  }
+
   function renderLeadInspector() {
     const inspector = document.getElementById('crm-lead-inspector');
     if (!inspector) return;
@@ -5482,6 +5695,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </div>
     `;
 
+    inspector.insertAdjacentHTML('beforeend', buildCustomer360RevenuePanel(lead));
+    inspector.insertAdjacentHTML('beforeend', buildCustomerJourneyPanel(lead));
+    bindCustomerJourneyPanel(lead, inspector);
+    bindCustomer360RevenuePanel(lead, inspector);
     inspector.insertAdjacentHTML('beforeend', buildCompany360BetaPanel(lead));
     bindCompany360BetaPanel(lead);
     inspector.insertAdjacentHTML('beforeend', buildCommercialPanel(lead));

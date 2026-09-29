@@ -9,11 +9,12 @@ const intelligence=require('../apps/sistema-og/modules/lead-intelligence.js');
 const signals=require('../apps/sistema-og/modules/signal-center.js');
 const automation=require('../apps/sistema-og/services/automation-engine-service.js');
 const operationsModel=require('../apps/sistema-og/operations-model.js');
+const customerJourney=require('../apps/sistema-og/services/customer-journey-service.js');
 
 const now=new Date('2026-09-28T15:00:00.000Z');
 const leads=[
   {id:'L1',empresa:'Vencida',status:'negociacao',priority:'alta',followUpAt:'2026-09-27T12:00:00.000Z',nextAction:'Ligar',updatedAt:'2026-09-20T12:00:00.000Z',fleetSize:40,decisionMaker:'Ana',pain:'Desgaste',interactions:[]},
-  {id:'L2',empresa:'Hoje',status:'novo',priority:'media',followUpAt:'2026-09-28T18:00:00.000Z',nextAction:'Retornar',updatedAt:'2026-09-28T10:00:00.000Z',interactions:[]},
+  {id:'L2',empresa:'Hoje',status:'novo',priority:'media',followUpAt:'2026-09-28T18:00:00.000Z',nextAction:'Retornar',nextActionReason:'Cliente pediu retorno',nextActionObjective:'Validar teste',nextActionExpectedResult:'Definir próximo passo',updatedAt:'2026-09-28T10:00:00.000Z',interactions:[]},
   {id:'L3',empresa:'Sem ação',status:'negociacao',priority:'media',followUpAt:'',nextAction:'',updatedAt:'2026-09-18T10:00:00.000Z',decisionMaker:'Carlos',pain:'Pressão',interactions:[]},
   {id:'L4',empresa:'Fechada',status:'fechado',conversationStage:'customer',priority:'alta',followUpAt:'2026-09-27T10:00:00.000Z',nextAction:'',updatedAt:'2026-09-27T10:00:00.000Z',interactions:[]}
 ];
@@ -25,12 +26,23 @@ const report=morning.build({leads,operations:ops,now},{
   salesDesk,
   leadIntelligence:intelligence,
   signalCenter:signals,
-  automationEngine:automation
+  automationEngine:automation,
+  customerJourney
 });
 assert.equal(report.counts.active,3);
 assert.equal(report.counts.overdue,1);
 assert.equal(report.counts.today,1);
+assert.equal(report.counts.commitments,1);
+assert.equal(report.counts.commitmentToday,1);
+assert.equal(report.commitments[0].leadId,'L2');
+assert.equal(report.commitments[0].objective,'Validar teste');
+assert.ok(report.workQueue.length>0);
+assert.equal(report.workQueue.find(item=>item.leadId==='L2').lane.id,'fulfill');
+assert.equal(report.workQueue.find(item=>item.leadId==='L3').lane.id,'close');
+assert.ok(report.counts.lanes.fulfill>=1);
 assert.equal(report.counts.priority,1);
+assert.equal(report.counts.customerActions,1);
+assert.equal(report.customerActions[0].leadId,'L4');
 assert.ok(report.counts.noAction>=1);
 assert.ok(report.mission);
 assert.equal(report.calendar.connected,false);
@@ -44,7 +56,7 @@ const withCalendar=morning.build({
   now,
   calendarConnected:true,
   calendarEvents:[{id:'CAL-1',summary:'Reunião comercial',start:'2026-09-28T17:00:00Z'}]
-},{salesDesk,leadIntelligence:intelligence,signalCenter:signals,automationEngine:automation});
+},{salesDesk,leadIntelligence:intelligence,signalCenter:signals,automationEngine:automation,customerJourney});
 assert.equal(withCalendar.counts.calendar,1);
 assert.equal(withCalendar.calendar.events[0].title,'Reunião comercial');
 
