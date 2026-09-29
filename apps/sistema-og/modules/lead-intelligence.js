@@ -27,7 +27,20 @@
 
   const clean = value => String(value ?? '').trim();
   const key = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const textKey = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
   const byId = (list, id) => list.find(item => item.id === id) || null;
+
+  function inferStageFromText(value) {
+    const text = textKey(value);
+    if (!text) return '';
+    if (/\bsem interesse\b|\bnao tem interesse\b|\bnao quer (comprar|seguir|continuar)\b|\bdesistiu\b/.test(text)) return 'not_interested';
+    if (/\bnao atende\b|\bnao atendeu\b|\brecusou chamada\b|\bchamada recusada\b|\bnao respondeu\b|\bsem resposta\b|\bnao consegui contato\b|\bcaixa postal\b/.test(text)) return 'no_reply';
+    if (/\bem reuniao\b|\bentrar em contato mais tarde\b|\bligar mais tarde\b|\bligar depois\b|\bretornar\b|\bretorno combinado\b|\baguardando resposta\b|\baguardando retorno\b/.test(text)) return 'waiting_response';
+    if (/\bproposta enviada\b|\borcamento enviado\b|\bcotacao enviada\b/.test(text)) return 'proposal';
+    if (/\bem negociacao\b|\bnegociando\b|\bcontraproposta\b/.test(text)) return 'negotiation';
+    if (/\binteressad[oa]\b|\bdemonstrou interesse\b/.test(text)) return 'interested';
+    return 'talked';
+  }
 
   function priorityBand(lead = {}) {
     const raw = key(lead.priorityBand || lead.sourcePriority || lead.priority);
@@ -39,15 +52,29 @@
 
   function conversationStage(lead = {}) {
     if (key(lead.status) === 'perdido') return 'not_interested';
+
     const explicit = key(lead.conversationStage);
     if (byId(CONVERSATION_STAGES, explicit)) return explicit;
-    if (lead.status === 'proposta_enviada') return 'proposal';
-    if (lead.status === 'negociacao') return 'negotiation';
-    if (lead.status === 'fechado') return 'customer';
+
     const interactions = Array.isArray(lead.interactions) ? lead.interactions : [];
     const latest = interactions.slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')))[0];
-    if (key(latest?.result) === 'nao_atendeu') return 'no_reply';
-    if (interactions.length || lead.operationalStatus === 'WORKED_LEAD') return 'talked';
+    const latestResult = key(latest?.result);
+    if (latestResult === 'nao_atendeu') return 'no_reply';
+    if (latestResult === 'sem_interesse') return 'not_interested';
+
+    const interactionEvidence = inferStageFromText([latest?.note, latest?.result].filter(Boolean).join(' '));
+    if (interactionEvidence) return interactionEvidence;
+
+    const storedEvidence = inferStageFromText([lead.accountSummary, lead.observacoes].filter(Boolean).join(' '));
+    if (storedEvidence) return storedEvidence;
+
+    if (interactions.length || lead.operationalStatus === 'WORKED_LEAD' || lead.status === 'contatado') return 'talked';
+    if (lead.status === 'proposta_enviada') return 'proposal';
+    if (lead.status === 'negociacao') return 'negotiation';
+
+    // "fechado" descreve relação/comercial histórico, não o estado da conversa atual.
+    // Um cliente OG ainda não trabalhado nesta rotina deve entrar como primeiro contato
+    // até existir evidência de conversa, resposta ou estágio explícito.
     return 'first_contact';
   }
 
@@ -180,6 +207,7 @@
   return {
     CONVERSATION_STAGES,
     PRIORITY_BANDS,
+    inferStageFromText,
     priorityBand,
     priorityDefinition,
     conversationStage,
