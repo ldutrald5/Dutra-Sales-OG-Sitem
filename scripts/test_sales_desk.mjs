@@ -95,5 +95,8 @@ assert.match(appSource, /message_prepared/);
 assert.match(appSource, /whatsapp_opened/);
 assert.doesNotMatch(appSource, /message_sent.*openDeskWhatsApp/);
 assert.match(htmlSource, /id="sales-desk-client"/);
+assert.match(appSource, /sales-desk-now/,'Meu Dia deve destacar uma única próxima ação');
+assert.match(appSource, /Registrar conversa \/ retorno/,'registro operacional deve ficar em divulgação progressiva');
+assert.match(appSource, /sales-desk-history.*Histórico recente/s,'histórico não deve competir com a ação principal no mobile');
 
 console.log('Sales Desk critical flows: PASS');
