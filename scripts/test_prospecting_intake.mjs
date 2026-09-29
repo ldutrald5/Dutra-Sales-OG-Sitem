@@ -12,9 +12,10 @@ assert.equal(mission.payload.mutationPolicy,'prepare_only');
 
 const candidate=intake.normalizeCandidate({
  companyName:'Transportadora Exemplo', city:'Cascavel', state:'PR', segment:'Transportadora rodoviária', fleetSize:45,
- sources:[{url:'https://example.com/frota',title:'Frota',supports:['fleet_evidence']}]
+ sourceSnippet:'Frota própria com 45 caminhões', sources:[{url:'https://example.com/frota',title:'Frota',supports:['fleet_evidence']}]
 },mission.payload.criteria);
 assert.equal(candidate.reviewStatus,'ready_for_review');
+assert.equal(candidate.sourceSnippet,'Frota própria com 45 caminhões');
 assert.ok(candidate.fitReasons.includes('fleet_threshold'));
 
 const [deduped]=intake.dedupeAgainstCrm([candidate],[{company:'Transportadora Exemplo'}]);
