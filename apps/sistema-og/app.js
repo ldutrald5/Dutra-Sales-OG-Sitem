@@ -7304,6 +7304,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
         <button type="button" data-mobile-tab="guia" role="menuitem"><span>🚛</span><small>Suportes</small></button>
         <button type="button" data-mobile-tab="scripts" role="menuitem"><span>💬</span><small>Vendas</small></button>
+        <button type="button" data-mobile-tab="comunicacao" role="menuitem"><span>✉</span><small>Comunicação</small></button>
+        <button type="button" data-mobile-tab="catalogo" role="menuitem"><span>📦</span><small>Peças</small></button>
+        <button type="button" data-mobile-tab="transportadoras" role="menuitem"><span>🚚</span><small>Transportadoras</small></button>
         <button type="button" data-mobile-tab="biblioteca" role="menuitem"><span>🎞️</span><small>Biblioteca</small></button>
         <button type="button" data-mobile-tab="operacoes" role="menuitem"><span>📊</span><small>Operações</small></button>
         <button type="button" data-mobile-tab="historico" role="menuitem"><span>≡</span><small>Histórico</small></button>
