@@ -115,12 +115,12 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/' || url.pathname === '/index.html') {
     const file = path.join(dir, 'index.html');
-    const html = fs.readFileSync(file, 'utf8').replace('</body>', '<script src="/core/modules/sales-desk.js"></script><script src="/core/modules/signal-center.js"></script><script src="/core/services/automation-engine-service.js"></script><script src="/core/services/customer-journey-service.js"></script><script src="/core/services/morning-command-service.js"></script><script src="/core-pricing.js"></script><script src="/meu-dia-v3.js"></script></body>');
+    const html = fs.readFileSync(file, 'utf8').replace('</body>', '<script src="/core/modules/sales-desk.js"></script><script src="/core/modules/signal-center.js"></script><script src="/core/services/automation-engine-service.js"></script><script src="/core/services/customer-journey-service.js"></script><script src="/core/services/morning-command-service.js"></script><script src="/core-pricing.js"></script><script src="/meu-dia-v3.js"></script><script src="/sales-execution-service.js"></script><script src="/call-provider-v3.js"></script><script src="/whatsapp-action-service-v3.js"></script><script src="/prospecting-execution-v3.js"></script></body>');
     res.writeHead(200, {'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'});
     if (req.method === 'HEAD') return res.end();
     return res.end(html);
   }
-  if (url.pathname === '/core-bridge.js' || url.pathname === '/core-pricing.js' || url.pathname === '/meu-dia-v3.js') {
+  if (['/core-bridge.js','/core-pricing.js','/meu-dia-v3.js','/sales-execution-service.js','/call-provider-v3.js','/whatsapp-action-service-v3.js','/prospecting-execution-v3.js'].includes(url.pathname)) {
     return sendFile(res, path.join(dir, url.pathname.slice(1)), req.method);
   }
 
