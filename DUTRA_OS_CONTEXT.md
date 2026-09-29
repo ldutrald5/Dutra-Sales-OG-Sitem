@@ -56,6 +56,7 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **V2.8:** Prospecção conectada ao mesmo CRM + Dutra Force contextual.
 - **V2.9:** Dutra Force Central com radar, briefing e links para Conta 360/Call AI.
 - **V3.0:** Ciclo Comercial Conectado com visão Entrada → Contato → Proposta → Negociação → Venda → Pós-venda e atalhos para Cotação, ROI/Payback, CRM, Mesa e Dutra Force. Cotação salva continua sendo rascunho até ação explícita do usuário.
+- **PRECALL-02:** Ficha de Ataque no Call AI com playbook determinístico por momento comercial, abordagem, abertura, WhatsApp de entrada, preparação técnica e guardrails sem mutar o CRM.
 
 ## Regra técnica OG
 
