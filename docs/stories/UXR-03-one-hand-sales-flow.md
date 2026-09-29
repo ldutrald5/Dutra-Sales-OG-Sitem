@@ -1,6 +1,6 @@
 # UXR-03 — Fluxo comercial de uma mão só
 
-Status: **implementado na branch de preview; aguardando validação visual/mobile**
+Status: **incorporado à main pelo RC2; fluxo contato → resultado → próxima ação → avançar está em produção. QA físico final permanece no gate da 1.0.**
 
 ## Objetivo
 
