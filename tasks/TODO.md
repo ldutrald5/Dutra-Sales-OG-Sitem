@@ -217,3 +217,12 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 5. **WAVE-05:** Aplicação Visual 360° — projeção visual do Technical Brain.
 6. **WAVE-06:** Proposal + ROI Engine — uma fonte para mensagem, proposta e cenários financeiros.
 7. **WAVE-07:** Coach DUTRA — orientação baseada em dados reais estruturados.
+
+
+## REF-01 — Referral Intelligence V1
+
+- **Objetivo:** transformar indicação confirmada em entidade rastreável e mensurar conversão/receita sem inventar fatos.
+- **Escopo:** indicador → indicado → contexto → deduplicação → oportunidade → venda → receita atribuída.
+- **Guardrails:** confirmação humana; colisão gera revisão; nenhuma fusão automática; receita somente com venda vinculada; score canônico preservado.
+- **Story:** `docs/stories/REF-01-referral-intelligence-v1.md`.
+- **Status:** em andamento.
