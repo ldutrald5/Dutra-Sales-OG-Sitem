@@ -77,4 +77,26 @@ assert.deepEqual(intelligence.filterSort(rows,{source:'Lista A'},now).map(x=>x.i
 assert.equal(intelligence.filterSort(rows,{priority:'urgente'},now)[0].id,'2');
 assert.equal(intelligence.stageDefinition('negotiation').label,'Negociação');
 assert.equal(intelligence.summarize(rows).stages.first_contact,1);
+
+const crmRows=[
+  {id:'CRM-1',status:'fechado',conversationStage:'customer',priorityBand:'media',sourceLabel:'Pós-venda OG'},
+  {id:'CRM-2',status:'novo',conversationStage:'first_contact',priorityBand:'media',sourceLabel:'CRM antigo'},
+  {id:'CRM-3',status:'proposta_enviada',conversationStage:'proposal',priorityBand:'alta',sourceLabel:'Proposta recuperada'},
+  {id:'CRM-4',status:'novo',conversationStage:'first_contact',priorityBand:'media',nextAction:'Conferir ERP antes de abordar',sourceLabel:'Prospecção ERP 24/09'},
+  {id:'CRM-5',status:'contatado',conversationStage:'waiting_response',priorityBand:'media',accountSummary:'Falamos com o gestor e ficou retorno combinado.'},
+  {id:'CRM-6',status:'novo',conversationStage:'first_contact',priorityBand:'media',potential:'alto',fleetSize:70}
+];
+assert.equal(intelligence.matchesCrmView(crmRows[0],'customers'),true,'cliente fechado deve entrar em Clientes');
+assert.equal(intelligence.matchesCrmView(crmRows[0],'prospects'),false,'cliente fechado não deve entrar em Prospects');
+assert.equal(intelligence.matchesCrmView(crmRows[1],'attack'),true,'prospect novo deve entrar na fila de ataque');
+assert.equal(intelligence.matchesCrmView(crmRows[3],'attack'),false,'registro pendente de ERP deve sair da fila de ataque');
+assert.equal(intelligence.matchesCrmView(crmRows[3],'erp_review'),true,'ação explícita de conferir ERP deve criar recorte de revisão');
+assert.equal(intelligence.matchesCrmView(crmRows[2],'proposals'),true,'proposta deve entrar no recorte de propostas');
+assert.equal(intelligence.matchesCrmView(crmRows[5],'strategic'),true,'potencial alto/frota grande deve entrar em estratégicas');
+assert.equal(intelligence.matchesCrmView(crmRows[4],'talked'),true,'retorno registrado deve entrar em já conversados');
+const crmSummary=intelligence.summarizeCrmViews(crmRows);
+assert.equal(crmSummary.all,6);
+assert.equal(crmSummary.customers,1);
+assert.equal(crmSummary.erp_review,1);
+assert.equal(intelligence.crmViewDefinition('attack').label,'Fila de ataque');
 console.log('Lead intelligence tests: PASS');
