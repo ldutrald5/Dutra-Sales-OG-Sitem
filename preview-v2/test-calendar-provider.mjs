@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+await import('./calendar-provider-v3.js');
+const cal=globalThis.DUTRA_CALENDAR_PROVIDER;
+assert.ok(cal,'calendar provider must attach');
+const meeting={id:'MTG-1',scheduledAt:'2026-09-30T14:00:00Z',durationMinutes:30,meetingType:'Diagnóstico de frota',objective:'Validar aplicação e próximos passos',mode:'ONLINE'};
+const event=cal.eventFromMeeting(meeting,{summary:'Olho de Gato · Frota Teste',attendees:[{name:'Marcos',email:'marcos@example.com'}]});
+assert.equal(event.end,'2026-09-30T14:30:00.000Z');
+const ics=cal.toIcs(event);
+assert.match(ics,/BEGIN:VEVENT/);
+assert.match(ics,/SUMMARY:Olho de Gato · Frota Teste/);
+assert.match(ics,/ATTENDEE;CN=Marcos:MAILTO:marcos@example.com/);
+assert.match(ics,/DTSTART:20260930T140000Z/);
+console.log('Calendar provider tests: PASS');
