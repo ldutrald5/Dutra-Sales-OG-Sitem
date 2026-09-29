@@ -7745,6 +7745,56 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     syncVehicleGallerySelection();
   }
 
+  let pwaReloadRequested = false;
+
+  function showPwaUpdateNotice() {
+    if (document.getElementById('og-update-banner')) return;
+    const banner = document.createElement('aside');
+    banner.id = 'og-update-banner';
+    banner.className = 'og-update-banner';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-live', 'polite');
+    banner.setAttribute('aria-atomic', 'true');
+    banner.innerHTML = `
+      <div><strong>Nova versão do DUTRA OS pronta</strong><span>Atualize quando puder para usar todos os ajustes sem misturar arquivos antigos e novos.</span></div>
+      <div class="og-update-actions">
+        <button type="button" data-pwa-update-now>Atualizar agora</button>
+        <button type="button" data-pwa-update-later>Depois</button>
+      </div>`;
+    document.body.appendChild(banner);
+    banner.querySelector('[data-pwa-update-now]')?.addEventListener('click', () => {
+      pwaReloadRequested = true;
+      location.reload();
+    });
+    banner.querySelector('[data-pwa-update-later]')?.addEventListener('click', () => banner.remove());
+  }
+
+  async function initServiceWorkerUpdates() {
+    if (!('serviceWorker' in navigator)) return;
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      if (registration.waiting && hadController) showPwaUpdateNotice();
+
+      registration.addEventListener('updatefound', () => {
+        const worker = registration.installing;
+        worker?.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            showPwaUpdateNotice();
+          }
+        });
+      });
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !pwaReloadRequested) showPwaUpdateNotice();
+      });
+
+      registration.update().catch(() => {});
+    } catch (error) {
+      console.warn('Atualização do PWA indisponível nesta abertura.', error);
+    }
+  }
+
   async function initUnifiedExperience() {
     const nav = document.createElement('nav');
     nav.className = 'og-mobile-nav';
@@ -7752,9 +7802,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     nav.innerHTML = `
       <button type="button" data-mobile-tab="dia" class="active"><span>◉</span><small>Meu Dia</small></button>
       <button type="button" data-mobile-tab="crm"><span>◎</span><small>Clientes</small></button>
-      <button type="button" data-mobile-tab="call-ai"><span>🎧</span><small>Call AI</small></button>
-      <button type="button" data-mobile-more aria-expanded="false"><span>＋</span><small>Mais</small></button>
-      <div class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
+      <button type="button" data-mobile-tab="call-ai"><span aria-hidden="true">🎧</span><small>Call AI</small></button>
+      <button type="button" data-mobile-more aria-expanded="false" aria-haspopup="menu" aria-controls="og-mobile-more-sheet"><span aria-hidden="true">＋</span><small>Mais</small></button>
+      <div id="og-mobile-more-sheet" class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
         <div class="og-mobile-more-head"><strong>Mais ferramentas</strong><small>Abra só quando precisar.</small></div>
         <button type="button" data-mobile-tab="cotacao" role="menuitem"><span>⚡</span><small>Cotação</small></button>
         <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
@@ -7771,10 +7821,25 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     nav.querySelectorAll('[data-mobile-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.mobileTab)));
     const moreButton = nav.querySelector('[data-mobile-more]');
     const moreSheet = nav.querySelector('.og-mobile-more-sheet');
+    const closeMoreSheet = (returnFocus = false) => {
+      moreSheet?.classList.add('hidden');
+      moreButton?.setAttribute('aria-expanded', 'false');
+      if (returnFocus) moreButton?.focus();
+    };
     moreButton?.addEventListener('click', () => {
       const willOpen = moreSheet?.classList.contains('hidden');
       moreSheet?.classList.toggle('hidden', !willOpen);
       moreButton.setAttribute('aria-expanded', String(Boolean(willOpen)));
+      if (willOpen) requestAnimationFrame(() => moreSheet?.querySelector('[role="menuitem"]')?.focus());
+    });
+    nav.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !moreSheet?.classList.contains('hidden')) {
+        event.preventDefault();
+        closeMoreSheet(true);
+      }
+    });
+    document.addEventListener('pointerdown', event => {
+      if (!moreSheet?.classList.contains('hidden') && !nav.contains(event.target)) closeMoreSheet(false);
     });
 
     const status = document.createElement('div');
@@ -7799,7 +7864,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       installPrompt = null;
       installButton.classList.add('hidden');
     });
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    await initServiceWorkerUpdates();
     await restoreSyncRecovery();
     window.addEventListener('offline', () => setSyncStatus('Sem conexão · salvo neste aparelho', 'offline'));
     window.addEventListener('online', () => {
