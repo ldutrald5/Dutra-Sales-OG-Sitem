@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function visibleFocusable(root) {
     if (!root) return [];
     return [...root.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
-      .filter(item => !item.closest('[hidden]') && !item.classList.contains('hidden') && item.getAttribute('aria-hidden') !== 'true');
+      .filter(item => item.offsetParent !== null && !item.closest('[hidden]') && !item.classList.contains('hidden') && item.getAttribute('aria-hidden') !== 'true');
   }
 
   function openAppDialog(modal, options = {}) {
