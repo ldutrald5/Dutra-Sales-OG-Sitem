@@ -419,13 +419,24 @@ body {
   .lead-smart-toolbar .lead-smart-selects { display: none; }
   .spreadsheet-auto-actions { display: none; }
   .sales-desk-side { display:none; }
-  .sales-desk-client { padding:.8rem; }
+  .sales-desk-layout { display:flex; flex-direction:column; gap:.65rem; }
+  .sales-desk-client { order:1; padding:.8rem; }
+  .sales-desk-queue { order:2; padding:.75rem!important; }
   .sales-desk-primary-actions { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .sales-desk-primary-actions [data-client-crm] { grid-column:1/-1;min-height:36px;background:transparent;color:#94a3b8; }
   .sales-desk-facts { display:none; }
-  .sales-desk-save-row { grid-template-columns:1fr; }
+  .sales-desk-register[open] { padding-bottom:.25rem; }
+  .sales-desk-register-body { gap:.55rem; }
+  .sales-desk-register-body textarea { min-height:72px; }
+  .sales-desk-save-row { position:sticky; bottom:calc(76px + env(safe-area-inset-bottom)); z-index:6; grid-template-columns:.7fr 1.3fr; padding:.48rem; border:1px solid rgba(255,222,23,.2); border-radius:.75rem; background:rgba(8,17,24,.96); box-shadow:0 12px 30px rgba(0,0,0,.38); backdrop-filter:blur(12px); }
+  .sales-desk-save-row #desk-save-advance { min-height:48px; font-size:.7rem; }
+  .sales-desk-save-row #desk-save-stay { min-height:48px; font-size:.64rem; }
   .sales-desk-actions { margin-top:.65rem; }
   .sales-desk-history { margin-top:.65rem; }
+  .sales-desk-queue .og-section-head { gap:.45rem; }
+  .sales-desk-queue .og-section-head h2 { font-size:.9rem; }
+  .sales-desk-queue .og-filter-row { display:none; }
+  .sales-desk-search { margin:.35rem 0 .55rem; }
   #btn-install-app span:last-child { display: none; }
 }
 /* ========================================================================== */
@@ -577,6 +588,7 @@ body {
 .sales-desk-register-body { display:grid; gap:.65rem; padding:.7rem 0 0; }
 .sales-desk-save-row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
 .sales-desk-save-row button { min-height:42px; }
+.sales-desk-save-row #desk-save-advance { font-weight:900; }
 
 .sales-desk-next { display: grid; grid-template-columns: 1fr .7fr; gap: .55rem; padding-top: .7rem; border-top: 1px solid var(--og-border); }
 .sales-desk-next button { align-self: end; min-height: 42px; border-radius: .65rem; background: #273244; color: white; font-size: .7rem; font-weight: 800; }
