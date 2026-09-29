@@ -5579,7 +5579,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const referrals=(state.operations?.referrals||[]).filter(item=>String(item.referrerClientId||'')===String(lead.id));
     const graph=engine.graph(referrals,state.leads),portfolio=engine.portfolio(referrals);
     const money=value=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(value)||0);
-    const cards=graph.edges.map(edge=>{const node=graph.nodes.find(n=>n.id===edge.target);return `<article class="rounded-lg border border-slate-800 bg-slate-950 p-2.5"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span><b class="text-xs text-slate-100">${escapeHtml(node?.label||'Indicado')}</b></div><small class="block text-[10px] text-slate-500 mt-1">${escapeHtml(edge.status||'received')} · ${edge.saleId?'VENDA '+money(edge.revenue):edge.opportunityId?'OPORTUNIDADE':'INDICAÇÃO'}</small></article>`;}).join('');
+    const cards=graph.edges.map(edge=>{const node=graph.nodes.find(n=>n.id===edge.target);return `<article class="rounded-lg border border-slate-800 bg-slate-950 p-2.5"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span><b class="text-xs text-slate-100">${escapeHtml(node?.label||'Indicado')}</b></div><small class="block text-[10px] text-slate-500 mt-1">${escapeHtml(edge.status||'received')} · ${edge.saleId?'VENDA '+money(edge.revenue):edge.opportunityId?'OPORTUNIDADE':'INDICAÇÃO'}</small>${!edge.opportunityId&&!edge.saleId?`<button type="button" data-ref-force="${escapeHtml(edge.referralId)}" class="mt-2 w-full px-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-black text-amber-300">→ ENVIAR AO DUTRA FORCE</button>`:''}</article>`;}).join('');
     return `<section class="rounded-xl border border-amber-500/20 bg-slate-900/70 p-3.5 space-y-3" data-referral-graph>
       <div class="flex items-start justify-between gap-3"><div><span class="og-kicker">REFERRAL GRAPH</span><h3 class="font-bold text-sm text-slate-100 mt-1">Rede de indicações desta conta</h3><p class="text-[11px] text-slate-400 mt-1">Cliente → indicado → oportunidade → venda. Somente fatos confirmados entram na rede.</p></div><span class="text-[10px] font-black px-2 py-1 rounded-full border border-amber-500/30 text-amber-300">${portfolio.total} indicações</span></div>
       <div class="grid grid-cols-3 gap-2"><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Oportunidades</small><b class="block text-sm text-slate-100">${portfolio.converted}</b></div><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Vendas</small><b class="block text-sm text-emerald-300">${portfolio.sales}</b></div><div class="rounded-lg bg-slate-950 border border-slate-800 p-2"><small class="text-[10px] text-slate-500">Receita atribuída</small><b class="block text-sm text-amber-300">${money(portfolio.attributedRevenue)}</b></div></div>
@@ -5589,6 +5589,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function bindReferralGraphPanel(lead,root){
+    root?.querySelectorAll('[data-ref-force]').forEach(button=>button.addEventListener('click',()=>{
+      const referral=(state.operations.referrals||[]).find(item=>String(item.id)===String(button.dataset.refForce));
+      if(!referral)return;
+      const duplicates=OG_REFERRAL_INTELLIGENCE.duplicateCandidates(referral,state.leads,state.operations.referrals||[]).filter(item=>item.kind==='lead');
+      if(duplicates.length){
+        const existing=state.leads.find(item=>String(item.id)===String(duplicates[0].id));
+        if(existing){state.selectedLeadId=existing.id;referral.prospectLeadId=existing.id;referral.forceStatus='linked_existing';referral.status='qualified';saveOperationsToStorage();renderLeadInspector();showNotification('Indicação vinculada ao prospect já existente; nenhum duplicado foi criado.','success');}
+        return;
+      }
+      if(!confirm(`Enviar "${referral.referredCompany||referral.referredContact}" ao DUTRA Force como novo prospect, preservando a origem desta indicação?`))return;
+      const prospect=OG_CRM_SERVICE.createProspect({empresa:referral.referredCompany||referral.referredContact,nome:referral.referredContact||'',telefone:referral.referredPhone||'',priority:'alta',nextAction:'Contatar indicação recebida e validar operação/frota',followUpAt:'',source:'referral',origin:'referral'}, {id:createQuickLeadId()});
+      prospect.referralId=referral.id;prospect.referredByClientId=lead.id;prospect.referralContext=referral.context||'';state.leads.unshift(prospect);referral.prospectLeadId=prospect.id;referral.forceStatus='sent';referral.status='qualified';
+      const now=new Date().toISOString();state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{id:newLibraryId('evt'),type:'referral.sent_to_force',at:now,clientId:lead.id,referralId:referral.id,prospectLeadId:prospect.id,source:'referral'});
+      saveLeadsToStorage();saveOperationsToStorage();state.selectedLeadId=prospect.id;renderCrmModule();renderLeadInspector();showNotification('Indicação enviada ao DUTRA Force com origem preservada.','success');
+    }));
     root?.querySelector('[data-ref-save]')?.addEventListener('click',()=>{
       const company=root.querySelector('[data-ref-company]')?.value?.trim()||'',contact=root.querySelector('[data-ref-contact]')?.value?.trim()||'',phone=root.querySelector('[data-ref-phone]')?.value?.trim()||'',context=root.querySelector('[data-ref-context]')?.value?.trim()||'';
       if(!company&&!contact)return showNotification('Informe a empresa ou o contato indicado.','warning');
