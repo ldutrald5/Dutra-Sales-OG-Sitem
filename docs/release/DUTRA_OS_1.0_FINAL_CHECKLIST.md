@@ -10,7 +10,7 @@ Este arquivo é o gate operacional da versão 1.0. Um item só recebe **OK** qua
 - [x] `/api/health` é público e identifica a release.
 - [x] Volume de dados permanece montado em `/data`.
 - [x] Build Node/npm é reproduzível no Railway.
-- [ ] Confirmar atualização PWA v63 em produção após RC2C.
+- [x] Atualização PWA v63 confirmada em produção no RC2C.\n- [ ] Confirmar Service Worker v64 e SHA da RC3 em produção.
 
 ## Uso diário comercial
 
@@ -69,8 +69,8 @@ Este arquivo é o gate operacional da versão 1.0. Um item só recebe **OK** qua
 - [x] Feedback principal usa `role=status`/alert conforme severidade.
 - [x] Sync e Research usam regiões vivas.
 - [x] Menu Mais expõe relação com a folha controlada.
-- [ ] Revisar modais antigos para foco/Escape/retorno de foco.
-- [ ] Validar navegação completa por teclado.
+- [x] Modais legados usam controlador comum de foco/Escape/retorno de foco.
+- [x] Módulos têm rota por hash, foco no título e menu desktop compacto.\n- [ ] Validar navegação completa por teclado em navegador real.
 - [ ] Validar zoom 200%.
 - [ ] Fazer revisão final de textos, títulos e telas sem dados.
 
