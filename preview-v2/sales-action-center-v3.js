@@ -174,8 +174,8 @@ function executeAction(lead,type,contactId){
     return;
   }
   if(type==='CREATE_PROPOSAL'){
-    const input=$('#proposalClient'); if(input) input.value=lead.empresa||lead.nome||'';
-    globalThis.go?.('proposal');
+    const contact=people(lead.id).find(p=>String(p.id)===String(contactId))||people(lead.id)[0]||{};
+    try{globalThis.DUTRA_QUOTE_HANDOFF?.launch?.(lead,contact,{target:'_blank'});}catch(e){alert('Não foi possível abrir a cotação oficial: '+e.message)}
     return;
   }
   if(type==='MEETING'){globalThis.go?.('prospecting');}
