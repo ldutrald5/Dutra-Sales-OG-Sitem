@@ -4523,12 +4523,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       specificWrap.classList.toggle('hidden', followMode.value !== 'specific');
     }
 
-    function nextDeskLead(currentId) {
-      const filtered = OG_SALES_DESK.selectQueue(state.leads, dayFilter, state.salesDeskSearch).filter(item => String(item.id) !== String(currentId));
-      const fallback = OG_SALES_DESK.selectQueue(state.leads, 'all', '').filter(item => String(item.id) !== String(currentId));
-      return filtered[0] || fallback[0] || null;
-    }
-
     function saveDeskOutcome(advance = false) {
       const result = resultSelect.value;
       if (!result) return showNotification('Escolha o resultado da conversa.', 'info');
@@ -4557,7 +4551,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         return;
       }
 
-      const next = nextDeskLead(lead.id);
+      const next = OG_SALES_DESK.nextLead(state.leads, lead.id, dayFilter, state.salesDeskSearch);
       if (!next) {
         showNotification('Conversa registrada. Sua fila ativa terminou.', 'success');
         renderDayDashboard();
