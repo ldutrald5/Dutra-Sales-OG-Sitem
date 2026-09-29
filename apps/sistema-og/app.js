@@ -3729,6 +3729,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const missionName = missionLead?.empresa || missionLead?.nome || 'Nenhuma conta crítica';
     const signalItems = (report.signals || []).slice(0, 3);
     const automationItems = (report.automations || []).slice(0, 3);
+    const commitmentItems = (report.commitments || []).slice(0, 5);
     root.innerHTML = `
       <header class="morning-command-head">
         <div><span class="og-kicker">DUTRA COMMAND · MORNING BRIEF</span><h2>Seu dia foi organizado com os fatos atuais do CRM.</h2><p>${escapeHtml(report.briefing.join(' '))}</p></div>
@@ -3740,6 +3741,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <div><small>Sinais</small><b>${report.counts.signals}</b></div>
         <div><small>Automações</small><b>${report.counts.automations}</b></div>
         <div><small>Pós-venda / expansão</small><b>${report.counts.lifecycle}</b></div>
+        <div><small>Compromissos</small><b>${report.counts.commitments || 0}</b></div>
       </div>
       <div class="morning-command-grid">
         <article class="morning-command-mission">
@@ -3748,6 +3750,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <p>${escapeHtml(report.mission?.reason || 'Nenhuma missão crítica detectada agora.')}</p>
           <strong>→ ${escapeHtml(report.mission?.recommendedAction || 'Continuar a rotina comercial registrada')}</strong>
           ${report.mission ? '<button type="button" data-morning-mission>ABRIR PRÓXIMA MISSÃO</button>' : ''}
+        </article>
+        <article>
+          <span class="og-kicker">COMPROMISSOS</span>
+          ${commitmentItems.length ? `<div class="morning-command-list">${commitmentItems.map(item => `<button type="button" data-morning-account="${escapeHtml(item.leadId)}"><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.action)} · ${escapeHtml(item.state === 'overdue' ? 'VENCIDO' : item.state === 'today' ? 'HOJE' : formatFollowUp(item.followUpAt))}</span><small>${escapeHtml(item.objective || item.reason || 'Objetivo ainda não informado')}</small></button>`).join('')}</div>` : '<p class="morning-command-empty">Nenhum compromisso estruturado.</p>'}
         </article>
         <article>
           <span class="og-kicker">SINAIS</span>
