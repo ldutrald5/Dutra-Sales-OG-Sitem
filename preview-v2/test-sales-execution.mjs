@@ -23,7 +23,7 @@ let outcome=s.recordOutcome(imported.leads,started.operations,started.session.id
 assert.equal(outcome.session.attemptedCalls,1);
 assert.equal(outcome.member.workStatus,'WORKED');
 assert.notEqual(s.nextMember(outcome.operations,outcome.session)?.id,first.id);
-assert.equal(outcome.lead.relationshipStatus,'COLD','não atendimento não deve inventar relacionamento');
+assert.equal(outcome.lead.relationshipStatus,'CUSTOMER','não atendimento deve preservar o relacionamento existente');
 
 // CASE B — gatekeeper and decision maker coexist.
 let c1=s.addContact(outcome.operations,outcome.lead.id,{name:'Ana',role:'Recepção',phone:'(44) 99999-1111',roleCategory:'GATEKEEPER'},new Date('2026-09-29T12:07:00Z'));
