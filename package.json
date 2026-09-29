@@ -81,7 +81,8 @@
     "og:prospecting-public-search:test": "node scripts/test_prospecting_public_search_provider.mjs",
     "og:prospecting-endpoint:test": "node scripts/test_prospecting_research_endpoint.mjs",
     "og:prospecting-research-ui:test": "node scripts/test_prospecting_research_ui_pipeline.mjs",
-    "og:pwa-release:test": "node scripts/test_pwa_release_experience.mjs"
+    "og:pwa-release:test": "node scripts/test_pwa_release_experience.mjs",
+    "og:final-candidate-ux:test": "node scripts/test_final_candidate_ux.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
