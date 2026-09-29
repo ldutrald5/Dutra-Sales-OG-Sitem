@@ -23,6 +23,7 @@ const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
 const hostedMode = Boolean(process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN);
 const writeWindows = new Map();
 const publicEventWindows = new Map();
+const prospectResearchWindows = new Map();
 if (lanMode && localAccessToken.length < 16) throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no modo LAN/hospedado.');
 if (hostedMode && localAccessPin && localAccessPin.length < 6) throw new Error('OG_LOCAL_ACCESS_PIN deve ter pelo menos 6 caracteres quando configurado.');
 const types = {
@@ -72,6 +73,40 @@ function allowWrite(req) {
   const recent = (writeWindows.get(key) || []).filter(time => now - time < 60_000);
   if (recent.length >= 30) return false;
   recent.push(now); writeWindows.set(key, recent); return true;
+}
+
+function allowProspectResearch(req) {
+  const key = req.socket.remoteAddress || 'unknown', now = Date.now();
+  const recent = (prospectResearchWindows.get(key) || []).filter(time => now - time < 60_000);
+  if (recent.length >= 6) return false;
+  recent.push(now); prospectResearchWindows.set(key, recent); return true;
+}
+
+function normalizeProspectCriteria(body = {}) {
+  const city=String(body.city||'').trim().slice(0,80), state=String(body.state||'').trim().toUpperCase().slice(0,2);
+  const segment=String(body.segment||'').trim().slice(0,80), minFleet=Math.max(0,Math.min(10000,Number(body.minFleet)||0));
+  const requestedCount=Math.max(1,Math.min(25,Number(body.requestedCount)||10));
+  const keywords=cleanArray(body.keywords,12).map(v=>String(v||'').trim().slice(0,60)).filter(Boolean);
+  if (!city || !/^[A-Z]{2}$/.test(state) || !segment) throw new Error('Cidade, UF e segmento são obrigatórios.');
+  return { city,state,segment,minFleet,requestedCount,keywords };
+}
+
+function buildProspectSearchQuery(criteria) {
+  return [criteria.segment, criteria.city, criteria.state, criteria.minFleet ? `frota ${criteria.minFleet} caminhões` : 'frota caminhões', ...criteria.keywords].filter(Boolean).join(' ');
+}
+
+async function searchPublicProspects(criteria) {
+  const endpoint=String(process.env.OG_PROSPECT_SEARCH_ENDPOINT||'').trim();
+  const token=String(process.env.OG_PROSPECT_SEARCH_TOKEN||'').trim();
+  if (!endpoint) return { available:false, provider:'unconfigured', candidates:[], message:'Provider de pesquisa pública ainda não configurado no servidor.' };
+  const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),8000);
+  try {
+    const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',...(token?{authorization:`Bearer ${token}`}:{})},body:JSON.stringify({query:buildProspectSearchQuery(criteria),limit:criteria.requestedCount}),signal:controller.signal});
+    if (!response.ok) throw new Error(`Provider respondeu HTTP ${response.status}`);
+    const raw=await response.json(); const rows=raw?.data?.web||raw?.web||raw?.results||[];
+    const candidates=cleanArray(rows,criteria.requestedCount).map(row=>({companyName:String(row.title||row.name||'').replace(/\\s*[|–—-].*$/,'').trim(),sourceSnippet:String(row.description||row.snippet||'').slice(0,500),sources:row.url?[{url:String(row.url).slice(0,2048),title:String(row.title||row.url).slice(0,200),observedAt:new Date().toISOString(),supports:['public_search']}]:[]})).filter(x=>x.companyName&&x.sources.length);
+    return { available:true,provider:'server_public_search',candidates };
+  } finally { clearTimeout(timer); }
 }
 
 function allowPublicEngagement(req) {
@@ -305,6 +340,18 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
+
+  if (url.pathname === '/api/prospects/research' && req.method === 'POST') {
+    try {
+      if (!allowProspectResearch(req)) return sendJson(res, 429, { error:'Limite de pesquisa atingido. Aguarde um minuto.' });
+      const criteria=normalizeProspectCriteria(await readBody(req, 20_000));
+      const result=await searchPublicProspects(criteria);
+      return sendJson(res, result.available ? 200 : 503, { ...result, criteria, mutationPolicy:'prepare_only', evidencePolicy:'public_sources_required' });
+    } catch (error) {
+      const status=/Payload muito grande/.test(error.message)?413:(error.name==='AbortError'?504:400);
+      return sendJson(res,status,{error:error.name==='AbortError'?'Pesquisa excedeu o tempo limite.':error.message});
+    }
+  }
 
   if (url.pathname === '/api/proposals/publish' && req.method === 'POST') {
     try {
