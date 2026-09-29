@@ -1,1 +1,1 @@
-{"name":"dutra-os-v3-premium","version":"3.0.0","type":"module","scripts":{"start":"node --check server.mjs && node --check core-bridge.js && node --check core-pricing.js && node server.mjs"},"engines":{"node":">=20"}}
+{"name":"dutra-os-v3-premium","version":"3.0.0","type":"module","scripts":{"start":"node --check server.mjs && node --check core-bridge.js && node --check core-pricing.js && node --check meu-dia-v3.js && node server.mjs"},"engines":{"node":">=20"}}
