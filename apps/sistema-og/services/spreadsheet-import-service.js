@@ -15,7 +15,7 @@
     {key:'externalCode',label:'Código OG',aliases:['codigo cliente','codigo og','codigo','cod cliente','cod','id cliente'],current:l=>l.internalCode||l.externalCode||'',incoming:r=>r.externalCode},
     {key:'company',label:'Empresa',aliases:['empresa nome','empresa','razao social nome','razao social','cliente','nome empresa'],current:l=>l.empresa||'',incoming:r=>r.company},
     {key:'contact',label:'Contato',aliases:['contato principal','contato','nome contato','responsavel','nome'],current:l=>l.nome||'',incoming:r=>r.primaryContact},
-    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
+    {key:'phone',label:'Telefone principal',aliases:['whatsapp principal','whatsapp','telefone principal','telefone','numero do cliente','numero cliente','celular','fone'],current:l=>l.telefone||'',incoming:r=>r.phone},
     {key:'document',label:'CNPJ / CPF',aliases:['cnpj cpf','cnpj','cpf','documento'],current:l=>l.cnpj||l.cpf||'',incoming:r=>r.document},
     {key:'email',label:'E-mail',aliases:['email','e mail','e-mail'],current:l=>l.email||'',incoming:r=>r.email},
     {key:'city',label:'Cidade / UF',aliases:['cidade uf','cidade estado','cidade','localizacao','uf'],current:l=>l.cidadeUf||'',incoming:r=>r.city},
