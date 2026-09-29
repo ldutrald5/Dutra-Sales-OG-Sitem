@@ -19,6 +19,13 @@ assert.equal(result.candidates.find(x=>x.field==='decisionProcessMentioned')?.co
 assert.ok(result.candidates.every(x=>x.requiresConfirmation===true));
 assert.ok(result.candidates.every(x=>x.evidence?.quote));
 assert.equal(result.baseDate,null,'não deve inventar data-base');
+assert.equal(result.candidates.find(x=>x.field==='commitmentMentioned')?.suggestedFollowUpAt,null);
+
+const dated=diary.preview('Pediu para ligar sexta às 14h.', { baseDate:'2026-09-28T10:00:00-03:00' });
+const commitment=dated.candidates.find(x=>x.field==='commitmentMentioned');
+assert.ok(commitment?.suggestedFollowUpAt,'com data-base explícita pode sugerir data');
+assert.equal(new Date(commitment.suggestedFollowUpAt).getUTCDay(),5);
+assert.equal(commitment.suggestedAction,'Retomar contato');
 
 const interested=diary.preview('Cliente gostou e ficou interessado.');
 assert.ok(interested.warnings.some(x=>/não significam venda/i.test(x)));
