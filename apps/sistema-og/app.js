@@ -4998,6 +4998,169 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       || null;
   }
 
+  function salesExecutionState() {
+    return state.prospecting.salesExecution;
+  }
+
+  async function refreshSalesExecutionLists(options = {}) {
+    const se = salesExecutionState();
+    if (!window.OG_SALES_EXECUTION_CLIENT) return;
+    se.loading = true;
+    se.error = '';
+    if (state.currentTab === 'prospeccao') renderProspecting();
+    try {
+      const health = await OG_SALES_EXECUTION_CLIENT.health();
+      se.configured = Boolean(health.configured);
+      if (!se.configured) {
+        se.lists = [];
+        if (!options.silent) showNotification('Sales Execution ainda não está configurado no Railway.', 'info');
+        return;
+      }
+      const payload = await OG_SALES_EXECUTION_CLIENT.lists();
+      se.lists = Array.isArray(payload.lists) ? payload.lists : [];
+      if (!se.selectedListId && se.lists.length) se.selectedListId = se.lists[0].id;
+    } catch (error) {
+      se.error = String(error?.message || error);
+      if (!options.silent) showNotification('Não foi possível carregar as listas do Sales Execution.', 'warning');
+    } finally {
+      se.loading = false;
+      if (state.currentTab === 'prospeccao') renderProspecting();
+    }
+  }
+
+  function renderSalesExecutionLauncher() {
+    const se = salesExecutionState();
+    if (se.loading) return '<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Carregando operação normalizada…</h3></section>';
+    if (se.error) return `<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Conexão pendente</h3><p>${escapeHtml(se.error)}</p><button type="button" data-sales-execution-load class="og-button">Tentar novamente</button></section>`;
+    if (se.configured === null) return '<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Fila normalizada</h3><p>Conecte às listas do Supabase para executar lista → sessão → Call AI → próximo prospect.</p><button type="button" data-sales-execution-load class="og-button og-button-primary">Conectar Sales Execution</button></section>';
+    if (se.configured === false) return '<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Gateway preparado</h3><p>O Railway ainda não recebeu as credenciais server-only do Supabase. A fila local continua disponível abaixo.</p><button type="button" data-sales-execution-load class="og-button">Verificar novamente</button></section>';
+    if (se.session) {
+      const list = se.lists.find(item => item.id === se.session.list_id);
+      return `<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION · SESSÃO ATIVA</span><h3>${escapeHtml(list?.name || 'Lista de prospecção')}</h3><p>${se.members.length} prospect(s) disponível(is) na fila canônica.</p><div class="prospect-capture-actions"><button type="button" data-sales-execution-continue class="og-button og-button-primary">▶ Continuar sessão</button><button type="button" data-sales-execution-load class="og-button">Atualizar listas</button></div></section>`;
+    }
+    if (!se.lists.length) return '<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Nenhuma lista normalizada ainda</h3><p>A integração está online, mas não há lead_lists ACTIVE para iniciar uma sessão. A fila local continua disponível.</p><button type="button" data-sales-execution-load class="og-button">Atualizar</button></section>';
+    return `<section class="clean-card prospect-sales-execution"><span class="og-kicker">SALES EXECUTION</span><h3>Iniciar sessão normalizada</h3><p>O resultado aprovado no Call AI será gravado atomicamente e o próximo prospect será aberto automaticamente.</p><div class="prospect-batch-fields"><label>Lista<select data-sales-execution-list>${se.lists.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === se.selectedListId ? 'selected' : ''}>${escapeHtml(item.name)} · ${Number(item.total_count || 0)} conta(s)</option>`).join('')}</select></label></div><div class="prospect-capture-actions"><button type="button" data-sales-execution-start class="og-button og-button-primary">▶ Iniciar Sales Execution</button><button type="button" data-sales-execution-load class="og-button">Atualizar</button></div></section>`;
+  }
+
+  async function materializeSalesExecutionMember(memberId) {
+    const se = salesExecutionState();
+    const member = se.members.find(item => String(item.id) === String(memberId));
+    if (!member) return null;
+    const context = await OG_SALES_EXECUTION_CLIENT.accountContext(member.company_id);
+    const company = context.company || {};
+    const existing = state.leads.find(item =>
+      String(item.salesExecution?.companyId || '') === String(company.id || '')
+      || (company.legacy_lead_id && String(item.id) === String(company.legacy_lead_id))
+    ) || {};
+    const envelope = OG_SALES_EXECUTION_ADAPTER.projectAccountContext(context, member, se.session, existing);
+    const projected = OG_SALES_EXECUTION_ADAPTER.toCallAiLead(envelope, existing);
+    const normalized = OG_CRM_SERVICE.normalizeLead(projected);
+    const index = state.leads.findIndex(item => String(item.id) === String(normalized.id));
+    if (index >= 0) state.leads[index] = normalized;
+    else state.leads.unshift(normalized);
+    saveLeadsToStorage();
+    return normalized;
+  }
+
+  async function activateSalesExecutionMember(memberId) {
+    const se = salesExecutionState();
+    const member = se.members.find(item => String(item.id) === String(memberId))
+      || OG_SALES_EXECUTION_ADAPTER.queueProjection(se.members)[0];
+    if (!member) {
+      se.currentMemberId = null;
+      state.prospecting.currentId = null;
+      state.prospecting.view = 'focus';
+      renderProspecting();
+      return null;
+    }
+    se.currentMemberId = member.id;
+    const lead = await materializeSalesExecutionMember(member.id);
+    if (!lead) return null;
+    state.prospecting.currentId = lead.id;
+    state.prospecting.view = 'focus';
+    renderProspecting();
+    return lead;
+  }
+
+  async function refreshSalesExecutionQueue() {
+    const se = salesExecutionState();
+    if (!se.session?.id) return [];
+    const payload = await OG_SALES_EXECUTION_CLIENT.queue(se.session.id);
+    se.session = payload.session || se.session;
+    se.members = OG_SALES_EXECUTION_ADAPTER.queueProjection(payload.members || []);
+    return se.members;
+  }
+
+  async function startSalesExecutionSession(listId) {
+    const se = salesExecutionState();
+    const list = se.lists.find(item => item.id === listId);
+    if (!list) return showNotification('Selecione uma lista do Sales Execution.', 'info');
+    se.loading = true;
+    renderProspecting();
+    try {
+      const externalId = `OG-SE-${listId}-${Date.now().toString(36).toUpperCase()}`;
+      const payload = await OG_SALES_EXECUTION_CLIENT.startSession({
+        listId,
+        targetCalls: Math.max(1, Number(list.total_count || 25)),
+        externalId
+      });
+      se.session = payload.session;
+      await refreshSalesExecutionQueue();
+      if (!se.members.length) {
+        showNotification('A lista não possui prospects disponíveis.', 'info');
+        state.prospecting.view = 'queue';
+        return;
+      }
+      await activateSalesExecutionMember(se.session.current_member_id || se.members[0].id);
+      showNotification('Sessão Sales Execution iniciada.', 'success');
+    } catch (error) {
+      se.error = String(error?.message || error);
+      showNotification('Não foi possível iniciar a sessão Sales Execution.', 'warning');
+    } finally {
+      se.loading = false;
+      if (state.currentTab === 'prospeccao') renderProspecting();
+    }
+  }
+
+  async function continueSalesExecutionSession() {
+    const se = salesExecutionState();
+    try {
+      await refreshSalesExecutionQueue();
+      await activateSalesExecutionMember(se.session?.current_member_id || se.currentMemberId || se.members[0]?.id);
+    } catch (error) {
+      se.error = String(error?.message || error);
+      showNotification('Não foi possível retomar a sessão Sales Execution.', 'warning');
+      renderProspecting();
+    }
+  }
+
+  async function advanceSalesExecutionAfterCall(nextMemberId) {
+    const se = salesExecutionState();
+    if (!se.session?.id) return false;
+    await refreshSalesExecutionQueue();
+    const next = nextMemberId
+      ? se.members.find(item => String(item.id) === String(nextMemberId))
+      : se.members[0];
+    switchTab('prospeccao');
+    if (!next) {
+      se.currentMemberId = null;
+      state.prospecting.currentId = null;
+      state.prospecting.view = 'focus';
+      renderProspecting();
+      showNotification('Sessão concluída: não há mais prospects disponíveis.', 'success');
+      return true;
+    }
+    await activateSalesExecutionMember(next.id);
+    return true;
+  }
+
+  function bindSalesExecutionLauncher(root) {
+    root.querySelector('[data-sales-execution-load]')?.addEventListener('click', () => refreshSalesExecutionLists());
+    root.querySelector('[data-sales-execution-list]')?.addEventListener('change', event => { salesExecutionState().selectedListId = event.target.value; });
+    root.querySelector('[data-sales-execution-start]')?.addEventListener('click', () => startSalesExecutionSession(salesExecutionState().selectedListId));
+    root.querySelector('[data-sales-execution-continue]')?.addEventListener('click', continueSalesExecutionSession);
+  }
+
   function renderProspectQueue(root) {
     const queue = prospectingQueueWithTerritory();
     const territory = prospectingTerritorySummary();
