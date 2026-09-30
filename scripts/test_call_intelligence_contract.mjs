@@ -27,6 +27,12 @@ assert.match(edge, /manual_transcript/, 'fallback de transcrição colada deve e
 
 assert.match(client, /uploadSigned/);
 assert.match(client, /method:'PUT'/);
+assert.match(client, /'content-type': blob\.type \|\| 'audio\/webm'/, 'upload assinado deve preservar o MIME real');
+assert.match(client, /body:blob/, 'upload assinado deve enviar o áudio bruto');
+assert.doesNotMatch(client, /new FormData\(\)/, 'signed upload não deve encapsular o áudio em multipart');
+assert.match(edge, /\.not\("call_session_id", "like", "TEST-%"\)/, 'dashboard não deve contaminar métricas com validações sintéticas');
+assert.match(edge, /objection_count: objections\.length/, 'objection_count deve contar categorias e não duplicar menções');
+assert.match(edge, /caminh\(\?:ão\|ões\)/, 'quantidades de caminhão/caminhões devem ser reconhecidas');
 assert.match(server, /\/api\/call-intelligence\/recordings\/init/);
 assert.match(server, /\/api\/call-intelligence\/recordings\/manual-transcript/);
 assert.match(app, /persistCallRecording/);

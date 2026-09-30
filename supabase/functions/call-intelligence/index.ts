@@ -106,7 +106,7 @@ function keywordCounts(text: string) {
 function numericCandidates(text: string) {
   const patterns = [
     /R\$\s?[\d.]+(?:,\d{1,2})?/gi,
-    /\b\d+(?:[.,]\d+)?\s*(?:caminh(?:a|ã)o(?:es|ões)?|carretas?|pneus?|equipamentos?|ve[ií]culos?|psi|parcelas?|dias?|meses?)\b/gi,
+    /\b\d+(?:[.,]\d+)?\s*(?:caminh(?:ão|ões)|carretas?|pneus?|equipamentos?|ve[ií]culos?|psi|parcelas?|dias?|meses?)\b/gi,
     /\b\d+(?:[.,]\d+)?\s*%/g
   ];
   const values: string[] = [];
@@ -156,7 +156,7 @@ function metricPayload(recording: any, transcriptId: string | null, text: string
     overlap_ms: Number(recording?.overlap_ms || 0) || null,
     seller_talk_ratio: spoken ? sellerMs / spoken : null,
     customer_talk_ratio: spoken ? customerMs / spoken : null,
-    objection_count: objections.reduce((sum, item) => sum + item.count, 0),
+    objection_count: objections.length,
     objections,
     keyword_counts: keywordCounts(text),
     numeric_mentions: numeric,
@@ -467,6 +467,7 @@ async function dashboard(payload: Record<string, unknown>) {
   const recordings = await admin.from("call_recordings")
     .select("id,call_attempt_id,duration_ms,seller_active_ms,customer_active_ms,transcription_status,created_at")
     .gte("created_at", since)
+    .not("call_session_id", "like", "TEST-%")
     .order("created_at", { ascending: false })
     .limit(5000);
   if (recordings.error) throw recordings.error;

@@ -25,13 +25,13 @@
 
   async function uploadSigned(signedUrl, blob) {
     if (!signedUrl || !blob) throw new Error('Upload de áudio incompleto.');
-    const form = new FormData();
-    form.append('cacheControl', '3600');
-    form.append('', blob, 'call-recording.' + (blob.type.includes('ogg') ? 'ogg' : blob.type.includes('mp4') ? 'm4a' : 'webm'));
     const response = await root.fetch(signedUrl, {
       method:'PUT',
-      headers:{ 'x-upsert':'true' },
-      body:form
+      headers:{
+        'content-type': blob.type || 'audio/webm',
+        'x-upsert':'true'
+      },
+      body:blob
     });
     if (!response.ok) {
       const message = await response.text().catch(() => '');
