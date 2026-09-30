@@ -30,11 +30,11 @@ function safeId(value) {
   return v;
 }
 async function listLists(env) {
-  return request('lead_lists?select=id,name,status,created_at,updated_at&order=created_at.desc&limit=100',{},env);
+  return request('lead_lists?select=id,name,source,status,total_count,worked_count,meetings_count,proposals_count,sales_count,created_at,updated_at&status=eq.ACTIVE&order=created_at.desc&limit=100',{},env);
 }
 async function sessionQueue(sessionId, env) {
   const sid=safeId(sessionId);
-  const s=await request('prospecting_sessions?id=eq.'+encodeURIComponent(sid)+'&select=id,list_id,current_member_id,status,started_at,ended_at&limit=1',{},env);
+  const s=await request('prospecting_sessions?id=eq.'+encodeURIComponent(sid)+'&select=id,list_id,current_member_id,status,target_calls,started_at,finished_at&limit=1',{},env);
   if(s.error || !s.data?.[0]) return s.error?s:{...s,status:404,error:'Sessão não encontrada'};
   const session=s.data[0];
   const q=await request('lead_list_members?list_id=eq.'+encodeURIComponent(session.list_id)+'&work_status=in.(AVAILABLE,IN_PROGRESS)&select=id,list_id,company_id,primary_contact_id,position,work_status,enrichment_status,briefing_cache,briefing_valid_until,last_attempt_at,worked_at&order=position.asc&limit=500',{},env);
@@ -89,8 +89,21 @@ async function recordCallResult(body={}, env) {
 
 async function startSession(body={}, env) {
   const listId=safeId(body.listId);
-  const sellerId=String(body.sellerId||'').trim().slice(0,160);
-  if(!sellerId) throw new Error('sellerId é obrigatório');
-  return request('prospecting_sessions',{method:'POST',headers:{Prefer:'return=representation'},body:{list_id:listId,seller_id:sellerId,status:'ACTIVE',external_id:String(body.externalId||'').trim()||undefined}},env);
+  const externalId=String(body.externalId||'').trim().slice(0,180);
+  const targetCalls=Math.max(1,Math.min(10000,Number(body.targetCalls)||25));
+  const rawSeller=String(body.sellerId||'').trim();
+  const sellerId=/^[0-9a-f-]{36}$/i.test(rawSeller)?rawSeller:null;
+
+  if (externalId) {
+    const existing=await request('prospecting_sessions?external_id=eq.'+encodeURIComponent(externalId)+'&select=*&limit=1',{},env);
+    if(existing.error) return existing;
+    if(existing.data?.[0]) return {configured:true,status:200,data:[existing.data[0]],error:null};
+  }
+
+  return request('prospecting_sessions',{
+    method:'POST',
+    headers:{Prefer:'return=representation'},
+    body:{list_id:listId,seller_id:sellerId,status:'ACTIVE',target_calls:targetCalls,external_id:externalId||null}
+  },env);
 }
 module.exports={cfg,request,listLists,sessionQueue,accountContext,startSession,normalizeCallCommand,recordCallResult,RESULT_STAGE};
