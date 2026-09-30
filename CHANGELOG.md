@@ -74,3 +74,12 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Modo E2E interno mantém cálculo/ROI/proposta reais, cancela enrichment job sintético e não inicia pesquisa externa.
 - Harness offline entrou na suíte de validação; segredos não são necessários no CI.
 - O teste prefere as novas chaves Supabase `sb_secret_...`, mantendo fallback legado durante migração.
+
+## [Unreleased] — WhatsApp Bridge AutoStart Windows
+
+- Adicionado instalador de duplo clique `INSTALL_WHATSAPP_AUTOSTART.cmd`.
+- Adicionada Scheduled Task `DUTRA-OS-WhatsApp-Bridge` no logon do usuário.
+- Bridge reinicia automaticamente após falha.
+- Logs locais são gravados em `apps/sistema-og/.data/logs/`.
+- Segredos permanecem somente no `.env` local.
+- Adicionados comandos de install/status/uninstall e teste de contrato.
