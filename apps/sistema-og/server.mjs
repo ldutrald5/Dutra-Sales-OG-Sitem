@@ -344,8 +344,10 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
 
   if (url.pathname === '/api/sales-execution/health' && req.method === 'GET') {
-    const config = salesExecutionGateway.cfg();
-    return sendJson(res, 200, { ok:true, configured:config.enabled, boundary:'railway_trusted_gateway' });
+    const result = await salesExecutionGateway.health();
+    return sendJson(res, result.status, result.error
+      ? { ok:false, configured:result.configured, error:result.error, boundary:'railway_trusted_gateway' }
+      : { ...(result.data || {}), boundary:'railway_trusted_gateway' });
   }
 
   if (url.pathname === '/api/sales-execution/lists' && req.method === 'GET') {
