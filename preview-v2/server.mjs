@@ -94,6 +94,14 @@ const server = http.createServer(async (req, res) => {
     return proxy(req, res, url.pathname + url.search);
   }
 
+  const localCoreServices = {
+    '/core/services/connection-state-service.js': path.join(dir, '..', 'apps', 'sistema-og', 'services', 'connection-state-service.js'),
+    '/core/services/sync-bridge-service.js': path.join(dir, '..', 'apps', 'sistema-og', 'services', 'sync-bridge-service.js')
+  };
+  if (localCoreServices[url.pathname]) {
+    return sendFile(res, localCoreServices[url.pathname], req.method);
+  }
+
   if (url.pathname.startsWith('/core/')) {
     const target = '/' + url.pathname.slice('/core/'.length) + url.search;
     return proxy(req, res, target);
