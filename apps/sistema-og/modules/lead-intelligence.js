@@ -152,6 +152,74 @@
     return Boolean(inferStageFromText([lead.accountSummary, lead.observacoes].filter(Boolean).join(' ')));
   }
 
+  function proposalEventEvidence(lead = {}, operations = {}) {
+    const leadId = clean(lead.id);
+    if (!leadId) return false;
+    const proposalTypes = new Set([
+      'proposal.prepared','proposal.sent','proposal.opened','proposal.reopened',
+      'proposal_prepared','proposal_sent','proposal_opened','proposal_reopened'
+    ]);
+    return (Array.isArray(operations.activityEvents) ? operations.activityEvents : [])
+      .some(item => clean(item.clientId || item.leadId) === leadId && proposalTypes.has(clean(item.type)));
+  }
+
+  function fleetProfile(lead = {}) {
+    const fleet = Number(lead.fleetSize || lead.confirmedFleetSize || lead.estimatedFleetSize || 0);
+    if (!Number.isFinite(fleet) || fleet <= 0) return Object.freeze({ id:'unknown', label:'Frota não levantada', count:0 });
+    if (fleet === 1) return Object.freeze({ id:'single', label:'1 veículo', count:1 });
+    if (fleet <= 9) return Object.freeze({ id:'2_9', label:'2–9 veículos', count:fleet });
+    if (fleet <= 49) return Object.freeze({ id:'10_49', label:'10–49 veículos', count:fleet });
+    return Object.freeze({ id:'50_plus', label:'50+ veículos', count:fleet });
+  }
+
+  function salesProfile(lead = {}, operations = {}) {
+    const stage = stageDefinition(lead);
+    const customer = isCustomerAccount(lead);
+    const proposal = hasProposalEvidence(lead) || proposalEventEvidence(lead, operations);
+    const contacted = hasConversationEvidence(lead) || Boolean(clean(lead.lastContactAt));
+    const erpReview = needsErpReview(lead);
+
+    let knowledge = Object.freeze({
+      id:'unconfirmed',
+      label:'Conhecimento OG não confirmado',
+      basis:'Sem evidência explícita de contato, proposta ou compra.'
+    });
+    if (customer) {
+      knowledge = Object.freeze({ id:'customer', label:'Já comprou / cliente', basis:'Relação de cliente registrada no CRM.' });
+    } else if (proposal) {
+      knowledge = Object.freeze({ id:'proposal', label:'Já recebeu proposta', basis:'Há evidência explícita de proposta/cotação.' });
+    } else if (contacted) {
+      knowledge = Object.freeze({ id:'contacted', label:'Contato OG já registrado', basis:'Há conversa ou tentativa registrada, sem presumir domínio do produto.' });
+    }
+
+    let route = Object.freeze({ id:'first_contact', label:'Primeiro contato', basis:'Sem histórico comercial explícito suficiente.' });
+    if (erpReview) {
+      route = Object.freeze({ id:'erp_review', label:'Conferir ERP antes de abordar', basis:'O registro possui pendência explícita de validação no ERP.' });
+    } else if (customer && ['customer','loyal_customer'].includes(stage.id)) {
+      route = Object.freeze({ id:'post_sale', label:'Pós-venda / expansão', basis:'Conta cliente com situação de cliente registrada.' });
+    } else if (customer) {
+      route = Object.freeze({ id:'customer_reactivation', label:'Reativação de cliente', basis:'Há relação de cliente, mas o contato atual precisa ser retomado.' });
+    } else if (proposal || ['proposal','negotiation'].includes(stage.id)) {
+      route = Object.freeze({ id:'proposal_followup', label:'Proposta / negociação', basis:'Há evidência de proposta ou negociação em andamento.' });
+    } else if (['no_reply','waiting_response'].includes(stage.id)) {
+      route = Object.freeze({ id:'follow_up', label:'Follow-up', basis:'A situação atual pede retorno, nova tentativa ou resposta.' });
+    } else if (stage.id === 'interested') {
+      route = Object.freeze({ id:'diagnosis', label:'Diagnóstico do interesse', basis:'Interesse registrado sem avanço confirmado para proposta.' });
+    } else if (contacted) {
+      route = Object.freeze({ id:'relationship', label:'Retomada / diagnóstico', basis:'Já existe contato registrado, sem proposta confirmada.' });
+    }
+
+    return Object.freeze({
+      leadId:clean(lead.id),
+      accountType:clean(lead.segmentId) || 'unclassified',
+      fleet:fleetProfile(lead),
+      knowledge,
+      route,
+      conversationStage:stage.id,
+      conversationLabel:stage.label
+    });
+  }
+
   function matchesCrmView(lead = {}, viewId = 'all') {
     const id = clean(viewId || 'all');
     if (id === 'all') return true;
@@ -308,6 +376,9 @@
     hasProposalEvidence,
     isStrategicAccount,
     hasConversationEvidence,
+    proposalEventEvidence,
+    fleetProfile,
+    salesProfile,
     matchesCrmView,
     crmViewDefinition,
     summarizeCrmViews,
