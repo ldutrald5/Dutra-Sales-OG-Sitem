@@ -41,6 +41,62 @@
       .sort((a,b)=>String(b.at || '').localeCompare(String(a.at || '')));
   }
 
+  function relationshipMoment(lead = {}, events = []) {
+    const stage=key(lead.conversationStage);
+    const status=key(lead.status);
+    const hasProposalEvent=events.some(item => ['proposal.sent','proposal_sent','proposal.opened','proposal_opened','proposal.reopened','proposal_reopened'].includes(item.type));
+
+    if (stage === 'not_interested' || status === 'perdido') return { id:'not_interested', label:'Sem interesse registrado' };
+    if (stage === 'loyal_customer') return { id:'customer', label:'Cliente fidelizado' };
+    if (stage === 'customer' || ['fechado','cliente','ganho'].includes(status)) return { id:'customer', label:'Cliente' };
+    if (stage === 'negotiation') return { id:'negotiation', label:'Negociação' };
+    if (stage === 'proposal' || hasProposalEvent) return { id:'proposal', label:'Proposta em jogo' };
+    if (stage === 'interested') return { id:'interested', label:'Interessado' };
+    if (['talked','no_reply','waiting_response'].includes(stage)) return { id:'follow_up', label:'Retomada / follow-up' };
+    return { id:'first_contact', label:'Primeiro contato' };
+  }
+
+  function ogAwareness(lead = {}) {
+    const explicit=key(lead.ogAwareness || lead.productAwareness || lead.ogKnowledge);
+    if (['nao_conhece','desconhece','novo','nenhum'].includes(explicit)) return { id:'does_not_know', label:'Não conhece · confirmado' };
+    if (['conhece','ja_conhece','familiar','basico'].includes(explicit)) return { id:'knows', label:'Já conhece · confirmado' };
+    if (['cliente','usuario','usa','ja_comprou'].includes(explicit)) return { id:'customer', label:'Já usa/comprou · confirmado' };
+    return { id:'unknown', label:'Não confirmado no CRM' };
+  }
+
+  function contactObjective(moment, lead = {}) {
+    if (moment.id === 'first_contact') return 'Entender a operação, descobrir o que o cliente já conhece da Olho de Gato e conquistar um próximo passo simples.';
+    if (moment.id === 'follow_up') return 'Retomar o contexto sem repetir apresentação, descobrir o que mudou e sair com próxima ação e data.';
+    if (moment.id === 'interested') return 'Aprofundar dor, frota e processo de decisão antes de transformar interesse em proposta.';
+    if (moment.id === 'proposal') return 'Descobrir o que impede a decisão hoje e combinar um avanço concreto sem pressionar por “sim ou não”.';
+    if (moment.id === 'negotiation') return 'Isolar a objeção principal, responder com evidência e alinhar decisão, responsável e prazo.';
+    if (moment.id === 'customer') return 'Validar situação atual e identificar suporte, reposição, expansão ou indicação sem presumir necessidade.';
+    if (moment.id === 'not_interested') return 'Confirmar se o cenário mudou; se não mudou, respeitar a decisão e registrar o próximo momento adequado.';
+    return clean(lead.nextAction) || 'Definir um próximo passo comercial concreto.';
+  }
+
+  function suggestedOpening(moment, lead = {}) {
+    const contact=clean(lead.nome) || 'tudo bem';
+    const company=clean(lead.empresa) || 'sua operação';
+    if (moment.id === 'first_contact') return `Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Antes de te explicar produto, queria entender rapidinho como a ${company} cuida de pressão e desgaste dos pneus. Você consegue falar dois minutos?`;
+    if (moment.id === 'follow_up') return `Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Não quero repetir apresentação; quero retomar exatamente de onde paramos. O que mudou desde nosso último contato?`;
+    if (moment.id === 'interested') return `Olá, ${contact}. Quero aproveitar o interesse que você demonstrou e entender melhor a operação antes de montar qualquer aplicação. Posso te fazer três perguntas rápidas?`;
+    if (moment.id === 'proposal') return `Olá, ${contact}. Quero fechar contigo um ponto daquela proposta. Hoje o que pesa mais para avançar: investimento, aplicação ou prioridade interna?`;
+    if (moment.id === 'negotiation') return `Olá, ${contact}. Quero resolver o principal ponto que ainda está travando essa negociação e sair com um próximo passo objetivo. Qual é o ponto mais pesado hoje?`;
+    if (moment.id === 'customer') return `Olá, ${contact}. Estou acompanhando a conta da ${company} e queria entender como está a operação hoje antes de falar em qualquer nova compra. Tem algum ponto de suporte, reposição ou expansão que vale olhar?`;
+    return `Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Quero só confirmar se o cenário mudou desde nosso último contato; se continuar sem prioridade, eu registro e respeito isso.`;
+  }
+
+  function technicalPrep(lead = {}) {
+    const items=[];
+    if (!has(lead.segmentId)) items.push('Confirmar tipo de operação/segmento antes de escolher argumento comercial.');
+    if (!Number(lead.fleetSize)) items.push('Levantar quantidade da frota e as configurações mais representativas.');
+    if (!has(lead.pain)) items.push('Validar a dor real antes de relacionar benefício, ROI ou economia.');
+    if (!has(lead.decisionMaker)) items.push('Descobrir quem valida tecnicamente e quem aprova comercialmente.');
+    items.push('Antes de indicar suporte/aplicação, confirmar veículo, eixo, pressão e regra OG; se faltar dado, marcar validação técnica.');
+    return [...new Set(items)].slice(0,5);
+  }
+
   function build(lead = {}, operations = {}) {
     if (!lead?.id) throw new Error('Briefing exige cliente identificado');
     const facts=[];
@@ -87,6 +143,15 @@
     doNotSay.push('Não ofereça desconto, frete, prazo ou condição de pagamento que não esteja explicitamente aprovado/registrado.');
 
     const events=eventsForLead(operations,lead.id);
+    const moment=relationshipMoment(lead,events);
+    const awareness=ogAwareness(lead);
+    const attack=Object.freeze({
+      moment:Object.freeze(moment),
+      awareness:Object.freeze(awareness),
+      objective:contactObjective(moment,lead),
+      opening:suggestedOpening(moment,lead),
+      technicalPrep:Object.freeze(technicalPrep(lead))
+    });
     const intentEvent=events.find(item => ['proposal.opened','proposal.reopened','proposal_opened','proposal_reopened'].includes(item.type));
     const sentEvent=events.find(item => ['proposal.sent','proposal_sent'].includes(item.type));
     if (intentEvent) {
@@ -102,6 +167,7 @@
 
     return Object.freeze({
       leadId:clean(lead.id),
+      attack,
       facts:Object.freeze(facts.slice(0,10).map(Object.freeze)),
       gaps:Object.freeze([...new Set(gaps)].slice(0,8)),
       questions:Object.freeze([...new Set(questions)].slice(0,7)),
