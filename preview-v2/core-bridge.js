@@ -393,7 +393,7 @@
       }
     });
 
-    $('.moduleRow').forEach(row => {
+    $$('.moduleRow').forEach(row => {
       const label=$('b',row)?.textContent?.trim()||'';
       if (row.dataset.go || row.id === 'openRoi2' || ['Meu Dia','Prospecção'].includes(label)) return;
       row.addEventListener('click', () => {
