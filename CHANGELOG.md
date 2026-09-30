@@ -57,6 +57,14 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 
 - Evolução visual para shell DUTRA OS preservando módulos e contratos existentes.
 
+## [Unreleased] — Sales Playbook V1
+
+- Adicionada Ficha de Ataque contextual na Mesa de Vendas.
+- Briefing determinístico passa a classificar primeiro contato, contato anterior, interesse, proposta, negociação e cliente/pós-venda.
+- Cada perfil recebe objetivo, abertura sugerida e foco sem chamada de IA.
+- Preparação técnica permanece conservadora: aplicação/código/suporte OG ficam pendentes até validação por fonte oficial.
+- A Ficha reutiliza PRECALL-01 e não altera CRM, estágio ou fatos automaticamente.
+
 ## [Unreleased] — WhatsApp/Kaption CRM Bridge
 
 - Adicionado worker local CLI para leitura incremental do Kaption MCP.
