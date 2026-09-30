@@ -7018,11 +7018,54 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function restoreLegacyCallAIResultOptions(select) {
+    if (!select) return;
+    select.innerHTML = '<option value="">Selecione…</option><option value="contato_realizado">Contato realizado</option><option value="sem_contato">Não consegui falar</option><option value="interesse">Demonstrou interesse</option><option value="proposta">Pediu proposta</option><option value="negociacao">Em negociação</option><option value="sem_interesse">Sem interesse agora</option>';
+    select.dataset.mode = 'legacy';
+  }
+
+  async function saveSalesExecutionCallAIReview() {
+    const lead = callLead();
+    const controller = salesExecutionController;
+    const result = document.getElementById('call-ai-result')?.value || '';
+    const summary = document.getElementById('call-ai-summary')?.value.trim() || '';
+    if (!lead || !controller) return showNotification('Sessão Sales Execution indisponível.', 'warning');
+    if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
+    const button = document.getElementById('call-ai-save');
+    if (button?.disabled) return;
+    if (button) { button.disabled = true; button.textContent = 'Salvando…'; }
+    const externalId = 'call-ai:' + (state.callAI.sessionId || (lead.id + ':' + Date.now()));
+    try {
+      const payload = await controller.recordCallAIResult({
+        outcome: result,
+        notes: summary,
+        nextAction: document.getElementById('call-ai-next-action')?.value.trim() || '',
+        followUpAt: document.getElementById('call-ai-follow-up')?.value || null,
+        externalId
+      });
+      document.getElementById('call-ai-review')?.classList.add('hidden');
+      state.callAI.salesExecution = null;
+      state.callAI.script = [];
+      state.callAI.sessionId = null;
+      document.getElementById('call-ai-session-state').textContent = payload.current ? 'Resultado salvo · próximo passo pronto' : 'Meta da sessão concluída';
+      state.prospecting.view = 'focus';
+      switchTab('prospeccao');
+      renderProspecting();
+      showNotification(payload.current ? 'Resultado salvo. Próximo movimento carregado.' : 'Meta da sessão concluída.', 'success');
+    } catch (error) {
+      showNotification(error?.message || 'Não foi possível registrar a ligação. Tente novamente; a chave idempotente será reutilizada.', 'warning');
+    } finally {
+      if (button?.isConnected) { button.disabled = false; button.textContent = 'Aprovar e registrar no CRM'; }
+    }
+  }
   function openCallAIReview() {
     saveCurrentCallSpeech();
     const lead = callLead();
     const notes = document.getElementById('call-ai-notes').value.trim();
     state.callAI.notes = notes;
+    const resultSelect = document.getElementById('call-ai-result');
+    if (state.callAI.salesExecution && window.OG_SALES_EXECUTION_UI) { resultSelect.innerHTML = OG_SALES_EXECUTION_UI.outcomeOptions(); resultSelect.dataset.mode = 'sales-execution'; }
+    else if (resultSelect?.dataset.mode === 'sales-execution') restoreLegacyCallAIResultOptions(resultSelect);
     document.getElementById('call-ai-summary').value = notes || `Ligação com ${lead?.empresa || lead?.nome || 'cliente'} sobre ${callObjectives[state.callAI.objective]}.`;
     document.getElementById('call-ai-next-action').value = lead?.nextAction || '';
     document.getElementById('call-ai-follow-up').value = lead?.followUpAt || '';
@@ -7032,6 +7075,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function saveCallAIReview() {
+    if (state.callAI.salesExecution) { saveSalesExecutionCallAIReview(); return; }
     const lead = callLead();
     if (!lead) return;
     const result = document.getElementById('call-ai-result').value;
@@ -7285,7 +7329,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
     document.getElementById('call-ai-record-pause')?.addEventListener('click', toggleCallRecordingPause);
     document.getElementById('call-ai-record-stop')?.addEventListener('click', stopCallRecording);
-    document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
+    document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; state.callAI.salesExecution = null; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
     document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
     document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
     apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {
