@@ -92,6 +92,69 @@ function phoneFromJid(jid) {
   return digits.length >= 10 ? `+${digits}` : null;
 }
 
+function phoneDigits(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+export function buildCanonicalPhoneIndex(leads = []) {
+  const index = new Map();
+  for (const lead of Array.isArray(leads) ? leads : []) {
+    if (!lead || typeof lead !== 'object') continue;
+    const phones = [
+      lead.telefone,
+      ...(Array.isArray(lead.additionalPhones) ? lead.additionalPhones.map((item) => item?.phone ?? item) : []),
+      ...(Array.isArray(lead.contacts) ? lead.contacts.map((item) => item?.phone ?? item?.telefone) : []),
+    ];
+    for (const phone of phones) {
+      const key = phoneDigits(phone);
+      if (key.length >= 10 && !index.has(key)) index.set(key, lead);
+    }
+  }
+  return index;
+}
+
+export function enrichInsightWithCanonicalLead(insight, lead) {
+  if (!insight || !lead || typeof lead !== 'object') return insight;
+  const facts = { ...(insight.facts || {}) };
+  const companyName = textValue(lead.empresa || lead.company || lead.nome);
+  const fleetSize = Number(lead.fleetSize);
+  const pain = textValue(lead.pain);
+
+  if (companyName) facts.company_name = fact(companyName, 1);
+  if (!facts.fleet_size && Number.isInteger(fleetSize) && fleetSize > 0 && fleetSize <= 100000) {
+    facts.fleet_size = fact(fleetSize, 1);
+  }
+  if (!facts.primary_pain && pain) facts.primary_pain = fact(pain.slice(0, 2000), 1);
+
+  return {
+    ...insight,
+    facts,
+    confidence: Math.max(Number(insight.confidence) || 0, companyName ? 1 : 0),
+    metadata: {
+      ...(insight.metadata || {}),
+      canonical_source: 'state.leads',
+      canonical_lead_id: lead.id || null,
+    },
+  };
+}
+
+async function loadCanonicalPhoneIndex(config) {
+  if (!config.crmLookup) return new Map();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+  try {
+    const headers = config.crmAccessToken
+      ? { Authorization: `Bearer ${config.crmAccessToken}` }
+      : {};
+    const response = await fetch(config.crmStateUrl, { headers, signal: controller.signal });
+    if (!response.ok) throw new Error(`CRM state HTTP ${response.status}`);
+    const state = await response.json();
+    return buildCanonicalPhoneIndex(state?.leads || []);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function fromMe(message) {
   for (const key of ['fromMe', 'from_me', 'isFromMe']) {
     if (typeof message?.[key] === 'boolean') return message[key];
@@ -426,7 +489,7 @@ function messageTypeOf(message) {
   return 'text';
 }
 
-async function syncConversation({ client, sessionId, conversation, state, config }) {
+async function syncConversation({ client, sessionId, conversation, state, config, crmIndex }) {
   const chatId = conversationId(conversation);
   if (!chatId) return { scanned: 0, ingested: 0, skipped: 0 };
 
@@ -434,6 +497,8 @@ async function syncConversation({ client, sessionId, conversation, state, config
   if (isGroup && !config.includeGroups) return { scanned: 0, ingested: 0, skipped: 1 };
 
   const key = cursorKey(sessionId, chatId);
+  const directPhone = phoneDigits(phoneFromJid(chatId));
+  const canonicalLead = directPhone ? crmIndex.get(directPhone) || null : null;
   const cursor = state.conversations[key]?.after || state.initial_after;
   const lastActivity = conversationTimestamp(conversation);
 
@@ -462,7 +527,8 @@ async function syncConversation({ client, sessionId, conversation, state, config
 
     const direction = fromMe(message) ? 'outbound' : 'inbound';
     const body = bodyFromMessage(message);
-    const insight = extractDeterministicInsight(body, direction);
+    const baseInsight = extractDeterministicInsight(body, direction);
+    const insight = enrichInsightWithCanonicalLead(baseInsight, canonicalLead);
     const chatName = conversationName(conversation);
     const eventId = `kaption:${sessionId}:${externalMessageId}`;
 
@@ -472,15 +538,22 @@ async function syncConversation({ client, sessionId, conversation, state, config
       provider: 'kaption',
       contact: isGroup ? null : {
         external_id: chatId,
-        full_name: chatName,
+        full_name: textValue(canonicalLead?.nome) || chatName,
         phone_e164: phoneFromJid(chatId),
-        metadata: { session_id: sessionId },
+        metadata: {
+          session_id: sessionId,
+          canonical_lead_id: canonicalLead?.id || null,
+        },
       },
       conversation: {
         external_thread_id: chatId,
         chat_type: isGroup ? 'group' : 'direct',
         title: chatName,
-        metadata: { session_id: sessionId, bridge_version: BRIDGE_VERSION },
+        metadata: {
+          session_id: sessionId,
+          bridge_version: BRIDGE_VERSION,
+          canonical_lead_id: canonicalLead?.id || null,
+        },
       },
       message: {
         external_message_id: externalMessageId,
@@ -518,7 +591,20 @@ async function syncConversation({ client, sessionId, conversation, state, config
   return { scanned: messages.length, ingested, skipped: 0 };
 }
 
+let lastCrmWarningAt = 0;
+
 async function runPass(client, state, config) {
+  let crmIndex = new Map();
+  try {
+    crmIndex = await loadCanonicalPhoneIndex(config);
+  } catch (error) {
+    const now = Date.now();
+    if (now - lastCrmWarningAt > 300000) {
+      console.error(`[wa-bridge] CRM canônico indisponível; sincronização continua sem vínculo automático: ${error instanceof Error ? error.message : String(error)}`);
+      lastCrmWarningAt = now;
+    }
+  }
+
   let sessionIds = [];
   if (config.sessionId) {
     sessionIds = [config.sessionId];
@@ -544,7 +630,7 @@ async function runPass(client, state, config) {
     totals.conversations += conversations.length;
 
     for (const conversation of conversations) {
-      const result = await syncConversation({ client, sessionId, conversation, state, config });
+      const result = await syncConversation({ client, sessionId, conversation, state, config, crmIndex });
       totals.scanned += result.scanned;
       totals.ingested += result.ingested;
       totals.skipped += result.skipped;
@@ -559,12 +645,23 @@ async function runPass(client, state, config) {
 export function buildConfig(env = process.env) {
   const ingestUrl = String(env.OG_WHATSAPP_INGEST_URL || DEFAULT_INGEST_URL).trim();
   const apiKey = String(env.OG_WHATSAPP_INGEST_API_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  const crmStateUrl = String(env.OG_WHATSAPP_CRM_STATE_URL || 'http://127.0.0.1:4321/api/state').trim();
   if (!/^https:\/\//i.test(ingestUrl)) throw new Error('OG_WHATSAPP_INGEST_URL deve usar HTTPS.');
   if (!apiKey) throw new Error('Defina OG_WHATSAPP_INGEST_API_KEY (ou SUPABASE_SERVICE_ROLE_KEY) somente no ambiente local.');
+
+  let parsedCrmUrl;
+  try { parsedCrmUrl = new URL(crmStateUrl); } catch { throw new Error('OG_WHATSAPP_CRM_STATE_URL inválida.'); }
+  const loopback = ['127.0.0.1', 'localhost', '::1'].includes(parsedCrmUrl.hostname);
+  if (parsedCrmUrl.protocol !== 'https:' && !(parsedCrmUrl.protocol === 'http:' && loopback)) {
+    throw new Error('OG_WHATSAPP_CRM_STATE_URL remota deve usar HTTPS.');
+  }
 
   return {
     ingestUrl,
     apiKey,
+    crmLookup: envBool(env, 'OG_WHATSAPP_CRM_LOOKUP', true),
+    crmStateUrl,
+    crmAccessToken: String(env.OG_WHATSAPP_CRM_ACCESS_TOKEN || env.OG_LOCAL_ACCESS_TOKEN || env.OG_ACCESS_TOKEN || '').trim(),
     pollMs: envInt(env, 'OG_WHATSAPP_POLL_MS', 30000, 10000, 3600000),
     lookbackMinutes: envInt(env, 'OG_WHATSAPP_LOOKBACK_MINUTES', 30, 1, 1440),
     maxConversations: envInt(env, 'OG_WHATSAPP_MAX_CONVERSATIONS', 500, 1, 5000),
