@@ -13,8 +13,8 @@ Estabelecer uma branch reproduzível, gates verdes e uma única fonte de verdade
 - [x] Espelhos de deploy protegidos por teste.
 - [x] Documentação inicial de integração, persistência, cotação, testes e riscos.
 - [x] `npm run validate` após as mudanças.
-- [ ] Commit e publicação da branch.
-- [ ] Preview Railway validado sem alteração de produção.
+- [x] Commit e publicação da branch.
+- [ ] Preview Railway validado sem alteração de produção — bloqueado pelo limite de recursos do plano gratuito; serviços existentes não foram reaproveitados sem evidência de que estavam livres.
 
 ## Arquivos
 

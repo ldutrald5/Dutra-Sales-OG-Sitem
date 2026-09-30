@@ -9,6 +9,7 @@
 | Proposta usa ponte para tela madura | experiência ainda não é totalmente unificada | próxima etapa após carrinho técnico |
 | Catálogo técnico tem cobertura parcial | risco de suporte incorreto | pendência explícita; vendedor decide e valida |
 | Testes V3 são majoritariamente contratuais/estáticos | falhas visuais podem escapar | smoke autenticado no preview e E2E progressivo |
+| Railway recusou um quarto serviço no projeto de preview | V1 ainda não possui URL própria | limite do plano gratuito; não substituir serviços existentes sem decisão explícita |
 
 ## Bloqueios para release oficial
 
