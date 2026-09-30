@@ -98,3 +98,11 @@ Em caso de conflito, use esta ordem:
 5. Sugestões de IA.
 
 Nunca promova o item 5 para os níveis 1–3 sem validação.
+
+## Integração WhatsApp/Kaption — WA-MCP-01
+
+O DUTRA OS possui uma camada server-side de ingestão para WhatsApp via Kaption. O worker local `scripts/whatsapp-kaption-bridge.mjs` opera somente enquanto Kaption/WhatsApp estão disponíveis no computador, lê mensagens incrementalmente e envia eventos ao Supabase `og-proposal-engine`.
+
+A integração segue o contrato **mensagem observada ≠ resultado comercial**. Extração automática só pode promover para fato campos derivados de linguagem inbound explícita e determinística, com proveniência. Sugestões de IA não confirmadas permanecem revisão. Nenhum estágio é alterado silenciosamente e nenhum envio de WhatsApp ocorre pelo bridge.
+
+O Supabase contém a trilha de integração, entidades normalizadas auxiliares e o motor de proposta/ROI, mas não substitui automaticamente o cadastro mestre local `state.leads` enquanto não houver migração/reconciliação explícita e validada.
