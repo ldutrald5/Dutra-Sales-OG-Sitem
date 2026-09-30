@@ -4330,20 +4330,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       : { gaps: [], questions: [], doNotSay: [] };
     const segment = (OG_DATA.segments || []).find(item => item.id === lead.segmentId);
     const status = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status);
-    const fleet = Math.max(0, Number(lead.fleetSize || 0) || 0);
-    const events = (state.operations?.activityEvents || [])
-      .filter(item => String(item.clientId || item.leadId || '') === String(lead.id));
-    const hasProposalHistory = events.some(item => ['proposal.prepared','proposal.sent','proposal.opened','proposal.reopened'].includes(item.type));
-    const hasContactHistory = Boolean(lead.lastContactAt || (lead.interactions || []).length);
-    const relationship = lead.status === 'fechado'
-      ? 'Cliente'
-      : hasProposalHistory
-        ? 'Proposta com histórico confirmado'
-        : hasContactHistory
-          ? 'Contato já registrado'
-          : 'Sem histórico de contato';
-    const profile = [segment?.name || lead.segmentId || 'Segmento não definido', fleet ? `${fleet} veículo(s)` : 'Frota não levantada'].join(' · ');
-    const moment = [conversation?.label || 'Situação não definida', status?.label || lead.status || 'Status não definido'].join(' · ');
+    const salesProfile = OG_LEAD_INTELLIGENCE.salesProfile(lead, state.operations);
+    const profile = [segment?.name || lead.segmentId || 'Segmento não definido', salesProfile.fleet.label].join(' · ');
+    const moment = [salesProfile.route.label, conversation?.label || 'Situação não definida'].join(' · ');
+    const relationship = salesProfile.knowledge.label;
     const objective = nextBest?.objective || lead.nextActionObjective || nextBest?.action || lead.nextAction || 'Definir objetivo antes do contato';
     const prepItems = brief.gaps?.length ? brief.gaps.slice(0, 3) : ['Contexto essencial preenchido'];
     const questions = (brief.questions || []).slice(0, 3);
@@ -4357,8 +4347,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         </div>
         <div class="client-sheet-attack-meta">
           <div><small>PERFIL</small><strong>${escapeHtml(profile)}</strong></div>
-          <div><small>MOMENTO</small><strong>${escapeHtml(moment)}</strong></div>
-          <div><small>RELACIONAMENTO</small><strong>${escapeHtml(relationship)}</strong></div>
+          <div><small>ROTA / MOMENTO</small><strong>${escapeHtml(moment)}</strong></div>
+          <div><small>RELAÇÃO OG</small><strong>${escapeHtml(relationship)}</strong></div>
         </div>
         <div class="client-sheet-attack-objective">
           <small>OBJETIVO DESTE CONTATO</small>

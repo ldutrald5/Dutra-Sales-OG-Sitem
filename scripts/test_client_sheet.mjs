@@ -108,6 +108,9 @@ assert.match(app,/function buildClientAttackCard\(lead, nextBest, conversation\)
 assert.match(app,/FICHA DE ATAQUE · V1/,'Ficha de Ataque deve estar visível na ficha do cliente');
 assert.match(app,/OG_SALES_BRIEF\.build\(lead, state\.operations\)/,'Ficha de Ataque deve reutilizar PRECALL-01');
 assert.match(app,/Somente leitura · fatos \+ regras existentes/,'Ficha de Ataque deve declarar que é projeção, não nova fonte de verdade');
+assert.match(app,/OG_LEAD_INTELLIGENCE\.salesProfile\(lead, state\.operations\)/,'Ficha de Ataque deve usar a classificação comercial canônica');
+assert.match(app,/ROTA \/ MOMENTO/,'Ficha de Ataque deve mostrar a rota comercial derivada');
+assert.match(app,/RELAÇÃO OG/,'Ficha de Ataque deve separar relação confirmada de suposição de conhecimento');
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/,'Ficha de Ataque deve expor perguntas de diagnóstico');
 assert.match(app,/NÃO DIGA AINDA/,'Ficha de Ataque deve expor guardrails');
 assert.match(css,/\.client-sheet-attack-card/,'estilos da Ficha de Ataque ausentes');

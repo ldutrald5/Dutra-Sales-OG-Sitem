@@ -99,4 +99,27 @@ assert.equal(crmSummary.all,6);
 assert.equal(crmSummary.customers,1);
 assert.equal(crmSummary.erp_review,1);
 assert.equal(intelligence.crmViewDefinition('attack').label,'Fila de ataque');
+const profileNew=intelligence.salesProfile({id:'P-NEW',segmentId:'transportadora',priority:'media',interactions:[]},{activityEvents:[]});
+assert.equal(profileNew.knowledge.id,'unconfirmed','sem evidência não pode virar "não conhece" nem "conhece"');
+assert.equal(profileNew.route.id,'first_contact');
+assert.equal(profileNew.fleet.id,'unknown');
+
+const profileTalked=intelligence.salesProfile({id:'P-TALK',status:'contatado',conversationStage:'talked',fleetSize:4,interactions:[{at:'2026-09-27T10:00:00-03:00',type:'call',result:'falou'}]},{activityEvents:[]});
+assert.equal(profileTalked.knowledge.id,'contacted');
+assert.equal(profileTalked.route.id,'relationship');
+assert.equal(profileTalked.fleet.id,'2_9');
+
+const profileProposal=intelligence.salesProfile({id:'P-PROP',status:'novo',conversationStage:'first_contact',fleetSize:18},{activityEvents:[{leadId:'P-PROP',type:'proposal.sent',at:'2026-09-27T10:00:00-03:00'}]});
+assert.equal(profileProposal.knowledge.id,'proposal','evento explícito de proposta deve elevar somente a relação confirmada');
+assert.equal(profileProposal.route.id,'proposal_followup');
+assert.equal(profileProposal.fleet.id,'10_49');
+
+const profileCustomer=intelligence.salesProfile({id:'P-CUST',status:'fechado',conversationStage:'customer',fleetSize:70},{activityEvents:[]});
+assert.equal(profileCustomer.knowledge.id,'customer');
+assert.equal(profileCustomer.route.id,'post_sale');
+assert.equal(profileCustomer.fleet.id,'50_plus');
+
+const profileErp=intelligence.salesProfile({id:'P-ERP',status:'novo',nextAction:'Conferir ERP antes de abordar'},{activityEvents:[]});
+assert.equal(profileErp.route.id,'erp_review','pendência de ERP deve bloquear a rota comercial normal');
+
 console.log('Lead intelligence tests: PASS');

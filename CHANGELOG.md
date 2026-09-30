@@ -96,6 +96,9 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 
 ## [Unreleased] — PLAYBOOK-01 Ficha de Ataque V1
 
+- Adicionada classificação determinística de relação OG, rota comercial e faixa de frota usando somente fatos/eventos existentes.
+- Ausência de histórico passa a ser exibida como “Conhecimento OG não confirmado”, sem inferir que o cliente conhece ou não conhece o produto.
+
 - Adicionada síntese comercial somente leitura na Ficha Universal.
 - A nova superfície reutiliza Next Best Action, PRECALL-01 e estado real da conta; não cria novo score, nova entidade ou nova persistência.
 - Mostra perfil, momento, relacionamento explícito, objetivo do contato, lacunas, perguntas de diagnóstico e guardrails “NÃO DIGA AINDA”.
