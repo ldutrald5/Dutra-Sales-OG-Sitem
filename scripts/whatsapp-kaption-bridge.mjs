@@ -499,10 +499,16 @@ async function syncConversation({ client, sessionId, conversation, state, config
   const key = cursorKey(sessionId, chatId);
   const directPhone = phoneDigits(phoneFromJid(chatId));
   const canonicalLead = directPhone ? crmIndex.get(directPhone) || null : null;
-  const cursor = state.conversations[key]?.after || state.initial_after;
+  const checkpoint = state.conversations[key] || {};
+  const cursor = checkpoint.after || state.initial_after;
+  const highWatermark = checkpoint.high_watermark || cursor;
   const lastActivity = conversationTimestamp(conversation);
 
-  if (lastActivity && Date.parse(lastActivity) <= Date.parse(cursor)) {
+  if (
+    lastActivity &&
+    Date.parse(lastActivity) <= Date.parse(highWatermark) &&
+    Date.now() - Date.parse(lastActivity) > 120000
+  ) {
     return { scanned: 0, ingested: 0, skipped: 1 };
   }
 
@@ -519,7 +525,7 @@ async function syncConversation({ client, sessionId, conversation, state, config
     .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
 
   let ingested = 0;
-  let newest = cursor;
+  let newest = highWatermark;
 
   for (const { message, at } of messages) {
     const externalMessageId = messageId(message);
@@ -580,9 +586,13 @@ async function syncConversation({ client, sessionId, conversation, state, config
     await postIngest(config.ingestUrl, config.apiKey, ingestPayload);
     ingested += 1;
     if (Date.parse(at) > Date.parse(newest)) newest = at;
+  }
 
+  if (messages.length) {
+    const overlapAfter = new Date(Math.max(0, Date.parse(newest) - 2000)).toISOString();
     state.conversations[key] = {
-      after: newest,
+      after: overlapAfter,
+      high_watermark: newest,
       last_success_at: new Date().toISOString(),
     };
     await saveState(config.cursorFile, state);
