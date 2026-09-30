@@ -203,7 +203,7 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 ## PLAYBOOK-01 — Ficha de Ataque V1
 
 - **Objetivo:** sintetizar preparação comercial imediata dentro da Ficha Universal sem duplicar Account 360, NBA, PRECALL ou Call AI.
-- **Escopo:** perfil, momento, relacionamento explícito, objetivo do contato, lacunas, perguntas e “NÃO DIGA AINDA” como projeção somente leitura.
+- **Escopo:** perfil, momento, relacionamento explícito, objetivo do contato, lacunas, perguntas e “NÃO DIGA AINDA” como projeção somente leitura; V1.1 inclui rota comercial, relação OG e faixa de frota determinísticas sem persistência.
 - **Fonte:** `state.leads`, `OG_LEAD_INTELLIGENCE`, `OG_SALES_BRIEF` e eventos explícitos já existentes.
 - **Story:** `docs/stories/PLAYBOOK-01-sales-attack-card-v1.md`.
 - **Status:** em validação.
