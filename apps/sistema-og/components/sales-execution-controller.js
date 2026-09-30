@@ -84,9 +84,9 @@
       return sx;
     }
 
-    function applyLegacy(payload, externalId) {
+    function applyLegacy(payload, externalId, targetLead = null) {
       const projection = payload?.legacyProjection;
-      const lead = legacyLead(payload?.current || executionState().current) || legacyLead();
+      const lead = targetLead || legacyLead();
       if (!lead || !projection) return false;
       const changed = service.applyLegacyProjection(lead, projection, {
         interactions: root.OG_INTERACTION_SERVICE,
@@ -275,6 +275,7 @@
       if (sx.busy) return;
       if (!input.outcome) return feedback('Escolha o resultado antes de salvar.', 'warning');
       const memberId = sx.current?.member?.id;
+      const leadBefore = legacyLead();
       if (!memberId || !sx.session?.id) return feedback('Sessão ou contato atual indisponível.', 'warning');
       const key = 'result:' + memberId + ':' + input.outcome;
       const externalId = pendingId(key, 'sales-result');
@@ -292,7 +293,7 @@
           phone: sx.current?.contact?.phone_e164 || legacyLead()?.telefone || '',
           externalId
         });
-        applyLegacy(payload, externalId);
+        applyLegacy(payload, externalId, leadBefore);
         applyPayload(payload);
         clearPending(externalId);
         feedback(payload.duplicate ? 'Resultado já havia sido salvo. Estado restaurado.' : 'Resultado salvo ✓', 'success');
@@ -400,6 +401,7 @@
         submit.disabled = true;
         status.textContent = 'Marcando reunião…';
         try {
+          const leadBefore = legacyLead();
           const payload = await service.scheduleMeeting(sx.session.id, {
             memberId: sx.current.member.id,
             scheduledAt,
@@ -409,7 +411,7 @@
             notes: data.get('notes'),
             externalId
           });
-          applyLegacy(payload, externalId);
+          applyLegacy(payload, externalId, leadBefore);
           applyPayload(payload);
           clearPending(externalId);
           status.textContent = 'REUNIÃO MARCADA ✓';
@@ -429,6 +431,7 @@
       if (!sx.session?.id || !sx.current?.member?.id) throw new Error('Sessão Sales Execution indisponível.');
       if (!input.outcome) throw new Error('Escolha um resultado.');
       const externalId = clean(input.externalId, 180) || pendingId('call-ai:' + sx.current.member.id + ':' + input.outcome, 'sales-call-ai');
+      const leadBefore = legacyLead();
       const payload = await service.recordResult(sx.session.id, {
         memberId: sx.current.member.id,
         contactId: sx.current.contact?.id || null,
@@ -440,7 +443,7 @@
         phone: sx.current.contact?.phone_e164 || legacyLead()?.telefone || '',
         externalId
       });
-      applyLegacy(payload, externalId);
+      applyLegacy(payload, externalId, leadBefore);
       applyPayload(payload);
       clearPending(externalId);
       return payload;
