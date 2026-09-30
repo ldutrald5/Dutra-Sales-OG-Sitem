@@ -6,6 +6,15 @@ function payloadFromLead(lead={},contact={},options={}){const tech=options.techn
 function store(payload,storage){const target=storage||root.sessionStorage;if(!target?.setItem)throw new Error("Session storage indisponível");target.setItem(KEY,JSON.stringify(payload));return clone(payload);}
 function read(storage){const target=storage||root.sessionStorage;if(!target?.getItem)return null;try{const p=JSON.parse(target.getItem(KEY)||"null");return p&&p.schemaVersion===1?p:null}catch{return null}}
 function clear(storage){const target=storage||root.sessionStorage;target?.removeItem?.(KEY);}
-function launch(lead,contact={},options={}){const payload=store(payloadFromLead(lead,contact,options),options.storage);const url=clean(options.url)||"/legacy/?tab=cotacao&handoff=1";if(typeof root.open==="function"){const opened=root.open(url,options.target||"_blank","noopener");if(!opened&&root.location)root.location.href=url;}return{payload,url};}
-return{KEY,payloadFromLead,store,read,clear,launch};
+function legacyUrl(options={}){return clean(options.url)||"/legacy/?tab=cotacao&handoff=1&embedded=1";}
+function launchLegacy(lead,contact={},options={}){const payload=store(payloadFromLead(lead,contact,options),options.storage),url=legacyUrl(options);if(typeof root.open==="function"){const opened=root.open(url,options.target||"_blank","noopener");if(!opened&&root.location)root.location.href=url;}return{payload,url,mode:"legacy-window"};}
+function launch(lead,contact={},options={}){
+  const payload=store(payloadFromLead(lead,contact,options),options.storage),url=legacyUrl(options);
+  if(options.openLegacyWindow===true)return launchLegacy(lead,contact,options);
+  try{root.dispatchEvent?.(new CustomEvent("dutra:quote-handoff",{detail:{payload,url}}));}catch{}
+  if(typeof root.go==="function")root.go("proposal");
+  else if(root.location)root.location.hash="proposal";
+  return{payload,url,mode:"integrated"};
+}
+return{KEY,payloadFromLead,store,read,clear,legacyUrl,launchLegacy,launch};
 }));
