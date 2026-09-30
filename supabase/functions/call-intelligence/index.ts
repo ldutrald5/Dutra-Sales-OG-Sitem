@@ -106,7 +106,7 @@ function keywordCounts(text: string) {
 function numericCandidates(text: string) {
   const patterns = [
     /R\$\s?[\d.]+(?:,\d{1,2})?/gi,
-    /\b\d+(?:[.,]\d+)?\s*(?:caminh(?:a|ã)(?:o|ões)|carretas?|pneus?|equipamentos?|ve[ií]culos?|psi|parcelas?|dias?|meses?)\b/gi,
+    /\b\d+(?:[.,]\d+)?\s*(?:caminh(?:ão|ões)|carretas?|pneus?|equipamentos?|ve[ií]culos?|psi|parcelas?|dias?|meses?)\b/gi,
     /\b\d+(?:[.,]\d+)?\s*%/g
   ];
   const values: string[] = [];
