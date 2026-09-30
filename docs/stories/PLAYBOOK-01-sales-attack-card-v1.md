@@ -18,6 +18,16 @@ Criar uma primeira camada compacta de preparação dentro da Ficha Universal, se
 - estágio/situação usam `OG_LEAD_INTELLIGENCE`.
 - eventos de proposta são apenas sinais explícitos de relacionamento; não viram venda nem conhecimento presumido.
 
+## Entrega V1.1 — classificação determinística
+
+A Ficha também deriva, sem persistir um novo fato:
+
+- **relação OG confirmada**: conhecimento não confirmado, contato registrado, proposta confirmada ou cliente;
+- **rota comercial**: primeiro contato, retomada/diagnóstico, follow-up, proposta/negociação, reativação de cliente, pós-venda/expansão ou conferência ERP;
+- **faixa de frota**: desconhecida, 1, 2–9, 10–49 ou 50+ veículos.
+
+As regras usam somente campos e eventos existentes. Ausência de evidência nunca vira “não conhece a OG”; fica **Conhecimento OG não confirmado**. A classificação é projeção somente leitura e pode mudar quando os fatos do CRM mudam.
+
 ## Entrega V1
 
 A Ficha Universal passa a mostrar, antes dos dados completos:
@@ -47,6 +57,7 @@ A Ficha Universal passa a mostrar, antes dos dados completos:
 - [x] não altera lead, estágio ou próxima ação;
 - [x] mobile oculta listas longas na primeira camada;
 - [x] teste de contrato da ficha cobre o wiring;
+- [x] classificação de relação/rota/frota é determinística e coberta por teste;
 - [ ] CI completo aprovado;
 - [ ] PR revisada/mergeada;
 - [ ] produção verificada, se houver deploy.
