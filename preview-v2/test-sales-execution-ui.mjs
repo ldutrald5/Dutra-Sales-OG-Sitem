@@ -7,8 +7,9 @@ const bridge=fs.readFileSync('./core-bridge.js','utf8');
 const actionCenter=fs.readFileSync('./sales-action-center-v3.js','utf8');
 const proposalEntry=fs.readFileSync('./proposal-entry-v3.js','utf8');
 const index=fs.readFileSync('./index.html','utf8');
+const loader=fs.readFileSync('./feature-loader-v3.js','utf8');
 
-assert.match(server,/spreadsheet-import-service\.js/,'V3 deve carregar o importador XLSX existente');
+assert.match(loader,/spreadsheet-import-service\.js/,'V3 deve carregar o importador XLSX sob demanda');
 assert.match(server,/\/workers\/spreadsheet-worker\.js/,'V3 deve expor o worker XLSX isolado');
 assert.match(server,/\/assets\/vendor\/xlsx\.full\.min\.js/,'V3 deve expor apenas o bundle XLSX isolado ao worker');
 assert.match(ui,/accept="\.csv,\.xlsx/,'importação de listas deve aceitar CSV e XLSX');
