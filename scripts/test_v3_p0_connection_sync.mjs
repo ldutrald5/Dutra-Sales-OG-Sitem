@@ -22,6 +22,10 @@ assert.match(core,/function enqueueBusinessMutation/);
 assert.match(core,/function acknowledgePendingMutations/);
 assert.match(core,/getPendingMutations/);
 assert.match(core,/navigator\.onLine===false/);
+assert.match(core,/bridge\?\.queueState/);
+assert.match(core,/bridge\?\.readQueuedState/);
+assert.match(core,/clearQueuedStateIf/);
+assert.match(core,/legacyPendingSave/);
 assert.match(connection,/SALVO NESTE APARELHO · SINCRONIZAÇÃO PENDENTE/);
 assert.match(connection,/SALVO ✓/);
 assert.match(connection,/TENTAR NOVAMENTE/);
@@ -39,6 +43,9 @@ assert.ok(localQueue>=0,'snapshot deve ser persistido antes da tentativa de rede
 assert.ok(mutationQueue>localQueue,'mutation granular deve ser registrada depois do snapshot recovery');
 assert.ok(networkWrite>mutationQueue,'rede só deve ser tentada depois da persistência local');
 assert.ok(ack>networkWrite,'mutation só pode ser confirmada depois da resposta do backend');
+assert.match(saveBlock,/clearPendingSave\(queuedRecord\?\.recordId/);
+assert.match(saveBlock,/acknowledgePendingMutations\(queuedRecord\?\.mutationIds/);
+assert.match(saveBlock,/Base indisponível\. A alteração ficou salva neste aparelho/);
 
 const flushStart=core.indexOf('async function flushPendingSave');
 const flushEnd=core.indexOf('\n  async function loginFromForm',flushStart);
@@ -48,12 +55,19 @@ assert.ok(flushBlock.indexOf('acknowledgePendingMutations')>flushBlock.indexOf("
 assert.match(flushBlock,/saveQueued/);
 assert.match(flushBlock,/saveFailed/);
 assert.match(flushBlock,/scheduleReconnect/);
+assert.match(flushBlock,/clearPendingSave\(queued\.recordId/);
+assert.match(flushBlock,/acknowledgePendingMutations\(queued\.mutationIds/);
 
 assert.match(actions,/RECORD_CALL_OUTCOME_AND_NEXT_ACTION/);
 assert.match(actions,/SCHEDULE_NEXT_ACTION/);
 assert.match(actions,/COMPLETE_NEXT_ACTION/);
+assert.match(actions,/idempotencyKey:'activity:'/);
+assert.match(actions,/saveButton\.disabled=true/);
 assert.match(technical,/SAVE_TECHNICAL_CONFIG/);
+assert.match(technical,/idempotencyKey:'technical:'/);
 assert.match(day,/APPLY_AUTOMATION_NEXT_ACTION/);
+assert.match(day,/idempotencyKey:'automation:'/);
 assert.match(core,/SAVE_PROPOSAL_DRAFT/);
+assert.match(core,/idempotencyKey:'proposal:'/);
 
 console.log('V3 P0 connection/sync/save contract: PASS');
