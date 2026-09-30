@@ -378,13 +378,16 @@
           } catch (error) { toast(error.message); }
         }
         if (index === 2) {
-          const action = prompt('Qual é a próxima ação?', lead.nextAction || 'Retomar contato');
-          if (action == null) return;
-          const when = prompt('Data/hora do follow-up (AAAA-MM-DDTHH:MM) ou deixe em branco:', clean(lead.followUpAt).slice(0,16));
-          globalThis.OG_INTERACTION_SERVICE?.setNextAction(lead, action, when || '', { reason:'Definido pelo Cliente 360° V3' });
-          const idx = state.leads.findIndex(item=>String(item.id)===String(lead.id));
-          state.leads[idx] = normalize(lead);
-          try { await saveState('Próxima ação salva na base real.'); } catch (error) { toast(error.message); }
+          if (globalThis.DUTRA_ACTION_CENTER?.open) {
+            globalThis.DUTRA_ACTION_CENTER.open(lead, lead.nextActionType || 'FOLLOW_UP', {
+              reason: lead.nextActionReason || 'Definir próximo compromisso pelo Cliente 360°.'
+            });
+          } else {
+            toast('Centro de próximas ações ainda não carregou.');
+          }
+        }
+        if (index === 3) {
+          prepareProposalForLead(lead);
         }
       }
     });
@@ -562,6 +565,7 @@
     save:saveState,
     getState:()=>state.snapshot,
     getLeads:()=>state.leads,
+    getSelectedLead:()=>selectedLead(),
     commit:async(payload={},message='Alterações salvas.')=>{if(Array.isArray(payload.leads))state.leads=payload.leads.map(normalize);if(payload.operations&&typeof payload.operations==='object'){if(!state.snapshot)throw new Error('Base ainda não carregada.');state.snapshot.operations=payload.operations;}return saveState(message);},
     request:(path,options={})=>api(path,options),
     selectClient:id=>{state.selectedLeadId=id;renderClient();globalThis.go?.('clients');}
