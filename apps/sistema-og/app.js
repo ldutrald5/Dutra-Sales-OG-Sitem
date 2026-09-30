@@ -7234,9 +7234,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           ? 'Sessão salva · próximo prospect pronto'
           : 'Sessão salva no CRM + Sales Execution';
         showNotification('Ligação confirmada e sincronizada com Sales Execution.', 'success');
+        if (state.callAI.returnTab === 'prospeccao') await advanceSalesExecutionAfterCall(nextMemberId);
         return;
       }
       showNotification('Ligação registrada no CRM. Esta conta ainda usa o modo local/legado.', 'success');
+      if (state.callAI.returnTab === 'prospeccao') {
+        state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null;
+        state.prospecting.view = 'focus';
+        switchTab('prospeccao');
+        renderProspecting();
+      }
     } catch (error) {
       console.error('Sales Execution sync failed', error);
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
