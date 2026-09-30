@@ -63,6 +63,7 @@ const SHELL_URLS = [
   '/modules/lead-intelligence.js',
   '/modules/signal-center.js',
   '/components/ui-components.js',
+  '/components/sales-execution-ui.js',
   '/material-store.js',
   '/sales-materials.js',
   '/performance-engine.js',
