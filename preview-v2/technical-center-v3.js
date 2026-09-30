@@ -141,7 +141,6 @@ function renderGuided(r,q,count){
   return `
   <section class="tcSection"><div class="tcSectionHead"><div><h2>1. Qual é o veículo?</h2><p style="text-align:left">Pode escrever como você fala: “Scania traçado com cubo redutor”.</p></div><span class="tcChip yellow">${count} configurações OG</span></div>
   <input class="tcSearch" id="tcVehicleSearch" value="${attr(state.search)}" placeholder="Buscar veículo, marca, cubo redutor, 6x2, Rodotrem…"><div class="tcVehicleGrid" id="tcVehicleGrid"></div>
-  ${state.search&&found.length===0?`<div class="tcFallback"><b>Não achei uma configuração exata para “${esc(state.search)}”.</b><p>Você não precisa parar o trabalho por causa disso. Abra um pedido manual com esse nome e monte os itens exatamente como o cliente precisa.</p><button id="tcUseSearchManual">Montar manualmente</button></div>`:''}
   </section>
   ${r?`
   <section class="tcSection"><div class="tcSectionHead"><div><h2>2. Configure sem complicação</h2><p style="text-align:left">${esc(r.name)} · ${esc(r.category)}</p></div><span class="tcStatus ${q?.technicallyReady?'':'warn'}">${q?.technicallyReady?'APLICAÇÃO PREENCHIDA':'FALTA VALIDAR'}</span></div>
@@ -191,7 +190,7 @@ function installmentOptions(){
 function renderVehicleGrid(){
   const root=$('#tcVehicleGrid');if(!root)return;
   const rows=E().searchRules(rules(),state.search);
-  root.innerHTML=rows.length?rows.map(r=>`<button class="tcVehicle ${r.id===state.ruleId?'active':''}" data-rule="${attr(r.id)}"><small>${esc(r.category)}</small><b>${esc(r.name)}</b><p>${esc((r.applications||[]).slice(0,4).join(' · '))}</p><div class="ax">${axleChips(r)}</div></button>`).join(''):'';
+  root.innerHTML=rows.length?rows.map(r=>`<button class="tcVehicle ${r.id===state.ruleId?'active':''}" data-rule="${attr(r.id)}"><small>${esc(r.category)}</small><b>${esc(r.name)}</b><p>${esc((r.applications||[]).slice(0,4).join(' · '))}</p><div class="ax">${axleChips(r)}</div></button>`).join(''):(state.search?`<div class="tcFallback" style="grid-column:1/-1"><b>Não achei uma configuração exata para “${esc(state.search)}”.</b><p>O trabalho não precisa parar. Monte o pedido manualmente com esse nome e edite as peças como precisar.</p><button data-search-manual>Montar manualmente</button></div>`:'');
 }
 function renderQuestions(r){
   return E().visibleQuestions(r,state.answers).map(q=>{
@@ -276,7 +275,6 @@ function bindActions(){
   $('#tcWhatsapp')?.addEventListener('click',sendWhatsApp);
   $('#tcOfficial')?.addEventListener('click',openOfficial);
   $('#tcStickyOfficial')?.addEventListener('click',openOfficial);
-  $('#tcUseSearchManual')?.addEventListener('click',()=>{state.manualVehicleName=state.search;state.mode='manual';render()});
   $('#tcConvertManual')?.addEventListener('click',convertToManual);
   $('#tcResetAuto')?.addEventListener('click',()=>{state.lineOverrides={};render()});
   $('#tcAddFree')?.addEventListener('click',()=>{const box=$('#tcCustomBox');if(box)box.style.display=box.style.display==='none'?'grid':'none'});
@@ -324,6 +322,7 @@ function removeLine(key){
 
 function handleClick(e){
   const mode=e.target.closest('[data-mode]');if(mode){state.mode=mode.dataset.mode;if(state.mode==='manual'&&!state.manualVehicleName)state.manualVehicleName=rule()?.name||state.search;render();return}
+  const manualSearch=e.target.closest('[data-search-manual]');if(manualSearch){state.manualVehicleName=state.search;state.mode='manual';render();return}
   const ruleBtn=e.target.closest('[data-rule]');if(ruleBtn){state.ruleId=ruleBtn.dataset.rule;state.answers={};state.lineOverrides={};render();setTimeout(()=>$('.tcControls')?.scrollIntoView({behavior:'smooth',block:'center'}),50);return}
   const ans=e.target.closest('[data-answer-q]');if(ans){state.answers[ans.dataset.answerQ]=ans.dataset.answerV;state.lineOverrides={};render();return}
   const add=e.target.closest('[data-catalog-add]');if(add){addCatalogLine(add.dataset.catalogAdd);return}
@@ -340,7 +339,7 @@ function handleChange(e){
   if(e.target.matches('[data-line-price]')){updateLine(e.target.dataset.linePrice,'unitPrice',e.target.value);return}
 }
 function handleInput(e){
-  if(e.target.id==='tcVehicleSearch'){state.search=e.target.value;renderVehicleGrid();const fallback=$('.tcFallback');if(fallback||state.search.length>1)render();return}
+  if(e.target.id==='tcVehicleSearch'){state.search=e.target.value;renderVehicleGrid();return}
   if(e.target.id==='tcCatalogSearch'){state.catalogSearch=e.target.value;renderCatalog();return}
   if(e.target.id==='tcManualVehicle'){state.manualVehicleName=e.target.value;return}
   if(e.target.id==='tcManualTires'){state.manualTires=Math.max(0,Number(e.target.value)||0);return}
