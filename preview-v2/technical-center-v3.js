@@ -358,8 +358,11 @@ async function saveDraft(){
   try{await C().commit(
     {leads:updated},
     'Configuração técnica salva na conta.',
-    {action:'SAVE_TECHNICAL_CONFIG',entityType:'lead',entityId:lead.id,label:'Configuração técnica',metadata:{ruleId:state.ruleId||null,mode:state.mode}}
-  );notify('Configuração salva no cliente.')}catch(err){notify('Não foi possível salvar: '+err.message)}
+    {action:'SAVE_TECHNICAL_CONFIG',entityType:'lead',entityId:lead.id,idempotencyKey:'technical:'+lead.id+':'+draft.updatedAt,label:'Configuração técnica',metadata:{ruleId:state.ruleId||null,mode:state.mode}}
+  );
+  const sync=C().getConnectionStatus?.();
+  notify(sync?.status==='CONNECTED'?'Configuração salva no cliente.':'Configuração salva neste aparelho; sincronização pendente.');
+  }catch(err){notify('Não foi possível preservar a configuração: '+err.message)}
 }
 async function copySummary(){
   const q=currentQuote();if(!q)return;
