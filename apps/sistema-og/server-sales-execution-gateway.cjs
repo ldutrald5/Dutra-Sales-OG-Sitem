@@ -527,6 +527,10 @@ function createSalesExecutionGateway(options = {}) {
     attempts.forEach(row => {
       if (row.list_member_id && !CONTINUATION_OUTCOMES.has(row.outcome)) terminalMembers.add(String(row.list_member_id));
     });
+    meetings.forEach(row => {
+      const memberId = row?.metadata?.list_member_id;
+      if (memberId) terminalMembers.add(String(memberId));
+    });
     const connected = attempts.filter(row => row.connected).length;
     const decisionMakers = attempts.filter(row => row.decision_maker_reached).length;
     const qualified = attempts.filter(row => row.qualified).length;
