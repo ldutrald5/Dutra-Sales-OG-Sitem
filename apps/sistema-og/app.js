@@ -6725,7 +6725,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function resetCallAICentralForLead(lead) {
     state.callAI.intent = 'prepare_call';
     state.callAI.centralResponse = null;
-    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent });
+    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent, salesExecution: state.callAI.salesExecution });
     const input = document.getElementById('call-ai-live-input');
     if (input) input.value = '';
     const result = document.getElementById('call-ai-structured-result');
@@ -6762,7 +6762,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const status = document.getElementById('call-ai-central-state');
     const button = document.getElementById('call-ai-generate');
     status.dataset.state = 'loading'; status.textContent = 'Preparando contexto mínimo e orientação…'; button.disabled = true;
-    const context = OG_CALL_AI_CONTEXT.build(lead, { intent });
+    const context = OG_CALL_AI_CONTEXT.build(lead, { intent, salesExecution: state.callAI.salesExecution });
     state.callAI.context = context;
     let knowledge = [];
     try {
@@ -6793,6 +6793,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (lead.status === 'negociacao') return 'negociacao';
     if (lead.pain) return 'retorno';
     return 'diagnostico';
+  }
+
+  function salesExecutionCallObjective(mode) {
+    return {
+      GATEKEEPER: 'primeiro_contato',
+      DECISION_MAKER: 'qualificacao',
+      MEETING: 'proximo_passo',
+      CUSTOMER: 'pos_venda',
+      FOLLOW_UP: 'retorno',
+      PROPOSAL: 'followup_proposta'
+    }[mode] || 'qualificacao';
   }
 
   function formatCallDate(value) {
@@ -6829,8 +6840,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     const lead = state.leads.find(item => String(item.id) === String(id));
     if (!lead) return;
-    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
+    const executionLegacyId = state.callAI.salesExecution?.company?.legacy_lead_id || '';
+    if (executionLegacyId && String(executionLegacyId) !== String(lead.id)) state.callAI.salesExecution = null;
+    const execution = state.callAI.salesExecution;
+    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: execution ? salesExecutionCallObjective(execution.mode || execution.briefing?.mode) : suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null, salesExecution: execution || null };
     resetCallAICentralForLead(lead);
+    if (execution?.briefing?.intent && OG_CALL_AI_PROMPTS.INTENTS[execution.briefing.intent]) state.callAI.intent = execution.briefing.intent;
+    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent, salesExecution: execution });
     const objective = document.getElementById('call-ai-objective');
     if (objective) objective.value = state.callAI.objective;
     const input = document.getElementById('call-ai-client-search');
