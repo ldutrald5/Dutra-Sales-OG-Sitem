@@ -57,6 +57,13 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 
 - Evolução visual para shell DUTRA OS preservando módulos e contratos existentes.
 
+## [Unreleased] — Playbook Comercial / Ficha de Ataque
+
+- Briefing pré-ligação passa a mostrar momento comercial, conhecimento OG confirmado/não confirmado, objetivo da conversa, abertura sugerida e preparação técnica mínima.
+- Derivação é determinística e somente leitura: não altera CRM, estágio ou próxima ação.
+- Primeiro contato não é tratado como prova de que o cliente desconhece a OG.
+- Aplicação técnica e ROI continuam protegidos por validação e premissas explícitas.
+
 ## [Unreleased] — WhatsApp/Kaption CRM Bridge
 
 - Adicionado worker local CLI para leitura incremental do Kaption MCP.

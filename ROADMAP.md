@@ -64,6 +64,12 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Próximo passo: importar/reconciliar um lote piloto com `legacy_lead_id`/`external_id` e validar o fluxo ponta a ponta antes de ampliar a migração.
 
 
+## Em validação — Playbook Comercial V1
+
+- PLAYBOOK-01A cria a Ficha de Ataque como extensão do briefing pré-contato existente.
+- Primeira fatia cobre momento da relação, conhecimento OG explícito, objetivo, abertura e preparação técnica.
+- Próximas fatias: registro revisável de conhecimento OG, abordagens por perfil/canal, integração com Account 360/Mesa e Technical Brain validado.
+
 ## Em validação — Call Intelligence V1
 
 - Gravação iniciada somente pelo vendedor e preservada localmente até decisão de upload.

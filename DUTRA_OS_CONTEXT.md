@@ -56,6 +56,7 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **V2.8:** Prospecção conectada ao mesmo CRM + Dutra Force contextual.
 - **V2.9:** Dutra Force Central com radar, briefing e links para Conta 360/Call AI.
 - **V3.0:** Ciclo Comercial Conectado com visão Entrada → Contato → Proposta → Negociação → Venda → Pós-venda e atalhos para Cotação, ROI/Payback, CRM, Mesa e Dutra Force. Cotação salva continua sendo rascunho até ação explícita do usuário.
+- **Playbook Comercial em evolução:** briefing pré-contato deriva uma Ficha de Ataque somente leitura com momento comercial, conhecimento OG explicitamente confirmado/não confirmado, objetivo, abertura e preparação técnica; não grava inferências no CRM.
 
 ## Regra técnica OG
 
