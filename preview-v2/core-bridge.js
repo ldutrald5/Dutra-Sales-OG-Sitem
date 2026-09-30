@@ -354,6 +354,7 @@
         if (id && state.leads.some(item => String(item.id) === String(id))) {
           state.selectedLeadId = id;
           renderClient();
+          window.dispatchEvent(new CustomEvent('dutra:client',{detail:{lead:selectedLead()}}));
           if (typeof globalThis.go === 'function') globalThis.go('clients');
           return;
         }
