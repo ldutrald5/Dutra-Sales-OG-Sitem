@@ -31,10 +31,24 @@ const mutation=bridge.createMutationRecord({
   metadata:{source:'v3'}
 },{now:'2026-09-30T03:10:00Z'});
 assert.equal(mutation.id,'M1');
-assert.equal(mutation.status,'pending');
+assert.equal(mutation.status,'PENDING');
+assert.equal(mutation.type,'SCHEDULE_NEXT_ACTION');
+assert.deepEqual(mutation.payload,{});
 assert.equal(mutation.attempts,0);
 assert.equal(mutation.idempotencyKey,'lead:L1:next-action:A1');
 assert.equal(mutation.metadata.source,'v3');
+const businessMutation=bridge.createMutationRecord({
+  id:'M-BIZ-1',
+  idempotencyKey:'interaction:INT-1',
+  action:'interaction.recorded',
+  type:'INTERACTION_RECORDED',
+  entityType:'lead',
+  entityId:'L1',
+  payload:{leadId:'L1',interactionId:'INT-1',note:'Falou com decisor'}
+},{now:'2026-09-30T03:10:30Z'});
+assert.equal(businessMutation.status,'PENDING');
+assert.equal(businessMutation.type,'INTERACTION_RECORDED');
+assert.equal(businessMutation.payload.interactionId,'INT-1');
 assert.throws(()=>bridge.createMutationRecord({}),/action/);
 
 const queuedWithMutation=bridge.createQueuedRecord(
