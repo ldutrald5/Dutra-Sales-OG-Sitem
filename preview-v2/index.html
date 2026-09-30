@@ -6,8 +6,12 @@
 <title>DUTRA OS · V3 Premium</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+<script>window.lucide=window.lucide||{createIcons(){}};</script>
+<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" onload="window.lucide?.createIcons?.()"></script>
 <style>
 :root{--y:#ffd400;--y2:#ffbf00;--bg:#05090c;--panel:#0a1014;--panel2:#0d1419;--line:#263139;--text:#f7f8f9;--muted:#98a3ad;--green:#45e65e;--cyan:#7de6ef;--red:#ff5c63}
 *{box-sizing:border-box}html{background:#020406}body{margin:0;background:radial-gradient(circle at 25% -5%,#3b2d0c66,transparent 26%),linear-gradient(#05090c,#030608 70%);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}
@@ -189,7 +193,7 @@ button,input,select{font:inherit}.shell{max-width:720px;margin:0 auto;min-height
 
 <script>
 const navs=[...document.querySelectorAll('.nav')];
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));navs.forEach(n=>n.classList.toggle('active',n.dataset.go===id));document.getElementById('command').classList.remove('open');window.scrollTo({top:0,behavior:'instant'});lucide.createIcons()}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));navs.forEach(n=>n.classList.toggle('active',n.dataset.go===id));document.getElementById('command').classList.remove('open');window.scrollTo({top:0,behavior:'instant'});window.dispatchEvent(new CustomEvent('dutra:navigate',{detail:{id}}));window.lucide?.createIcons?.()}
 document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>go(el.dataset.go)));
 const command=document.getElementById('command'),cmdInput=document.getElementById('cmdInput');
 document.getElementById('openCommand').onclick=()=>{command.classList.add('open');setTimeout(()=>cmdInput.focus(),60)};
@@ -197,9 +201,9 @@ document.getElementById('closeCommand').onclick=()=>command.classList.remove('op
 cmdInput.addEventListener('input',()=>{const q=cmdInput.value.toLowerCase().trim();document.querySelectorAll('.cmdItem').forEach(item=>item.style.display=!q||item.textContent.toLowerCase().includes(q)?'flex':'none')});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();command.classList.add('open');setTimeout(()=>cmdInput.focus(),60)}if(e.key==='Escape'){command.classList.remove('open');document.getElementById('roiModal').classList.remove('open')}});
 document.querySelectorAll('[data-client-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-client-tab]').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('[data-client-panel]').forEach(p=>p.classList.toggle('active',p.dataset.clientPanel===btn.dataset.clientTab));}));
-document.querySelectorAll('[data-app-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-app-tab]').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('[data-app-panel]').forEach(p=>p.classList.toggle('active',p.dataset.appPanel===btn.dataset.appTab));lucide.createIcons()}));
+document.querySelectorAll('[data-app-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-app-tab]').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('[data-app-panel]').forEach(p=>p.classList.toggle('active',p.dataset.appPanel===btn.dataset.appTab));window.lucide?.createIcons?.()}));
 const supportMap={'EQ-110':['Dianteira','Dianteira','Aplicação dianteira compatível com a configuração selecionada.'],'EQ-1145':['Tração','Tração','Aplicação de tração com validação de suporte e rota da mangueira.'],'EQ-1135':['Truck','Truck','Aplicação no eixo Truck; conferir compatibilidade conforme configuração física.'],'EQ-120':['Carreta','Carreta / Rodotrem','Aplicação recomendada para carreta e rodotrem na configuração selecionada.']};
-const supportDrawer=document.getElementById('supportDrawer');document.querySelectorAll('[data-support]').forEach(row=>row.addEventListener('click',()=>{const code=row.dataset.support,[pos,app,desc]=supportMap[code]||['Aplicação','Aplicação',''];document.getElementById('supportTitle').textContent=code;document.getElementById('supportCode').textContent=code;document.getElementById('supportPosition').textContent=pos;document.getElementById('supportApplication').textContent=app;document.getElementById('supportDesc').textContent=desc;supportDrawer.classList.add('open');lucide.createIcons()}));document.getElementById('closeSupport').onclick=()=>supportDrawer.classList.remove('open');supportDrawer.addEventListener('click',e=>{if(e.target===supportDrawer)supportDrawer.classList.remove('open')});
+const supportDrawer=document.getElementById('supportDrawer');document.querySelectorAll('[data-support]').forEach(row=>row.addEventListener('click',()=>{const code=row.dataset.support,[pos,app,desc]=supportMap[code]||['Aplicação','Aplicação',''];document.getElementById('supportTitle').textContent=code;document.getElementById('supportCode').textContent=code;document.getElementById('supportPosition').textContent=pos;document.getElementById('supportApplication').textContent=app;document.getElementById('supportDesc').textContent=desc;supportDrawer.classList.add('open');window.lucide?.createIcons?.()}));document.getElementById('closeSupport').onclick=()=>supportDrawer.classList.remove('open');supportDrawer.addEventListener('click',e=>{if(e.target===supportDrawer)supportDrawer.classList.remove('open')});
 const toast=document.getElementById('toast');let toastTimer;function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2600)}
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
 function updateProposal(){const qty=Math.max(1,parseInt(document.getElementById('proposalQty')?.value)||1),inst=Math.max(1,parseInt(document.getElementById('proposalInstallments')?.value)||1),units=qty*16,eq=units*249,kit=1678,total=eq+kit,tires=qty*32;document.getElementById('proposalTires').value=tires;document.getElementById('eqItemLabel').textContent='EQ-120 · '+units+' unidades';document.getElementById('eqItemTotal').textContent=money(eq);document.getElementById('proposalProductsTotal').textContent=money(total);document.getElementById('proposalTotal').textContent=money(total);document.getElementById('proposalCondition').textContent=inst+'x de '+money(total/inst);}
@@ -207,16 +211,16 @@ function updateProposal(){const qty=Math.max(1,parseInt(document.getElementById(
 document.getElementById('previewProposal')?.addEventListener('click',()=>showToast('Prévia atualizada com os valores da proposta.'));
 
 const roi=document.getElementById('roiModal');function updateRoi(){const inv=parseFloat(document.getElementById('roiInvestment')?.value)||0,monthly=parseFloat(document.getElementById('roiMonthlyTires')?.value)||0,pct=parseFloat(document.getElementById('roiSavingPct')?.value)||0,saving=monthly*(pct/100),annual=saving*12,payback=saving>0?inv/saving:0;document.getElementById('roiMonthlySaving').textContent=money(saving);document.getElementById('roiAnnualSaving').textContent=money(annual);document.getElementById('roiInvestmentView').textContent=money(inv);document.getElementById('roiPayback').textContent=payback?payback.toFixed(1).replace('.',',')+' meses':'—';}
-function openRoi(){roi.classList.add('open');updateRoi();lucide.createIcons()}
+function openRoi(){roi.classList.add('open');updateRoi();window.lucide?.createIcons?.()}
 ['openRoi','openRoi2','cmdRoi'].forEach(id=>document.getElementById(id)?.addEventListener('click',openRoi));document.getElementById('closeRoi').onclick=()=>roi.classList.remove('open');['roiInvestment','roiMonthlyTires','roiSavingPct','roiFleet'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateRoi));document.getElementById('roiUseProposal')?.addEventListener('click',()=>{roi.classList.remove('open');go('proposal');showToast('Premissas do ROI prontas para acompanhar a proposta.')});
-lucide.createIcons();
+window.lucide?.createIcons?.();
 </script>
-<script src="/core/data.js"></script>
-<script src="/core/operations-model.js"></script>
-<script src="/core/services/crm-service.js"></script>
-<script src="/core/services/interaction-service.js"></script>
-<script src="/core/services/whatsapp-service.js"></script>
-<script src="/core/modules/lead-intelligence.js"></script>
-<script src="/core/services/proposal-intelligence-service.js"></script>
-<script src="/core-bridge.js"></script>
+<script defer src="/core/data.js"></script>
+<script defer src="/core/operations-model.js"></script>
+<script defer src="/core/services/crm-service.js"></script>
+<script defer src="/core/services/interaction-service.js"></script>
+<script defer src="/core/services/whatsapp-service.js"></script>
+<script defer src="/core/modules/lead-intelligence.js"></script>
+<script defer src="/core/services/proposal-intelligence-service.js"></script>
+<script defer src="/core-bridge.js"></script>
 </body></html>
