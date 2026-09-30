@@ -10,7 +10,9 @@ assert.ok(sw.includes("'/services/sync-conflict-service.js'"),'serviço de confl
 assert.ok(sw.includes("'/services/sync-bridge-service.js'"),'Sync Bridge fora do shell offline');
 assert.ok(app.includes("OG_SYNC_CONFLICT.createConflict("),'409 deve criar snapshot de conflito');
 assert.ok(app.includes("OG_SYNC_BRIDGE.saveConflict(conflict)"),'conflito deve persistir fora de sessionStorage');
-assert.ok(app.includes("OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision))"),'falha de rede deve manter o estado local mais recente na outbox');
+assert.ok(app.includes("OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision), { mutationIds: queued.mutationIds || [] })"),'falha de replay deve manter snapshot e mutationIds na outbox');
+assert.ok(app.includes("markMutationAttempt(id, error?.message || 'Falha de sincronização')"),'falha deve manter mutation recuperável com diagnóstico');
+assert.ok(app.includes("ackMutations(queued.mutationIds)"),'mutation só deve sair após confirmação do replay');
 assert.ok(app.includes("async function flushQueuedState()"),'outbox deve ter flush autenticado no foreground');
 assert.ok(app.includes("await restoreSyncRecovery();"),'recovery deve acontecer antes do pull inicial');
 assert.ok(app.includes("readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()"),'marcador de conflito deve bloquear pull/sync');
@@ -34,6 +36,9 @@ assert.ok(app.includes("navigator.serviceWorker.addEventListener('message'"),'ap
 assert.ok(app.includes("event.data?.type === 'OG_SYNC_OUTBOX_READY'"),'service worker deve delegar flush ao app autenticado');
 assert.ok(app.includes("body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })"),'envio conciliado deve usar revisão-base');
 assert.ok(app.includes("if (response.status === 409)"),'novo 409 durante envio conciliado deve ser tratado');
+assert.ok(app.includes("await persistSyncConflict(conflict)"),'409 deve persistir conflito antes de qualquer novo envio');
+assert.ok(app.includes("if (pendingSyncConflict())"),'mutation replay deve permanecer bloqueado durante conflito');
+assert.ok(app.includes("await restoreSyncRecovery();"),'reload deve restaurar conflito/review antes de sincronizar');
 assert.ok(!app.includes("sessionStorage.setItem('og_sync_conflict'"),'snapshot completo não deve depender de quota do sessionStorage');
 assert.ok(!app.includes("sessionStorage.setItem('og_sync_review_pending'"),'recovery não deve depender do sessionStorage');
 assert.ok(!app.includes("if(response.status===409){\n          const remote=await response.json();\n          const merged=OG_DATA_SAFETY.mergeBackup"),'merge/reenvio silencioso antigo ainda presente');
