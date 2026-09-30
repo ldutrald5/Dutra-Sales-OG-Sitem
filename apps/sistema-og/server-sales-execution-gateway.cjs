@@ -77,21 +77,14 @@ function normalizeCallCommand(body={}) {
 }
 async function recordCallResult(body={}, env) {
   const cmd=normalizeCallCommand(body);
-  const existing=await request('call_attempts?external_id=eq.'+encodeURIComponent(cmd.externalId)+'&select=*&limit=1',{},env);
-  if(existing.error) return existing;
-  if(existing.data?.[0]) return {configured:true,status:200,data:{duplicate:true,callAttempt:existing.data[0]},error:null};
-
-  const attemptBody={external_id:cmd.externalId,company_id:cmd.companyId,contact_id:cmd.contactId,session_id:cmd.sessionId,member_id:cmd.memberId,result:cmd.result,
-    connected:['GATEKEEPER','DECISION_MAKER_IDENTIFIED','DECISION_MAKER_REACHED','QUALIFIED','MEETING_BOOKED','SEND_MATERIAL','PROPOSAL'].includes(cmd.result),
-    decision_maker_reached:['DECISION_MAKER_REACHED','QUALIFIED','MEETING_BOOKED','PROPOSAL'].includes(cmd.result),
-    qualified:['QUALIFIED','MEETING_BOOKED','PROPOSAL'].includes(cmd.result),notes:cmd.note||null};
-  const inserted=await request('call_attempts',{method:'POST',headers:{Prefer:'return=representation'},body:attemptBody},env);
-  if(inserted.error) return inserted;
-
-  // P0 deliberately stops after the canonical attempt fact. Opportunity/activity/meeting
-  // mutation is enabled only after a server-side transactional RPC exists.
-  return {configured:true,status:201,data:{duplicate:false,callAttempt:inserted.data?.[0]||null,
-    proposedStage:RESULT_STAGE[cmd.result],pendingMutations:{opportunity:Boolean(cmd.opportunityId),activity:true,meeting:cmd.result==='MEETING_BOOKED'}},error:null};
+  const rpc=await request('rpc/record_sales_execution_result_v1',{
+    method:'POST', headers:{Prefer:'return=representation'}, body:{p_command:{
+      externalId:cmd.externalId,result:cmd.result,companyId:cmd.companyId,sessionId:cmd.sessionId,
+      memberId:cmd.memberId,contactId:cmd.contactId,opportunityId:cmd.opportunityId,note:cmd.note,
+      nextActionType:cmd.nextActionType,nextActionAt:cmd.nextActionAt,meeting:cmd.meeting
+    }}
+  },env);
+  return rpc.error?rpc:{configured:true,status:rpc.status||200,data:rpc.data,error:null};
 }
 
 async function startSession(body={}, env) {
