@@ -191,3 +191,12 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Escopo:** sessão, organizations, memberships, RLS, persistência canônica, backups e política de recuperação.
 - **Critério de aceite:** isolamento entre organizações comprovado; fail-closed; nenhum secret privilegiado no browser.
 - **Status:** bloqueada por validação/configuração real do Supabase.
+
+## V3-P0-01 — Connection State + save visible + offline mutation queue
+
+- **Objetivo:** tornar conexão, save local/remoto e replay visíveis e confiáveis na V3 Premium.
+- **Escopo implementado:** Connection State central, IndexedDB v3 com mutation queue granular, full-state outbox de recovery, save feedback, retry sem reaplicar ação, ACK por lote e idempotency keys nas ações críticas.
+- **Validação automatizada:** CI run 334 passou `validate`, Brain, Security, npm audit e Release Gate; runtime Railway entrega os serviços P0 com HTTP 200.
+- **Pendência para conclusão:** executar CASO 1 e CASO 2 da story em navegador autenticado real, incluindo desligar rede, editar, reconectar e reload.
+- **Branch:** `dutra-os-ui-v3-premium`; não mergear na `main` sem aprovação explícita.
+- **Status:** em andamento.

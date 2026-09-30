@@ -87,19 +87,58 @@ Fases visíveis:
 
 ## Entregáveis
 
-- `apps/sistema-og/services/connection-state-service.js`
-- evolução aditiva de `apps/sistema-og/services/sync-bridge-service.js`
-- integração no `preview-v2/core-bridge.js`
-- carregamento local dos serviços no `preview-v2/server.mjs` / `index.html`
-- feedback global de conexão/save
-- metadados de mutation em ações críticas V3
-- testes unitários/contrato/aceitação
-- documentação arquitetural atualizada
+- [x] `apps/sistema-og/services/connection-state-service.js`
+- [x] evolução aditiva de `apps/sistema-og/services/sync-bridge-service.js`
+- [x] integração no `preview-v2/core-bridge.js`
+- [x] carregamento dos serviços no `preview-v2/server.mjs` / `index.html`
+- [x] espelhos de deploy em `preview-v2/p0-services/` com teste byte-a-byte de paridade
+- [x] feedback global de conexão/save
+- [x] metadados/idempotency keys de mutation em ações críticas V3
+- [x] testes unitários, contratos P0 e gates do repositório
+- [x] documentação arquitetural atualizada
+
+## Evidência automatizada e de runtime
+
+- Connection State testável com `CONNECTING | CONNECTED | OFFLINE | SYNCING | ERROR`.
+- IndexedDB `sistema-og-sync` evoluído para schema v3 com `outbox`, `recovery` e `mutations`.
+- O full-state outbox continua sendo o payload de recovery; mutations granulares adicionam identidade, idempotência, tentativas e rastreabilidade sem criar segunda base comercial.
+- `localStorage` de pending save virou apenas fallback/migração de compatibilidade.
+- Replay reenvia o snapshot já materializado e não repete a ação de negócio.
+- ACK é limitado ao `recordId` e aos `mutationIds` do lote realmente confirmado, impedindo um replay antigo de apagar uma edição mais nova.
+- Ações tipadas: resultado de ligação + próxima ação, agendamento/conclusão de próxima ação, configuração técnica, Meu Dia/Automation e rascunho de proposta.
+- Falha HTTP 5xx mantém a alteração local, mostra `TENTAR NOVAMENTE` e não comunica sucesso remoto falso.
+- CI `Package 00R` run 334: `npm ci`, `validate`, Brain, Security, `npm audit --audit-level=high` e `release:gate` — PASS.
+- O CI também detectou a dependência `undici 7.29.0`; a branch foi alinhada ao override auditado `undici 7.30.0` já usado na `main`.
+- Railway V3 publicou o commit `4374886cadbda4a113b21fd701cb21a0df9daa09` com status SUCCESS.
+- Runtime verificado: `/health`, `/core/services/connection-state-service.js` e `/core/services/sync-bridge-service.js` retornam HTTP 200.
+- A primeira validação de produção detectou 404 nos dois serviços por causa de `rootDirectory=/preview-v2`; o empacotamento foi corrigido e protegido por teste de paridade.
+
+## Aceitação ainda manual
+
+Os critérios CASO 1 e CASO 2 acima permanecem desmarcados até serem exercitados em um navegador autenticado real, incluindo desligar rede, editar, reconectar e recarregar. A implementação e os contratos automatizados que suportam esses casos estão verdes, mas isso não substitui o teste manual de comportamento do browser.
 
 ## File List
 
 - `docs/stories/V3-P0-01-connection-sync-save-offline.md`
+- `apps/sistema-og/services/connection-state-service.js`
+- `apps/sistema-og/services/sync-bridge-service.js`
+- `apps/sistema-og/service-worker.js`
+- `preview-v2/p0-services/connection-state-service.js`
+- `preview-v2/p0-services/sync-bridge-service.js`
+- `preview-v2/core-bridge.js`
+- `preview-v2/server.mjs`
+- `preview-v2/index.html`
+- `preview-v2/sales-action-center-v3.js`
+- `preview-v2/technical-center-v3.js`
+- `preview-v2/meu-dia-v3.js`
+- `scripts/test_connection_state_service.mjs`
+- `scripts/test_sync_bridge.mjs`
+- `scripts/test_v3_p0_connection_sync.mjs`
+- `scripts/test_v3_p0_service_mirror.mjs`
+- `package.json`
+- `package-lock.json`
+- `scripts/validate.mjs`
 
 ## Status
 
-In Progress
+Implemented — automated/runtime validation complete; browser offline/reload acceptance pending.

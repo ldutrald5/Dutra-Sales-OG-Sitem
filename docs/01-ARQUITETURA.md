@@ -83,3 +83,46 @@ O Motor de Prospecção adiciona parser, fila, recomendação e métricas determ
 A camada de automação contém parser, importação, duplicidade, fila, datas, templates, Command Center e métricas. A camada de inteligência contém Call AI, estratégia, objeções complexas e análise. O Call AI recebe somente o contexto compacto da conta ativa e retorna à Mesa ou à Prospecção sem carregar o CRM inteiro.
 
 Detalhamento existente: [fundação operacional](architecture/og-operations-foundation.md), [mapa de produto](architecture/sistema-og-product-map.md) e [copiloto](architecture/sistema-og-copiloto.md).
+
+## Incremento V3-P0-01 — Connection State e sincronização confiável
+
+A V3 Premium adiciona uma camada transversal de confiança sobre o Sync Bridge existente, sem trocar a fonte operacional `state.leads` e sem ativar Supabase/Auth.
+
+```text
+UI V3 Premium
+  ↓
+OG_CONNECTION_STATE
+  ↓
+DUTRA_CORE commit/save
+  ↓
+snapshot local + mutation granular
+  ↓
+IndexedDB sistema-og-sync v3
+  ├─ outbox      → snapshot completo para recovery/replay
+  ├─ mutations   → ação, entidade, idempotencyKey, tentativas e erro
+  └─ recovery    → conflitos/revisão já existentes
+  ↓
+PUT /core-api/state
+  ↓
+persistência hospedada atual
+```
+
+### Semântica de conexão e save
+
+O estado global é limitado a `CONNECTING | CONNECTED | OFFLINE | SYNCING | ERROR`. O feedback de escrita diferencia `SALVANDO…`, `SALVO ✓`, save local com sincronização pendente e `TENTAR NOVAMENTE`. HTTP 5xx é `ERROR`, não é rotulado como offline.
+
+### Idempotência e concorrência
+
+A mutation granular não é uma segunda persistência comercial: a ação já foi materializada no snapshot local e o replay reenvia esse snapshot. Mutations fornecem identidade e auditoria local para que retry não execute novamente a ação de negócio. A confirmação usa o ID do snapshot e somente os mutation IDs capturados naquele lote; uma resposta atrasada não pode limpar alterações criadas depois.
+
+### Compatibilidade
+
+O antigo `dutra_v3_pending_save_v1` em localStorage permanece somente como fallback de emergência e fonte de migração automática. O caminho preferencial é o IndexedDB do Sync Bridge. O schema compartilhado com o Service Worker foi elevado para v3.
+
+### Empacotamento V3 no Railway
+
+O serviço Railway V3 usa `rootDirectory=/preview-v2`. Por isso, os serviços P0 canônicos em `apps/sistema-og/services/` possuem espelhos de deploy em `preview-v2/p0-services/`. `test_v3_p0_service_mirror.mjs` exige equivalência byte-a-byte para evitar deriva. Essa duplicação é apenas de artefato de deploy; não cria nova regra de negócio nem nova fonte de dados.
+
+### Validação
+
+O CI run 334 passou suíte completa, Brain, Security, npm audit e Release Gate. No Railway, o deploy do commit `4374886cadbda4a113b21fd701cb21a0df9daa09` ficou SUCCESS; `/health` e os dois serviços P0 respondem HTTP 200. A aceitação manual de desligamento/reconexão de rede em navegador autenticado permanece separada.
