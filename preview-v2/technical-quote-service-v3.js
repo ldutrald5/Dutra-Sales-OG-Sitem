@@ -21,6 +21,11 @@ function missingAnswers(rule,answers={}){
   return visibleQuestions(rule,answers).filter(q=>!clean(answers[q.id])).map(q=>q.id);
 }
 function adjustedAxles(rule,answers={}){
+  const shared=globalThis.DUTRA_TECHNICAL_APPLICATION;
+  if(shared?.resolveVehicleSupports&&rule?.id){
+    const resolved=shared.resolveVehicleSupports(rule.id,answers);
+    if(resolved?.axlesCount)return {...resolved.axlesCount};
+  }
   const a={dianteiro:number(rule?.axles?.dianteiro),tracao:number(rule?.axles?.tracao),truck:number(rule?.axles?.truck),carreta:number(rule?.axles?.carreta)};
   if(rule?.id==="trucado_6x2_8x2"&&answers.is_bitruck==="8x2")a.dianteiro=2;
   if(rule?.id==="3_4"&&["sim_vw","sim_mb"].includes(answers.has_truck_3_4))a.truck=1;
@@ -107,8 +112,19 @@ function supportDecision(rule,answers,position){
   return validate("Posição ainda não coberta pela regra atual.");
 }
 function technicalPositions(rule,answers={},options={}){
-  const ax=adjustedAxles(rule,answers),includeFront=options.includeFront!==false;
-  const positions=[];
+  const includeFront=options.includeFront!==false,shared=globalThis.DUTRA_TECHNICAL_APPLICATION,missing=missingAnswers(rule,answers);
+  if(shared?.positionSupports&&rule?.id){
+    return shared.positionSupports(rule.id,answers,includeFront).map(p=>({
+      position:p.position,
+      code:p.code,
+      status:missing.length?"VALIDATE":"CONFIRMED",
+      reason:missing.length?"Complete as perguntas técnicas antes de confirmar a aplicação.":"Regra técnica herdada do consultor OG.",
+      alternatives:[],
+      axles:p.axles,
+      qtyPerVehicle:p.qtyPerVehicle
+    }));
+  }
+  const ax=adjustedAxles(rule,answers),positions=[];
   if(includeFront&&ax.dianteiro>0)positions.push({...supportDecision(rule,answers,"dianteiro"),axles:ax.dianteiro,qtyPerVehicle:ax.dianteiro*2});
   if(ax.tracao>0)positions.push({...supportDecision(rule,answers,"tracao"),axles:ax.tracao,qtyPerVehicle:ax.tracao*2});
   if(ax.truck>0)positions.push({...supportDecision(rule,answers,"truck"),axles:ax.truck,qtyPerVehicle:ax.truck*2});
@@ -157,7 +173,7 @@ function buildQuote(rule,answers={},options={},data={}){
   return{
     ruleId:rule.id,vehicleName:rule.name,category:rule.category,applications:rule.applications||[],answers:{...answers},axles:ax,qty,psi,includeFront,tierKey,tierName:tier.name||tierKey,installments,
     rearEqualizersPerVehicle:rearEq,frontEqualizersPerVehicle:frontEq,tiresPerVehicle,totalTires,totalPieces,positions,lines,missingAnswers:missing,
-    technicallyReady:missing.length===0&&unresolved.length===0,unresolved,
+    technicallyReady:missing.length===0&&unresolved.length===0,unresolved,engineSource:globalThis.DUTRA_TECHNICAL_APPLICATION?'OG_LEGACY_SHARED':'V3_FALLBACK',
     subtotal,discount,total,installmentValue:total/installments
   };
 }
