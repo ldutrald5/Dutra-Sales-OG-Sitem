@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const ui=fs.readFileSync('./technical-center-v3.js','utf8');
+const server=fs.readFileSync('./server.mjs','utf8');
+const handoff=fs.readFileSync('./quote-handoff-v3.js','utf8');
+assert.match(server,/technical-quote-service-v3\.js/);
+assert.match(server,/technical-center-v3\.js/);
+assert.match(ui,/Veículo → suporte → peças → orçamento/);
+assert.match(ui,/SUPORTE-A-DEFINIR|VALIDAR/);
+assert.match(ui,/Abrir cotação oficial/);
+assert.match(ui,/technicalDraft/);
+assert.match(ui,/DUTRA_QUOTE_HANDOFF/);
+assert.match(ui,/tcCatalogSearch/);
+assert.match(handoff,/technical:/,'handoff deve transportar configuração técnica revisada');
+assert.doesNotMatch(ui,/Lorentrans|Biener|Vendruscolo|Aragão/i);
+console.log('Technical center UI integration: PASS');
