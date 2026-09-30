@@ -258,10 +258,13 @@
     return legacy;
   }
 
-  async function clearPendingSave() {
+  async function clearPendingSave(recordId = '') {
     const bridge=syncBridge();
-    if(bridge?.clearQueuedState){
-      try{await bridge.clearQueuedState();}catch(error){console.warn('[DUTRA] limpeza do outbox IndexedDB falhou',error);}
+    if(bridge){
+      try{
+        if(recordId && bridge.clearQueuedStateIf) await bridge.clearQueuedStateIf(recordId);
+        else if(bridge.clearQueuedState) await bridge.clearQueuedState();
+      }catch(error){console.warn('[DUTRA] limpeza do outbox IndexedDB falhou',error);}
     }
     clearLegacyPendingSave();
   }
@@ -297,11 +300,13 @@
     const rows = await pendingMutations();
     await Promise.all(rows.map(row => bridge.markMutationAttempt(row.id,error).catch(()=>null)));
   }
-  async function acknowledgePendingMutations() {
+  async function acknowledgePendingMutations(ids = null) {
     const bridge = syncBridge();
-    if (!bridge?.ackMutations) return 0;
+    if (!bridge?.ackMutations) return refreshPendingMutationCount();
     const rows = await pendingMutations();
-    if (rows.length) await bridge.ackMutations(rows.map(row=>row.id));
+    const allowed = Array.isArray(ids) && ids.length ? new Set(ids.map(String)) : null;
+    const target = allowed ? rows.filter(row=>allowed.has(String(row.id))) : rows;
+    if (target.length) await bridge.ackMutations(target.map(row=>row.id));
     return refreshPendingMutationCount();
   }
   function restoreCachedState() {
@@ -333,8 +338,8 @@
         state.snapshot=next;
         state.leads=(next.leads||[]).map(normalize);
         state.lastSyncedAt=new Date().toISOString();
-        await clearPendingSave();
-        const pendingCount=await acknowledgePendingMutations();
+        await clearPendingSave(queued.recordId||'');
+        const pendingCount=await acknowledgePendingMutations(queued.mutationIds||null);
         cacheSnapshot(next);
         renderAll();
         window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads,source:'sync'}}));
@@ -414,12 +419,12 @@
     if (!state.snapshot) throw new Error('Base ainda não carregada.');
     const payload = statePayload();
     cacheSnapshot({...state.snapshot,...payload});
-    await queuePendingSave(payload,'saving');
+    let queuedRecord=await queuePendingSave(payload,'saving');
 
     let mutation=null;
     try {
       mutation=await enqueueBusinessMutation(mutationMeta,message);
-      await queuePendingSave(payload,'saving');
+      queuedRecord=await queuePendingSave(payload,'saving')||queuedRecord;
     } catch (error) {
       console.warn('[DUTRA] mutation granular indisponível; snapshot recovery preservado',error);
     }
@@ -447,8 +452,8 @@
       state.snapshot = next;
       state.leads = (next.leads || []).map(normalize);
       state.lastSyncedAt = new Date().toISOString();
-      await clearPendingSave();
-      const pendingCount=await acknowledgePendingMutations();
+      await clearPendingSave(queuedRecord?.recordId||'');
+      const pendingCount=await acknowledgePendingMutations(queuedRecord?.mutationIds||null);
       cacheSnapshot(next);
       connectionState()?.saveSucceeded?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,message:'SALVO ✓'});
       setConnectionStatus('CONNECTED');
