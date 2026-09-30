@@ -2,11 +2,17 @@
   'use strict';
 
   const STORAGE_KEY = 'dutra_v3_access_pin';
+  const CACHE_KEY = 'dutra_v3_snapshot_cache_v1';
+  const PENDING_SAVE_KEY = 'dutra_v3_pending_save_v1';
   const state = {
     snapshot: null,
     leads: [],
     selectedLeadId: null,
-    pin: sessionStorage.getItem(STORAGE_KEY) || ''
+    pin: sessionStorage.getItem(STORAGE_KEY) || '',
+    connectionStatus: 'CONNECTING',
+    lastSyncedAt: '',
+    reconnectTimer: null,
+    flushingPending: false
   };
 
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -57,8 +63,11 @@
       .dutra-login-card input{width:100%;height:54px;border:1px solid #3b4650;border-radius:12px;background:#080d11;color:#fff;padding:0 14px;font-size:18px;letter-spacing:.16em;outline:0}
       .dutra-login-card button{width:100%;height:54px;margin-top:12px;border:0;border-radius:12px;background:#ffd400;color:#111;font-weight:900}
       .dutra-login-status{min-height:18px;margin-top:9px;color:#ff9b9b;font-size:11px}
-      .dutra-connection{position:fixed;right:12px;bottom:92px;z-index:70;padding:7px 9px;border-radius:999px;border:1px solid #29402d;background:#0b1710e8;color:#72e77c;font-size:9px;font-weight:800;box-shadow:0 8px 28px #0007}
-      .dutra-connection.off{border-color:#4d3434;background:#1b0f0fe8;color:#ff8e8e}
+      .dutra-connection{position:fixed;right:12px;bottom:92px;z-index:70;padding:7px 9px;border-radius:999px;border:1px solid #29402d;background:#0b1710e8;color:#72e77c;font-size:9px;font-weight:800;box-shadow:0 8px 28px #0007;cursor:pointer;max-width:min(82vw,360px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .dutra-connection[data-status="CONNECTING"],.dutra-connection[data-status="SYNCING"]{border-color:#645818;background:#171506e8;color:#ffd400}
+      .dutra-connection[data-status="OFFLINE"]{border-color:#4d3434;background:#1b0f0fe8;color:#ff9a9a}
+      .dutra-connection[data-status="ERROR"]{border-color:#69432c;background:#21140de8;color:#ffb27f}
+      .dutra-connection[data-status="CONNECTED"]{border-color:#29402d;background:#0b1710e8;color:#72e77c}
       .core-client-result{padding:10px 12px;border-radius:10px;display:flex;justify-content:space-between;gap:10px;cursor:pointer}
       .core-client-result:hover{background:#121a20}.core-client-result b{font-size:12px}.core-client-result small{display:block;color:#8e99a2;font-size:9px;margin-top:3px}
     `;
@@ -80,8 +89,11 @@
 
     const indicator = document.createElement('div');
     indicator.id = 'dutra-connection';
-    indicator.className = 'dutra-connection off';
-    indicator.textContent = 'BASE DESCONECTADA';
+    indicator.className = 'dutra-connection';
+    indicator.dataset.status = 'CONNECTING';
+    indicator.textContent = 'CONECTANDO À BASE…';
+    indicator.title = 'Toque para tentar sincronizar novamente.';
+    indicator.addEventListener('click', () => flushPendingSave(true));
     document.body.appendChild(indicator);
 
     $('#dutra-login-submit').addEventListener('click', loginFromForm);
@@ -102,11 +114,76 @@
     $('#dutra-login')?.classList.remove('open');
   }
 
-  function connection(online) {
+  function setConnectionStatus(status, detail = '') {
+    state.connectionStatus = status;
     const el = $('#dutra-connection');
     if (!el) return;
-    el.classList.toggle('off', !online);
-    el.textContent = online ? 'BASE REAL CONECTADA' : 'BASE DESCONECTADA';
+    const labels = {CONNECTING:'CONECTANDO À BASE…',CONNECTED:'BASE REAL CONECTADA',OFFLINE:'OFFLINE · ALTERAÇÕES SERÃO SINCRONIZADAS',SYNCING:'SINCRONIZANDO…',ERROR:'SINCRONIZAÇÃO PENDENTE'};
+    el.dataset.status = status;
+    el.textContent = detail || labels[status] || status;
+    el.title = status === 'CONNECTED'
+      ? ('Última confirmação: ' + (state.lastSyncedAt ? new Date(state.lastSyncedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : 'agora'))
+      : 'Toque para tentar sincronizar novamente.';
+    window.dispatchEvent(new CustomEvent('dutra:connection',{detail:{status,lastSyncedAt:state.lastSyncedAt}}));
+  }
+
+  function connection(online) { setConnectionStatus(online ? 'CONNECTED' : 'OFFLINE'); }
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+  function statePayload() {
+    if (!state.snapshot) return null;
+    return {revision:Number(state.snapshot.revision||0),leads:state.leads,history:state.snapshot.history||[],operations:state.snapshot.operations||{}};
+  }
+  function cacheSnapshot(snapshot = state.snapshot) {
+    if (!snapshot) return;
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({savedAt:new Date().toISOString(),snapshot:{...clone(snapshot),leads:clone(state.leads)}})); }
+    catch (error) { console.warn('[DUTRA] cache local indisponível', error); }
+  }
+  function readCachedSnapshot() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY)||'null')?.snapshot || null; }
+    catch { return null; }
+  }
+  function queuePendingSave(payload, reason = 'offline') {
+    try { localStorage.setItem(PENDING_SAVE_KEY, JSON.stringify({queuedAt:new Date().toISOString(),reason,payload:clone(payload)})); return true; }
+    catch (error) { console.warn('[DUTRA] fila local indisponível', error); return false; }
+  }
+  function pendingSave() {
+    try { return JSON.parse(localStorage.getItem(PENDING_SAVE_KEY)||'null'); } catch { return null; }
+  }
+  function clearPendingSave() { try { localStorage.removeItem(PENDING_SAVE_KEY); } catch {} }
+  function restoreCachedState() {
+    const cached=readCachedSnapshot(); if(!cached) return false;
+    state.snapshot=cached; state.leads=(cached.leads||[]).map(normalize);
+    if(!state.selectedLeadId||!state.leads.some(item=>String(item.id)===String(state.selectedLeadId))) state.selectedLeadId=pickFocusLead()?.id||state.leads[0]?.id||null;
+    renderAll();
+    window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads,source:'cache'}}));
+    return true;
+  }
+  function networkLikeError(error) { return !error?.status || Number(error.status)>=500; }
+  function scheduleReconnect(delay=5000) {
+    clearTimeout(state.reconnectTimer); if(!state.pin) return;
+    state.reconnectTimer=setTimeout(()=>flushPendingSave(false),delay);
+  }
+  async function flushPendingSave(force=false) {
+    if(state.flushingPending||!state.pin) return false;
+    const queued=pendingSave(); state.flushingPending=true; setConnectionStatus(queued?'SYNCING':'CONNECTING');
+    try {
+      if(queued?.payload) {
+        const next=await api('/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(queued.payload)});
+        state.snapshot=next; state.leads=(next.leads||[]).map(normalize); state.lastSyncedAt=new Date().toISOString();
+        clearPendingSave(); cacheSnapshot(next); renderAll();
+        window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads,source:'sync'}}));
+        setConnectionStatus('CONNECTED'); if(force) toast('Alterações pendentes sincronizadas.'); return true;
+      }
+      await loadState({silent:true}); return true;
+    } catch(error) {
+      if(error.status===409) {
+        setConnectionStatus('ERROR','CONFLITO DE SINCRONIZAÇÃO · DADOS PRESERVADOS');
+        if(force) toast('A base mudou em outro dispositivo. Seus dados locais foram preservados para revisão.');
+      } else if(networkLikeError(error)) {
+        setConnectionStatus('OFFLINE'); scheduleReconnect(force?5000:10000);
+      } else if(error.message!=='unauthorized') setConnectionStatus('ERROR');
+      return false;
+    } finally { state.flushingPending=false; }
   }
 
   async function loginFromForm() {
@@ -133,14 +210,17 @@
     }
   }
 
-  async function loadState() {
+  async function loadState(options = {}) {
+    setConnectionStatus('CONNECTING');
     const snapshot = await api('/state');
     state.snapshot = snapshot;
     state.leads = (snapshot.leads || []).map(normalize);
     if (!state.selectedLeadId || !state.leads.some(item => String(item.id) === String(state.selectedLeadId))) {
       state.selectedLeadId = pickFocusLead()?.id || state.leads[0]?.id || null;
     }
-    connection(true);
+    state.lastSyncedAt = new Date().toISOString();
+    cacheSnapshot(snapshot);
+    setConnectionStatus('CONNECTED');
     renderAll();
     window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads}}));
     return snapshot;
@@ -148,12 +228,9 @@
 
   async function saveState(message = 'Alterações salvas.') {
     if (!state.snapshot) throw new Error('Base ainda não carregada.');
-    const payload = {
-      revision: Number(state.snapshot.revision || 0),
-      leads: state.leads,
-      history: state.snapshot.history || [],
-      operations: state.snapshot.operations || {}
-    };
+    const payload = statePayload();
+    cacheSnapshot({...state.snapshot,...payload});
+    setConnectionStatus('SYNCING');
     try {
       const next = await api('/state', {
         method:'PUT',
@@ -162,16 +239,31 @@
       });
       state.snapshot = next;
       state.leads = (next.leads || []).map(normalize);
-      connection(true);
+      state.lastSyncedAt = new Date().toISOString();
+      clearPendingSave();
+      cacheSnapshot(next);
+      setConnectionStatus('CONNECTED');
       renderAll();
       window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads}}));
       toast(message);
       return next;
     } catch (error) {
       if (error.status === 409) {
-        await loadState();
-        toast('A base mudou em outro dispositivo. Recarreguei os dados para evitar conflito.');
+        queuePendingSave(payload,'conflict');
+        cacheSnapshot({...state.snapshot,...payload});
+        setConnectionStatus('ERROR','CONFLITO DE SINCRONIZAÇÃO · DADOS PRESERVADOS');
+        toast('A base mudou em outro dispositivo. Mantive suas alterações locais para não perder nada.');
+        return state.snapshot;
       }
+      if (networkLikeError(error)) {
+        queuePendingSave(payload,'offline');
+        cacheSnapshot({...state.snapshot,...payload});
+        setConnectionStatus('OFFLINE');
+        toast('Sem conexão. Alteração salva neste aparelho e será sincronizada automaticamente.');
+        scheduleReconnect();
+        return state.snapshot;
+      }
+      setConnectionStatus('ERROR');
       throw error;
     }
   }
@@ -553,12 +645,22 @@
     try {
       await loadState();
       hideLogin();
+      if (pendingSave()) flushPendingSave(false);
     } catch (error) {
-      if (error.message !== 'unauthorized') {
-        console.error(error);
-        showLogin('Não consegui conectar à base real. Tente novamente.');
+      if (error.message === 'unauthorized') return;
+      console.error(error);
+      if (restoreCachedState()) {
+        hideLogin();
+        setConnectionStatus('OFFLINE');
+        toast('Sem conexão. Abri a última versão salva neste aparelho.');
+        scheduleReconnect();
+      } else {
+        hideLogin();
+        setConnectionStatus('OFFLINE','SEM CONEXÃO · TENTE NOVAMENTE');
       }
     }
+    window.addEventListener('online',()=>flushPendingSave(true));
+    window.addEventListener('offline',()=>setConnectionStatus('OFFLINE'));
   }
 
   window.DUTRA_CORE = {
@@ -567,6 +669,8 @@
     getState:()=>state.snapshot,
     getLeads:()=>state.leads,
     getSelectedLead:()=>selectedLead(),
+    getConnectionStatus:()=>({status:state.connectionStatus,lastSyncedAt:state.lastSyncedAt,pending:Boolean(pendingSave())}),
+    retrySync:()=>flushPendingSave(true),
     commit:async(payload={},message='Alterações salvas.')=>{if(Array.isArray(payload.leads))state.leads=payload.leads.map(normalize);if(payload.operations&&typeof payload.operations==='object'){if(!state.snapshot)throw new Error('Base ainda não carregada.');state.snapshot.operations=payload.operations;}return saveState(message);},
     request:(path,options={})=>api(path,options),
     selectClient:id=>{state.selectedLeadId=id;renderClient();window.dispatchEvent(new CustomEvent('dutra:client',{detail:{lead:selectedLead()}}));globalThis.go?.('clients');}
