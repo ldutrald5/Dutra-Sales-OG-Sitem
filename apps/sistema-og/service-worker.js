@@ -64,6 +64,7 @@ const SHELL_URLS = [
   '/modules/signal-center.js',
   '/components/ui-components.js',
   '/components/sales-execution-ui.js',
+  '/components/sales-execution-controller.js',
   '/material-store.js',
   '/sales-materials.js',
   '/performance-engine.js',
