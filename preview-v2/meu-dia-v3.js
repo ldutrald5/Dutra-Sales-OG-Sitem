@@ -280,7 +280,10 @@
     try{
       globalThis.OG_AUTOMATION_ENGINE.applyToLead(lead,suggestion,{interactionService:globalThis.OG_INTERACTION_SERVICE});
       snapshot.operations=globalThis.OG_AUTOMATION_ENGINE.markApplied(snapshot.operations||{},suggestion,{operationsModel:globalThis.OG_OPERATIONS_MODEL,now:new Date()});
-      await globalThis.DUTRA_CORE.save('Sugestão transformada em próxima ação real.');
+      await globalThis.DUTRA_CORE.save(
+        'Sugestão transformada em próxima ação real.',
+        {action:'APPLY_AUTOMATION_NEXT_ACTION',entityType:'lead',entityId:lead.id,label:'Próxima ação do Meu Dia',metadata:{suggestionId:suggestion.id}}
+      );
     }catch(error){
       console.error(error);
       alert('Não foi possível aplicar a sugestão: '+error.message);
