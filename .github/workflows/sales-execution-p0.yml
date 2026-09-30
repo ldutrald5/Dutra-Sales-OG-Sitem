@@ -1,0 +1,36 @@
+name: Sales Execution P0
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/sistema-og/**'
+      - 'scripts/test_sales_execution_*.mjs'
+      - 'scripts/test_call_ai.mjs'
+      - 'scripts/test_prospecting_engine.mjs'
+      - 'supabase/functions/sales-execution-gateway/**'
+      - 'supabase/migrations/*sales_execution*'
+      - 'package.json'
+      - '.github/workflows/sales-execution-p0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax checks
+        run: npm run og:check
+      - name: Sales Execution contract
+        run: npm run og:sales-execution:test
+      - name: Prospecting regression
+        run: npm run og:prospecting:test
+      - name: Call AI regression
+        run: npm run og:call-ai:test
