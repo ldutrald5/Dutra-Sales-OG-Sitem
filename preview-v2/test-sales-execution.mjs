@@ -93,6 +93,10 @@ const metrics=s.listMetrics(metricOps, imported.list.id, outcome.leads);
 assert.equal(metrics.attempted,1);
 assert.equal(metrics.proposals,1,'métrica de proposta deve contar documento real, não intenção de proposta');
 assert.equal(metrics.rates.contactRate,0);
+assert.ok(metrics.rates.closeRate<=100,'taxa de fechamento de lista nunca pode ultrapassar 100%');
+const contaminatedLeads=[...outcome.leads,{id:'OLD-WON',empresa:'Venda antiga',status:'fechado',pipelineStage:'WON'}];
+const contaminatedMetrics=s.listMetrics(metricOps, imported.list.id, contaminatedLeads);
+assert.equal(contaminatedMetrics.rates.closeRate,metrics.rates.closeRate,'venda histórica sem proposta da lista não pode contaminar o funil');
 
 const action=s.scheduleAction(outcome.leads,outcome.operations,outcome.lead.id,{type:'FOLLOW_UP',description:'Retornar contato',dueAt:new Date('2026-09-30T15:00:00Z'),reason:'Retorno combinado',priority:'HIGH'},new Date('2026-09-29T13:00:00Z'));
 assert.equal(action.lead.nextActionType,'FOLLOW_UP');
