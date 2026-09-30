@@ -160,11 +160,57 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Erro ao ler localStorage', e);
   }
 
+  const connectionState = { status: 'CONNECTING', pending: 0, lastError: '', updatedAt: new Date().toISOString() };
+
+  async function refreshConnectionState(preferredStatus = '') {
+    let pending = 0;
+    try { pending = await OG_SYNC_BRIDGE.pendingMutationCount(); } catch {}
+    connectionState.pending = pending;
+    if (preferredStatus) connectionState.status = preferredStatus;
+    else if (!navigator.onLine) connectionState.status = 'OFFLINE';
+    else if (serverSyncInFlight || pending > 0) connectionState.status = 'SYNCING';
+    else connectionState.status = 'CONNECTED';
+    connectionState.updatedAt = new Date().toISOString();
+    return { ...connectionState };
+  }
+
   function setSyncStatus(label, mode = 'idle') {
     const badge = document.getElementById('og-sync-status');
     if (!badge) return;
     badge.textContent = label;
     badge.dataset.mode = mode;
+    badge.dataset.connectionState =
+      mode === 'ok' ? 'CONNECTED' :
+      mode === 'busy' ? 'SYNCING' :
+      mode === 'offline' ? 'OFFLINE' :
+      mode === 'error' || mode === 'conflict' ? 'ERROR' : 'CONNECTING';
+  }
+
+  async function updateReliabilityBadge(preferredStatus = '') {
+    const snapshot = await refreshConnectionState(preferredStatus);
+    if (snapshot.status === 'CONNECTED') setSyncStatus('● Base conectada · Tudo salvo', 'ok');
+    else if (snapshot.status === 'SYNCING') setSyncStatus(`↻ Sincronizando${snapshot.pending ? ` · ${snapshot.pending} pendente(s)` : '…'}`, 'busy');
+    else if (snapshot.status === 'OFFLINE') setSyncStatus(`○ Offline${snapshot.pending ? ` · ${snapshot.pending} pendente(s)` : ''}`, 'offline');
+    else if (snapshot.status === 'ERROR') setSyncStatus(`⚠ Sincronização precisa de atenção${snapshot.pending ? ` · ${snapshot.pending}` : ''}`, 'error');
+    else setSyncStatus('Conectando à base…', 'idle');
+  }
+
+  async function queueBusinessMutation(input = {}) {
+    const mutation = await OG_SYNC_BRIDGE.enqueueMutation({
+      ...input,
+      type: input.type || input.action,
+      status: navigator.onLine ? 'PENDING' : 'PENDING'
+    });
+    await updateReliabilityBadge(navigator.onLine ? 'SYNCING' : 'OFFLINE');
+    return mutation;
+  }
+
+  async function retryPendingMutations() {
+    const rows = await OG_SYNC_BRIDGE.listMutations();
+    if (!rows.length) return updateReliabilityBadge();
+    rows.forEach(row => OG_SYNC_BRIDGE.updateMutation(row.id, { status: 'PENDING', lastError: '' }).catch(()=>{}));
+    scheduleServerSync();
+    await updateReliabilityBadge(navigator.onLine ? 'SYNCING' : 'OFFLINE');
   }
 
   async function importLucas2026Leads() {
@@ -394,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         serverRevision = Number(saved.revision || pending.baseRevision);
         await clearSyncReview();
         try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
-        setSyncStatus('Sincronizado', 'ok');
+        await updateReliabilityBadge('CONNECTED');
         showNotification('Revisão conciliada sincronizada.', 'success');
       } catch {
         setSyncStatus('Revisão aguardando envio', 'offline');
@@ -451,7 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
         serverSyncTimer = setTimeout(runScheduledServerSync, 120);
         return false;
       }
-      setSyncStatus('Sincronizado', 'ok');
+      if (queued.mutationIds?.length) await OG_SYNC_BRIDGE.ackMutations(queued.mutationIds);
+      await updateReliabilityBadge('CONNECTED');
       return true;
     } catch {
       try { await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision)); } catch {}
@@ -493,15 +540,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const saved = await response.json();
       serverRevision = Number(saved.revision || serverRevision);
       try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
-      setSyncStatus(serverSyncGeneration === generationAtStart ? 'Sincronizado' : 'Salvando alterações recentes…', serverSyncGeneration === generationAtStart ? 'ok' : 'busy');
+      try {
+        const queued = await OG_SYNC_BRIDGE.readQueuedState();
+        if (queued?.mutationIds?.length && serverSyncGeneration === generationAtStart) await OG_SYNC_BRIDGE.ackMutations(queued.mutationIds);
+      } catch {}
+      await updateReliabilityBadge(serverSyncGeneration === generationAtStart ? 'CONNECTED' : 'SYNCING');
     } catch {
       try {
-        await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision));
+        const mutationIds = (await OG_SYNC_BRIDGE.listMutations()).map(row => row.id);
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision), { mutationIds });
         const registration = await navigator.serviceWorker?.ready;
         await registration?.sync?.register?.('og-sync-state');
-        setSyncStatus('Pendente de sincronização', 'offline');
+        await updateReliabilityBadge('OFFLINE');
       } catch {
-        setSyncStatus('Salvo neste aparelho', 'offline');
+        await updateReliabilityBadge('OFFLINE');
       }
     } finally {
       serverSyncInFlight = false;
@@ -537,9 +589,17 @@ document.addEventListener('DOMContentLoaded', () => {
       showSyncConflictBanner();
       return;
     }
-    setSyncStatus('Salvando…', 'busy');
+    updateReliabilityBadge(navigator.onLine ? 'SYNCING' : 'OFFLINE').catch(()=>{});
+    setSyncStatus(navigator.onLine ? 'SALVANDO…' : '○ Offline · alteração segura neste aparelho', navigator.onLine ? 'busy' : 'offline');
     serverSyncTimer = setTimeout(runScheduledServerSync, 450);
   }
+
+  window.addEventListener('online', () => {
+    updateReliabilityBadge('SYNCING').catch(()=>{});
+    retryPendingMutations().catch(()=>{});
+    flushQueuedState().catch(()=>{});
+  });
+  window.addEventListener('offline', () => updateReliabilityBadge('OFFLINE').catch(()=>{}));
 
   async function restoreSyncRecovery() {
     syncRecoveryReady = false;
@@ -645,7 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (browserHasData) scheduleServerSync();
       setSyncStatus('Sincronizado', 'ok');
     } catch {
-      setSyncStatus('Salvo neste aparelho', 'offline');
+      await updateReliabilityBadge('OFFLINE');
     }
   }
 
