@@ -59,3 +59,9 @@ Modes are context configurations of one Call AI, not independent agents:
 
 ## Compatibility
 During P0, existing local interaction recording remains available as fallback. Dual-write, if introduced, must be explicit, idempotent and observable; silent dual-write is prohibited.
+
+
+## P0 write-safety checkpoint
+The HTTP command boundary is implemented with mandatory `externalId/idempotencyKey` and a canonical call-attempt write. It intentionally returns proposed downstream mutations instead of independently writing opportunity/activity/meeting.
+
+Reason: the live database does not yet expose a verified transactional Sales Execution RPC. Scattered REST writes could leave partial commercial facts. The next database change should add one reviewed transactional function (for example `record_sales_execution_result_v1`) and only then enable the downstream mutations through that single function.
