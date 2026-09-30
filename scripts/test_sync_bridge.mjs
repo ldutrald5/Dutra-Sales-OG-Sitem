@@ -64,4 +64,20 @@ assert.ok(!sw.includes("fetch(pending.url"),'service worker não pode enviar out
 assert.ok(sw.includes('SYNC_DB_VERSION = 3'),'service worker e app devem compartilhar versão do IndexedDB');
 assert.ok(sw.includes("SYNC_MUTATION_STORE = 'mutations'"),'service worker deve preservar o store granular de mutations');
 
+
+const source=fs.readFileSync(new URL('../apps/sistema-og/services/sync-bridge-service.js',import.meta.url),'utf8');
+assert.match(source,/FAILED_RETRYABLE/,'falha de save deve manter mutation recuperável');
+assert.match(source,/SYNCING/,'retry deve marcar mutation em sincronização');
+assert.match(source,/index\.get\(record\.idempotencyKey\)/,'enqueue deve deduplicar por idempotencyKey');
+assert.match(source,/unique\.forEach\(id=>store\.delete\(id\)\)/,'ack só remove mutations explicitamente confirmadas');
+
+const app=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'utf8');
+assert.match(app,/window\.addEventListener\('offline'/,'app deve observar perda de internet');
+assert.match(app,/window\.addEventListener\('online'/,'app deve observar reconexão');
+assert.match(app,/retryPendingMutations/,'reconexão deve preparar replay');
+assert.match(app,/queueSnapshotMutationsForSync/,'snapshot da outbox deve carregar mutationIds pendentes');
+assert.match(app,/ackMutations\(queued\.mutationIds\)/,'flush confirmado deve reconhecer mutations vinculadas');
+assert.match(app,/○ Offline/,'UX deve informar trabalho offline');
+assert.match(app,/● Base conectada · Tudo salvo/,'UX deve informar confirmação final');
+
 console.log('Sync bridge service tests: PASS');
