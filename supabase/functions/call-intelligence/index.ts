@@ -1,6 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.95.0";
 
+import { providerRequest, ProviderError } from "./provider-request.ts";
+
 const URL = Deno.env.get("SUPABASE_URL") || "";
 const secretMap = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}");
 const ADMIN_KEY = secretMap.default || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -285,7 +287,7 @@ async function completeRecording(payload: Record<string, unknown>) {
   await saveMetrics(saved.data, null, "", []);
 
   if (autoTranscribe && providerReady()) {
-    const task = transcribeRecording(saved.data.id);
+    const task = transcribeRecording(saved.data.id).catch(() => console.error("background_transcription_failed"));
     const runtime = (globalThis as any).EdgeRuntime;
     if (runtime?.waitUntil) runtime.waitUntil(task);
     else await task;
@@ -314,6 +316,8 @@ async function transcribeRecording(recordingId: string) {
     updated_at: new Date().toISOString()
   }).eq("id", recordingId);
 
+  const clientRequestId = crypto.randomUUID();
+  let providerRequestId: string | null = null;
   try {
     const downloaded = await admin.storage.from(STORAGE_BUCKET).download(rec.data.storage_path);
     if (downloaded.error || !downloaded.data) throw downloaded.error || new Error("audio_download_failed");
@@ -329,15 +333,9 @@ async function transcribeRecording(recordingId: string) {
       form.append("response_format", "json");
     }
 
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + OPENAI_API_KEY },
-      body: form
-    });
-    const raw = await response.text();
-    let parsed: any = {};
-    try { parsed = JSON.parse(raw); } catch { parsed = { text: raw }; }
-    if (!response.ok) throw new Error("OpenAI transcription HTTP " + response.status + ": " + raw.slice(0, 1200));
+    const provider = await providerRequest(form, OPENAI_API_KEY, clientRequestId);
+    const parsed = provider.result;
+    providerRequestId = provider.requestId;
 
     const transcriptText = String(parsed?.text || "").trim();
     if (!transcriptText) throw new Error("Transcrição retornou vazia");
@@ -351,7 +349,7 @@ async function transcribeRecording(recordingId: string) {
       language: "pt",
       transcript_text: transcriptText,
       segments,
-      provider_usage: parsed?.usage || {},
+      provider_usage: { ...(parsed?.usage || {}), client_request_id: clientRequestId, request_id: providerRequestId },
       duration_ms: durationMs || rec.data.duration_ms || null,
       updated_at: new Date().toISOString()
     }, { onConflict: "recording_id" }).select("*").single();
@@ -371,7 +369,8 @@ async function transcribeRecording(recordingId: string) {
     await admin.from("call_recordings").update({
       recording_status: "UPLOADED",
       transcription_status: "FAILED",
-      transcription_error: error instanceof Error ? error.message.slice(0, 1800) : String(error).slice(0, 1800),
+      transcription_error: error instanceof ProviderError ? error.code : "transcription_failed",
+      metadata: { ...(rec.data.metadata || {}), ai_request: { client_request_id: clientRequestId, request_id: error instanceof ProviderError ? error.requestId : providerRequestId } },
       updated_at: new Date().toISOString()
     }).eq("id", recordingId);
     throw error;
@@ -390,7 +389,7 @@ async function requestTranscription(payload: Record<string, unknown>) {
     updated_at: new Date().toISOString()
   }).eq("id", rec.data.id).select("id,call_session_id,transcription_status").single();
   if (queued.error) throw queued.error;
-  const task = transcribeRecording(rec.data.id).catch(error => console.error("background transcription failed", error));
+  const task = transcribeRecording(rec.data.id).catch(() => console.error("background_transcription_failed"));
   const runtime = (globalThis as any).EdgeRuntime;
   if (runtime?.waitUntil) runtime.waitUntil(task);
   else await task;
@@ -534,7 +533,7 @@ Deno.serve(async (req: Request) => {
     else return json(400, { error: "Ação inválida" });
     return json(200, { ok: true, data });
   } catch (error) {
-    console.error(error);
-    return json(400, { error: error instanceof Error ? error.message : String(error) });
+    console.error("call_intelligence_action_failed");
+    return json(400, { error: "Call Intelligence não concluiu a ação. Consulte o status da gravação." });
   }
 });

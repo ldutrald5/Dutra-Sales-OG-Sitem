@@ -36,3 +36,32 @@ O bucket `call-recordings` é privado. O upload é uma ação explícita. A tran
 ## Rollback
 
 A funcionalidade é aditiva. Se o gateway estiver indisponível, a gravação local e o download continuam funcionando. As tabelas e objetos existentes não são excluídos automaticamente.
+
+## AI Secure Backend — incremento de confiabilidade
+
+- [x] Timeout de 90 segundos na chamada OpenAI (inclui leitura do JSON).
+- [x] X-Client-Request-Id único e x-request-id persistidos em provider_usage; falhas em metadata.ai_request.
+- [x] Corpo de erro do provedor não é persistido nem logado.
+- [x] Falhas de tarefas em background são tratadas sem imprimir objetos de erro.
+- [x] Testes simulados de sucesso, HTTP 429, rede, timeout e JSON inválido.
+- [ ] Autenticação individual e autorização por organização (gateway atual usa token interno).
+- [ ] Ledger ai_requests, deduplicação concorrente e recuperação durável/retry.
+- [ ] Responses API com saída estruturada e revisão integrada à Mutation Queue.
+- [ ] Validação real de transcrição com chave configurada e áudio autorizado.
+
+### File List do incremento
+
+- supabase/functions/call-intelligence/index.ts
+- supabase/functions/call-intelligence/provider-request.ts
+- scripts/test_call_intelligence_provider.mjs
+- scripts/test_call_intelligence_contract.mjs
+- package.json
+- docs/stories/CALL-INTELLIGENCE-V1.md
+
+Não habilitar acesso direto pelo navegador: verify_jwt=false é compatível somente com a autenticação interna existente; não equivale a Supabase Auth multiusuário. Retry após timeout não é automático, porque o provedor pode já ter processado e cobrado a requisição.
+
+### Validação do incremento
+
+Sintaxe, contratos Call Intelligence, testes comportamentais do provedor, Builder Brain e release gate passaram. Após npm ci --ignore-scripts, a suíte geral npm test passou, incluindo aiox:config-check. Deploy segue pendente de reconciliação com a função live.
+
+File List adicional: docs/06-CALL-AI.md; tasks/TODO.md.
