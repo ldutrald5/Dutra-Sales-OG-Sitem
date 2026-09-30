@@ -5,6 +5,7 @@ const server=fs.readFileSync('./server.mjs','utf8');
 const handoff=fs.readFileSync('./quote-handoff-v3.js','utf8');
 const index=fs.readFileSync('./index.html','utf8');
 assert.match(index,/defer src="\/core\/data\.js"/,'V3 precisa carregar a base técnica OG de forma não bloqueante antes do configurador');
+assert.match(server,/technical-application-core-v3\.js/,'V3 deve carregar o motor técnico extraído do legado');
 assert.match(server,/technical-quote-service-v3\.js/);
 assert.match(server,/technical-center-v3\.js/);
 assert.match(ui,/Veículo → suporte → peças → orçamento/);
