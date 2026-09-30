@@ -141,13 +141,10 @@
       sx.busy = true;
       if (button) button.disabled = true;
       try {
-        const day = new Date().toISOString().slice(0, 10);
-        const payload = await service.startSession({
-          listId,
-          targetCalls,
-          externalId: service.clientExternalId('dutra-session', listId + ':' + day)
-        });
+        const externalId = pendingId('start:' + listId + ':' + targetCalls, 'sales-session');
+        const payload = await service.startSession({ listId, targetCalls, externalId });
         applyPayload(payload);
+        clearPending(externalId);
         deps.setProspectingView('focus');
         deps.showNotification(payload.resumed ? 'Sessão retomada.' : 'Sessão iniciada.', 'success');
       } catch (error) {
@@ -203,13 +200,15 @@
       sx.busy = true;
       if (button) button.disabled = true;
       try {
+        const externalId = pendingId('import:' + clean(input.name, 100) + ':' + queue.length, 'sales-list');
         const imported = await service.importList({
           name: input.name,
           source: 'DUTRA OS · fila local',
           sourceOwner: 'Lucas Dutra',
-          externalId: service.clientExternalId('dutra-list', clean(input.name, 100) + ':' + new Date().toISOString().slice(0, 10)),
+          externalId,
           leads: queue
         });
+        clearPending(externalId);
         if (imported.partial && imported.issues?.length) {
           deps.showNotification(imported.linked + ' contato(s) vinculados; ' + imported.issues.length + ' exigem revisão de identidade.', 'warning');
         } else {
