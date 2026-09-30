@@ -49,7 +49,7 @@ assert.match(ui, /data-sales-meeting/);
 assert.match(ui, /data-sales-decision/);
 assert.match(ui, /data-sales-save-result/);
 assert.match(app, /saveSalesExecutionCallAIReview/);
-assert.match(app, /salesExecutionController\.recordCallAIResult/);
+assert.match(app, /controller\.recordCallAIResult/);
 assert.match(app, /salesExecution: execution/);
 assert.match(app, /executionBrief/);
 
