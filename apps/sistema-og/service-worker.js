@@ -12,7 +12,8 @@ const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
 const SYNC_STORE = 'outbox';
 const SYNC_RECOVERY_STORE = 'recovery';
-const SYNC_DB_VERSION = 2;
+const SYNC_MUTATION_STORE = 'mutations';
+const SYNC_DB_VERSION = 3;
 const SYNC_TAG = 'og-sync-state';
 
 const SHELL_URLS = [
@@ -133,6 +134,11 @@ function openSyncDb() {
       const db = req.result;
       if (!db.objectStoreNames.contains(SYNC_STORE)) db.createObjectStore(SYNC_STORE);
       if (!db.objectStoreNames.contains(SYNC_RECOVERY_STORE)) db.createObjectStore(SYNC_RECOVERY_STORE);
+      if (!db.objectStoreNames.contains(SYNC_MUTATION_STORE)) {
+        const store = db.createObjectStore(SYNC_MUTATION_STORE, { keyPath: 'id' });
+        store.createIndex('idempotencyKey', 'idempotencyKey', { unique: true });
+        store.createIndex('createdAt', 'createdAt', { unique: false });
+      }
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
