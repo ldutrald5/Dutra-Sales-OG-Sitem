@@ -45,6 +45,13 @@ Primeiro: impedir perda de follow-up e reduzir trabalho manual.
 Depois: melhorar inteligência e automações.
 Sempre: preservar integridade dos dados e conhecimento técnico OG.
 
+## Em validação — Sales Playbook V1
+
+- Primeira fatia da preparação contextual entra na Mesa de Vendas como Ficha de Ataque.
+- Perfis comerciais são derivados de estágio/status/eventos reais, sem inferir que o cliente conhece ou desconhece a OG.
+- Objetivo, abertura, perguntas e check técnico reutilizam o briefing PRECALL-01 e permanecem determinísticos.
+- Próximas fatias: objeções e mensagens por perfil; preparação técnica ligada a veículo/fonte OG; fechamento do ciclo com Diário Inteligente revisável.
+
 ## Em validação — V3.1 WhatsApp → CRM
 
 - Bridge local Kaption com sincronização incremental e cursor privado.
