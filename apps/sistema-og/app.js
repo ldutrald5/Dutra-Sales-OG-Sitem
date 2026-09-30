@@ -7140,6 +7140,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const notes = document.getElementById('call-ai-notes').value.trim();
     state.callAI.notes = notes;
     document.getElementById('call-ai-summary').value = notes || `Ligação com ${lead?.empresa || lead?.nome || 'cliente'} sobre ${callObjectives[state.callAI.objective]}.`;
+    const resultSelect = document.getElementById('call-ai-result');
+    if (resultSelect) resultSelect.value = '';
+    document.getElementById('call-ai-meeting-mode-wrap')?.classList.add('hidden');
+    document.getElementById('call-ai-meeting-duration-wrap')?.classList.add('hidden');
     document.getElementById('call-ai-next-action').value = lead?.nextAction || '';
     document.getElementById('call-ai-follow-up').value = lead?.followUpAt || '';
     document.getElementById('call-ai-change-preview').innerHTML = `<strong>Prévia das alterações</strong><p>Histórico: será acrescentado somente após sua aprovação.</p><p>Próxima ação: <del>${escapeHtml(lead?.nextAction || 'não informada')}</del> → valor revisado acima.</p><p>Retorno: <del>${escapeHtml(formatCallDate(lead?.followUpAt))}</del> → data revisada acima.</p>`;
@@ -7170,6 +7174,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ? (input.result === 'proposta' || input.result === 'negociacao' ? 'PROPOSAL_FOLLOW_UP' : input.result === 'enviar_material' ? 'SEND_MATERIAL' : input.result === 'reuniao_agendada' ? 'MEETING' : 'FOLLOW_UP')
       : '';
     if (input.result === 'reuniao_agendada' && !input.followUp) throw new Error('Informe a data e hora da reunião antes de registrar.');
+    if (input.result === 'reuniao_agendada' && !input.meetingMode) throw new Error('Selecione o modo da reunião antes de registrar.');
     const result = await OG_SALES_EXECUTION_CLIENT.recordCallResult({
       externalId: input.sessionId,
       companyId: refs.companyId,
@@ -7181,7 +7186,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       note: input.summary,
       nextActionType,
       nextActionAt: input.followUp || null,
-      meeting: input.result === 'reuniao_agendada' ? { scheduledAt:input.followUp, mode:'PHONE', objective:input.nextAction || input.summary } : null
+      meeting: input.result === 'reuniao_agendada' ? { scheduledAt:input.followUp, mode:input.meetingMode, durationMinutes:Number(input.meetingDuration)||30, objective:input.nextAction || input.summary } : null
     });
     return { synced:true, result };
   }
@@ -7231,7 +7236,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (state.callAI.returnTab === 'prospeccao') state.prospecting.session.events.push({ type: 'processed', result, at: now, leadId: lead.id });
     try {
       const canonical = await syncApprovedCallToSalesExecution(lead, {
-        sessionId, result, summary, nextAction:reviewedNextAction, followUp:reviewedFollowUp
+        sessionId, result, summary, nextAction:reviewedNextAction, followUp:reviewedFollowUp, meetingMode:document.getElementById('call-ai-meeting-mode')?.value || '', meetingDuration:document.getElementById('call-ai-meeting-duration')?.value || ''
       });
       if (canonical.synced) {
         const nextMemberId = canonical.result?.nextMemberId || null;
@@ -7412,6 +7417,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
     });
     document.getElementById('call-ai-objective')?.addEventListener('change', event => { state.callAI.objective = event.target.value; });
+    document.getElementById('call-ai-result')?.addEventListener('change', event => {
+      const meeting = event.target.value === 'reuniao_agendada';
+      document.getElementById('call-ai-meeting-mode-wrap')?.classList.toggle('hidden', !meeting);
+      document.getElementById('call-ai-meeting-duration-wrap')?.classList.toggle('hidden', !meeting);
+    });
     document.getElementById('call-ai-intents')?.addEventListener('click', event => {
       const button = event.target.closest('[data-call-intent]');
       if (!button) return;
