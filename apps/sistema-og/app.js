@@ -6980,7 +6980,36 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-review').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function saveCallAIReview() {
+  const CALL_AI_SALES_RESULT = Object.freeze({
+    sem_contato:'NO_ANSWER',
+    contato_realizado:'DECISION_MAKER_REACHED',
+    proposta:'PROPOSAL',
+    negociacao:'PROPOSAL',
+    sem_interesse:'NOT_INTERESTED'
+  });
+
+  async function syncApprovedCallToSalesExecution(lead, input) {
+    const refs = lead?.salesExecution || {};
+    if (!window.OG_SALES_EXECUTION_CLIENT || !refs.companyId) return { synced:false, reason:'not_normalized' };
+    const nextActionType = input.nextAction
+      ? (input.result === 'proposta' || input.result === 'negociacao' ? 'PROPOSAL_FOLLOW_UP' : 'FOLLOW_UP')
+      : '';
+    const result = await OG_SALES_EXECUTION_CLIENT.recordCallResult({
+      externalId: input.sessionId,
+      companyId: refs.companyId,
+      contactId: refs.contactId || null,
+      opportunityId: refs.opportunityId || null,
+      sessionId: refs.sessionId || null,
+      memberId: refs.listMemberId || null,
+      result: CALL_AI_SALES_RESULT[input.result] || 'DECISION_MAKER_REACHED',
+      note: input.summary,
+      nextActionType,
+      nextActionAt: input.followUp || null
+    });
+    return { synced:true, result };
+  }
+
+  async function saveCallAIReview() {
     const lead = callLead();
     if (!lead) return;
     const result = document.getElementById('call-ai-result').value;
@@ -7023,7 +7052,34 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-review').classList.add('hidden');
     document.getElementById('call-ai-session-state').textContent = 'Sessão salva no CRM';
     if (state.callAI.returnTab === 'prospeccao') state.prospecting.session.events.push({ type: 'processed', result, at: now, leadId: lead.id });
-    showNotification('Ligação registrada no CRM após sua aprovação.', 'success');
+    try {
+      const canonical = await syncApprovedCallToSalesExecution(lead, {
+        sessionId, result, summary, nextAction:reviewedNextAction, followUp:reviewedFollowUp
+      });
+      if (canonical.synced) {
+        const nextMemberId = canonical.result?.nextMemberId || null;
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+          id:newLibraryId('evt'), type:'sales_execution.synced', at:new Date().toISOString(),
+          clientId:lead.id, callSessionId:sessionId, nextMemberId
+        });
+        saveOperationsToStorage();
+        document.getElementById('call-ai-session-state').textContent = nextMemberId
+          ? 'Sessão salva · próximo prospect pronto'
+          : 'Sessão salva no CRM + Sales Execution';
+        showNotification('Ligação confirmada e sincronizada com Sales Execution.', 'success');
+        return;
+      }
+      showNotification('Ligação registrada no CRM. Esta conta ainda usa o modo local/legado.', 'success');
+    } catch (error) {
+      console.error('Sales Execution sync failed', error);
+      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+        id:newLibraryId('evt'), type:'sales_execution.sync_failed', at:new Date().toISOString(),
+        clientId:lead.id, callSessionId:sessionId, error:String(error?.message || error).slice(0,300)
+      });
+      saveOperationsToStorage();
+      document.getElementById('call-ai-session-state').textContent = 'Salvo localmente · sincronização pendente';
+      showNotification('Ligação salva localmente. Sales Execution ficou pendente para nova tentativa.', 'warning');
+    }
   }
 
   function setCallRecordingStatus(message, mode = 'idle') {
