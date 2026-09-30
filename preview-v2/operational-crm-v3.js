@@ -15,6 +15,31 @@ const arr=(key)=>Array.isArray(ops()[key])?ops()[key]:[];
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmtDate=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})};
 const notify=msg=>typeof globalThis.showToast==='function'?globalThis.showToast(msg):console.log('[DUTRA]',msg);
+const PRIVACY_KEY='dutra_home_privacy_v1';
+let homePrivacy=localStorage.getItem(PRIVACY_KEY)==='1';
+
+function applyHomePrivacy(){
+  document.body.classList.toggle('dutra-home-private',homePrivacy);
+  const btn=$('#homePrivacyToggle');
+  if(btn){
+    btn.innerHTML='<i data-lucide="'+(homePrivacy?'eye-off':'eye')+'"></i>';
+    btn.title=homePrivacy?'Mostrar indicadores':'Ocultar indicadores';
+    btn.setAttribute('aria-label',btn.title);
+    btn.classList.toggle('active',homePrivacy);
+  }
+  window.lucide?.createIcons?.();
+}
+function ensureHomePrivacyToggle(){
+  const profile=$('#home .profile');if(!profile||$('#homePrivacyToggle'))return;
+  const bell=$('#home .profile .iconBtn');
+  const btn=document.createElement('button');
+  btn.id='homePrivacyToggle';
+  btn.className='iconBtn homePrivacyBtn';
+  btn.type='button';
+  btn.onclick=()=>{homePrivacy=!homePrivacy;localStorage.setItem(PRIVACY_KEY,homePrivacy?'1':'0');applyHomePrivacy();};
+  if(bell)profile.insertBefore(btn,bell);else profile.appendChild(btn);
+  applyHomePrivacy();
+}
 
 function addStyles(){
   if($('#operational-crm-v3-style'))return;
@@ -30,7 +55,7 @@ function addStyles(){
     .clientProposalItem{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px;border:1px solid #27323a;border-radius:10px;background:#091015;margin:8px 0}.clientProposalItem b{font-size:10px}.clientProposalItem small{display:block;color:#84909a;font-size:8px;margin-top:3px}.clientProposalItem strong{font-size:11px;color:#ffd400}.clientProposalItem button{grid-column:1/-1;height:34px;border:1px solid #34404a;border-radius:8px;background:#0d1419;color:#dce3e7;font-size:8px;font-weight:900}
     .clientFleetFacts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.clientFleetFact{border:1px solid #27323a;border-radius:10px;background:#091015;padding:11px}.clientFleetFact small{display:block;color:#82909a;font-size:7px}.clientFleetFact strong{display:block;font-size:12px;margin-top:4px}
     .clientNoData{padding:16px;border:1px dashed #34404a;border-radius:11px;color:#87939c;font-size:9px;text-align:center}
-    .clientAction[data-real-action],.contactBtns button[data-real-action]{cursor:pointer}.homeBell{position:relative}.homeBellCount{position:absolute;right:-4px;top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ffd400;color:#111;display:grid;place-items:center;font-size:7px;font-weight:900;border:2px solid #080d11}
+    .clientAction[data-real-action],.contactBtns button[data-real-action]{cursor:pointer}.homeBell{position:relative}.homeBellCount{position:absolute;right:-4px;top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ffd400;color:#111;display:grid;place-items:center;font-size:7px;font-weight:900;border:2px solid #080d11}.homePrivacyBtn{transition:.18s ease}.homePrivacyBtn.active{color:#ffd400;border-color:#6a5918;background:#171506}.dutra-home-private #home .metric strong,.dutra-home-private #home .pipeNum strong{color:transparent!important;position:relative;user-select:none}.dutra-home-private #home .metric strong::after{content:'••••';position:absolute;left:0;top:0;color:#f7f8f9;letter-spacing:.08em}.dutra-home-private #home .pipeNum strong::after{content:'••';position:absolute;left:0;top:0;color:#f7f8f9;letter-spacing:.08em}
     @media(max-width:560px){.clientOverviewGrid{grid-template-columns:1fr}.clientHistoryItem{grid-template-columns:34px 1fr}.clientHistoryItem time{grid-column:2}.clientFleetFacts{grid-template-columns:1fr 1fr}}
   `;document.head.appendChild(s);
 }
@@ -94,6 +119,8 @@ function neutralize(){
 
 function renderHome(){
   if(!snapshot())return;
+  ensureHomePrivacyToggle();
+  applyHomePrivacy();
   const ls=leads(),queue=actionQueue(),pipe=groupPipeline();
   const total=ls.filter(l=>clean(l.status).toLowerCase()!=='perdido').length;
   const newCount=ls.filter(l=>clean(l.pipelineStage||l.pipeline_stage).toUpperCase()==='PROSPECT'||clean(l.conversationStage).toLowerCase()==='first_contact'||clean(l.status).toLowerCase()==='novo').length;
@@ -329,7 +356,7 @@ function bind(){
 }
 
 function boot(){
-  addStyles();neutralize();ensureClientPicker();bind();
+  addStyles();neutralize();ensureClientPicker();ensureHomePrivacyToggle();bind();
   window.addEventListener('dutra:state',()=>{renderHome();renderClient()});
   window.addEventListener('dutra:client',()=>renderClient());
   if(snapshot()){renderHome();renderClient()}
