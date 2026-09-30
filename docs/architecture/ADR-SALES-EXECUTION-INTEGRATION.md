@@ -43,3 +43,7 @@ List → Session → Next Account → Briefing → Call AI → Confirmed Result 
 
 ## Rollback
 The first integration package is adapter/gateway-only and must not delete local data, rewrite legacy IDs or make Supabase the only readable source. Feature flags/default-off behavior are required until end-to-end validation.
+
+
+## Production transport
+The production transport uses a dedicated Supabase Edge Function between Railway and the database. Railway keeps only a rotatable internal gateway token; database administrator keys stay in Supabase-managed server runtime. The browser never receives either credential.
