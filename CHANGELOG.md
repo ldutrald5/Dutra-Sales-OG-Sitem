@@ -56,3 +56,12 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 ## [2.0] — Foundation
 
 - Evolução visual para shell DUTRA OS preservando módulos e contratos existentes.
+
+## [Unreleased] — WhatsApp/Kaption CRM Bridge
+
+- Adicionado worker local CLI para leitura incremental do Kaption MCP.
+- Adicionados cursor privado, suporte multi-sessão e exclusão de grupos por padrão.
+- Mensagens seguem para a camada server-side `whatsapp-ingest` com metadados mínimos.
+- Extração determinística reconhece somente fatos inbound explícitos; perguntas e hipóteses não viram fatos.
+- Segredos de ingestão permanecem somente em variáveis de ambiente.
+- Mantida a regra: leitura de WhatsApp, rascunho de proposta e próxima ação não significam envio, contato concluído ou avanço automático de estágio.
