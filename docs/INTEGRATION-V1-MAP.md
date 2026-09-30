@@ -26,7 +26,7 @@ V3 Premium (UI)
 | Aplicação técnica | legado em `app.js` e módulo V3 extraído | duplicidade parcial | fonte canônica criada em `technical-application-service.js` |
 | Cotação | `preview-v2/technical-quote-service-v3.js` | funcional, antes sem fonte canônica | fonte canônica criada em `quote-engine-service.js` |
 | Catálogo/preços | `apps/sistema-og/data.js` | fonte real atual | não duplicar nem inventar valores |
-| Propostas | legado + `proposal-entry-v3.js` | ponte/handoff | integrar após o motor de cotação |
+| Propostas | `proposal-entry-v3.js` + `proposal-intelligence-service.js` | editor e persistência integrados; legado como fallback | completar PDF, estados e conversão em pedido |
 | Persistência | localStorage + IndexedDB + backend JSON/KV | local-first | manter outbox e confirmação explícita |
 | Supabase | migrations e pilotos existentes | não é fonte geral ativa | não ampliar nesta fase |
 

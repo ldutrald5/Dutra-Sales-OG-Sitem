@@ -9,8 +9,10 @@ const server=fs.readFileSync('./server.mjs','utf8');
 
 assert.match(handoff,/dutra:quote-handoff/,'handoff deve comunicar com o shell V3');
 assert.match(handoff,/go\("proposal"\)/,'cotação deve permanecer no shell V3');
-assert.match(proposal,/peWorkspaceFrame/,'proposta deve hospedar o motor oficial na própria tela');
-assert.match(proposal,/embedded=1/,'motor legado deve rodar em modo embutido durante a migração');
+assert.match(proposal,/EDITOR V1 INTEGRADO/,'proposta deve usar editor nativo na própria tela');
+assert.match(proposal,/prepareTrackingDraft/,'editor nativo deve persistir pelo motor oficial');
+assert.match(proposal,/launchLegacy/,'motor legado deve permanecer como fallback explícito durante a migração');
+assert.doesNotMatch(proposal,/iframe class="peWorkspaceFrame"/,'fluxo principal não deve depender do iframe legado');
 assert.match(server,/dutraEmbedded/,'modo embutido deve esconder navegação duplicada do legado');
 
 assert.match(operational,/summarizeCrmViews/,'V3 deve reutilizar agrupamento inteligente de leads');

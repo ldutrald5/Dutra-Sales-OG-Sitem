@@ -33,4 +33,6 @@
 - Loading, empty, ready, error e offline.
 - Nenhum `alert()` ou `prompt()` em fluxo novo.
 - Aplicação ambígua mostra validação antes da proposta.
+- Carrinho técnico abre editor nativo com itens e preços editáveis.
+- Salvar rascunho persiste `DRAFT`, incrementa versão e não registra envio.
 - Produção permanece sem mudança durante a fase V1.

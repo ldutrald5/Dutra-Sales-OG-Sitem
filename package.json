@@ -64,6 +64,7 @@
     "og:cic03:test": "node scripts/test_cic03_account_command.mjs",
     "og:kcc:test": "node scripts/test_kcc_contextual_knowledge.mjs",
     "og:proposal:test": "node scripts/test_proposal_intelligence.mjs",
+    "og:v1:proposal:test": "node scripts/test_v1_proposal_integration.mjs",
     "og:automation:test": "node scripts/test_automation_engine.mjs",
     "og:territory:test": "node scripts/test_territory_readiness.mjs",
     "og:command-core:test": "node scripts/test_command_core.mjs",
