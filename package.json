@@ -75,7 +75,8 @@
     "og:connection:test": "node scripts/test_connection_state_service.mjs",
     "og:v3:p0:test": "node scripts/test_v3_p0_connection_sync.mjs",
     "og:v3:p0:mirror:test": "node scripts/test_v3_p0_service_mirror.mjs",
-    "og:v3:capabilities:test": "node scripts/test_v3_capability_bridge.mjs"
+    "og:v3:capabilities:test": "node scripts/test_v3_capability_bridge.mjs",
+    "og:v3:review-gate:test": "node scripts/test_v3_review_gate.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
