@@ -591,6 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateReliabilityBadge(navigator.onLine ? 'SYNCING' : 'OFFLINE').catch(()=>{});
     setSyncStatus(navigator.onLine ? 'SALVANDO…' : '○ Offline · alteração segura neste aparelho', navigator.onLine ? 'busy' : 'offline');
+    queueSnapshotMutationsForSync().catch(()=>{});
     serverSyncTimer = setTimeout(runScheduledServerSync, 450);
   }
 
@@ -6673,6 +6674,22 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       scheduleServerSync();
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async function queueSnapshotMutationsForSync() {
+    try {
+      const mutationIds = (await OG_SYNC_BRIDGE.listMutations())
+        .filter(row => !['CONFIRMED'].includes(String(row.status || '').toUpperCase()))
+        .map(row => row.id);
+      if (!mutationIds.length) return [];
+      const queued = await OG_SYNC_BRIDGE.readQueuedState();
+      const revision = Number(queued?.body?.revision ?? serverRevision ?? 0);
+      await OG_SYNC_BRIDGE.queueState(currentSyncPayload(revision), { mutationIds });
+      return mutationIds;
+    } catch (error) {
+      connectionState.lastError = String(error?.message || error || 'Falha ao preparar outbox');
+      return [];
     }
   }
 
