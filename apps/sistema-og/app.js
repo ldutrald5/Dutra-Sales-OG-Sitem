@@ -5191,9 +5191,19 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     state.prospecting.currentId = lead?.id || null;
     const metrics = OG_PROSPECTING.sessionMetrics(state.prospecting.session.events);
     if (!lead) { root.innerHTML = '<section class="clean-card prospect-finished"><h2>Fila concluída</h2><p>Não há prospects pendentes nestes filtros.</p><button type="button" data-back-inbox>Adicionar mais prospects</button></section>'; root.querySelector('[data-back-inbox]')?.addEventListener('click', () => setProspectingView('inbox')); return; }
-    const position = Math.max(1, queue.findIndex(item => item.id === lead.id) + 1);
+    const salesMembers = activeSalesExecutionLead ? salesExecutionState().members : [];
+    const salesMemberIndex = activeSalesExecutionLead ? salesMembers.findIndex(item => String(item.id) === String(lead.salesExecution?.listMemberId)) : -1;
+    const position = activeSalesExecutionLead ? Math.max(1, salesMemberIndex + 1) : Math.max(1, queue.findIndex(item => item.id === lead.id) + 1);
+    const queueTotal = activeSalesExecutionLead ? salesMembers.length : queue.length;
     const suggestion = OG_PROSPECTING.nextBestAction(lead);
-    root.innerHTML = `<section class="prospect-session-metrics"><div><small>Prospectados hoje</small><b>${metrics.processed}</b></div><div><small>Restantes</small><b>${queue.length}</b></div><div><small>Interessados</small><b>${metrics.interested}</b></div><div><small>Orçamentos</small><b>${metrics.quotes}</b></div><div><small>Não atendeu</small><b>${metrics.noAnswers}</b></div></section><section class="clean-card prospect-focus"><header><div><span class="og-kicker">PROSPECÇÃO · ${position} / ${queue.length}</span><h1>${escapeHtml(lead.empresa)}</h1><p>${escapeHtml(lead.nome || 'Contato não informado')} ${lead.cargo ? `· ${escapeHtml(lead.cargo)}` : ''}</p></div><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></header><div class="prospect-identity"><span>📱 ${escapeHtml(formatPhone(lead.telefone))}</span><span>CNPJ ${escapeHtml(OG_PROSPECT_PARSER.cnpjFormat(lead.cnpj) || 'não informado')}</span><span>Código ${escapeHtml(lead.internalCode || 'não informado')}</span><span>Origem ${escapeHtml(lead.sourceChannel || 'não informada')}</span></div><div class="prospect-next-best"><span>💡 Próxima ação sugerida</span><b>${escapeHtml(suggestion.label)}</b><small>${escapeHtml(suggestion.reason)}</small></div><div class="prospect-focus-actions"><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}" data-session-call>📞 Ligar</a><button type="button" data-session-whatsapp>💬 WhatsApp</button><button type="button" data-session-call-ai>Call AI</button><button type="button" data-session-skip>Pular</button><button type="button" data-session-delay>Adiar</button></div><div class="prospect-result-grid"><label>Resultado<select id="prospect-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label>Nota rápida<textarea id="prospect-note" rows="3" placeholder="O que aconteceu?"></textarea></label><label>Próxima ação<input id="prospect-next-action" placeholder="Ex.: enviar apresentação"></label><label>Quando<select id="prospect-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem ação</option></select></label><label id="prospect-date-wrap" class="hidden">Data<input id="prospect-specific-date" type="datetime-local"></label></div><button type="button" id="prospect-save-next" class="og-button og-button-primary prospect-save-next">Salvar e próximo →</button></section>`;
+    root.innerHTML = `<section class="prospect-session-metrics"><div><small>Prospectados hoje</small><b>${metrics.processed}</b></div><div><small>Restantes</small><b>${queueTotal}</b></div><div><small>Interessados</small><b>${metrics.interested}</b></div><div><small>Orçamentos</small><b>${metrics.quotes}</b></div><div><small>Não atendeu</small><b>${metrics.noAnswers}</b></div></section><section class="clean-card prospect-focus"><header><div><span class="og-kicker">PROSPECÇÃO · ${position} / ${queueTotal}</span><h1>${escapeHtml(lead.empresa)}</h1><p>${escapeHtml(lead.nome || 'Contato não informado')} ${lead.cargo ? `· ${escapeHtml(lead.cargo)}` : ''}</p></div><button type="button" data-prospect-feedback>💡 Sugerir melhoria</button></header><div class="prospect-identity"><span>📱 ${escapeHtml(formatPhone(lead.telefone))}</span><span>CNPJ ${escapeHtml(OG_PROSPECT_PARSER.cnpjFormat(lead.cnpj) || 'não informado')}</span><span>Código ${escapeHtml(lead.internalCode || 'não informado')}</span><span>Origem ${escapeHtml(lead.sourceChannel || 'não informada')}</span></div><div class="prospect-next-best"><span>💡 Próxima ação sugerida</span><b>${escapeHtml(suggestion.label)}</b><small>${escapeHtml(suggestion.reason)}</small></div><div class="prospect-focus-actions"><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button><a href="tel:${escapeHtml(lead.telefone)}" data-session-call>📞 Ligar</a><button type="button" data-session-whatsapp>💬 WhatsApp</button><button type="button" data-session-call-ai>Call AI</button><button type="button" data-session-skip>Pular</button><button type="button" data-session-delay>Adiar</button></div><div class="prospect-result-grid"><label>Resultado<select id="prospect-result">${Object.entries(OG_INTERACTION_SERVICE.RESULT_DEFINITIONS).map(([value, item]) => `<option value="${value}">${escapeHtml(item.label)}</option>`).join('')}</select></label><label>Nota rápida<textarea id="prospect-note" rows="3" placeholder="O que aconteceu?"></textarea></label><label>Próxima ação<input id="prospect-next-action" placeholder="Ex.: enviar apresentação"></label><label>Quando<select id="prospect-follow-mode"><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="specific">Data específica</option><option value="none">Sem ação</option></select></label><label id="prospect-date-wrap" class="hidden">Data<input id="prospect-specific-date" type="datetime-local"></label></div><button type="button" id="prospect-save-next" class="og-button og-button-primary prospect-save-next">Salvar e próximo →</button></section>`;
+    if (activeSalesExecutionLead) {
+      root.querySelector('.prospect-result-grid')?.classList.add('hidden');
+      const quickSave = root.querySelector('#prospect-save-next');
+      if (quickSave) { quickSave.disabled = true; quickSave.textContent = 'Registre o resultado pelo Call AI'; }
+      root.querySelector('[data-session-skip]')?.setAttribute('disabled', 'disabled');
+      root.querySelector('[data-session-delay]')?.setAttribute('disabled', 'disabled');
+    }
     root.querySelector('[data-session-call]')?.addEventListener('click', () => state.prospecting.session.events.push({ type: 'attempt', channel: 'call', at: new Date().toISOString(), leadId: lead.id }));
     root.querySelector('[data-session-whatsapp]').addEventListener('click', () => { state.prospecting.session.events.push({ type: 'attempt', channel: 'whatsapp', at: new Date().toISOString(), leadId: lead.id }); openDeskMessageComposer(lead, 'follow_up'); });
     root.querySelector('[data-session-call-ai]').addEventListener('click', () => { state.callAI.context = OG_CALL_AI_CONTEXT.build(lead); state.callAI.returnTab = 'prospeccao'; state.callAI.selectedLeadId = lead.id; switchTab('call-ai'); selectCallClient(lead.id); });
@@ -7153,6 +7163,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   const CALL_AI_SALES_RESULT = Object.freeze({
     sem_contato:'NO_ANSWER',
+    numero_invalido:'INVALID_NUMBER',
     gatekeeper:'GATEKEEPER',
     decisor_identificado:'DECISION_MAKER_IDENTIFIED',
     decisor_contatado:'DECISION_MAKER_REACHED',
@@ -7161,7 +7172,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     reuniao_agendada:'MEETING_BOOKED',
     enviar_material:'SEND_MATERIAL',
     proposta:'PROPOSAL',
-    negociacao:'PROPOSAL',
     sem_interesse:'NOT_INTERESTED'
   });
 
@@ -7199,6 +7209,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
     const sessionId = state.callAI.sessionId;
     if (lead.interactions.some(item => item.sessionId === sessionId)) return showNotification('Esta sessão já foi registrada.', 'info');
+    if (lead.salesExecution?.companyId && !CALL_AI_SALES_RESULT[result]) {
+      return showNotification('Para Sales Execution, escolha um resultado específico da ligação em vez de um resultado genérico.', 'warning');
+    }
+    if (lead.salesExecution?.companyId && result === 'reuniao_agendada') {
+      if (!document.getElementById('call-ai-follow-up').value) return showNotification('Informe a data e hora da reunião.', 'warning');
+      if (!document.getElementById('call-ai-meeting-mode')?.value) return showNotification('Selecione o modo da reunião.', 'warning');
+    }
     const now = new Date().toISOString();
     const previousStatus = lead.status;
     const reviewedNextAction = document.getElementById('call-ai-next-action').value.trim();
