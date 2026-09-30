@@ -46,6 +46,8 @@ assert.ok(app.includes("OG_AI_SERVICE.generate"), 'Call AI deve usar a abstraç�
 assert.ok(app.includes("syncApprovedCallToSalesExecution"), 'Call AI aprovado deve ter ponte explícita para Sales Execution');
 assert.ok(app.includes("OG_SALES_EXECUTION_CLIENT.recordCallResult"), 'Call AI deve usar o comando canônico de resultado');
 assert.ok(app.includes("sales_execution.sync_failed"), 'Falha de sincronização deve ser observável e preservar fallback local');
+assert.ok(app.includes("advanceSalesExecutionAfterCall"), 'Call AI aprovado deve avançar para o próximo prospect normalizado');
+assert.ok(app.includes("switchTab('prospeccao')"), 'Fluxo aprovado deve conseguir retornar à prospecção');
 assert.ok(app.includes("data-ai-save-note"), 'Resposta deve permitir nota confirmada');
 assert.ok(app.includes("data-ai-next-action"), 'Resposta deve permitir próxima ação confirmada');
 const saveReviewBlock = app.slice(app.indexOf('function saveCallAIReview()'), app.indexOf('function setCallRecordingStatus'));
