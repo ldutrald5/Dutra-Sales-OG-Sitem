@@ -377,6 +377,14 @@ const server = http.createServer(async (req, res) => {
     } catch (error) { return sendJson(res, 400, { error:error.message }); }
   }
 
+  if (url.pathname === '/api/sales-execution/commands/record-call-result' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await salesExecutionGateway.recordCallResult(await readBody(req, 30_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
   if (url.pathname === '/api/prospects/research' && req.method === 'POST') {
     try {
       if (!allowProspectResearch(req)) return sendJson(res, 429, { error:'Limite de pesquisa atingido. Aguarde um minuto.' });
