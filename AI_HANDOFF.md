@@ -95,3 +95,19 @@ O Kaption deve estar aberto e com a ponte MCP local funcional. O worker consulta
 - `OG_WHATSAPP_E2E_KEEP=true` preserva dados sintéticos somente quando for necessário diagnosticar falha;
 - por padrão, o teste remove proposta, oportunidade, atividades, conversa, contato, eventos e empresas sintéticas ao finalizar;
 - não usar o modo E2E como atalho para proposta real: o bypass de discovery exige `metadata.e2e=true` e empresa `[E2E]`.
+
+## Handoff — AutoStart do Bridge no Windows
+
+O computador que mantém Kaption/WhatsApp pode registrar o Bridge como tarefa do Windows.
+
+Instalação por duplo clique:
+- `INSTALL_WHATSAPP_AUTOSTART.cmd`
+
+Alternativa CLI:
+- `npm run og:whatsapp:autostart:install`
+- `npm run og:whatsapp:autostart:status`
+- `npm run og:whatsapp:autostart:uninstall`
+
+A tarefa se chama `DUTRA-OS-WhatsApp-Bridge`, inicia no logon do usuário atual e tenta reiniciar após falha. O launcher resolve o caminho do repositório dinamicamente, usa o `.env` local e grava logs em `apps/sistema-og/.data/logs/`.
+
+Nunca colocar segredo no Task Scheduler, arquivo .cmd ou scripts versionados. O segredo continua somente no `.env` local.
