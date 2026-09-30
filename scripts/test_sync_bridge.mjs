@@ -31,7 +31,7 @@ const mutation=bridge.createMutationRecord({
   metadata:{source:'v3'}
 },{now:'2026-09-30T03:10:00Z'});
 assert.equal(mutation.id,'M1');
-assert.equal(mutation.status,'pending');
+assert.equal(mutation.status,'PENDING');
 assert.equal(mutation.attempts,0);
 assert.equal(mutation.idempotencyKey,'lead:L1:next-action:A1');
 assert.equal(mutation.metadata.source,'v3');

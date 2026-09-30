@@ -27,6 +27,7 @@ let state={
   catalogCategory:'all',
   lineOverrides:{},
   manualLines:[],
+  cartItems:[],
   manualVehicleName:'',
   manualTires:0,
   manualNote:''
@@ -92,7 +93,8 @@ function restoreFromClient(){
     mode:draft.mode||'guided',
     answers:{...(draft.answers||{})},
     lineOverrides:{...(draft.lineOverrides||{})},
-    manualLines:Array.isArray(draft.manualLines)?draft.manualLines.map(x=>({...x})):(Array.isArray(draft.extras)?draft.extras.map(x=>catalogManualLine(x.code,x.qty)):[])
+    manualLines:Array.isArray(draft.manualLines)?draft.manualLines.map(x=>({...x})):(Array.isArray(draft.extras)?draft.extras.map(x=>catalogManualLine(x.code,x.qty)):[]),
+    cartItems:Array.isArray(draft.cartItems)?draft.cartItems.map(x=>({...x,quote:{...(x.quote||{}),lines:(x.quote?.lines||[]).map(line=>({...line}))}})):[]
   };
 }
 
@@ -127,12 +129,13 @@ function render(){
   </section>
 
   ${state.mode==='guided'?renderGuided(r,q,count):renderManual(q)}
+  ${renderCart()}
   ${q?renderBudget(q):''}
   ${q?renderCatalogSection():''}
   ${q?renderActions(q):''}
   ${q?`<div class="tcSticky"><div><small>TOTAL ATUAL</small><strong>${money(q.total)}</strong></div><button id="tcStickyOfficial">Cotação oficial →</button></div>`:''}
   `;
-  renderVehicleGrid();if(q){setValues();renderCatalog();bindActions()}
+  renderVehicleGrid();if(q){setValues();renderCatalog()}if(q||state.cartItems.length)bindActions();
   lucide?.createIcons?.();
 }
 
@@ -159,7 +162,7 @@ function renderGuided(r,q,count){
       <div class="tcVehicleVisual"><h3>${esc(r.name)}</h3><p>${esc((r.applications||[]).join(' · '))}</p><div class="tcAxles">${Object.entries(q?.axles||{}).filter(([,n])=>n>0).map(([k,n])=>`<div class="tcAxle"><small>${esc(k.toUpperCase())}</small><strong>${n} eixo(s)</strong></div>`).join('')}</div></div>
       <div class="tcSupports">${renderSupports(q)}</div>
     </div>
-    <div class="tcBudgetToolbar"><button class="yellow" id="tcConvertManual">Usar este cálculo como base manual</button></div>
+    <div class="tcBudgetToolbar"><button class="yellow" id="tcCartAdd">+ Adicionar veículo ao carrinho</button><button id="tcConvertManual">Usar este cálculo como base manual</button></div>
   </section>`:''}
   `;
 }
@@ -178,6 +181,20 @@ function renderManual(q){
       </div>
       <div class="tcManualHint">Nada aqui é travado pelo sistema. Você pode adicionar código do catálogo, criar item livre, alterar quantidade, alterar preço ou remover uma linha.</div>
     </div>
+  </section>`;
+}
+
+function consolidatedCart(){
+  if(!state.cartItems.length)return null;
+  try{return E().buildMultiVehicleQuote(state.cartItems,D(),{installments:state.installments})}catch{return null}
+}
+function renderCart(){
+  const cart=consolidatedCart();if(!cart)return'';
+  return `<section class="tcSection tcBudget"><div class="tcSectionHead"><div><h2>Carrinho multi-veículos</h2><p style="text-align:left">${cart.vehicles.length} configurações · códigos iguais consolidados com origem preservada.</p></div><span class="tcStatus ${cart.technicallyReady?'':'warn'}">${cart.technicallyReady?'PRONTO PARA REVISÃO':'VALIDAR APLICAÇÃO'}</span></div>
+    <div class="tcBudgetToolbar">${cart.vehicles.map(v=>`<span class="tcChip yellow">${esc(v.label)} <button data-cart-remove="${attr(v.id)}" title="Remover veículo">×</button></span>`).join('')}</div>
+    <div class="tcBudgetTop" style="margin-top:9px"><div class="tcBudgetStat"><small>PNEUS</small><strong>${cart.totalTires}</strong></div><div class="tcBudgetStat"><small>PEÇAS</small><strong>${cart.totalPieces}</strong></div><div class="tcBudgetStat"><small>CÓDIGOS</small><strong>${cart.lines.length}</strong></div><div class="tcBudgetStat total"><small>TOTAL</small><strong>${money(cart.total)}</strong></div></div>
+    <div class="tcTable">${cart.lines.map(line=>`<div class="tcLine ${line.unresolved||line.priceConflict?'warn':''}"><div class="code">${esc(line.code)}</div><div><b>${esc(line.name)}</b><small>${line.breakdown.map(x=>`${esc(x.label)}: ${x.qty}`).join(' · ')}</small></div><div class="val">${line.qty} un</div><div class="val">${line.priceConflict?'REVISAR':money(line.unitPrice)}</div><div class="val">${money(line.total)}</div><span></span></div>`).join('')}</div>
+    <div class="tcBudgetToolbar"><button class="yellow" id="tcCartUse">Usar carrinho como base manual</button><button id="tcCartClear">Limpar carrinho</button></div>
   </section>`;
 }
 
@@ -276,9 +293,27 @@ function bindActions(){
   $('#tcOfficial')?.addEventListener('click',openOfficial);
   $('#tcStickyOfficial')?.addEventListener('click',openOfficial);
   $('#tcConvertManual')?.addEventListener('click',convertToManual);
+  $('#tcCartAdd')?.addEventListener('click',addCurrentToCart);
+  $('#tcCartUse')?.addEventListener('click',useCartAsManual);
+  $('#tcCartClear')?.addEventListener('click',()=>{state.cartItems=[];render()});
   $('#tcResetAuto')?.addEventListener('click',()=>{state.lineOverrides={};render()});
   $('#tcAddFree')?.addEventListener('click',()=>{const box=$('#tcCustomBox');if(box)box.style.display=box.style.display==='none'?'grid':'none'});
   $('#tcCustomSave')?.addEventListener('click',addCustomLine);
+}
+
+function addCurrentToCart(){
+  const q=currentQuote();if(!q)return;
+  const entryId=id('VEH');
+  state.cartItems.push({id:entryId,label:`${q.qty} × ${q.vehicleName}`,quote:JSON.parse(JSON.stringify(q))});
+  render();notify(q.technicallyReady?'Veículo adicionado ao carrinho.':'Veículo adicionado com validação técnica pendente.');
+}
+function useCartAsManual(){
+  const cart=consolidatedCart();if(!cart)return;
+  if(!cart.technicallyReady)return notify('Revise as aplicações e preços marcados antes de converter o carrinho.');
+  state.manualVehicleName=cart.vehicles.map(x=>x.label).join(' + ');
+  state.manualTires=cart.totalTires;
+  state.manualLines=cart.lines.map(x=>({id:id('MAN'),code:x.code,name:x.name,category:x.category,internalCode:x.internalCode||'',qty:x.qty,unitPrice:x.unitPrice||0,position:'multi-veículos',manual:true,breakdown:x.breakdown}));
+  state.lineOverrides={};state.mode='manual';render();notify('Carrinho consolidado copiado para edição manual.');
 }
 
 function convertToManual(){
@@ -327,6 +362,7 @@ function handleClick(e){
   const ans=e.target.closest('[data-answer-q]');if(ans){state.answers[ans.dataset.answerQ]=ans.dataset.answerV;state.lineOverrides={};render();return}
   const add=e.target.closest('[data-catalog-add]');if(add){addCatalogLine(add.dataset.catalogAdd);return}
   const rem=e.target.closest('[data-line-remove]');if(rem){removeLine(rem.dataset.lineRemove);return}
+  const cartRemove=e.target.closest('[data-cart-remove]');if(cartRemove){state.cartItems=state.cartItems.filter(x=>String(x.id)!==cartRemove.dataset.cartRemove);render();return}
 }
 function handleChange(e){
   if(e.target.id==='tcQty'){state.qty=Math.max(1,Number(e.target.value)||1);if(state.mode==='guided')state.lineOverrides={};render();return}
@@ -350,7 +386,7 @@ async function saveDraft(){
   const lead=selected(),q=currentQuote();if(!lead||!q)return notify('Selecione um cliente no Cliente 360° antes de salvar.');
   const draft={
     mode:state.mode,ruleId:state.ruleId,answers:{...state.answers},qty:state.qty,psi:state.psi,includeFront:state.includeFront,tierKey:state.tierKey,installments:state.installments,
-    search:state.search,lineOverrides:{...state.lineOverrides},manualLines:state.manualLines.map(x=>({...x})),manualVehicleName:state.manualVehicleName,manualTires:state.manualTires,manualNote:state.manualNote,
+    search:state.search,lineOverrides:{...state.lineOverrides},manualLines:state.manualLines.map(x=>({...x})),cartItems:state.cartItems.map(x=>JSON.parse(JSON.stringify(x))),manualVehicleName:state.manualVehicleName,manualTires:state.manualTires,manualNote:state.manualNote,
     quoteSummary:{vehicleName:q.vehicleName,total:q.total,totalPieces:q.totalPieces,totalTires:q.totalTires,technicallyReady:q.technicallyReady,editedManually:Boolean(Object.keys(state.lineOverrides).length||state.manualLines.length||state.mode==='manual')},
     updatedAt:new Date().toISOString()
   };
@@ -391,7 +427,7 @@ function openOfficial(){
 function boot(){
   addStyles();ensureScreen();restoreFromClient();render();
   window.addEventListener('dutra:state',()=>{if($('#application')?.classList.contains('active'))render()});
-  window.addEventListener('dutra:client',()=>{state={...state,mode:'guided',ruleId:'',answers:{},lineOverrides:{},manualLines:[],manualVehicleName:'',manualTires:0,manualNote:''};restoreFromClient();render()});
+  window.addEventListener('dutra:client',()=>{state={...state,mode:'guided',ruleId:'',answers:{},lineOverrides:{},manualLines:[],cartItems:[],manualVehicleName:'',manualTires:0,manualNote:''};restoreFromClient();render()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

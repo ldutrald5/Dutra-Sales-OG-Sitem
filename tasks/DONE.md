@@ -221,3 +221,21 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Resultado rápido:** `interaction-service.recordResult()` grava somente resultado confirmado e mantém histórico.
 - **Próxima ação:** `interaction-service.setNextAction()` é o contrato compartilhado por Mesa, Prospecção, Next Best Action e Automation Engine; mudança material invalida contexto antigo e mudança só de data preserva contexto.
 - **Evidência:** `scripts/test_sales_desk.mjs`, `services/whatsapp-service.js`, `services/interaction-service.js` e suíte completa.
+## V1-01 — Fundação da integração oficial
+
+- **Data:** 2026-09-30.
+- **Baseline:** V3 Premium em `cd919192eadc1d319d1bd59711d237385db9f9dc`.
+- **Mudança observável:** o motor de aplicação técnica e cotação passa a ter fonte canônica em `apps/sistema-og/services`, com espelhos de deploy V3 protegidos por paridade byte a byte.
+- **Segurança técnica:** Scania com suspensão a ar e cubo redutor permanece em validação, com alternativas visíveis; o sistema não escolhe suporte silenciosamente.
+- **Baseline reparado:** Sync Bridge canônico e espelho V3 foram reconciliados, teste de status foi atualizado para o contrato de reliability e a suíte completa passou a executar sequencialmente no Windows.
+- **Validação:** `npm run validate`, testes V3 e release gate passaram; Builder Brain contém 60 registros e zero warnings.
+- **Evolução concluída:** carrinho multi-veículos consolidado no domínio e na interface V3, com detalhamento por veículo, persistência no rascunho da conta e bloqueio de aplicações ambíguas.
+- **Limite:** smoke autenticado no preview permanece bloqueado pela capacidade do plano Railway.
+
+## V1-02 — Proposta persistente integrada
+
+- **Data:** 2026-09-30.
+- **Mudança observável:** aplicação e carrinho técnico abrem um editor nativo de proposta na V3, com itens, quantidades, preços e condições editáveis.
+- **Persistência:** rascunho versionado e vinculado ao cliente por `DUTRA_CORE.commit`, com mutation idempotente e suporte à fila offline.
+- **Governança:** rascunho permanece `DRAFT`; preparar e salvar não registram envio.
+- **Compatibilidade:** proposta pública e editor legado continuam disponíveis sem serem acionados automaticamente.

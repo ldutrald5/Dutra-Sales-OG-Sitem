@@ -7,6 +7,7 @@
 
   const PUBLIC_EVENT_TYPES = Object.freeze(['proposal.opened','proposal.reopened','proposal.contact_clicked','proposal.accepted']);
   const USER_EVENT_TYPES = Object.freeze(['proposal.sent','proposal.revoked']);
+  const PROPOSAL_STATUSES = Object.freeze(['DRAFT','READY','SENT','VIEWED','FOLLOW_UP','NEGOTIATION','ACCEPTED','REJECTED','EXPIRED']);
   const EVENT_ALIASES = Object.freeze({
     proposal_prepared:'proposal.prepared',
     proposal_sent:'proposal.sent',
@@ -44,8 +45,12 @@
       qty: Math.max(1, Math.round(safeNumber(vehicle.qty) || 1)),
       items: (Array.isArray(vehicle.items) ? vehicle.items : []).slice(0, 100).map(item => ({
         code: clean(item.code),
+        name: clean(item.name),
         qty: Math.max(0, Math.round(safeNumber(item.qty))),
-        customPrice: item.customPrice == null ? null : safeNumber(item.customPrice)
+        customPrice: item.customPrice == null ? null : safeNumber(item.customPrice),
+        unitPrice: item.unitPrice == null ? null : safeNumber(item.unitPrice),
+        total: item.total == null ? null : safeNumber(item.total),
+        manual: Boolean(item.manual)
       }))
     };
   }
@@ -84,7 +89,9 @@
         totalValue: safeNumber(quote.totalValue),
         totalPieces: Math.max(0, Math.round(safeNumber(quote.totalPecas))),
         freightText: clean(client.freteTexto),
-        paymentTerms: clean(client.condicaoPagamento || client.paymentTerms)
+        deliveryText: clean(client.deliveryText || state.deliveryText),
+        paymentTerms: clean(client.condicaoPagamento || client.paymentTerms),
+        installments: Math.max(1, Math.round(safeNumber(state.installments || input.installments) || 1))
       },
       vehicles: (Array.isArray(state.vehicles) ? state.vehicles : []).slice(0, 100).map(safeVehicle),
       extraItems: (Array.isArray(state.extraItems) ? state.extraItems : []).slice(0, 200).map(safeExtra)
@@ -120,11 +127,13 @@
     const snapshot = buildSnapshot(input, options);
     const id = clean(input.proposalId) || proposalId(snapshot.quoteId);
     const preparedAt = snapshot.preparedAt;
+    const previous = next.generatedDocuments.find(item => String(item.id) === String(id));
+    const items = snapshot.vehicles.flatMap(vehicle => vehicle.items.map(item => ({...item, vehicleId:vehicle.id, vehicleName:vehicle.name}))).concat(snapshot.extraItems);
 
     const quoteRecord = {
       id: snapshot.quoteId,
       clientId: snapshot.clientId,
-      status: 'saved',
+      status: 'DRAFT',
       totalValue: snapshot.commercial.totalValue,
       totalPieces: snapshot.commercial.totalPieces,
       preparedAt,
@@ -140,8 +149,17 @@
       clientId: snapshot.clientId,
       quoteId: snapshot.quoteId,
       status: 'internal_draft',
-      version: 1,
+      proposalStatus: 'DRAFT',
+      version: Math.max(1, Number(previous?.version || 0) + 1),
+      createdAt: previous?.createdAt || preparedAt,
+      updatedAt: preparedAt,
       preparedAt,
+      total: snapshot.commercial.totalValue,
+      items,
+      paymentTerms: snapshot.commercial.paymentTerms,
+      freight: snapshot.commercial.freightText,
+      delivery: snapshot.commercial.deliveryText,
+      owner: clean(input.owner || previous?.owner),
       snapshot,
       publication: {
         publicEnabled: false,
@@ -215,6 +233,7 @@
   return {
     PUBLIC_EVENT_TYPES,
     USER_EVENT_TYPES,
+    PROPOSAL_STATUSES,
     EVENT_ALIASES,
     normalizeProposalEventType,
     buildSnapshot,

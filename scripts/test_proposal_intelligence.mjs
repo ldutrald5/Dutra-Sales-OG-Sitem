@@ -20,6 +20,7 @@ assert.equal(snapshot.quoteId,'COT-123456');
 assert.equal(snapshot.templateId,'lorentrans');
 assert.equal(snapshot.commercial.totalValue,41518);
 assert.equal(snapshot.vehicles[0].name,'Rodotrem 9 eixos');
+assert.equal(snapshot.vehicles[0].items[0].name,'');
 assert.equal(snapshot.client.internalCode,'15517');
 assert.equal(proposal.validatePublicSnapshot(snapshot),true);
 assert.throws(()=>proposal.validatePublicSnapshot({...snapshot,secret:'x'}),/Campo proibido/);
@@ -29,10 +30,23 @@ const prepared=proposal.prepareTrackingDraft(ops,{quote,quoteState,clientId:'LEA
 assert.equal(prepared.quotes.length,1);
 assert.equal(prepared.generatedDocuments.length,1);
 assert.equal(prepared.generatedDocuments[0].status,'internal_draft');
+assert.equal(prepared.generatedDocuments[0].proposalStatus,'DRAFT');
+assert.equal(prepared.generatedDocuments[0].total,41518);
+assert.equal(prepared.generatedDocuments[0].items[0].code,'EQ-120');
+assert.equal(prepared.generatedDocuments[0].items[0].vehicleName,'Rodotrem 9 eixos');
+assert.equal(prepared.generatedDocuments[0].createdAt,'2026-09-28T05:00:00.000Z');
+assert.ok(proposal.PROPOSAL_STATUSES.includes('ACCEPTED'));
 assert.equal(prepared.generatedDocuments[0].publication.publicEnabled,false);
 assert.equal(prepared.generatedDocuments[0].publication.publicToken,null);
 assert.equal(prepared.activityEvents[0].type,'proposal.prepared');
 assert.equal(proposal.canPublish(prepared.generatedDocuments[0]),true);
+
+const revised=proposal.prepareTrackingDraft(prepared,{proposalId:prepared.generatedDocuments[0].id,quote:{...quote,totalValue:40000},quoteState,clientId:'LEAD-1'},{operationsModel,now:'2026-09-28T05:10:00.000Z'});
+assert.equal(revised.generatedDocuments.length,1,'editar rascunho não deve duplicar proposta');
+assert.equal(revised.generatedDocuments[0].version,2);
+assert.equal(revised.generatedDocuments[0].createdAt,'2026-09-28T05:00:00.000Z');
+assert.equal(revised.generatedDocuments[0].updatedAt,'2026-09-28T05:10:00.000Z');
+assert.equal(revised.generatedDocuments[0].total,40000);
 
 assert.throws(()=>proposal.recordServerEvent({id:'PROP-1'},{type:'proposal_opened'}),/backend confiável/);
 const opened=proposal.recordServerEvent({id:'PROP-1'},{id:'EV-1',type:'proposal_opened',at:'2026-09-28T05:03:00Z'},{trustedServer:true});

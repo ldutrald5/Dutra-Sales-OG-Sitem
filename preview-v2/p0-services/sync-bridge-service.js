@@ -92,10 +92,12 @@
       id,
       idempotencyKey,
       action,
+      type:String(input.type||action).trim().toUpperCase(),
       entityType:String(input.entityType||'state'),
       entityId:String(input.entityId||''),
       label:String(input.label||action),
-      status:'pending',
+      payload:clone(input.payload||{}),
+      status:String(input.status||'PENDING').toUpperCase(),
       attempts:Number.isInteger(Number(input.attempts))?Math.max(0,Number(input.attempts)):0,
       createdAt,
       updatedAt:createdAt,
@@ -139,6 +141,26 @@
     }finally{db.close();}
   }
 
+  async function updateMutation(id,patch={}){
+    const db=await openDb();
+    try{
+      return await new Promise((resolve,reject)=>{
+        const tx=db.transaction(MUTATION_STORE,'readwrite');
+        const store=tx.objectStore(MUTATION_STORE);
+        const request=store.get(String(id));
+        let result=null;
+        request.onsuccess=()=>{
+          if(!request.result)return;
+          result={...request.result,...clone(patch),updatedAt:nowIso()};
+          store.put(result);
+        };
+        request.onerror=()=>reject(request.error||new Error('Falha ao carregar mutation.'));
+        tx.oncomplete=()=>resolve(result?clone(result):null);
+        tx.onerror=()=>reject(tx.error||new Error('Falha ao atualizar mutation.'));
+      });
+    }finally{db.close();}
+  }
+
   async function markMutationAttempt(id,error=''){
     const db=await openDb();
     try{
@@ -149,7 +171,7 @@
         let result=null;
         request.onsuccess=()=>{
           if(!request.result)return;
-          result={...request.result,attempts:Number(request.result.attempts||0)+1,lastAttemptAt:nowIso(),lastError:String(error||''),updatedAt:nowIso()};
+          result={...request.result,status:error?'FAILED_RETRYABLE':'SYNCING',attempts:Number(request.result.attempts||0)+1,lastAttemptAt:nowIso(),lastError:String(error||''),updatedAt:nowIso()};
           store.put(result);
         };
         request.onerror=()=>reject(request.error||new Error('Falha ao carregar mutation.'));
@@ -176,7 +198,7 @@
     }finally{db.close();}
   }
 
-  async function pendingMutationCount(){return (await listMutations()).length;}
+  async function pendingMutationCount(){return (await listMutations()).filter(row=>String(row.status||'PENDING').toUpperCase()!=='CONFIRMED').length;}
   const saveConflict=conflict=>write(RECOVERY_STORE,CONFLICT_KEY,conflict);
   const loadConflict=()=>read(RECOVERY_STORE,CONFLICT_KEY);
   const clearConflict=()=>remove(RECOVERY_STORE,CONFLICT_KEY);
@@ -184,5 +206,5 @@
   const loadReview=()=>read(RECOVERY_STORE,REVIEW_KEY);
   const clearReview=()=>remove(RECOVERY_STORE,REVIEW_KEY);
 
-  return{DB_NAME,DB_VERSION,OUTBOX_STORE,RECOVERY_STORE,MUTATION_STORE,createQueuedRecord,queueState,readQueuedState,clearQueuedState,clearQueuedStateIf,createMutationRecord,enqueueMutation,listMutations,markMutationAttempt,ackMutations,pendingMutationCount,saveConflict,loadConflict,clearConflict,saveReview,loadReview,clearReview};
+  return{DB_NAME,DB_VERSION,OUTBOX_STORE,RECOVERY_STORE,MUTATION_STORE,createQueuedRecord,queueState,readQueuedState,clearQueuedState,clearQueuedStateIf,createMutationRecord,enqueueMutation,listMutations,updateMutation,markMutationAttempt,ackMutations,pendingMutationCount,saveConflict,loadConflict,clearConflict,saveReview,loadReview,clearReview};
 }));

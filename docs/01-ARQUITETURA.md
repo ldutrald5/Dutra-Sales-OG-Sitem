@@ -126,3 +126,7 @@ O serviço Railway V3 usa `rootDirectory=/preview-v2`. Por isso, os serviços P0
 ### Validação
 
 O CI run 334 passou suíte completa, Brain, Security, npm audit e Release Gate. No Railway, o deploy do commit `4374886cadbda4a113b21fd701cb21a0df9daa09` ficou SUCCESS; `/health` e os dois serviços P0 respondem HTTP 200. A aceitação manual de desligamento/reconexão de rede em navegador autenticado permanece separada.
+
+## Integração V1 oficial
+
+A V3 Premium permanece como shell e o sistema maduro fornece serviços de domínio durante a extração incremental. O primeiro domínio formalizado é aplicação técnica/cotação. As fontes canônicas ficam em `apps/sistema-og/services/`; os arquivos em `preview-v2/` são artefatos de empacotamento protegidos por paridade byte a byte. Consulte `docs/INTEGRATION-V1-MAP.md` e `docs/QUOTE-ENGINE.md`.
