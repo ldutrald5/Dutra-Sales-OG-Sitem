@@ -30,4 +30,9 @@ const metrics = engine.sessionMetrics([{ type: 'processed', result: 'nao_atendeu
 assert.deepEqual(metrics, { processed: 2, calls: 1, whatsappActions: 0, interested: 0, quotes: 1, noAnswers: 1 });
 const command = parser.parseNaturalCommand('Rodolog, falei com Carlos, pediu apresentação, retornar amanhã', new Date('2026-09-24T12:00:00Z'));
 assert.equal(command.result, 'enviar_apresentacao'); assert.equal(command.contact, 'Carlos'); assert.ok(command.followUpAt);
+const appSource = (await import('node:fs')).readFileSync('apps/sistema-og/app.js','utf8');
+assert.ok(appSource.includes('renderSalesExecutionLauncher'), 'Prospecção deve expor o launcher Sales Execution');
+assert.ok(appSource.includes('startSalesExecutionSession'), 'Prospecção deve iniciar sessão normalizada');
+assert.ok(appSource.includes('materializeSalesExecutionMember'), 'Fila normalizada deve materializar contexto para o Call AI');
+assert.ok(appSource.includes("state.callAI.returnTab = 'prospeccao'"), 'Call AI deve preservar origem na prospecção');
 console.log('Prospecting engine critical flows: PASS');
