@@ -6947,13 +6947,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     state.callAI.sources = results;
     state.callAI.script = buildCallScript(lead, state.callAI.objective, results);
+    const executionBrief = state.callAI.salesExecution?.briefing;
+    if (executionBrief && state.callAI.script.length) {
+      if (executionBrief.opening) state.callAI.script[0] = { ...state.callAI.script[0], speech: executionBrief.opening };
+      if (executionBrief.questions?.length) state.callAI.script[1] = { ...state.callAI.script[1], question: executionBrief.questions[0] };
+      const nextStepIndex = Math.max(0, state.callAI.script.length - 2);
+      if (executionBrief.cta) state.callAI.script[nextStepIndex] = { ...state.callAI.script[nextStepIndex], speech: executionBrief.cta };
+    }
     state.callAI.step = 0;
     state.callAI.completed = [];
     state.callAI.sessionId = `CALL-${Date.now()}`;
     document.getElementById('call-ai-empty').classList.add('hidden');
     document.getElementById('call-ai-workspace').classList.remove('hidden');
     document.getElementById('call-ai-footer').classList.remove('hidden');
-    document.getElementById('call-ai-session-state').textContent = `${callObjectives[state.callAI.objective]} · modo manual`;
+    document.getElementById('call-ai-session-state').textContent = state.callAI.salesExecution ? `${state.callAI.salesExecution.mode || 'Sales Execution'} · sessão ativa` : `${callObjectives[state.callAI.objective]} · modo manual`;
     renderCallAIStep();
     renderCallAISources();
     button.disabled = false;
