@@ -41,6 +41,78 @@
       .sort((a,b)=>String(b.at || '').localeCompare(String(a.at || '')));
   }
 
+  function profileFor(lead = {}, events = []) {
+    const stage=key(lead.conversationStage || lead.status);
+    const status=key(lead.status);
+    const eventTypes=new Set(events.map(item=>clean(item.type)));
+    if (['customer','loyal_customer','cliente','cliente_fidelizado'].includes(stage) || status === 'fechado') {
+      return Object.freeze({id:'customer',label:'Cliente / pós-venda'});
+    }
+    if (['negotiation','negociacao'].includes(stage)) {
+      return Object.freeze({id:'negotiation',label:'Negociação em andamento'});
+    }
+    if (stage === 'proposal' || eventTypes.has('proposal.sent') || eventTypes.has('proposal_sent')) {
+      return Object.freeze({id:'proposal',label:'Proposta / orçamento em andamento'});
+    }
+    if (['interested','interessado'].includes(stage)) {
+      return Object.freeze({id:'interested',label:'Interesse registrado'});
+    }
+    if (['talked','ja_conversei','waiting_response','aguardando_resposta','no_reply','nao_respondeu'].includes(stage)) {
+      return Object.freeze({id:'known',label:'Já houve contato'});
+    }
+    return Object.freeze({id:'first_contact',label:'Primeiro contato · conhecimento da OG não confirmado'});
+  }
+
+  function approachFor(lead = {}, profile = {}) {
+    const contact=clean(lead.nome) || 'tudo bem';
+    const company=clean(lead.empresa) || 'sua operação';
+    const nextAction=clean(lead.nextAction);
+    const approaches={
+      first_contact:{
+        objective:'Descobrir como a operação cuida de pneus, qual frota está envolvida, qual dor existe e quem decide antes de apresentar solução.',
+        opening:`Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Antes de te explicar qualquer coisa, quero entender como vocês cuidam de pressão e desgaste dos pneus. Posso te fazer duas perguntas rápidas?`,
+        focus:'Diagnóstico primeiro. Produto entra só depois que existir contexto real.'
+      },
+      known:{
+        objective:nextAction || 'Retomar o contexto anterior e descobrir o que mudou, o que foi entendido e qual avanço faz sentido agora.',
+        opening:`Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Vi que já houve contato com a ${company}; não quero te repetir apresentação. O que vocês chegaram a avaliar e em que ponto isso ficou?`,
+        focus:'Não recomeçar do zero. Recuperar percepção, objeção e próximo passo.'
+      },
+      interested:{
+        objective:nextAction || 'Transformar o interesse registrado em uma validação concreta de frota, problema e próximo passo técnico/comercial.',
+        opening:`Olá, ${contact}. Quero avançar um ponto do que vocês já avaliaram com a Olho de Gato. Antes de falar em proposta, quero confirmar em quais veículos o problema pesa mais e quem precisa participar da decisão.`,
+        focus:'Converter interesse em diagnóstico validado e compromisso objetivo.'
+      },
+      proposal:{
+        objective:nextAction || 'Descobrir o que impede a decisão e separar investimento, aplicação técnica e prioridade interna.',
+        opening:`Olá, ${contact}. Quero alinhar um ponto daquela proposta da Olho de Gato. Hoje, o que pesa mais para vocês avançarem: investimento, aplicação na frota ou prioridade interna?`,
+        focus:'Não perguntar apenas se “viu a proposta”. Fazer a objeção real aparecer.'
+      },
+      negotiation:{
+        objective:nextAction || 'Isolar a objeção principal, confirmar quem decide e sair com ação, responsável e data.',
+        opening:`Olá, ${contact}. Quero deixar nossa negociação objetiva. O ponto que mais segura vocês hoje é investimento, aplicação, condição comercial ou prioridade da operação?`,
+        focus:'Tratar uma objeção por vez e fechar um próximo movimento concreto.'
+      },
+      customer:{
+        objective:nextAction || 'Entender experiência real, identificar pendências e mapear expansão, reposição ou indicação sem forçar nova venda.',
+        opening:`Olá, ${contact}. Aqui é o Lucas, da Olho de Gato. Antes de falar em qualquer expansão, quero saber como está a experiência de vocês e se ficou alguma pendência de uso, instalação ou manutenção.`,
+        focus:'Pós-venda primeiro. Expansão nasce de resultado e contexto confirmados.'
+      }
+    };
+    return Object.freeze(approaches[profile.id] || approaches.first_contact);
+  }
+
+  function technicalPrepFor(lead = {}) {
+    const items=[];
+    if (Number(lead.fleetSize) > 0) items.push(`Frota registrada: ${Number(lead.fleetSize)} veículo(s). Confirmar quais configurações representam a maior parte.`);
+    else items.push('Levantar tamanho e composição da frota antes de dimensionar cobertura.');
+    items.push('Confirmar marca/modelo/configuração dos veículos ou conjuntos prioritários.');
+    items.push('Confirmar eixos/posição do rodado e pressão de trabalho usada pela operação.');
+    items.push('Identificar onde o problema aparece mais: cavalo, tração, truck, carreta ou reboque.');
+    items.push('Código/suporte OG: Não determinado / Necessária validação técnica até cruzar fonte oficial.');
+    return Object.freeze(items);
+  }
+
   function build(lead = {}, operations = {}) {
     if (!lead?.id) throw new Error('Briefing exige cliente identificado');
     const facts=[];
@@ -87,6 +159,9 @@
     doNotSay.push('Não ofereça desconto, frete, prazo ou condição de pagamento que não esteja explicitamente aprovado/registrado.');
 
     const events=eventsForLead(operations,lead.id);
+    const profile=profileFor(lead,events);
+    const approach=approachFor(lead,profile);
+    const technicalPrep=technicalPrepFor(lead);
     const intentEvent=events.find(item => ['proposal.opened','proposal.reopened','proposal_opened','proposal_reopened'].includes(item.type));
     const sentEvent=events.find(item => ['proposal.sent','proposal_sent'].includes(item.type));
     if (intentEvent) {
@@ -102,6 +177,9 @@
 
     return Object.freeze({
       leadId:clean(lead.id),
+      profile,
+      approach,
+      technicalPrep,
       facts:Object.freeze(facts.slice(0,10).map(Object.freeze)),
       gaps:Object.freeze([...new Set(gaps)].slice(0,8)),
       questions:Object.freeze([...new Set(questions)].slice(0,7)),
@@ -109,5 +187,5 @@
     });
   }
 
-  return Object.freeze({ build });
+  return Object.freeze({ build, profileFor, approachFor, technicalPrepFor });
 }));
