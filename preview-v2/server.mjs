@@ -95,8 +95,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   const localCoreServices = {
-    '/core/services/connection-state-service.js': path.join(dir, '..', 'apps', 'sistema-og', 'services', 'connection-state-service.js'),
-    '/core/services/sync-bridge-service.js': path.join(dir, '..', 'apps', 'sistema-og', 'services', 'sync-bridge-service.js')
+    '/core/services/connection-state-service.js': path.join(dir, 'p0-services', 'connection-state-service.js'),
+    '/core/services/sync-bridge-service.js': path.join(dir, 'p0-services', 'sync-bridge-service.js')
   };
   if (localCoreServices[url.pathname]) {
     return sendFile(res, localCoreServices[url.pathname], req.method);
