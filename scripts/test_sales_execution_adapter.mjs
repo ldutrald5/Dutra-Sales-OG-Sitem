@@ -25,4 +25,17 @@ const q = adapter.queueProjection([
  {id:'1',work_status:'IN_PROGRESS',position:1}
 ]);
 assert.deepEqual(q.map(x=>x.id), ['1','2']);
+const accountEnvelope=adapter.projectAccountContext({
+  company:{id:'c1',name:'Transportes X',legacy_lead_id:'L-9',city:'Maringá',state:'PR'},
+  contacts:[{id:'p1',full_name:'Carlos',decision_level:'decision_maker',role_category:'FLEET_MANAGER',phone_e164:'5544999999999'}],
+  opportunities:[{id:'o1',pipeline_stage:'QUALIFIED',next_action:'Agendar reunião'}],
+  recentActivities:[{id:'a1',activity_type:'call',description:'Contato realizado',created_at:'2026-09-30T00:00:00Z'}],
+  briefings:[{id:'b1',processing_status:'READY'}]
+},{id:'m1',list_id:'l1',company_id:'c1',primary_contact_id:'p1',work_status:'IN_PROGRESS'},{id:'s1',list_id:'l1'});
+const callLead=adapter.toCallAiLead(accountEnvelope,{});
+assert.equal(callLead.id,'L-9');
+assert.equal(callLead.nome,'Carlos');
+assert.equal(callLead.salesExecution.listMemberId,'m1');
+assert.equal(callLead.salesExecution.sessionId,'s1');
+assert.equal(callLead.interactions[0].note,'Contato realizado');
 console.log('sales-execution-adapter: ok');
