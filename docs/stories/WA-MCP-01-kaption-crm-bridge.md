@@ -22,16 +22,16 @@ Sincronizar mensagens novas do WhatsApp lidas pelo Kaption MCP com o backend Sup
 ## Critérios de aceite
 
 - [x] Story criada antes da implementação.
-- [ ] Worker local inicia o MCP Kaption e valida que `query` existe.
-- [ ] Worker lista sessões e sincroniza mensagens incrementais.
-- [ ] Retry não duplica evento/mensagem/insight no Supabase.
-- [ ] Cursor só avança depois de ingestão bem-sucedida.
-- [ ] Fatos explícitos suportados têm testes determinísticos.
-- [ ] Ausência de chave de ingestão falha de forma fechada.
-- [ ] `.env.example` documenta as variáveis sem segredos.
-- [ ] `package.json` expõe comando CLI para worker e teste.
-- [ ] Arquitetura/contexto/changelog/roadmap registram a integração.
-- [ ] Checks relevantes executados e resultado registrado.
+- [x] Worker local inicia o MCP Kaption e valida que `query` existe.
+- [x] Worker lista sessões e sincroniza mensagens incrementais.
+- [x] Retry não duplica evento/mensagem/insight no Supabase.
+- [x] Cursor só avança depois de ingestão bem-sucedida.
+- [x] Fatos explícitos suportados têm testes determinísticos.
+- [x] Ausência de chave de ingestão falha de forma fechada.
+- [x] `.env.example` documenta as variáveis sem segredos.
+- [x] `package.json` expõe comando CLI para worker e teste.
+- [x] Arquitetura/contexto/changelog/roadmap registram a integração.
+- [x] Checks relevantes executados e resultado registrado.
 
 ## Segurança e integridade
 
@@ -55,3 +55,15 @@ Sincronizar mensagens novas do WhatsApp lidas pelo Kaption MCP com o backend Sup
 - `ROADMAP.md`
 - `CHANGELOG.md`
 - `docs/stories/WA-MCP-01-kaption-crm-bridge.md`
+
+
+## Validação executada
+
+- GitHub Actions `Package 00R CI` run **313**: PASS.
+- `npm run validate`: PASS.
+- `npm run og:brain:check`: PASS.
+- `npm run og:security:test`: PASS.
+- `npm audit --audit-level=high`: PASS.
+- `npm run release:gate`: PASS.
+- O primeiro CI (run 306) detectou uma asserção incorreta do novo teste; a falha foi corrigida antes da integração.
+- Teste com o **Kaption real no computador do usuário** não é executável no runner do GitHub e permanece como verificação operacional pós-merge. O worker falha fechado se a ponte MCP ou a chave de ingestão estiverem indisponíveis.
