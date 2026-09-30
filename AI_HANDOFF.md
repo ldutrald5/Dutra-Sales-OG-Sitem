@@ -84,3 +84,14 @@ Para tarefas relacionadas ao WhatsApp automático:
 - chave server-side: `OG_WHATSAPP_INGEST_API_KEY` (nunca versionar/expor no frontend).
 
 O Kaption deve estar aberto e com a ponte MCP local funcional. O worker consulta `entity=session` e depois conversas/mensagens com `after`. Não adicionar envio automático ao mesmo processo: ações externas continuam separadas e exigem confirmação humana.
+
+## Handoff — WhatsApp E2E
+
+- teste live: `npm run og:whatsapp:e2e`;
+- harness offline/CI: `npm run og:whatsapp:e2e:test`;
+- chave preferida: `OG_WHATSAPP_E2E_API_KEY=sb_secret_...`;
+- fallbacks locais: `OG_WHATSAPP_INGEST_API_KEY`, `SUPABASE_SECRET_KEY`, legado `SUPABASE_SERVICE_ROLE_KEY`;
+- nunca registrar a chave no Git, frontend ou logs;
+- `OG_WHATSAPP_E2E_KEEP=true` preserva dados sintéticos somente quando for necessário diagnosticar falha;
+- por padrão, o teste remove proposta, oportunidade, atividades, conversa, contato, eventos e empresas sintéticas ao finalizar;
+- não usar o modo E2E como atalho para proposta real: o bypass de discovery exige `metadata.e2e=true` e empresa `[E2E]`.
