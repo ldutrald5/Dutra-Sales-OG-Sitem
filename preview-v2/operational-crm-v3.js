@@ -17,6 +17,7 @@ const fmtDate=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.ge
 const notify=msg=>typeof globalThis.showToast==='function'?globalThis.showToast(msg):console.log('[DUTRA]',msg);
 const PRIVACY_KEY='dutra_home_privacy_v1';
 let homePrivacy=localStorage.getItem(PRIVACY_KEY)==='1';
+let clientSmartView='all';
 
 function applyHomePrivacy(){
   document.body.classList.toggle('dutra-home-private',homePrivacy);
@@ -47,7 +48,7 @@ function addStyles(){
     .realOnly{opacity:1}.homeLiveEmpty{padding:15px;border:1px dashed #34404a;border-radius:12px;color:#8d99a2;font-size:10px;text-align:center}
     .homeStateTag{font-size:7px;font-weight:900;border:1px solid #4c421b;border-radius:7px;color:#ffd400;padding:4px 6px;white-space:nowrap}.homeStateTag.over{color:#ff8389;border-color:#5c2529}.homeStateTag.today{color:#ffd400}
     .homeAgendaMeta{display:flex;gap:5px;align-items:center}.homeAgendaMeta time{font-size:8px}
-    .clientPicker{position:relative;margin:0 0 12px}.clientPickerInput{height:46px;width:100%;border:1px solid #303a43;border-radius:11px;background:#080d11;color:#fff;padding:0 42px 0 12px;outline:0}.clientPickerIcon{position:absolute;right:12px;top:12px;color:#79858e}.clientPickerResults{display:none;position:absolute;left:0;right:0;top:51px;z-index:80;max-height:320px;overflow:auto;border:1px solid #354049;border-radius:12px;background:#091015;box-shadow:0 18px 60px #000}.clientPickerResults.open{display:block}.clientPickRow{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #1e282f;cursor:pointer}.clientPickRow:hover{background:#101820}.clientPickRow b{display:block;font-size:11px}.clientPickRow small{display:block;color:#84909a;font-size:8px;margin-top:2px}.clientPickRow .thumb{width:38px;height:38px}
+    .clientPicker{position:relative;margin:0 0 10px}.clientSmartViews{margin:0 0 10px}.clientSmartViewScroll{display:flex;gap:6px;overflow:auto;padding:2px 0 7px;scrollbar-width:none}.clientSmartViewScroll::-webkit-scrollbar{display:none}.clientSmartChip{flex:0 0 auto;border:1px solid #34404a;border-radius:999px;background:#0a1116;color:#b9c2c8;padding:7px 9px;font-size:8px;font-weight:900}.clientSmartChip.active{border-color:#806b18;background:#1a1707;color:#ffd400}.clientSmartChip b{margin-left:4px;color:#fff}.clientSmartSummary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:1px 1px 7px;color:#83909a;font-size:8px}.clientSmartSummary strong{color:#e7ecef;font-size:9px}.clientSmartList{display:grid;gap:6px;max-height:270px;overflow:auto;border:1px solid #27323a;border-radius:12px;background:#080d11;padding:6px}.clientSmartAccount{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;border:1px solid #202a31;border-radius:9px;background:#0b1217;color:#e7ecef;text-align:left;padding:8px}.clientSmartAccount:hover,.clientSmartAccount.active{border-color:#6e5c17;background:#171507}.clientSmartAccount .thumb{width:34px;height:34px}.clientSmartAccount b{display:block;font-size:9px}.clientSmartAccount small{display:block;color:#7f8b94;font-size:7px;margin-top:2px}.clientSmartStage{font-size:6px;font-weight:900;border:1px solid #3c474f;border-radius:999px;padding:4px 5px;color:#b8c1c7;white-space:nowrap}.clientPicker{position:relative;margin:0 0 12px}.clientPickerInput{height:46px;width:100%;border:1px solid #303a43;border-radius:11px;background:#080d11;color:#fff;padding:0 42px 0 12px;outline:0}.clientPickerIcon{position:absolute;right:12px;top:12px;color:#79858e}.clientPickerResults{display:none;position:absolute;left:0;right:0;top:51px;z-index:80;max-height:320px;overflow:auto;border:1px solid #354049;border-radius:12px;background:#091015;box-shadow:0 18px 60px #000}.clientPickerResults.open{display:block}.clientPickRow{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #1e282f;cursor:pointer}.clientPickRow:hover{background:#101820}.clientPickRow b{display:block;font-size:11px}.clientPickRow small{display:block;color:#84909a;font-size:8px;margin-top:2px}.clientPickRow .thumb{width:38px;height:38px}
     .clientBadgeDynamic{font-size:8px;font-weight:900;padding:5px 7px;border-radius:999px;border:1px solid #3d4850;color:#b9c3ca}.clientBadgeDynamic.relationship{border-color:#6e5d16;color:#ffd400;background:#211c08}.clientBadgeDynamic.pipeline{border-color:#285a31;color:#72e77c;background:#0b2110}
     .clientOverviewGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.clientRealCard{border:1px solid #27323a;border-radius:12px;background:#091015;padding:12px}.clientRealCard label{display:block;color:#818d96;font-size:7px;font-weight:900;letter-spacing:.08em}.clientRealCard strong{display:block;font-size:13px;margin-top:5px}.clientRealCard p{margin:5px 0 0;color:#919ca4;font-size:9px;line-height:1.45}
     .clientPeople{margin-top:12px;border:1px solid #27323a;border-radius:13px;background:#091015;padding:12px}.clientPeopleHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.clientPeopleHead h3{margin:0;font-size:13px}.clientPeopleHead button{border:0;background:transparent;color:#ffd400;font-size:8px;font-weight:900}.clientPerson{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-top:1px solid #202a31}.clientPerson:first-of-type{margin-top:8px}.clientPerson b{display:block;font-size:10px}.clientPerson small{display:block;color:#85919a;font-size:8px;margin-top:2px}.clientRole{font-size:7px;font-weight:900;color:#ffd400;border:1px solid #544819;border-radius:7px;padding:4px 6px;height:max-content}
@@ -221,10 +222,51 @@ function nextActionFor(lead){
   return{action:nba?.action||lead.nextAction||'Definir próxima ação',reason:nba?.reason||lead.nextActionReason||'Sem motivo registrado.',dueAt:lead.followUpAt||null,type:lead.nextActionType||'FOLLOW_UP'};
 }
 
+function smartViews(){
+  const intel=globalThis.OG_LEAD_INTELLIGENCE;
+  return Array.isArray(intel?.CRM_ACCOUNT_VIEWS)&&intel.CRM_ACCOUNT_VIEWS.length?intel.CRM_ACCOUNT_VIEWS:[
+    {id:'all',label:'Todos'},{id:'customers',label:'Clientes'},{id:'prospects',label:'Prospects'},{id:'proposals',label:'Propostas'},{id:'strategic',label:'Estratégicas'},{id:'talked',label:'Já conversados'}
+  ];
+}
+function smartViewCounts(){
+  const intel=globalThis.OG_LEAD_INTELLIGENCE;
+  if(intel?.summarizeCrmViews)return intel.summarizeCrmViews(leads());
+  const ls=leads();return{all:ls.length};
+}
+function smartViewLeads(){
+  const intel=globalThis.OG_LEAD_INTELLIGENCE;
+  const rows=leads().filter(l=>clientSmartView==='all'||!intel?.matchesCrmView||intel.matchesCrmView(l,clientSmartView));
+  return intel?.filterSort?intel.filterSort(rows,{},new Date()):rows;
+}
+function ensureClientSmartViews(){
+  const picker=$('#clientPicker');if(!picker||$('#clientSmartViews'))return;
+  const wrap=document.createElement('section');wrap.id='clientSmartViews';wrap.className='clientSmartViews';
+  wrap.innerHTML='<div class="clientSmartViewScroll" id="clientSmartViewScroll"></div><div class="clientSmartSummary"><strong id="clientSmartTitle">Base CRM</strong><span id="clientSmartCount">0 contas</span></div><div class="clientSmartList" id="clientSmartList"></div>';
+  picker.after(wrap);
+  wrap.addEventListener('click',e=>{
+    const chip=e.target.closest('[data-crm-view]');
+    if(chip){clientSmartView=chip.dataset.crmView||'all';renderClientSmartViews();return}
+    const account=e.target.closest('[data-smart-client]');
+    if(account){core()?.selectClient?.(account.dataset.smartClient);return}
+  });
+}
+function renderClientSmartViews(){
+  ensureClientSmartViews();
+  const chips=$('#clientSmartViewScroll'),list=$('#clientSmartList'),title=$('#clientSmartTitle'),count=$('#clientSmartCount');
+  if(!chips||!list)return;
+  const views=smartViews(),counts=smartViewCounts(),active=views.find(v=>v.id===clientSmartView)||views[0]||{id:'all',label:'Todos'};
+  if(!views.some(v=>v.id===clientSmartView))clientSmartView=active.id;
+  chips.innerHTML=views.map(v=>'<button class="clientSmartChip '+(v.id===clientSmartView?'active':'')+'" data-crm-view="'+attr(v.id)+'">'+esc(v.label)+' <b>'+Number(counts[v.id]||0)+'</b></button>').join('');
+  const rows=smartViewLeads().slice(0,30);
+  if(title)title.textContent=active.label||'Base CRM';
+  if(count)count.textContent=(counts[clientSmartView]??rows.length)+' conta(s)';
+  list.innerHTML=rows.length?rows.map(l=>'<button class="clientSmartAccount '+(String(selected()?.id)===String(l.id)?'active':'')+'" data-smart-client="'+attr(l.id)+'"><div class="thumb">'+esc(clean(l.empresa||l.nome).slice(0,1).toUpperCase()||'C')+'</div><div><b>'+esc(l.empresa||l.nome||'Conta')+'</b><small>'+esc([l.nome&&l.nome!==l.empresa?l.nome:'',l.cidadeUf||'',l.nextAction||'Sem próxima ação'].filter(Boolean).join(' · '))+'</small></div><span class="clientSmartStage">'+esc(pipelineLabel(l))+'</span></button>').join(''):'<div class="clientNoData">Nenhuma conta nesta visão.</div>';
+}
 function ensureClientPicker(){
   const screen=$('#clients'),head=$('.pageHead',screen);if(!screen||!head||$('#clientPicker',screen))return;
   const wrap=document.createElement('div');wrap.id='clientPicker';wrap.className='clientPicker';wrap.innerHTML='<input class="clientPickerInput" id="clientPickerInput" placeholder="Trocar cliente: busque empresa, CNPJ, telefone ou cidade…"><i class="clientPickerIcon" data-lucide="search"></i><div class="clientPickerResults" id="clientPickerResults"></div>';
   head.after(wrap);
+  ensureClientSmartViews();
   const input=$('#clientPickerInput'),results=$('#clientPickerResults');
   input.addEventListener('input',()=>{
     const q=clean(input.value).toLowerCase();
@@ -241,6 +283,7 @@ function ensureClientPicker(){
 function renderClient(){
   if(!snapshot())return;
   ensureClientPicker();
+  renderClientSmartViews();
   const lead=selected(),screen=$('#clients');if(!screen)return;
   const clientMenu=$('.pageHead > .iconBtn:last-child',screen);
   if(clientMenu){clientMenu.style.display='none';clientMenu.setAttribute('aria-hidden','true')}
