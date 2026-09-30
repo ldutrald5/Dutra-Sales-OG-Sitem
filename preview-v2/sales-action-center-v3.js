@@ -157,17 +157,35 @@ async function saveAction(execute){
     const next=S().nextMember(result.operations,session);
     if(next){session.currentMemberId=next.id;next.workStatus='IN_PROGRESS';}
   }
-  await C().commit(
-    {leads:result.leads,operations:result.operations},
-    modal.dataset.outcome?'Resultado salvo, próxima ação criada e próximo contato preparado.':'Próxima ação salva no CRM.',
-    {
-      action:modal.dataset.outcome?'RECORD_CALL_OUTCOME_AND_NEXT_ACTION':'SCHEDULE_NEXT_ACTION',
-      entityType:'lead',
-      entityId:result.lead.id,
-      label:modal.dataset.outcome?'Resultado + próxima ação':'Próxima ação',
-      metadata:{type,contactId:contactId||null,sessionId:modal.dataset.sessionId||null}
-    }
-  );
+  const saveButton=$('#afSave'),executeButton=$('#afExecute');
+  if(saveButton?.disabled||executeButton?.disabled)return;
+  if(saveButton)saveButton.disabled=true;
+  if(executeButton)executeButton.disabled=true;
+  try{
+    await C().commit(
+      {leads:result.leads,operations:result.operations},
+      modal.dataset.outcome?'Resultado salvo, próxima ação criada e próximo contato preparado.':'Próxima ação salva no CRM.',
+      {
+        action:modal.dataset.outcome?'RECORD_CALL_OUTCOME_AND_NEXT_ACTION':'SCHEDULE_NEXT_ACTION',
+        entityType:'lead',
+        entityId:result.lead.id,
+        idempotencyKey:'activity:'+(result.activity?.id||result.lead.id+':'+type+':'+(at||'sem-data')),
+        label:modal.dataset.outcome?'Resultado + próxima ação':'Próxima ação',
+        metadata:{
+          type,
+          activityId:result.activity?.id||null,
+          callAttemptId:result.operations?.callAttempts?.[0]?.id||null,
+          contactId:contactId||null,
+          sessionId:modal.dataset.sessionId||null
+        }
+      }
+    );
+  }catch(error){
+    notify('Não foi possível preservar a alteração: '+error.message);
+    if(saveButton)saveButton.disabled=false;
+    if(executeButton)executeButton.disabled=false;
+    return;
+  }
   $('#actionFlowModal').classList.remove('open');
   if(execute) executeAction(result.lead,type,contactId);
   if(modal.dataset.outcome){globalThis.go?.('prospecting');}
@@ -205,7 +223,7 @@ async function completeQueueItem(leadId){
   await C().commit(
     {leads:x.leads,operations:x.operations},
     message,
-    {action:'COMPLETE_NEXT_ACTION',entityType:'lead',entityId:lead.id,label:'Próxima ação concluída',metadata:{completedType}}
+    {action:'COMPLETE_NEXT_ACTION',entityType:'lead',entityId:lead.id,idempotencyKey:'activity:'+(x.operations?.activities?.[0]?.id||lead.id+':complete:'+completedType),label:'Próxima ação concluída',metadata:{completedType,activityId:x.operations?.activities?.[0]?.id||null}}
   );
   renderQueue();
 }
