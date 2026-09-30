@@ -15,6 +15,9 @@ assert.match(ui,/Pedido manual/,'fluxo técnico deve preservar edição manual')
 assert.match(ui,/data-line-price/,'preço unitário deve ser editável');
 assert.match(ui,/data-line-qty/,'quantidade deve ser editável');
 assert.match(ui,/Item livre/,'pedido deve aceitar item fora do cálculo automático');
+assert.match(ui,/Carrinho multi-veículos/,'fluxo técnico deve consolidar vários veículos');
+assert.match(ui,/buildMultiVehicleQuote/,'UI deve reutilizar o motor canônico para consolidar o carrinho');
+assert.match(ui,/cartItems/,'carrinho deve integrar o rascunho persistido da conta');
 assert.match(ui,/searchRules/,'busca de veículo deve aceitar linguagem natural');
 assert.match(ui,/technicalDraft/);
 assert.match(ui,/DUTRA_QUOTE_HANDOFF/);

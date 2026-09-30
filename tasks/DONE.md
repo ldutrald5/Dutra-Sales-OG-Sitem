@@ -229,4 +229,5 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Segurança técnica:** Scania com suspensão a ar e cubo redutor permanece em validação, com alternativas visíveis; o sistema não escolhe suporte silenciosamente.
 - **Baseline reparado:** Sync Bridge canônico e espelho V3 foram reconciliados, teste de status foi atualizado para o contrato de reliability e a suíte completa passou a executar sequencialmente no Windows.
 - **Validação:** `npm run validate`, testes V3 e release gate passaram; Builder Brain contém 60 registros e zero warnings.
-- **Limite:** carrinho multi-veículos, proposta persistente unificada e smoke autenticado no preview permanecem nas próximas etapas.
+- **Evolução concluída:** carrinho multi-veículos consolidado no domínio e na interface V3, com detalhamento por veículo, persistência no rascunho da conta e bloqueio de aplicações ambíguas.
+- **Limite:** proposta persistente unificada e smoke autenticado no preview permanecem nas próximas etapas.

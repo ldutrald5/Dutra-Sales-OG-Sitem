@@ -186,6 +186,27 @@ function buildQuote(rule,answers={},options={},data={}){
     subtotal,discount,total,installmentValue:total/installments
   };
 }
+function buildMultiVehicleQuote(entries=[],data={},options={}){
+  const installments=clampInt(options.installments||6,1,10),vehicles=[],lineMap=new Map(),unresolved=[];
+  for(const [index,entry] of (Array.isArray(entries)?entries:[]).entries()){
+    const quote=entry?.quote||buildQuote(entry?.rule,entry?.answers||{},{...(entry?.options||{}),installments},data);
+    const vehicleId=clean(entry?.id)||`VEHICLE-${index+1}`;
+    vehicles.push({id:vehicleId,label:clean(entry?.label)||quote.vehicleName,quote});
+    if(!quote.technicallyReady)unresolved.push({vehicleId,label:clean(entry?.label)||quote.vehicleName,items:quote.unresolved||[],missingAnswers:quote.missingAnswers||[]});
+    for(const line of quote.lines||[]){
+      const code=clean(line.code).toUpperCase()||'ITEM-SEM-CODIGO',unitPrice=Math.max(0,number(line.unitPrice));
+      const row=lineMap.get(code)||{code,name:line.name,category:line.category,internalCode:line.internalCode||'',qty:0,unitPrice,total:0,unresolved:false,priceConflict:false,breakdown:[]};
+      if(row.breakdown.length&&Math.abs(row.unitPrice-unitPrice)>0.0001)row.priceConflict=true;
+      row.qty+=clampInt(line.qty,0);row.total+=Math.max(0,number(line.total,clampInt(line.qty,0)*unitPrice));row.unresolved=Boolean(row.unresolved||line.unresolved);
+      row.breakdown.push({vehicleId,label:clean(entry?.label)||quote.vehicleName,qty:clampInt(line.qty,0),unitPrice,total:Math.max(0,number(line.total,clampInt(line.qty,0)*unitPrice))});
+      lineMap.set(code,row);
+    }
+  }
+  const lines=[...lineMap.values()].map(row=>({...row,unitPrice:row.priceConflict?null:row.unitPrice}));
+  const subtotal=lines.reduce((sum,row)=>sum+row.total,0),discount=installments===1?subtotal*.03:0,total=subtotal-discount;
+  const priceConflicts=lines.filter(row=>row.priceConflict).map(row=>row.code);
+  return{vehicles,lines,installments,subtotal,discount,total,installmentValue:total/installments,totalPieces:lines.reduce((sum,row)=>sum+row.qty,0),totalTires:vehicles.reduce((sum,row)=>sum+number(row.quote.totalTires),0),technicallyReady:unresolved.length===0&&priceConflicts.length===0,unresolved,priceConflicts};
+}
 function searchCatalog(data,query="",category="all"){
   const q=clean(query).toLowerCase();
   return (data?.catalog||[]).filter(item=>(category==="all"||item.category===category)&&(!q||[item.code,item.internalCode,item.name,item.desc,item.category].some(v=>clean(v).toLowerCase().includes(q)))).slice(0,60);
@@ -208,5 +229,5 @@ function summaryText(quote,client={}){
     "Valores e aplicação devem ser revisados no motor oficial antes do envio."
   ].filter(Boolean).join("\n");
 }
-return{normalizedText,ruleSearchText,searchRules,repriceLines,applyManualAdjustments,visibleQuestions,missingAnswers,adjustedAxles,supportDecision,technicalPositions,catalogItem,tierUnitPrice,buildQuote,searchCatalog,summaryText};
+return{normalizedText,ruleSearchText,searchRules,repriceLines,applyManualAdjustments,visibleQuestions,missingAnswers,adjustedAxles,supportDecision,technicalPositions,catalogItem,tierUnitPrice,buildQuote,buildMultiVehicleQuote,searchCatalog,summaryText};
 }));

@@ -41,4 +41,4 @@ Os arquivos equivalentes em `preview-v2/` são espelhos necessários porque o Ra
 
 ## Contrato inicial
 
-O motor atual expõe busca normalizada, perguntas visíveis, resolução de aplicação, consolidação de peças, cotação, busca no catálogo, ajuste manual e resumo. A próxima evolução adicionará carrinho multi-veículos sobre este contrato, sem duplicar a regra técnica.
+O motor expõe busca normalizada, perguntas visíveis, resolução de aplicação, consolidação de peças, cotação, busca no catálogo, ajuste manual, resumo e carrinho multi-veículos. `buildMultiVehicleQuote()` agrupa códigos iguais, preserva o detalhamento por veículo e mantém o conjunto pendente quando qualquer aplicação ou preço precisar de revisão.

@@ -60,4 +60,21 @@ assert.equal(adjusted.lines.find(x=>x.code==='EQ-120').unitPrice,220);
 assert.ok(adjusted.lines.some(x=>x.code==='EQ-700'&&x.manual),'pedido assistido precisa aceitar item manual');
 assert.equal(adjusted.totalPieces,q.totalPieces-5+1);
 
+const fleet=t.buildMultiVehicleQuote([
+  {id:'VOLVO-3',label:'3 × Volvo 6x4',rule:rodotrem,answers:{brand:'volvo',has_reduction:'nao'},options:{qty:3,psi:120,includeFront:false,tierKey:'lead_ie'}},
+  {id:'SCANIA-2',label:'2 × Scania 6x4',rule:rodotrem,answers:{brand:'scania',scania_suspension:'mola',has_reduction:'nao'},options:{qty:2,psi:120,includeFront:false,tierKey:'lead_ie'}}
+],data,{installments:6});
+assert.equal(fleet.vehicles.length,2);
+assert.equal(fleet.lines.find(x=>x.code==='EQ-120').qty,80,'carrinho deve consolidar o mesmo código entre veículos');
+assert.equal(fleet.totalTires,160);
+assert.equal(fleet.technicallyReady,true);
+assert.equal(fleet.lines.find(x=>x.code==='EQ-120').breakdown.length,2,'linha consolidada deve preservar origem por veículo');
+
+const fleetWithReview=t.buildMultiVehicleQuote([
+  {id:'OK',rule:rodotrem,answers:{brand:'volvo',has_reduction:'nao'},options:{qty:1,psi:120,includeFront:false,tierKey:'lead_ie'}},
+  {id:'REVIEW',rule:rodotrem,answers:{brand:'scania',scania_suspension:'ar',has_reduction:'sim'},options:{qty:1,psi:120,includeFront:false,tierKey:'lead_ie'}}
+],data,{installments:6});
+assert.equal(fleetWithReview.technicallyReady,false,'uma aplicação ambígua deve bloquear o carrinho consolidado');
+assert.equal(fleetWithReview.unresolved[0].vehicleId,'REVIEW');
+
 console.log('Technical quote engine tests: PASS');

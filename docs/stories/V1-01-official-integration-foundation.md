@@ -10,6 +10,7 @@ Estabelecer uma branch reproduzível, gates verdes e uma única fonte de verdade
 - [x] Baseline registrado.
 - [x] Falhas de sync/paridade diagnosticadas e corrigidas.
 - [x] Fonte canônica do motor técnico e de cotação criada.
+- [x] Consolidação multi-veículos criada no domínio, com breakdown e bloqueio por ambiguidade.
 - [x] Espelhos de deploy protegidos por teste.
 - [x] Documentação inicial de integração, persistência, cotação, testes e riscos.
 - [x] `npm run validate` após as mudanças.
