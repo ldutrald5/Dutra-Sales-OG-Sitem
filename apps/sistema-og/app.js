@@ -857,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (safeTabId === 'scripts') renderSalesKnowledge();
     else if (safeTabId === 'crm') renderCrmModule();
     else if (safeTabId === 'guia') renderConsultantEngine();
-    else if (safeTabId === 'call-ai') renderCallAIContext();
+    else if (safeTabId === 'call-ai') { renderCallAIContext(); renderCallIntelligenceDashboard(); }
     else if (safeTabId === 'biblioteca') renderMaterialLibrary();
     else if (safeTabId === 'operacoes') renderOperationsFoundation();
 
@@ -7753,6 +7753,35 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     recorder.stop();
   }
 
+  async function renderCallIntelligenceDashboard() {
+    const grid = document.getElementById('call-intelligence-dashboard-grid');
+    const detail = document.getElementById('call-intelligence-dashboard-detail');
+    if (!grid || !detail || !window.OG_CALL_INTELLIGENCE_CLIENT) return;
+    detail.textContent = 'Atualizando métricas das ligações…';
+    try {
+      const data = await OG_CALL_INTELLIGENCE_CLIENT.dashboard(30);
+      const seller = data.avgSellerTalkPct == null ? 'n/d' : data.avgSellerTalkPct + '%';
+      const customer = data.avgCustomerTalkPct == null ? 'n/d' : data.avgCustomerTalkPct + '%';
+      grid.innerHTML =
+        '<div><small>Chamadas</small><b>' + escapeHtml(String(data.calls || 0)) + '</b></div>' +
+        '<div><small>Minutos gravados</small><b>' + escapeHtml(String(data.audioMinutes || 0)) + '</b></div>' +
+        '<div><small>Duração média</small><b>' + escapeHtml(formatCallDuration(Number(data.avgCallSeconds || 0) * 1000)) + '</b></div>' +
+        '<div><small>Transcritas</small><b>' + escapeHtml(String(data.transcriptionCoveragePct || 0) + '%') + '</b></div>' +
+        '<div><small>Você fala</small><b>' + escapeHtml(seller) + '</b></div>' +
+        '<div><small>Cliente fala</small><b>' + escapeHtml(customer) + '</b></div>';
+      const objections = Object.entries(data.objections || {}).sort((a,b) => Number(b[1]) - Number(a[1])).slice(0,4);
+      const outcomes = Object.entries(data.outcomes || {}).sort((a,b) => Number(b[1]) - Number(a[1])).slice(0,4);
+      const parts = [];
+      if (objections.length) parts.push('Objeções: ' + objections.map(([key,value]) => key + ' ' + value).join(' · '));
+      if (outcomes.length) parts.push('Resultados: ' + outcomes.map(([key,value]) => key + ' ' + value).join(' · '));
+      parts.push('Perguntas detectadas: ' + Number(data.questions || 0));
+      parts.push(data.providerReady ? 'Transcrição automática disponível' : 'Transcrição automática ainda sem provedor; texto colado continua disponível');
+      detail.textContent = parts.join('  |  ');
+    } catch (error) {
+      detail.textContent = 'Métricas indisponíveis agora: ' + String(error?.message || error);
+    }
+  }
+
   function initCallAI() {
     if (window.OG_CALL_INTELLIGENCE_CLIENT) OG_CALL_INTELLIGENCE_CLIENT.configure({ fetcher: apiFetch });
     const input = document.getElementById('call-ai-client-search');
@@ -7778,6 +7807,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         selectCallClient(matches[activeIndex].id);
       }
     });
+    document.getElementById('call-intelligence-refresh')?.addEventListener('click', renderCallIntelligenceDashboard);
     document.getElementById('call-ai-objective')?.addEventListener('change', event => { state.callAI.objective = event.target.value; });
     document.getElementById('call-ai-result')?.addEventListener('change', event => {
       const meeting = event.target.value === 'reuniao_agendada';
