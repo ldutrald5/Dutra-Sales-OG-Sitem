@@ -43,4 +43,20 @@ assert.ok(ambiguous.lines.some(x=>x.code==='SUPORTE-A-DEFINIR'));
 const bitrem={id:'bitrem_7eixos',name:'Bitrem',category:'Combinações',axles:{dianteiro:1,tracao:2,truck:0,carreta:4},questions:[{id:'traction_type',options:[{value:'6x2'},{value:'6x4'}]},{id:'brand',options:[{value:'volvo'}]}]};
 assert.deepEqual(t.adjustedAxles(bitrem,{traction_type:'6x2'}),{dianteiro:1,tracao:1,truck:1,carreta:4});
 
+const fuzzyRules=[
+  rodotrem,
+  {id:'toco_4x2',name:'Caminhão Toco 4x2',category:'Médio',keywords:['toco','4x2'],applications:['Baú'],questions:[{id:'brand',question:'Qual marca?',options:[{value:'mb',label:'Mercedes-Benz'}]}]}
+];
+assert.equal(t.searchRules(fuzzyRules,'Scania com cubo redutor traçado')[0].id,'rodotrem_9eixos','busca deve entender linguagem natural e redutor/redução');
+
+const adjusted=t.applyManualAdjustments(q,{
+  installments:6,
+  overrides:{'EQ-120':{qty:155,unitPrice:220}},
+  manualLines:[{id:'M1',code:'EQ-700',name:'Kit ferramenta',category:'ferramenta',qty:1,unitPrice:1425}]
+});
+assert.equal(adjusted.lines.find(x=>x.code==='EQ-120').qty,155);
+assert.equal(adjusted.lines.find(x=>x.code==='EQ-120').unitPrice,220);
+assert.ok(adjusted.lines.some(x=>x.code==='EQ-700'&&x.manual),'pedido assistido precisa aceitar item manual');
+assert.equal(adjusted.totalPieces,q.totalPieces-5+1);
+
 console.log('Technical quote engine tests: PASS');
