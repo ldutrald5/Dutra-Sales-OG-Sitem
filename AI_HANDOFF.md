@@ -70,3 +70,44 @@ Registre no mínimo:
 - situação de sincronização GitHub/produção.
 
 Isso permite continuidade por ChatGPT, Codex, Claude, Gemini, outro agente ou desenvolvedor humano.
+
+## Handoff — WhatsApp/Kaption
+
+Para tarefas relacionadas ao WhatsApp automático:
+
+- worker local: `scripts/whatsapp-kaption-bridge.mjs`;
+- comando contínuo: `npm run og:whatsapp:bridge`;
+- diagnóstico de um ciclo: `npm run og:whatsapp:bridge:once`;
+- teste determinístico: `npm run og:whatsapp:bridge:test`;
+- cursor privado padrão: `apps/sistema-og/.data/kaption-sync-cursor.json`;
+- endpoint de ingestão: variável `OG_WHATSAPP_INGEST_URL`;
+- chave server-side: `OG_WHATSAPP_INGEST_API_KEY` (nunca versionar/expor no frontend).
+
+O Kaption deve estar aberto e com a ponte MCP local funcional. O worker consulta `entity=session` e depois conversas/mensagens com `after`. Não adicionar envio automático ao mesmo processo: ações externas continuam separadas e exigem confirmação humana.
+
+## Handoff — WhatsApp E2E
+
+- teste live: `npm run og:whatsapp:e2e`;
+- harness offline/CI: `npm run og:whatsapp:e2e:test`;
+- chave preferida: `OG_WHATSAPP_E2E_API_KEY=sb_secret_...`;
+- fallbacks locais: `OG_WHATSAPP_INGEST_API_KEY`, `SUPABASE_SECRET_KEY`, legado `SUPABASE_SERVICE_ROLE_KEY`;
+- nunca registrar a chave no Git, frontend ou logs;
+- `OG_WHATSAPP_E2E_KEEP=true` preserva dados sintéticos somente quando for necessário diagnosticar falha;
+- por padrão, o teste remove proposta, oportunidade, atividades, conversa, contato, eventos e empresas sintéticas ao finalizar;
+- não usar o modo E2E como atalho para proposta real: o bypass de discovery exige `metadata.e2e=true` e empresa `[E2E]`.
+
+## Handoff — AutoStart do Bridge no Windows
+
+O computador que mantém Kaption/WhatsApp pode registrar o Bridge como tarefa do Windows.
+
+Instalação por duplo clique:
+- `INSTALL_WHATSAPP_AUTOSTART.cmd`
+
+Alternativa CLI:
+- `npm run og:whatsapp:autostart:install`
+- `npm run og:whatsapp:autostart:status`
+- `npm run og:whatsapp:autostart:uninstall`
+
+A tarefa se chama `DUTRA-OS-WhatsApp-Bridge`, inicia no logon do usuário atual e tenta reiniciar após falha. O launcher resolve o caminho do repositório dinamicamente, usa o `.env` local e grava logs em `apps/sistema-og/.data/logs/`.
+
+Nunca colocar segredo no Task Scheduler, arquivo .cmd ou scripts versionados. O segredo continua somente no `.env` local.

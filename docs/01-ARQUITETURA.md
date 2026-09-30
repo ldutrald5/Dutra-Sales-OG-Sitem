@@ -83,3 +83,53 @@ O Motor de Prospecção adiciona parser, fila, recomendação e métricas determ
 A camada de automação contém parser, importação, duplicidade, fila, datas, templates, Command Center e métricas. A camada de inteligência contém Call AI, estratégia, objeções complexas e análise. O Call AI recebe somente o contexto compacto da conta ativa e retorna à Mesa ou à Prospecção sem carregar o CRM inteiro.
 
 Detalhamento existente: [fundação operacional](architecture/og-operations-foundation.md), [mapa de produto](architecture/sistema-og-product-map.md) e [copiloto](architecture/sistema-og-copiloto.md).
+
+## Incremento WA-MCP-01 — ingestão WhatsApp/Kaption
+
+A leitura automática do WhatsApp passa a existir como **bridge local opcional**, separado do PWA e do servidor hospedado. O processo `scripts/whatsapp-kaption-bridge.mjs` inicia o `@kaptionai/mcp-extension` por stdio, consulta primeiro as sessões conectadas e usa a ferramenta `query` com cursor `after` para ingestão incremental.
+
+Fluxo:
+
+```text
+Kaption/WhatsApp local
+        │ MCP stdio (read-only)
+        ▼
+whatsapp-kaption-bridge.mjs
+        │ HTTPS + apikey server-side
+        ▼
+Supabase whatsapp-ingest
+        ├── integration_events / crm_messages / crm_insights
+        ▼
+commercial-processor
+        ├── fatos explícitos confirmados → dados derivados/auditáveis
+        ├── sugestões/IA → revisão
+        ├── follow-up sem envio externo
+        └── proposal-engine → rascunho quando requisitos confirmados existem
+```
+
+Regras preservadas:
+
+- o bridge não envia mensagens nem altera chats;
+- grupos ficam desativados por padrão;
+- cursor e estado local ficam em `apps/sistema-og/.data/`;
+- o segredo de ingestão existe apenas no ambiente do worker;
+- retries são idempotentes no backend;
+- mensagens não promovem estágio comercial automaticamente;
+- proposta gerada é artefato interno/rascunho e não equivale a proposta enviada;
+- a camada Supabase de integração/auditoria não substitui silenciosamente `state.leads` como cadastro mestre do PWA; reconciliação exige migração explícita.
+
+## Incremento WA-E2E-01 — Self-Test do fluxo WhatsApp
+
+O fluxo Kaption/WhatsApp possui um harness E2E hospedado acionado por CLI:
+
+```bash
+npm run og:whatsapp:e2e
+```
+
+O teste cria somente entidades com prefixo `[E2E]` e provider `e2e`, usa o `whatsapp-ingest` real, passa pelo `commercial-processor`, grava CRM auxiliar, gera follow-up e chama o `proposal-engine` real.
+
+Para evitar pesquisa externa durante validação, o insight leva `metadata.e2e=true`. O `commercial-processor` propaga um header interno `x-og-e2e: 1` para o `proposal-engine`; esse modo só é aceito quando o nome da empresa começa com `[E2E]`. O proposal engine mantém cálculo, proposta e banco reais, mas cancela o `enrichment_job` sintético e não inicia company discovery.
+
+O harness valida caminho feliz, idempotência, proveniência e bloqueio de hipótese não confirmada. Cleanup padrão remove somente IDs criados pelo próprio run. `OG_WHATSAPP_E2E_KEEP=true` existe apenas para diagnóstico explícito.
+
+A chave usada pelo harness é server-side. Preferir chave Supabase moderna `sb_secret_...`; nunca expor essa chave no PWA/browser.

@@ -56,3 +56,30 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 ## [2.0] — Foundation
 
 - Evolução visual para shell DUTRA OS preservando módulos e contratos existentes.
+
+## [Unreleased] — WhatsApp/Kaption CRM Bridge
+
+- Adicionado worker local CLI para leitura incremental do Kaption MCP.
+- Adicionados cursor privado, suporte multi-sessão e exclusão de grupos por padrão.
+- Mensagens seguem para a camada server-side `whatsapp-ingest` com metadados mínimos.
+- Extração determinística reconhece somente fatos inbound explícitos; perguntas e hipóteses não viram fatos.
+- Segredos de ingestão permanecem somente em variáveis de ambiente.
+- Mantida a regra: leitura de WhatsApp, rascunho de proposta e próxima ação não significam envio, contato concluído ou avanço automático de estágio.
+
+## [Unreleased] — WhatsApp E2E Self-Test
+
+- Adicionado `npm run og:whatsapp:e2e` para testar o pipeline hospedado real.
+- Adicionados cenários de caminho feliz, retry/idempotência e hipótese não confirmada.
+- Adicionado cleanup automático limitado a registros sintéticos do próprio run.
+- Modo E2E interno mantém cálculo/ROI/proposta reais, cancela enrichment job sintético e não inicia pesquisa externa.
+- Harness offline entrou na suíte de validação; segredos não são necessários no CI.
+- O teste prefere as novas chaves Supabase `sb_secret_...`, mantendo fallback legado durante migração.
+
+## [Unreleased] — WhatsApp Bridge AutoStart Windows
+
+- Adicionado instalador de duplo clique `INSTALL_WHATSAPP_AUTOSTART.cmd`.
+- Adicionada Scheduled Task `DUTRA-OS-WhatsApp-Bridge` no logon do usuário.
+- Bridge reinicia automaticamente após falha.
+- Logs locais são gravados em `apps/sistema-og/.data/logs/`.
+- Segredos permanecem somente no `.env` local.
+- Adicionados comandos de install/status/uninstall e teste de contrato.

@@ -98,3 +98,17 @@ Em caso de conflito, use esta ordem:
 5. Sugestões de IA.
 
 Nunca promova o item 5 para os níveis 1–3 sem validação.
+
+## Integração WhatsApp/Kaption — WA-MCP-01
+
+O DUTRA OS possui uma camada server-side de ingestão para WhatsApp via Kaption. O worker local `scripts/whatsapp-kaption-bridge.mjs` opera somente enquanto Kaption/WhatsApp estão disponíveis no computador, lê mensagens incrementalmente e envia eventos ao Supabase `og-proposal-engine`.
+
+A integração segue o contrato **mensagem observada ≠ resultado comercial**. Extração automática só pode promover para fato campos derivados de linguagem inbound explícita e determinística, com proveniência. Sugestões de IA não confirmadas permanecem revisão. Nenhum estágio é alterado silenciosamente e nenhum envio de WhatsApp ocorre pelo bridge.
+
+O Supabase contém a trilha de integração, entidades normalizadas auxiliares e o motor de proposta/ROI, mas não substitui automaticamente o cadastro mestre local `state.leads` enquanto não houver migração/reconciliação explícita e validada.
+
+## Auto-teste E2E do WhatsApp
+
+O DUTRA OS possui `npm run og:whatsapp:e2e` para validar o pipeline server-side com dados sintéticos: ingestão, CRM auxiliar, processador comercial, follow-up, proposta/ROI, idempotência e auditoria.
+
+O teste nunca envia mensagens ao WhatsApp e não altera estágio comercial. Empresas de teste usam prefixo `[E2E]`; dados não confirmados permanecem revisão. O modo E2E pula somente enriquecimento externo e cancela o job sintético correspondente; cálculo e persistência continuam reais. Cleanup é automático por padrão e limitado aos IDs do run.
