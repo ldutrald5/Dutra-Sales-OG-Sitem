@@ -7,4 +7,8 @@ assert.equal(gateway.cfg({OG_SUPABASE_URL:'https://x.supabase.co',OG_SUPABASE_SE
 const result=await gateway.listLists({});
 assert.equal(result.status,503);
 assert.equal(result.configured,false);
-console.log('sales-execution-gateway: safe disabled mode ok');
+const normalized=gateway.normalizeCallCommand({externalId:'CALL-1',companyId:'11111111-1111-1111-1111-111111111111',result:'meeting_booked'});
+assert.equal(normalized.result,'MEETING_BOOKED');
+assert.equal(gateway.RESULT_STAGE.MEETING_BOOKED,'MEETING_SCHEDULED');
+assert.throws(()=>gateway.normalizeCallCommand({externalId:'X',companyId:'11111111-1111-1111-1111-111111111111',result:'invented'}),/inválido/);
+console.log('sales-execution-gateway: safe disabled mode + command validation ok');
