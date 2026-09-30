@@ -30,7 +30,7 @@ function addStyles(){
     .clientProposalItem{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px;border:1px solid #27323a;border-radius:10px;background:#091015;margin:8px 0}.clientProposalItem b{font-size:10px}.clientProposalItem small{display:block;color:#84909a;font-size:8px;margin-top:3px}.clientProposalItem strong{font-size:11px;color:#ffd400}.clientProposalItem button{grid-column:1/-1;height:34px;border:1px solid #34404a;border-radius:8px;background:#0d1419;color:#dce3e7;font-size:8px;font-weight:900}
     .clientFleetFacts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.clientFleetFact{border:1px solid #27323a;border-radius:10px;background:#091015;padding:11px}.clientFleetFact small{display:block;color:#82909a;font-size:7px}.clientFleetFact strong{display:block;font-size:12px;margin-top:4px}
     .clientNoData{padding:16px;border:1px dashed #34404a;border-radius:11px;color:#87939c;font-size:9px;text-align:center}
-    .clientAction[data-real-action],.contactBtns button[data-real-action]{cursor:pointer}
+    .clientAction[data-real-action],.contactBtns button[data-real-action]{cursor:pointer}.homeBell{position:relative}.homeBellCount{position:absolute;right:-4px;top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ffd400;color:#111;display:grid;place-items:center;font-size:7px;font-weight:900;border:2px solid #080d11}
     @media(max-width:560px){.clientOverviewGrid{grid-template-columns:1fr}.clientHistoryItem{grid-template-columns:34px 1fr}.clientHistoryItem time{grid-column:2}.clientFleetFacts{grid-template-columns:1fr 1fr}}
   `;document.head.appendChild(s);
 }
@@ -123,6 +123,8 @@ function renderHome(){
     const head=$('.sectionHead',recentSection)?.outerHTML||'';
     const recent=topRecent();
     recentSection.innerHTML=head+(recent.length?recent.map(lead=>`<div class="clientrow" data-core-lead="${attr(lead.id)}"><div class="thumb">${esc(clean(lead.empresa||lead.nome).slice(0,1).toUpperCase()||'C')}</div><div class="rowBody"><b>${esc(lead.empresa||lead.nome||'Conta')}</b><small>${esc([lead.nome&&lead.nome!==lead.empresa?lead.nome:'',lead.cidadeUf||'',lead.nextAction||'Sem próxima ação'].filter(Boolean).join(' · '))}</small></div><span class="status gray">${esc(pipelineLabel(lead))}</span></div>`).join(''):'<div class="homeLiveEmpty">Nenhuma conta na base real.</div>');
+    const viewAll=$('.sectionHead button',recentSection);
+    if(viewAll)viewAll.onclick=e=>{e.preventDefault();globalThis.go?.('clients');setTimeout(()=>$('#clientPickerInput')?.focus(),80)};
   }
 
   const agenda=$('#home .agenda');
@@ -153,8 +155,21 @@ function renderHome(){
 
   const central=$$('#home .sectionHead button').find(b=>b.textContent.includes('Central operacional'));
   if(central){central.dataset.go='day';central.onclick=e=>{e.preventDefault();globalThis.go?.('day')}}
-  const prospection=$$('#home .module').find(m=>$('b',m)?.textContent?.includes('Prospecção'));
+  const prospection=$('#home .module').find(m=>$('b',m)?.textContent?.includes('Prospecção'));
   if(prospection){prospection.dataset.go='prospecting';prospection.onclick=e=>{e.preventDefault();globalThis.go?.('prospecting')}}
+  const topButtons=$('#home .top .iconBtn');
+  const bell=topButtons.find(b=>b.querySelector('[data-lucide="bell"]'));
+  if(bell){
+    bell.classList.add('homeBell');
+    let badge=$('.homeBellCount',bell);
+    if(!badge){badge=document.createElement('span');badge.className='homeBellCount';bell.appendChild(badge)}
+    badge.textContent=String(Math.min(99,queue.filter(x=>x.state==='OVERDUE'||x.state==='TODAY').length));
+    badge.style.display=badge.textContent==='0'?'none':'grid';
+    bell.onclick=e=>{e.preventDefault();globalThis.go?.('executionQueue');globalThis.DUTRA_ACTION_CENTER?.render?.()};
+    bell.title='Próximas ações';
+  }
+  const primaryClient=$('#home .buttons .btn').find(b=>b.dataset.go==='clients');
+  if(primaryClient)primaryClient.innerHTML='<i data-lucide="users"></i> Cliente 360°';
   lucide?.createIcons?.();
 }
 
@@ -200,6 +215,10 @@ function renderClient(){
   if(!snapshot())return;
   ensureClientPicker();
   const lead=selected(),screen=$('#clients');if(!screen)return;
+  const clientMenu=$('.pageHead > .iconBtn:last-child',screen);
+  if(clientMenu){clientMenu.style.display='none';clientMenu.setAttribute('aria-hidden','true')}
+  const appMenu=$('#application .pageHead > .iconBtn:last-child');
+  if(appMenu){appMenu.style.display='none';appMenu.setAttribute('aria-hidden','true')}
   if(!lead){$('.clientInfo h2',screen).textContent='Nenhum cliente selecionado';$('.clientInfo p',screen).textContent='Use a busca acima para abrir uma conta.';return}
 
   const title=$('.clientInfo h2',screen),subtitle=$('.clientInfo p',screen),avatar=$('.bigAvatar',screen);
