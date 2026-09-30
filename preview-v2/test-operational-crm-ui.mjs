@@ -18,6 +18,10 @@ assert.match(operational,/contactsFor/,'Cliente 360 deve usar mapa real de pesso
 assert.match(operational,/clientPickerInput/,'Cliente 360 precisa permitir trocar de conta sem sair da tela');
 assert.match(operational,/DUTRA_QUOTE_HANDOFF/,'proposta do Cliente 360 deve abrir o motor oficial');
 assert.match(operational,/DUTRA_ACTION_CENTER/,'próxima ação deve usar fluxo estruturado');
+assert.match(operational,/CRM_ACCOUNT_VIEWS/,'Cliente 360 deve reutilizar as visões inteligentes do CRM legado');
+assert.match(operational,/summarizeCrmViews/,'contadores das visões CRM devem vir do motor existente');
+assert.match(operational,/matchesCrmView/,'filtros do CRM legado devem ser reutilizados, não duplicados');
+assert.match(operational,/Fila de ataque|clientSmartView/,'V3 precisa organizar a base sem criar outro banco de leads');
 for (const fake of ['Lorentrans','Biener','Vendruscolo','Aragão']) {
   assert.doesNotMatch(operational,new RegExp(fake,'i'),'camada operacional não pode depender de cliente fictício/fixo: '+fake);
 }
