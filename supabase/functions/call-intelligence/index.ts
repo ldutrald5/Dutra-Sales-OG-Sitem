@@ -384,8 +384,17 @@ async function requestTranscription(payload: Record<string, unknown>) {
   if (rec.error) throw rec.error;
   if (!rec.data) throw new Error("Gravação não encontrada");
   if (!providerReady()) throw new Error("Transcrição automática ainda não está configurada");
-  await transcribeRecording(rec.data.id);
-  return statusForSession(callSessionId);
+  const queued = await admin.from("call_recordings").update({
+    transcription_status: "QUEUED",
+    transcription_error: null,
+    updated_at: new Date().toISOString()
+  }).eq("id", rec.data.id).select("id,call_session_id,transcription_status").single();
+  if (queued.error) throw queued.error;
+  const task = transcribeRecording(rec.data.id).catch(error => console.error("background transcription failed", error));
+  const runtime = (globalThis as any).EdgeRuntime;
+  if (runtime?.waitUntil) runtime.waitUntil(task);
+  else await task;
+  return { queued:true, providerReady:true, recording:queued.data };
 }
 
 async function saveManualTranscript(payload: Record<string, unknown>) {
