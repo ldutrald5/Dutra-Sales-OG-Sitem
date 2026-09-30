@@ -17,7 +17,7 @@ assert.match(migration, /'call-recordings'[\s\S]*false/, 'bucket de áudio deve 
 assert.match(migration, /100 MB|104857600/, 'limite de arquivo deve ser explícito');
 assert.match(edge, /TOKEN_NAME = "call_intelligence_gateway"/);
 assert.match(edge, /createSignedUploadUrl/, 'upload deve usar URL assinada server-side');
-assert.match(edge, /api\.openai\.com\/v1\/audio\/transcriptions/, 'transcrição automática deve ficar server-side');
+assert.match(fs.readFileSync('supabase/functions/call-intelligence/provider-request.ts','utf8'), /api\.openai\.com\/v1\/audio\/transcriptions/, 'transcrição automática deve ficar server-side');
 assert.match(edge, /gpt-4o-transcribe-diarize/, 'modelo diarizado deve ser o padrão');
 assert.match(edge, /review_required: true/, 'extrações devem exigir revisão');
 assert.match(edge, /crm_fact_mutation: false/, 'análise não pode promover fatos de CRM automaticamente');

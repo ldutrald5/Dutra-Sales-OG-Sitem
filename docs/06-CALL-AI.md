@@ -72,3 +72,15 @@ A gravação passa a ter um ciclo durável e auditável:
 - Extrações da conversa são **candidatos revisáveis**; não viram frota, dor, preço, estágio, reunião ou outro fato canônico sem confirmação.
 - Quando o resultado da ligação entra no Sales Execution, a gravação pode ser vinculada ao `call_attempt` e à oportunidade.
 - O Call AI exibe também um resumo agregado dos últimos 30 dias.
+
+## AI Secure Backend — estado do gate
+
+O fluxo atual continua navegador → servidor OG protegido → token interno → Edge Function. Não é ainda um fluxo Supabase Auth por organização.
+
+O incremento adiciona timeout de 90 segundos, IDs de requisição em provider_usage/metadata e erros sanitizados. Não há retry automático após timeout para evitar cobranças duplicadas.
+
+Para ativação: cadastrar OPENAI_API_KEY diretamente em Edge Functions → Secrets do projeto hlyffyguxqxmgxlevfeq, confirmar faturamento/acesso ao modelo e testar áudio curto autorizado com duas vozes. Não enviar chave pelo chat. A chave privada Supabase compartilhada anteriormente deve ser substituída e revogada no painel; atualizar os consumidores antes de revogar.
+
+O código da Edge Function implantada é diferente do arquivo main verificado neste incremento. Não substituir a função ao vivo antes de reconciliar essa diferença. A versão deste incremento deve ser revisada em branch isolada.
+
+Pendências técnicas: autorização por usuário/org; ledger ai_requests; deduplicação concorrente; recuperação durável; análise estruturada e Mutation Queue; auditoria de bundle completo. A transcrição manual existente não comprova transcrição OpenAI real.

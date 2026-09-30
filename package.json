@@ -93,7 +93,7 @@
     "og:whatsapp:autostart:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/uninstall-whatsapp-bridge-autostart.ps1",
     "og:whatsapp:autostart:test": "node scripts/test_whatsapp_autostart_contract.mjs",
     "og:sales-execution:test": "node scripts/test_sales_execution_adapter.mjs && node scripts/test_sales_execution_gateway.mjs",
-    "og:call-intelligence:test": "node scripts/test_call_intelligence_gateway.mjs && node scripts/test_call_intelligence_contract.mjs"
+    "og:call-intelligence:test": "node scripts/test_call_intelligence_gateway.mjs && node scripts/test_call_intelligence_contract.mjs && node scripts/test_call_intelligence_provider.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",

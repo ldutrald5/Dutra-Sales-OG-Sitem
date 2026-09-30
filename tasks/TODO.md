@@ -225,3 +225,10 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 5. **WAVE-05:** Aplicação Visual 360° — projeção visual do Technical Brain.
 6. **WAVE-06:** Proposal + ROI Engine — uma fonte para mensagem, proposta e cenários financeiros.
 7. **WAVE-07:** Coach DUTRA — orientação baseada em dados reais estruturados.
+
+## AI Secure Backend
+
+- Incremento de timeout, tracing e sanitização implementado; revisão em branch isolada.
+- Pendente reconciliar Edge Function live com main antes de deploy.
+- Pendente secrets/rotação pelo titular e validação de transcrição real.
+- Gate completo ainda pendente: Auth/org, ai_requests, concorrência/retry durável e análise revisável integrada à fila.
