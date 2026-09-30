@@ -70,3 +70,17 @@ Registre no mínimo:
 - situação de sincronização GitHub/produção.
 
 Isso permite continuidade por ChatGPT, Codex, Claude, Gemini, outro agente ou desenvolvedor humano.
+
+## Handoff — WhatsApp/Kaption
+
+Para tarefas relacionadas ao WhatsApp automático:
+
+- worker local: `scripts/whatsapp-kaption-bridge.mjs`;
+- comando contínuo: `npm run og:whatsapp:bridge`;
+- diagnóstico de um ciclo: `npm run og:whatsapp:bridge:once`;
+- teste determinístico: `npm run og:whatsapp:bridge:test`;
+- cursor privado padrão: `apps/sistema-og/.data/kaption-sync-cursor.json`;
+- endpoint de ingestão: variável `OG_WHATSAPP_INGEST_URL`;
+- chave server-side: `OG_WHATSAPP_INGEST_API_KEY` (nunca versionar/expor no frontend).
+
+O Kaption deve estar aberto e com a ponte MCP local funcional. O worker consulta `entity=session` e depois conversas/mensagens com `after`. Não adicionar envio automático ao mesmo processo: ações externas continuam separadas e exigem confirmação humana.

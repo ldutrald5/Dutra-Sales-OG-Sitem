@@ -44,3 +44,13 @@ Fechar o ciclo depois do ganho da venda sem criar base paralela:
 Primeiro: impedir perda de follow-up e reduzir trabalho manual.
 Depois: melhorar inteligência e automações.
 Sempre: preservar integridade dos dados e conhecimento técnico OG.
+
+## Em validação — V3.1 WhatsApp → CRM
+
+- Bridge local Kaption com sincronização incremental e cursor privado.
+- Ingestão server-side no Supabase com idempotência e auditoria.
+- Fatos explícitos inbound podem alimentar a camada normalizada com proveniência.
+- Sugestões de IA permanecem revisáveis.
+- Follow-up pode ser criado como tarefa; envio externo permanece manual.
+- Proposta/ROI pode nascer como rascunho quando empresa, frota e perfil veicular já estiverem confirmados.
+- Pendente para consolidação: validar tráfego real do computador com Kaption e reconciliar entidades Supabase ↔ cadastro mestre local sem migração silenciosa.
