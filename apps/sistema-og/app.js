@@ -7149,7 +7149,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   const CALL_AI_SALES_RESULT = Object.freeze({
     sem_contato:'NO_ANSWER',
-    contato_realizado:'DECISION_MAKER_REACHED',
+    gatekeeper:'GATEKEEPER',
+    decisor_identificado:'DECISION_MAKER_IDENTIFIED',
+    decisor_contatado:'DECISION_MAKER_REACHED',
+    retornar_depois:'RETURN_LATER',
+    qualificado:'QUALIFIED',
+    reuniao_agendada:'MEETING_BOOKED',
+    enviar_material:'SEND_MATERIAL',
     proposta:'PROPOSAL',
     negociacao:'PROPOSAL',
     sem_interesse:'NOT_INTERESTED'
@@ -7158,9 +7164,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   async function syncApprovedCallToSalesExecution(lead, input) {
     const refs = lead?.salesExecution || {};
     if (!window.OG_SALES_EXECUTION_CLIENT || !refs.companyId) return { synced:false, reason:'not_normalized' };
+    const canonicalResult = CALL_AI_SALES_RESULT[input.result];
+    if (!canonicalResult) return { synced:false, reason:'ambiguous_result' };
     const nextActionType = input.nextAction
-      ? (input.result === 'proposta' || input.result === 'negociacao' ? 'PROPOSAL_FOLLOW_UP' : 'FOLLOW_UP')
+      ? (input.result === 'proposta' || input.result === 'negociacao' ? 'PROPOSAL_FOLLOW_UP' : input.result === 'enviar_material' ? 'SEND_MATERIAL' : input.result === 'reuniao_agendada' ? 'MEETING' : 'FOLLOW_UP')
       : '';
+    if (input.result === 'reuniao_agendada' && !input.followUp) throw new Error('Informe a data e hora da reunião antes de registrar.');
     const result = await OG_SALES_EXECUTION_CLIENT.recordCallResult({
       externalId: input.sessionId,
       companyId: refs.companyId,
@@ -7168,10 +7177,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       opportunityId: refs.opportunityId || null,
       sessionId: refs.sessionId || null,
       memberId: refs.listMemberId || null,
-      result: CALL_AI_SALES_RESULT[input.result] || 'DECISION_MAKER_REACHED',
+      result: canonicalResult,
       note: input.summary,
       nextActionType,
-      nextActionAt: input.followUp || null
+      nextActionAt: input.followUp || null,
+      meeting: input.result === 'reuniao_agendada' ? { scheduledAt:input.followUp, mode:'PHONE', objective:input.nextAction || input.summary } : null
     });
     return { synced:true, result };
   }
