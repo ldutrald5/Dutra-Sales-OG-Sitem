@@ -290,3 +290,56 @@ load `.codex/skills/dutra-runtime-operator/SKILL.md`.
 That runtime skill must inspect the current runtime manifest and query the connected infrastructure provider when available. Repository documentation is a locator and safety contract, not proof that a deployment is currently healthy.
 
 Never place access-token values, credentials, API keys, private cookies or passwords in this skill, Git history, second-brain records or runtime documentation.
+
+## Continuous learning protocol — project-local
+
+For DUTRA OS, this skill must behave as a **controlled learning system**, not as an autonomous self-modifying agent.
+
+### Always use the existing skill stack first
+Before designing a new structural idea, inspect the relevant project-local skills and route work through them instead of inventing a parallel methodology. In particular:
+- use `dutra-builder-brain` for evidence, architecture, migration, product ideas and durable learning;
+- use `dutra-runtime-operator` for Railway, hosted runtime, environment, deployment, domains, logs and live health;
+- use the AIOX specialist skills/agents already present for architecture, development, QA, data engineering, product and UX when their scope applies.
+
+New agents or skills require a demonstrated gap. Prefer improving an existing skill over adding another overlapping one.
+
+### Learning loop
+After every STANDARD or STRUCTURAL cycle:
+1. compare prior assumptions with inspected reality;
+2. capture durable FACT / PATTERN / DECISION / ANTI-PATTERN / OPEN QUESTION in the second brain;
+3. supersede stale records rather than silently rewriting history;
+4. update this skill only when the lesson changes the reusable **method**, not merely the current product state;
+5. refresh indexes/metrics and run the brain checker;
+6. require review through normal Git history/PR controls.
+
+This is “learning” through evidence-backed repository updates. Never mutate instructions merely because an AI suggested a new rule, and never create an uncontrolled recursive process that rewrites its own guardrails.
+
+### Live reality beats stale plans
+For structural work, audit the live system when access exists. If live infrastructure/schema is ahead of repository documentation, record drift explicitly and reconcile it before creating duplicate structures. A roadmap is not proof of runtime state.
+
+### Existing-before-create gate
+Before proposing a table, service, queue, agent, screen, pipeline, score, prompt system or integration:
+1. search code and schema for an existing equivalent;
+2. classify it KEEP / ADAPT / REUSE / REPLACE / DEFER;
+3. create something new only when the gap is explicit.
+
+### Canonical transition rule
+When a normalized backend and a legacy/local-first model coexist, do not perform a big-bang replacement. Prefer:
+`legacy UI → compatibility/adapter → trusted gateway/domain command → canonical backend`.
+
+Maintain stable identity mapping and idempotency. Legacy state may remain as a compatibility projection during migration, but document which side is the architectural destination.
+
+### Trusted gateway rule
+Privileged backend credentials never belong in the browser. When client authorization/RLS is not ready, route privileged operations through a trusted server boundary. Prefer domain commands for multi-entity business events so related writes can be validated and committed atomically.
+
+Example: a call result that affects attempt + contact + opportunity + activity + meeting should have one controlled command path rather than scattered client writes.
+
+### Derived metrics rule
+Do not trust denormalized counters as canonical facts unless their update mechanism is verified. Prefer deriving metrics from immutable/normalized events until triggers or transactional maintenance are proven.
+
+### Vertical-slice proof
+For migrations/integrations, prove architecture with the smallest end-to-end workflow before broad migration. For Sales Execution, a representative slice is:
+`list → session → next account → briefing → Call AI → confirmed result → next action/meeting → next account`.
+
+The exact slice is project-specific; the reusable lesson is to validate ownership, identity, writes, UX and rollback through one complete path first.
+
