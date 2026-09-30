@@ -139,7 +139,7 @@
     $('#dutra-login').classList.add('open');
     $('#dutra-login-status').textContent = message;
     setTimeout(() => $('#dutra-login-pin')?.focus(), 60);
-    connection(false);
+    setConnectionStatus('CONNECTING','BASE AGUARDANDO AUTENTICAÇÃO');
   }
 
   function hideLogin() {
@@ -263,7 +263,7 @@
     window.dispatchEvent(new CustomEvent('dutra:state',{detail:{snapshot:state.snapshot,leads:state.leads,source:'cache'}}));
     return true;
   }
-  function networkLikeError(error) { return !error?.status || Number(error.status)>=500; }
+  function networkLikeError(error) { return !error?.status || error?.code==='NETWORK_TIMEOUT'; }
   function scheduleReconnect(delay=5000) {
     clearTimeout(state.reconnectTimer); if(!state.pin) return;
     state.reconnectTimer=setTimeout(()=>flushPendingSave(false),delay);
@@ -307,8 +307,12 @@
         connectionState()?.saveQueued?.({status:'OFFLINE',pendingCount});
         setConnectionStatus('OFFLINE');
         scheduleReconnect(force?5000:10000);
+      } else if(Number(error.status)>=500) {
+        connectionState()?.saveFailed?.({status:'ERROR',pendingCount,error:error.message,message:'TENTAR NOVAMENTE'});
+        setConnectionStatus('ERROR','BASE INDISPONÍVEL · TENTAR NOVAMENTE');
+        scheduleReconnect(force?5000:10000);
       } else if(error.message!=='unauthorized') {
-        connectionState()?.saveFailed?.({status:'ERROR',pendingCount,error:error.message});
+        connectionState()?.saveFailed?.({status:'ERROR',pendingCount,error:error.message,message:'TENTAR NOVAMENTE'});
         setConnectionStatus('ERROR');
       }
       return false;
@@ -422,8 +426,11 @@
         scheduleReconnect();
         return state.snapshot;
       }
-      connectionState()?.saveFailed?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'ERROR',error:error.message});
-      setConnectionStatus('ERROR');
+      queuePendingSave(payload,'error');
+      cacheSnapshot({...state.snapshot,...payload});
+      connectionState()?.saveFailed?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'ERROR',error:error.message,message:'TENTAR NOVAMENTE'});
+      setConnectionStatus('ERROR',Number(error.status)>=500?'BASE INDISPONÍVEL · TENTAR NOVAMENTE':'SINCRONIZAÇÃO PENDENTE');
+      if(Number(error.status)>=500) scheduleReconnect(10000);
       throw error;
     }
   }
@@ -711,7 +718,12 @@
         quoteState
       }, { operationsModel, now:new Date().toISOString() });
       state.snapshot.operations = nextOps;
-      await saveState('Rascunho oficial salvo na base real.');
+      await saveState('Rascunho oficial salvo na base real.',{
+        action:'SAVE_PROPOSAL_DRAFT',
+        entityType:'proposal',
+        entityId:quoteId,
+        label:'Proposta'
+      });
 
       const proposalId = `PROP-${quoteId.replace(/[^a-zA-Z0-9_-]/g,'').slice(-32)}`;
       const published = await api('/proposals/publish', {
