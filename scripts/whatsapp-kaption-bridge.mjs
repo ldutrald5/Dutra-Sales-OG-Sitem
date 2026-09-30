@@ -566,7 +566,7 @@ export function buildConfig(env = process.env) {
     messageLimit: envInt('OG_WHATSAPP_MESSAGE_LIMIT', 500, 1, 5000),
     cursorFile: path.resolve(String(env.OG_WHATSAPP_CURSOR_FILE || DEFAULT_CURSOR_FILE)),
     includeGroups: envBool('OG_WHATSAPP_INCLUDE_GROUPS', false),
-    once: envBool('OG_WHATSAPP_ONCE', false),
+    once: envBool('OG_WHATSAPP_ONCE', false) || process.argv.includes('--once'),
     sessionId: String(env.OG_WHATSAPP_SESSION_ID || '').trim() || null,
   };
 }
