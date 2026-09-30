@@ -10,14 +10,14 @@ export const BRIDGE_VERSION = '1.0.0';
 const DEFAULT_INGEST_URL = 'https://hlyffyguxqxmgxlevfeq.supabase.co/functions/v1/whatsapp-ingest';
 const DEFAULT_CURSOR_FILE = path.resolve('apps/sistema-og/.data/kaption-sync-cursor.json');
 
-function envInt(name, fallback, min, max) {
-  const value = Number(process.env[name]);
+function envInt(env, name, fallback, min, max) {
+  const value = Number(env[name]);
   if (!Number.isFinite(value)) return fallback;
   return Math.max(min, Math.min(max, Math.trunc(value)));
 }
 
-function envBool(name, fallback = false) {
-  const value = String(process.env[name] ?? '').trim().toLowerCase();
+function envBool(env, name, fallback = false) {
+  const value = String(env[name] ?? '').trim().toLowerCase();
   if (!value) return fallback;
   return ['1', 'true', 'yes', 'on'].includes(value);
 }
@@ -262,8 +262,13 @@ class McpStdioClient {
   }
 
   async start() {
-    const command = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-    this.child = spawn(command, ['-y', '@kaptionai/mcp-extension@latest'], {
+    const command = process.platform === 'win32'
+      ? (process.env.ComSpec || 'cmd.exe')
+      : 'npx';
+    const args = process.platform === 'win32'
+      ? ['/d', '/s', '/c', 'npx.cmd -y @kaptionai/mcp-extension@latest']
+      : ['-y', '@kaptionai/mcp-extension@latest'];
+    this.child = spawn(command, args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: process.env,
       windowsHide: true,
@@ -432,8 +437,8 @@ async function syncConversation({ client, sessionId, conversation, state, config
   const cursor = state.conversations[key]?.after || state.initial_after;
   const lastActivity = conversationTimestamp(conversation);
 
-  if (state.conversations[key]?.after && lastActivity) {
-    if (Date.parse(lastActivity) <= Date.parse(cursor)) return { scanned: 0, ingested: 0, skipped: 1 };
+  if (lastActivity && Date.parse(lastActivity) <= Date.parse(cursor)) {
+    return { scanned: 0, ingested: 0, skipped: 1 };
   }
 
   const payload = await client.callTool('query', {
@@ -560,13 +565,13 @@ export function buildConfig(env = process.env) {
   return {
     ingestUrl,
     apiKey,
-    pollMs: envInt('OG_WHATSAPP_POLL_MS', 30000, 10000, 3600000),
-    lookbackMinutes: envInt('OG_WHATSAPP_LOOKBACK_MINUTES', 30, 1, 1440),
-    maxConversations: envInt('OG_WHATSAPP_MAX_CONVERSATIONS', 500, 1, 5000),
-    messageLimit: envInt('OG_WHATSAPP_MESSAGE_LIMIT', 500, 1, 5000),
+    pollMs: envInt(env, 'OG_WHATSAPP_POLL_MS', 30000, 10000, 3600000),
+    lookbackMinutes: envInt(env, 'OG_WHATSAPP_LOOKBACK_MINUTES', 30, 1, 1440),
+    maxConversations: envInt(env, 'OG_WHATSAPP_MAX_CONVERSATIONS', 500, 1, 5000),
+    messageLimit: envInt(env, 'OG_WHATSAPP_MESSAGE_LIMIT', 500, 1, 5000),
     cursorFile: path.resolve(String(env.OG_WHATSAPP_CURSOR_FILE || DEFAULT_CURSOR_FILE)),
-    includeGroups: envBool('OG_WHATSAPP_INCLUDE_GROUPS', false),
-    once: envBool('OG_WHATSAPP_ONCE', false) || process.argv.includes('--once'),
+    includeGroups: envBool(env, 'OG_WHATSAPP_INCLUDE_GROUPS', false),
+    once: envBool(env, 'OG_WHATSAPP_ONCE', false) || process.argv.includes('--once'),
     sessionId: String(env.OG_WHATSAPP_SESSION_ID || '').trim() || null,
   };
 }
