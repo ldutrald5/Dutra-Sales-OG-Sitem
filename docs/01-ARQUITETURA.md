@@ -83,3 +83,37 @@ O Motor de Prospecção adiciona parser, fila, recomendação e métricas determ
 A camada de automação contém parser, importação, duplicidade, fila, datas, templates, Command Center e métricas. A camada de inteligência contém Call AI, estratégia, objeções complexas e análise. O Call AI recebe somente o contexto compacto da conta ativa e retorna à Mesa ou à Prospecção sem carregar o CRM inteiro.
 
 Detalhamento existente: [fundação operacional](architecture/og-operations-foundation.md), [mapa de produto](architecture/sistema-og-product-map.md) e [copiloto](architecture/sistema-og-copiloto.md).
+
+## Incremento WA-MCP-01 — ingestão WhatsApp/Kaption
+
+A leitura automática do WhatsApp passa a existir como **bridge local opcional**, separado do PWA e do servidor hospedado. O processo `scripts/whatsapp-kaption-bridge.mjs` inicia o `@kaptionai/mcp-extension` por stdio, consulta primeiro as sessões conectadas e usa a ferramenta `query` com cursor `after` para ingestão incremental.
+
+Fluxo:
+
+```text
+Kaption/WhatsApp local
+        │ MCP stdio (read-only)
+        ▼
+whatsapp-kaption-bridge.mjs
+        │ HTTPS + apikey server-side
+        ▼
+Supabase whatsapp-ingest
+        ├── integration_events / crm_messages / crm_insights
+        ▼
+commercial-processor
+        ├── fatos explícitos confirmados → dados derivados/auditáveis
+        ├── sugestões/IA → revisão
+        ├── follow-up sem envio externo
+        └── proposal-engine → rascunho quando requisitos confirmados existem
+```
+
+Regras preservadas:
+
+- o bridge não envia mensagens nem altera chats;
+- grupos ficam desativados por padrão;
+- cursor e estado local ficam em `apps/sistema-og/.data/`;
+- o segredo de ingestão existe apenas no ambiente do worker;
+- retries são idempotentes no backend;
+- mensagens não promovem estágio comercial automaticamente;
+- proposta gerada é artefato interno/rascunho e não equivale a proposta enviada;
+- a camada Supabase de integração/auditoria não substitui silenciosamente `state.leads` como cadastro mestre do PWA; reconciliação exige migração explícita.
