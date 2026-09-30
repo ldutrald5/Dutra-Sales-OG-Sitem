@@ -48,6 +48,7 @@
     "og:sync:conflict:test": "node scripts/test_sync_conflict.mjs",
     "og:sync:conflict:ui:test": "node scripts/test_sync_conflict_ui.mjs",
     "og:sync:bridge:test": "node scripts/test_sync_bridge.mjs",
+    "og:reliability:test": "node scripts/test_sync_bridge.mjs && node scripts/test_sync_conflict.mjs && node scripts/test_sync_conflict_ui.mjs && node scripts/test_connection_state_service.mjs && node scripts/test_v3_p0_connection_sync.mjs && node scripts/test_v3_p0_service_mirror.mjs",
     "og:legacy:reconciliation:test": "node scripts/test_legacy_reconciliation.mjs",
     "og:legacy:reconciliation:ui:test": "node scripts/test_legacy_reconciliation_ui.mjs",
     "og:start:hosted": "node scripts/start-og-hosted.mjs",
