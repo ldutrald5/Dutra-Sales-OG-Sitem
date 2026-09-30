@@ -54,3 +54,11 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Follow-up pode ser criado como tarefa; envio externo permanece manual.
 - Proposta/ROI pode nascer como rascunho quando empresa, frota e perfil veicular já estiverem confirmados.
 - Pendente para consolidação: validar tráfego real do computador com Kaption e reconciliar entidades Supabase ↔ cadastro mestre local sem migração silenciosa.
+
+## Em validação — Sales Execution P0
+
+- Vertical normalizada: Lista → Sessão → Prospect → Call AI → resultado confirmado → próximo prospect.
+- Adapter mantém compatibilidade temporária com `state.leads` sem transformar o legado em segunda fonte canônica.
+- Escrita multi-entidade usa RPC transacional e idempotente.
+- Gateway privilegiado permanece server-side; browser não recebe chave administrativa.
+- Próximo passo: importar/reconciliar um lote piloto com `legacy_lead_id`/`external_id` e validar o fluxo ponta a ponta antes de ampliar a migração.
