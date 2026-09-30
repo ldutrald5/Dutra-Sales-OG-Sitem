@@ -64,15 +64,15 @@ Esperado:
 ## Critérios de aceite
 
 - [x] Story criada antes do código.
-- [ ] Script E2E live implementado.
-- [ ] Teste offline do harness implementado.
-- [ ] `package.json` expõe comandos.
-- [ ] `.env.example` documenta contrato sem segredos.
-- [ ] Modo E2E interno não inicia company discovery.
-- [ ] E2E limpa dados criados.
-- [ ] CI completo passa.
-- [ ] Security advisor revisado.
-- [ ] Documentação/handoff/changelog atualizados.
+- [x] Script E2E live implementado.
+- [x] Teste offline do harness implementado.
+- [x] `package.json` expõe comandos.
+- [x] `.env.example` documenta contrato sem segredos.
+- [x] Modo E2E interno não inicia company discovery.
+- [x] E2E limpa dados criados.
+- [x] CI completo passa.
+- [x] Security advisor revisado.
+- [x] Documentação/handoff/changelog atualizados.
 
 ## File List
 
@@ -86,3 +86,17 @@ Esperado:
 - `DUTRA_OS_CONTEXT.md`
 - `AI_HANDOFF.md`
 - `CHANGELOG.md`
+
+
+## Validação executada
+
+- GitHub Actions `Package 00R CI` run **319**: PASS.
+- `npm run validate`: PASS.
+- `npm run og:brain:check`: PASS.
+- `npm run og:security:test`: PASS.
+- `npm audit --audit-level=high`: PASS.
+- `npm run release:gate`: PASS.
+- Supabase Security Advisor revisado após os deploys: nenhum novo alerta crítico; os avisos existentes são RLS sem policy nas tabelas deliberadamente server-only.
+- Supabase Performance Advisor revisado; apenas índices ainda não usados, esperado para estruturas recém-criadas.
+- `proposal-engine` E2E guard ativo: bypass de discovery exige header interno + nome de empresa `[E2E]`; enrichment job sintético é cancelado.
+- O harness live não foi executado desta sessão porque a chave secreta Supabase não é exposta ao ChatGPT/GitHub. A execução local usa `npm run og:whatsapp:e2e` com segredo no `.env`, sem commit.
