@@ -500,9 +500,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (queued.mutationIds?.length) await OG_SYNC_BRIDGE.ackMutations(queued.mutationIds);
       await updateReliabilityBadge('CONNECTED');
       return true;
-    } catch {
-      try { await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision)); } catch {}
-      setSyncStatus('Sincronização pendente', 'offline');
+    } catch (error) {
+      try {
+        for (const id of (queued.mutationIds || [])) await OG_SYNC_BRIDGE.markMutationAttempt(id, error?.message || 'Falha de sincronização');
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision), { mutationIds: queued.mutationIds || [] });
+      } catch {}
+      connectionState.lastError = String(error?.message || error || 'Falha de sincronização');
+      await updateReliabilityBadge(navigator.onLine ? 'ERROR' : 'OFFLINE');
       return false;
     } finally {
       serverSyncInFlight = false;
@@ -539,15 +543,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Servidor indisponível');
       const saved = await response.json();
       serverRevision = Number(saved.revision || serverRevision);
-      try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
+      let confirmedMutationIds = [];
       try {
         const queued = await OG_SYNC_BRIDGE.readQueuedState();
-        if (queued?.mutationIds?.length && serverSyncGeneration === generationAtStart) await OG_SYNC_BRIDGE.ackMutations(queued.mutationIds);
+        confirmedMutationIds = queued?.mutationIds || [];
+        await OG_SYNC_BRIDGE.clearQueuedState();
+        if (confirmedMutationIds.length && serverSyncGeneration === generationAtStart) {
+          await OG_SYNC_BRIDGE.ackMutations(confirmedMutationIds);
+        }
       } catch {}
       await updateReliabilityBadge(serverSyncGeneration === generationAtStart ? 'CONNECTED' : 'SYNCING');
-    } catch {
+    } catch (error) {
       try {
         const mutationIds = (await OG_SYNC_BRIDGE.listMutations()).map(row => row.id);
+        for (const id of mutationIds) await OG_SYNC_BRIDGE.markMutationAttempt(id, error?.message || 'Falha de sincronização');
         await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision), { mutationIds });
         const registration = await navigator.serviceWorker?.ready;
         await registration?.sync?.register?.('og-sync-state');
