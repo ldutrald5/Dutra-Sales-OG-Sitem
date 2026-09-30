@@ -873,7 +873,8 @@ function createSalesExecutionGateway(options = {}) {
     const email = clean(input.email, 220).toLowerCase();
     const externalId = ensureExternalId(input.externalId);
 
-    let contact = phone ? await selectOne('crm_contacts', { phone_e164: 'eq.' + phone }) : null;
+    let contact = await selectOne('crm_contacts', { provider: 'eq.dutra_sales_execution', external_contact_id: 'eq.' + externalId });
+    if (!contact && phone) contact = await selectOne('crm_contacts', { phone_e164: 'eq.' + phone });
     if (!contact && email) contact = await selectOne('crm_contacts', { email: 'eq.' + email });
     if (contact && contact.company_id && String(contact.company_id) !== String(hydrated.company.id)) {
       throw new GatewayError(409, 'decision_maker_company_conflict', 'Contato informado já está vinculado a outra empresa.');
@@ -898,7 +899,7 @@ function createSalesExecutionGateway(options = {}) {
     } else {
       contact = await insertOne('crm_contacts', {
         provider: 'dutra_sales_execution',
-        external_contact_id: null,
+        external_contact_id: externalId,
         legacy_contact_id: null,
         ...patch
       });
