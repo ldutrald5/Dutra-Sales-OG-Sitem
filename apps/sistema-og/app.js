@@ -4047,6 +4047,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function persistSalesDeskActivity(lead, interaction, activityType) {
     const now = interaction?.at || new Date().toISOString();
+    const mutationId = interaction?.idempotencyKey || interaction?.eventId || interaction?.id || `MUT-${Date.now().toString(36).toUpperCase()}`;
+    queueBusinessMutation({
+      id: mutationId,
+      idempotencyKey: mutationId,
+      action: activityType,
+      type: activityType,
+      entityType: 'lead',
+      entityId: String(lead.id),
+      label: interaction?.note || activityType,
+      payload: { leadId: lead.id, interactionId: interaction?.id || null, at: now, changedFields: interaction?.changedFields || [] }
+    }).catch(error => {
+      connectionState.lastError = String(error?.message || error || 'Falha ao enfileirar alteração');
+      updateReliabilityBadge('ERROR').catch(()=>{});
+    });
     state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
       id: interaction?.eventId || `EVT-${Date.now().toString(36).toUpperCase()}`,
       type: activityType,
@@ -4952,6 +4966,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       lead.decisionMaker = document.getElementById('lead-decision-maker').value.trim();
       lead.followUpAt = document.getElementById('lead-follow-up').value;
       lead.nextAction = document.getElementById('lead-next-action').value.trim();
+      queueBusinessMutation({
+        action:'crm.context_updated', type:'CRM_CONTEXT_UPDATED', entityType:'lead', entityId:String(lead.id),
+        label:'Contexto comercial atualizado',
+        payload:{leadId:lead.id,status:lead.status,priority:lead.priority,fleetSize:lead.fleetSize,pain:lead.pain,decisionMaker:lead.decisionMaker,followUpAt:lead.followUpAt,nextAction:lead.nextAction}
+      }).catch(()=>updateReliabilityBadge('ERROR'));
       saveLeadsToStorage();
       renderLeadsTable();
       showNotification('Contexto e próximo retorno salvos.', 'success');
@@ -4960,9 +4979,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const note = document.getElementById('lead-interaction-note').value.trim();
       if (!note) return showNotification('Escreva uma nota curta antes de registrar.', 'info');
       const now = new Date().toISOString();
-      lead.interactions.push({ id: `INT-${Date.now()}`, at: now, type: 'conversa', note });
+      const interaction = OG_INTERACTION_SERVICE.addInteraction(lead, { type:'conversa', note });
+      queueBusinessMutation({
+        id:interaction.idempotencyKey, idempotencyKey:interaction.idempotencyKey,
+        action:'interaction.recorded', type:'INTERACTION_RECORDED', entityType:'lead', entityId:String(lead.id),
+        label:note, payload:{leadId:lead.id,interactionId:interaction.id,at:interaction.at,note}
+      }).catch(()=>updateReliabilityBadge('ERROR'));
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'interaction.recorded', at: now, clientId: lead.id, interactionType: 'conversation' });
-      lead.lastContactAt = now;
       if (lead.status === 'novo') lead.status = 'contatado';
       saveLeadsToStorage();
       saveOperationsToStorage();
