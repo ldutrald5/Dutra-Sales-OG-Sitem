@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const core=fs.readFileSync(new URL('../preview-v2/core-bridge.js',import.meta.url),'utf8');
+const connection=fs.readFileSync(new URL('../apps/sistema-og/services/connection-state-service.js',import.meta.url),'utf8');
 const index=fs.readFileSync(new URL('../preview-v2/index.html',import.meta.url),'utf8');
 const server=fs.readFileSync(new URL('../preview-v2/server.mjs',import.meta.url),'utf8');
 const actions=fs.readFileSync(new URL('../preview-v2/sales-action-center-v3.js',import.meta.url),'utf8');
@@ -21,7 +22,9 @@ assert.match(core,/function enqueueBusinessMutation/);
 assert.match(core,/function acknowledgePendingMutations/);
 assert.match(core,/getPendingMutations/);
 assert.match(core,/navigator\.onLine===false/);
-assert.match(core,/SALVO NESTE APARELHO · SINCRONIZAÇÃO PENDENTE/);
+assert.match(connection,/SALVO NESTE APARELHO · SINCRONIZAÇÃO PENDENTE/);
+assert.match(connection,/SALVO ✓/);
+assert.match(connection,/TENTAR NOVAMENTE/);
 assert.match(core,/TENTAR NOVAMENTE/);
 assert.match(core,/BASE INDISPONÍVEL · TENTAR NOVAMENTE/);
 
