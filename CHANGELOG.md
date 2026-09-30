@@ -83,3 +83,12 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Logs locais são gravados em `apps/sistema-og/.data/logs/`.
 - Segredos permanecem somente no `.env` local.
 - Adicionados comandos de install/status/uninstall e teste de contrato.
+
+## [Unreleased] — Sales Execution P0
+
+- Conectada a Prospecção às listas e sessões normalizadas do Supabase sem criar um segundo CRM.
+- Call AI passa a registrar resultados confirmados por um comando transacional e idempotente.
+- Resultado confirmado atualiza tentativa, atividade, oportunidade, reunião quando explícita, membro da lista e cursor da sessão.
+- Após o registro, a Prospecção retorna automaticamente para o próximo prospect disponível.
+- Criado gateway Railway → Supabase Edge com token interno rotacionável; credenciais administrativas não chegam ao navegador.
+- Mantido fallback local observável quando a conta ainda não está normalizada ou a sincronização falha.

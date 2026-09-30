@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const require=createRequire(import.meta.url);
+const gateway=require('../apps/sistema-og/server-sales-execution-gateway.cjs');
+assert.equal(gateway.cfg({}).enabled,false);
+assert.equal(gateway.cfg({OG_SUPABASE_URL:'https://x.supabase.co',OG_SUPABASE_SERVICE_ROLE_KEY:'secret'}).enabled,true);
+assert.equal(gateway.cfg({OG_SALES_EXECUTION_EDGE_URL:'https://x.supabase.co/functions/v1/sales-execution-gateway',OG_SALES_EXECUTION_EDGE_TOKEN:'token-token-token-token-token-token'}).mode,'edge');
+const result=await gateway.listLists({});
+assert.equal(result.status,503);
+assert.equal(result.configured,false);
+const normalized=gateway.normalizeCallCommand({externalId:'CALL-1',companyId:'11111111-1111-1111-1111-111111111111',result:'meeting_booked'});
+assert.equal(normalized.result,'MEETING_BOOKED');
+assert.equal(gateway.RESULT_STAGE.MEETING_BOOKED,'MEETING_SCHEDULED');
+assert.throws(()=>gateway.normalizeCallCommand({externalId:'X',companyId:'11111111-1111-1111-1111-111111111111',result:'invented'}),/inválido/);
+console.log('sales-execution-gateway: safe disabled mode + command validation ok');
