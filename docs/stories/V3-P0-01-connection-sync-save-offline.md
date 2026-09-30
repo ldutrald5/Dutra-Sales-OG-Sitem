@@ -117,6 +117,8 @@ Fases visíveis:
 
 Os critérios CASO 1 e CASO 2 acima permanecem desmarcados até serem exercitados em um navegador autenticado real, incluindo desligar rede, editar, reconectar e recarregar. A implementação e os contratos automatizados que suportam esses casos estão verdes, mas isso não substitui o teste manual de comportamento do browser.
 
+Revalidação em 2026-09-30: todos os testes direcionados e a suíte V3 passaram; o deployment Railway consultado estava `SUCCESS`, e a página e o `/health` responderam HTTP 200. Auditoria consolidada em `docs/audits/DUTRA_OS_V3_SPRINT_1_AUDIT.md`. A pendência manual acima permanece sem ser marcada artificialmente como concluída.
+
 ## File List
 
 - `docs/stories/V3-P0-01-connection-sync-save-offline.md`
