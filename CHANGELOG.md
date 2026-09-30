@@ -92,3 +92,13 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Após o registro, a Prospecção retorna automaticamente para o próximo prospect disponível.
 - Criado gateway Railway → Supabase Edge com token interno rotacionável; credenciais administrativas não chegam ao navegador.
 - Mantido fallback local observável quando a conta ainda não está normalizada ou a sincronização falha.
+
+
+## [Unreleased] — Call Intelligence V1
+
+- Evoluída a gravação do Call AI de arquivo apenas local para persistência opcional em Storage privado.
+- Adicionadas transcrição automática server-side quando o provedor estiver configurado e transcrição manual como fallback.
+- Adicionadas métricas de duração, tempo de fala por canal, sobreposição, palavras, perguntas, objeções, termos comerciais e menções numéricas.
+- Adicionado dashboard agregado de 30 dias no Call AI.
+- Áudio só é enviado após ação explícita; análise e extrações não alteram fatos do CRM automaticamente.
+- Gravações normalizadas passam a poder ser vinculadas ao `call_attempt` do Sales Execution.
