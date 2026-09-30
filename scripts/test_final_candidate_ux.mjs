@@ -39,7 +39,7 @@ assert.match(app, /card\.tabIndex = 0/, 'cards clicáveis do catálogo precisam 
 assert.match(app, /card\.setAttribute\('role', 'button'\)/, 'cards clicáveis do catálogo precisam declarar papel');
 assert.match(app, /event\.key === 'Enter' \|\| event\.key === ' '/, 'cards do catálogo precisam aceitar teclado');
 
-const swVersion = Number(sw.match(/const SW_VERSION = 'v(\\d+)';/)?.[1] || 0);
+const swVersion = Number(sw.match(/const SW_VERSION = 'v(\d+)';/)?.[1] || 0);
 assert.ok(swVersion >= 64, 'RC3 e versões posteriores precisam preservar invalidação do cache anterior');
 
 console.log('DUTRA OS 1.0 RC3 final candidate UX tests: PASS');
