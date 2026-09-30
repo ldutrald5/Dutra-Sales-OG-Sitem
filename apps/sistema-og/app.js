@@ -108,7 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     leadSourceFilter: 'all',
     leadPriorityFilter: 'all',
     salesDeskSearch: '',
-    prospecting: { view: 'inbox', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    prospecting: { view: 'lists', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    salesExecution: { lists: [], loading: false, error: '', session: null, current: null, briefing: null, prepared: null, busy: false, pending: null },
     communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
     ocrImageBase64: null,
     ocrExtractedText: '',
@@ -126,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       intent: 'prepare_call',
       centralResponse: null,
       sessionId: null,
+      salesExecution: null,
       fontSize: 1,
       recording: { recorder: null, streams: [], chunks: [], audioContext: null, url: null, startedAt: null }
     }
@@ -141,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let proposalEventsSyncInFlight = false;
   let proposalEventsLastPollAt = 0;
   let proposalEventsSince = '';
+  let salesExecutionController = null;
 
   // Carrega histórico e leads
   try {
@@ -4871,6 +4874,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function renderProspecting() {
     const root = document.getElementById('prospecting-root');
     if (!root) return;
+    if (salesExecutionController?.render(root)) return;
     if (state.prospecting.view === 'inbox') renderProspectInbox(root);
     else if (state.prospecting.view === 'queue') renderProspectQueue(root);
     else renderProspectFocus(root);
@@ -5058,6 +5062,34 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function initProspecting() {
     document.querySelectorAll('[data-prospect-view]').forEach(button => button.addEventListener('click', () => setProspectingView(button.dataset.prospectView)));
+    if (window.OG_SALES_EXECUTION_CONTROLLER && window.OG_SALES_EXECUTION && window.OG_SALES_EXECUTION_UI) {
+      salesExecutionController = OG_SALES_EXECUTION_CONTROLLER.create({
+        state,
+        service: OG_SALES_EXECUTION,
+        ui: OG_SALES_EXECUTION_UI,
+        request: apiFetch,
+        getLegacyQueue: prospectingQueueWithTerritory,
+        saveLeads: saveLeadsToStorage,
+        saveOperations: saveOperationsToStorage,
+        showNotification,
+        openMessageComposer: openDeskMessageComposer,
+        renderProspecting,
+        setProspectingView,
+        openAppDialog,
+        closeAppDialog,
+        bindAppDialog,
+        operations: () => state.operations,
+        openCallAI: (lead, execution) => {
+          state.callAI.salesExecution = execution;
+          state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { salesExecution: execution });
+          state.callAI.returnTab = 'prospeccao';
+          state.callAI.selectedLeadId = lead.id;
+          switchTab('call-ai');
+          selectCallClient(lead.id);
+        }
+      });
+      salesExecutionController.init().catch(error => console.warn('Sales Execution init indisponível.', error));
+    }
   }
 
   function closeCommandCenter() { document.querySelector('.command-center-overlay')?.remove(); }
