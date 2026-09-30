@@ -33,11 +33,26 @@
   }
 
   async function api(path, options = {}) {
-    const response = await fetch('/core-api' + path, {
-      ...options,
-      headers: authHeaders(options.headers || {}),
-      cache: 'no-store'
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort('timeout'), Number(options.timeoutMs || 9000));
+    let response;
+    try {
+      response = await fetch('/core-api' + path, {
+        ...options,
+        headers: authHeaders(options.headers || {}),
+        cache: 'no-store',
+        signal: options.signal || controller.signal
+      });
+    } catch (error) {
+      if (error?.name === 'AbortError' || controller.signal.aborted) {
+        const timeoutError = new Error('A base demorou para responder. O DUTRA OS continuará com o cache local.');
+        timeoutError.code = 'NETWORK_TIMEOUT';
+        throw timeoutError;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
     if (response.status === 401) {
       showLogin('Informe o mesmo código de acesso usado no DUTRA OS.');
       throw new Error('unauthorized');
