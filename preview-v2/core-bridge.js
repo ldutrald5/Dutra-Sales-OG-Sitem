@@ -485,7 +485,11 @@
       cacheSnapshot({...state.snapshot,...payload});
       connectionState()?.saveFailed?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'ERROR',error:error.message,message:'TENTAR NOVAMENTE'});
       setConnectionStatus('ERROR',Number(error.status)>=500?'BASE INDISPONÍVEL · TENTAR NOVAMENTE':'SINCRONIZAÇÃO PENDENTE');
-      if(Number(error.status)>=500) scheduleReconnect(10000);
+      if(Number(error.status)>=500){
+        scheduleReconnect(10000);
+        toast('Base indisponível. A alteração ficou salva neste aparelho; use TENTAR NOVAMENTE.');
+        return state.snapshot;
+      }
       throw error;
     }
   }
@@ -777,6 +781,7 @@
         action:'SAVE_PROPOSAL_DRAFT',
         entityType:'proposal',
         entityId:quoteId,
+        idempotencyKey:'proposal:'+quoteId,
         label:'Proposta'
       });
 
