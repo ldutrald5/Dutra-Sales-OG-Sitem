@@ -25,6 +25,12 @@ assert.ok(b.questions.some(q=>/quem participa/i.test(q)));
 assert.ok(b.doNotSay.some(x=>/não presuma/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/não há abertura confirmada/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/percentual de economia/i.test(x)));
+assert.equal(b.attack.moment.id,'proposal');
+assert.equal(b.attack.awareness.id,'unknown');
+assert.match(b.attack.objective,/impede a decisão/i);
+assert.match(b.attack.opening,/investimento, aplicação ou prioridade interna/i);
+assert.ok(b.attack.technicalPrep.some(x=>/quantidade da frota/i.test(x)));
+assert.ok(b.attack.technicalPrep.some(x=>/veículo, eixo, pressão/i.test(x)));
 
 const reopened=brief.build({
   ...incomplete,
@@ -36,6 +42,32 @@ const reopened=brief.build({
 assert.ok(reopened.facts.some(x=>x.label==='Sinal interno de proposta'&&/Reabertura/.test(x.value)));
 assert.ok(reopened.doNotSay.some(x=>/eu vi você abrir/i.test(x)));
 assert.ok(reopened.questions.some(x=>/continua acontecendo/i.test(x)));
+assert.equal(reopened.attack.moment.id,'proposal');
+
+const firstContact=brief.build({
+  ...incomplete,
+  id:'L2',
+  conversationStage:'first_contact',
+  ogAwareness:'nao_conhece'
+},{activityEvents:[]});
+assert.equal(firstContact.attack.moment.id,'first_contact');
+assert.equal(firstContact.attack.awareness.id,'does_not_know');
+assert.match(firstContact.attack.objective,/descobrir o que o cliente já conhece/i);
+assert.match(firstContact.attack.opening,/antes de te explicar produto/i);
+
+const customer=brief.build({
+  ...incomplete,
+  id:'L3',
+  conversationStage:'customer',
+  ogAwareness:'cliente',
+  fleetSize:12,
+  decisionMaker:'Paulo',
+  pain:'Desgaste irregular'
+},{activityEvents:[]});
+assert.equal(customer.attack.moment.id,'customer');
+assert.equal(customer.attack.awareness.id,'customer');
+assert.match(customer.attack.objective,/suporte, reposição, expansão ou indicação/i);
+assert.match(customer.attack.opening,/antes de falar em qualquer nova compra/i);
 
 assert.throws(()=>brief.build({},{}),/cliente identificado/);
 
@@ -47,5 +79,8 @@ assert.match(sw,/sales-brief-service\.js/);
 assert.match(app,/OG_SALES_BRIEF\.build/);
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/);
 assert.match(app,/NÃO DIGA AINDA/);
+assert.match(app,/FICHA DE ATAQUE/);
+assert.match(app,/OBJETIVO DESTA CONVERSA/);
+assert.match(app,/PREPARAÇÃO TÉCNICA/);
 
-console.log('PRECALL-01 diagnostic + guardrails: PASS');
+console.log('PRECALL-01 + PLAYBOOK-01A attack card: PASS');
