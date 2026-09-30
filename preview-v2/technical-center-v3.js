@@ -355,7 +355,11 @@ async function saveDraft(){
     updatedAt:new Date().toISOString()
   };
   const updated=(C().getLeads()||[]).map(l=>String(l.id)===String(lead.id)?{...l,technicalDraft:draft,vehicleTypes:[...new Set([...(Array.isArray(l.vehicleTypes)?l.vehicleTypes:[]),q.vehicleName])]}:l);
-  try{await C().commit({leads:updated},'Configuração técnica salva na conta.');notify('Configuração salva no cliente.')}catch(err){notify('Não foi possível salvar: '+err.message)}
+  try{await C().commit(
+    {leads:updated},
+    'Configuração técnica salva na conta.',
+    {action:'SAVE_TECHNICAL_CONFIG',entityType:'lead',entityId:lead.id,label:'Configuração técnica',metadata:{ruleId:state.ruleId||null,mode:state.mode}}
+  );notify('Configuração salva no cliente.')}catch(err){notify('Não foi possível salvar: '+err.message)}
 }
 async function copySummary(){
   const q=currentQuote();if(!q)return;
