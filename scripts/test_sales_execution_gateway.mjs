@@ -4,6 +4,7 @@ const require=createRequire(import.meta.url);
 const gateway=require('../apps/sistema-og/server-sales-execution-gateway.cjs');
 assert.equal(gateway.cfg({}).enabled,false);
 assert.equal(gateway.cfg({OG_SUPABASE_URL:'https://x.supabase.co',OG_SUPABASE_SERVICE_ROLE_KEY:'secret'}).enabled,true);
+assert.equal(gateway.cfg({OG_SALES_EXECUTION_EDGE_URL:'https://x.supabase.co/functions/v1/sales-execution-gateway',OG_SALES_EXECUTION_EDGE_TOKEN:'token-token-token-token-token-token'}).mode,'edge');
 const result=await gateway.listLists({});
 assert.equal(result.status,503);
 assert.equal(result.configured,false);
