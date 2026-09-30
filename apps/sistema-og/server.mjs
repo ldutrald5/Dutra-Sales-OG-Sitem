@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
 const proposalIntelligence = require('./services/proposal-intelligence-service.js');
 const proposalStore = require('./server-proposal-store.cjs');
+const salesExecutionGateway = require('./server-sales-execution-gateway.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
@@ -341,6 +342,40 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
+
+  if (url.pathname === '/api/sales-execution/health' && req.method === 'GET') {
+    const config = salesExecutionGateway.cfg();
+    return sendJson(res, 200, { ok:true, configured:config.enabled, boundary:'railway_trusted_gateway' });
+  }
+
+  if (url.pathname === '/api/sales-execution/lists' && req.method === 'GET') {
+    const result = await salesExecutionGateway.listLists();
+    return sendJson(res, result.status, result.error ? { error:result.error, configured:result.configured } : { lists:result.data || [] });
+  }
+
+  const salesQueueMatch = url.pathname.match(/^\/api\/sales-execution\/sessions\/([0-9a-f-]{36})\/queue$/i);
+  if (salesQueueMatch && req.method === 'GET') {
+    try {
+      const result = await salesExecutionGateway.sessionQueue(salesQueueMatch[1]);
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  const salesAccountMatch = url.pathname.match(/^\/api\/sales-execution\/accounts\/([0-9a-f-]{36})\/context$/i);
+  if (salesAccountMatch && req.method === 'GET') {
+    try {
+      const result = await salesExecutionGateway.accountContext(salesAccountMatch[1]);
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/sales-execution/sessions' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await salesExecutionGateway.startSession(await readBody(req, 20_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : { session:Array.isArray(result.data)?result.data[0]:result.data });
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
 
   if (url.pathname === '/api/prospects/research' && req.method === 'POST') {
     try {
