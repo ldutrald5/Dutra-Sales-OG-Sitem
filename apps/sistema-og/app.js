@@ -4333,7 +4333,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const fleet = Math.max(0, Number(lead.fleetSize || 0) || 0);
     const events = (state.operations?.activityEvents || [])
       .filter(item => String(item.clientId || item.leadId || '') === String(lead.id));
-    const hasProposalHistory = events.some(item => ['proposal.prepared','proposal.sent','proposal.opened','proposal.reopened','proposal_prepared','proposal_sent','proposal_opened','proposal_reopened'].includes(item.type));
+    const hasProposalHistory = events.some(item => ['proposal.prepared','proposal.sent','proposal.opened','proposal.reopened'].includes(item.type));
     const hasContactHistory = Boolean(lead.lastContactAt || (lead.interactions || []).length);
     const relationship = lead.status === 'fechado'
       ? 'Cliente'
