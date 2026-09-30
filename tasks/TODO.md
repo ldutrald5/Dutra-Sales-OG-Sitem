@@ -200,6 +200,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Story:** `docs/stories/DUTRA-INT-01-intelligence-core-roadmap.md`.
 - **Status:** em andamento.
 
+## PLAYBOOK-01A — Ficha de Ataque pré-contato
+
+- **Objetivo:** preparar o vendedor antes de cada contato com objetivo, abertura, momento comercial e checklist técnico derivados do CRM.
+- **Escopo:** extensão somente leitura de `sales-brief-service.js` e Call AI; sem nova base, sem IA obrigatória e sem mutar fatos.
+- **Story:** `docs/stories/PLAYBOOK-01A-ficha-de-ataque.md`.
+- **Dependências:** PRECALL-01, CIC-01 e TASK-008.
+- **Status:** em andamento; implementação em branch aguardando validação/merge.
+
 ## DIARY-01 — Diário Inteligente Revisável
 
 - **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.
