@@ -157,7 +157,17 @@ async function saveAction(execute){
     const next=S().nextMember(result.operations,session);
     if(next){session.currentMemberId=next.id;next.workStatus='IN_PROGRESS';}
   }
-  await C().commit({leads:result.leads,operations:result.operations},modal.dataset.outcome?'Resultado salvo, próxima ação criada e próximo contato preparado.':'Próxima ação salva no CRM.');
+  await C().commit(
+    {leads:result.leads,operations:result.operations},
+    modal.dataset.outcome?'Resultado salvo, próxima ação criada e próximo contato preparado.':'Próxima ação salva no CRM.',
+    {
+      action:modal.dataset.outcome?'RECORD_CALL_OUTCOME_AND_NEXT_ACTION':'SCHEDULE_NEXT_ACTION',
+      entityType:'lead',
+      entityId:result.lead.id,
+      label:modal.dataset.outcome?'Resultado + próxima ação':'Próxima ação',
+      metadata:{type,contactId:contactId||null,sessionId:modal.dataset.sessionId||null}
+    }
+  );
   $('#actionFlowModal').classList.remove('open');
   if(execute) executeAction(result.lead,type,contactId);
   if(modal.dataset.outcome){globalThis.go?.('prospecting');}
@@ -192,7 +202,11 @@ async function completeQueueItem(leadId){
     x=S().scheduleAction(x.leads,x.operations,lead.id,{type:'FOLLOW_UP',dueAt:due,description:'Confirmar recebimento do material',reason:'Material marcado como enviado; validar recebimento e reação do cliente.',priority:'MEDIUM',objective:'Descobrir se o material foi visto e avançar o próximo passo.',expectedResult:'Obter resposta e definir avanço comercial.'},new Date());
     message='Material concluído e follow-up de recebimento criado automaticamente.';
   }
-  await C().commit({leads:x.leads,operations:x.operations},message);
+  await C().commit(
+    {leads:x.leads,operations:x.operations},
+    message,
+    {action:'COMPLETE_NEXT_ACTION',entityType:'lead',entityId:lead.id,label:'Próxima ação concluída',metadata:{completedType}}
+  );
   renderQueue();
 }
 
