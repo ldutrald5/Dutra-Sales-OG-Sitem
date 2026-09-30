@@ -75,8 +75,6 @@ const config = buildConfig({
 assert.equal(config.pollMs, 10000);
 assert.equal(config.includeGroups, true);
 
-console.log('WhatsApp Kaption bridge deterministic tests: PASS');
-
 assert.throws(
   () => buildConfig({
     OG_WHATSAPP_INGEST_URL: 'https://example.test',
@@ -85,3 +83,5 @@ assert.throws(
   }),
   /remota deve usar HTTPS/,
 );
+
+console.log('WhatsApp Kaption bridge deterministic tests: PASS');
