@@ -6997,7 +6997,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!context || !lead) return;
     const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead);
     state.callAI.context = compact;
-    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[] };
+    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { approach:null, gaps:[], questions:[], doNotSay:[] };
     const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
       <div class="call-ai-account-row"><div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>
@@ -7012,6 +7012,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <section class="call-ai-prebrief" aria-label="Briefing de diagnóstico">
         <div class="call-ai-prebrief-head"><span class="og-kicker">BRIEFING PRÉ-LIGAÇÃO</span><small>${preCall.gaps.length ? `${preCall.gaps.length} lacuna(s) para descobrir` : 'Contexto essencial preenchido'}</small></div>
         ${preCall.gaps.length ? `<div class="call-ai-gap-chips">${preCall.gaps.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>` : ''}
+        ${preCall.approach ? `<div class="call-ai-approach-card"><div class="call-ai-approach-top"><span>MODO DE ABORDAGEM</span><strong>${escapeHtml(preCall.approach.label)}</strong></div><small>${escapeHtml(preCall.approach.awareness)}</small><p><b>Objetivo:</b> ${escapeHtml(preCall.approach.objective)}</p><blockquote>${escapeHtml(preCall.approach.opening)}</blockquote><p><b>Próximo avanço:</b> ${escapeHtml(preCall.approach.desiredNextStep)}</p><details><summary>Preparação técnica antes de falar</summary><ul>${preCall.approach.preparation.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></details></div>` : ''}
         <div class="call-ai-prebrief-grid">
           <div><b>PERGUNTAS PARA DESCOBRIR</b><ol>${preCall.questions.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>
           <div class="call-ai-dont-say"><b>NÃO DIGA AINDA</b><ul>${preCall.doNotSay.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>

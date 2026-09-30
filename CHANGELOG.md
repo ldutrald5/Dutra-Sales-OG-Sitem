@@ -2,6 +2,13 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — Playbook Comercial Contextual
+
+- O briefing pré-ligação passa a classificar o modo de abordagem por estágio real da conta.
+- Exibe objetivo, consciência comprovada, abertura sugerida, pergunta principal e próximo avanço.
+- Adiciona preparação técnica segura sem inferir aplicação/código OG.
+- Mantém o caminho determinístico/offline e não grava fatos por mera recomendação.
+
 ## [3.0] — Ciclo Comercial Conectado
 
 - Adicionada central de Ciclo Comercial: Entrada → Contato → Proposta → Negociação → Venda → Pós-venda.

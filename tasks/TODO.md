@@ -217,3 +217,13 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 5. **WAVE-05:** Aplicação Visual 360° — projeção visual do Technical Brain.
 6. **WAVE-06:** Proposal + ROI Engine — uma fonte para mensagem, proposta e cenários financeiros.
 7. **WAVE-07:** Coach DUTRA — orientação baseada em dados reais estruturados.
+
+
+## PLAYBOOK-01 — Abordagem Comercial Contextual
+
+- **Objetivo:** dizer como abordar cada conta agora, com objetivo, abertura, pergunta principal, próximo avanço e preparação segura derivados do CRM.
+- **Escopo da fatia 1:** ampliar o briefing pré-ligação existente sem criar outro CRM, outro score ou persistência paralela.
+- **Arquivos relevantes:** `services/sales-brief-service.js`, `app.js`, `styles.css`, `scripts/test_sales_brief.mjs`, `docs/stories/PLAYBOOK-01-contextual-sales-approach.md`.
+- **Critério de aceite:** primeiro contato, proposta, negociação, recuperação e cliente recebem abordagens distintas; conhecimento da OG não é presumido; aplicação técnica continua protegida por validação.
+- **Dependências:** PRECALL-01, CIC-01 e Call AI.
+- **Status:** em andamento — fatia 1 implementada em branch, aguardando merge/release.

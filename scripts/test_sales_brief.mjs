@@ -25,6 +25,40 @@ assert.ok(b.questions.some(q=>/quem participa/i.test(q)));
 assert.ok(b.doNotSay.some(x=>/não presuma/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/não há abertura confirmada/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/percentual de economia/i.test(x)));
+assert.equal(b.approach.id,'first_contact');
+assert.match(b.approach.awareness,/não confirmado/i);
+assert.match(b.approach.opening,/antes de eu te explicar/i);
+assert.ok(b.approach.preparation.some(x=>/marca, modelo, ano/i.test(x)));
+
+const proposal=brief.build({
+  ...incomplete,
+  conversationStage:'proposal',
+  pain:'Desgaste irregular',
+  fleetSize:24,
+  decisionMaker:'João'
+},{});
+assert.equal(proposal.approach.id,'proposal');
+assert.match(proposal.approach.opening,/investimento, aplicação ou prioridade/i);
+assert.match(proposal.approach.desiredNextStep,/objeção principal/i);
+
+const customer=brief.build({
+  ...incomplete,
+  conversationStage:'customer',
+  status:'fechado',
+  pain:'Calibragem frequente',
+  fleetSize:12,
+  decisionMaker:'Maria'
+},{});
+assert.equal(customer.approach.id,'customer');
+assert.match(customer.approach.objective,/experiência real/i);
+assert.match(customer.approach.desiredNextStep,/expansão, reposição/i);
+
+const noReply=brief.build({
+  ...incomplete,
+  conversationStage:'no_reply'
+},{});
+assert.equal(noReply.approach.id,'no_reply');
+assert.match(noReply.approach.primaryQuestion,/ainda é prioridade/i);
 
 const reopened=brief.build({
   ...incomplete,
@@ -47,5 +81,7 @@ assert.match(sw,/sales-brief-service\.js/);
 assert.match(app,/OG_SALES_BRIEF\.build/);
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/);
 assert.match(app,/NÃO DIGA AINDA/);
+assert.match(app,/MODO DE ABORDAGEM/);
+assert.match(app,/Preparação técnica antes de falar/);
 
-console.log('PRECALL-01 diagnostic + guardrails: PASS');
+console.log('PRECALL-01 + PLAYBOOK-01 contextual approach: PASS');
