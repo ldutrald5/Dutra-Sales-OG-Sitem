@@ -1637,3 +1637,14 @@ body.og-dialog-open { overflow: hidden; }
   .call-ai-recording-file-actions { align-items:stretch; }
   .call-ai-recording-file-actions > * { flex:1 1 auto; justify-content:center; text-align:center; }
 }
+
+.call-intelligence-dashboard { display:grid; gap:.7rem; padding:.9rem 1rem; border:1px solid var(--og-border); border-radius:1rem; background:linear-gradient(145deg,#0a0d11,#0d1217); }
+.call-intelligence-dashboard-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.call-intelligence-dashboard-head h2 { color:#f3f4f6; font-size:.9rem; font-weight:850; }
+.call-intelligence-dashboard-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:.45rem; }
+.call-intelligence-dashboard-grid > div { padding:.65rem; border:1px solid #252b33; border-radius:.7rem; background:#090c10; }
+.call-intelligence-dashboard-grid small { display:block; color:#778191; font-size:.5rem; text-transform:uppercase; letter-spacing:.06em; }
+.call-intelligence-dashboard-grid b { display:block; margin-top:.16rem; color:#f9fafb; font-size:.9rem; }
+.call-intelligence-dashboard-detail { color:#8f99a9; font-size:.58rem; line-height:1.45; }
+@media (max-width:900px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:560px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
