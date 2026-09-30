@@ -84,7 +84,7 @@
     "og:pwa-release:test": "node scripts/test_pwa_release_experience.mjs",
     "og:final-candidate-ux:test": "node scripts/test_final_candidate_ux.mjs",
     "og:whatsapp:bridge": "node --env-file-if-exists=.env scripts/whatsapp-kaption-bridge.mjs",
-    "og:whatsapp:bridge:once": "node --env-file-if-exists=.env scripts/whatsapp-kaption-bridge.mjs",
+    "og:whatsapp:bridge:once": "node --env-file-if-exists=.env scripts/whatsapp-kaption-bridge.mjs --once",
     "og:whatsapp:bridge:test": "node scripts/test_whatsapp_kaption_bridge.mjs"
   },
   "devDependencies": {
