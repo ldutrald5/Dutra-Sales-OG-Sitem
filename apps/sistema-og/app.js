@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     leadSourceFilter: 'all',
     leadPriorityFilter: 'all',
     salesDeskSearch: '',
-    prospecting: { view: 'inbox', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    prospecting: { view: 'inbox', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] }, salesExecution: { configured: null, loading: false, lists: [], selectedListId: '', session: null, members: [], currentMemberId: null, error: '' } },
     communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
     ocrImageBase64: null,
     ocrExtractedText: '',
