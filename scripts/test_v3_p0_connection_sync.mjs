@@ -8,6 +8,7 @@ const server=fs.readFileSync(new URL('../preview-v2/server.mjs',import.meta.url)
 const actions=fs.readFileSync(new URL('../preview-v2/sales-action-center-v3.js',import.meta.url),'utf8');
 const technical=fs.readFileSync(new URL('../preview-v2/technical-center-v3.js',import.meta.url),'utf8');
 const day=fs.readFileSync(new URL('../preview-v2/meu-dia-v3.js',import.meta.url),'utf8');
+const prospecting=fs.readFileSync(new URL('../preview-v2/prospecting-execution-v3.js',import.meta.url),'utf8');
 
 const connectionScript=index.indexOf('/core/services/connection-state-service.js');
 const syncScript=index.indexOf('/core/services/sync-bridge-service.js');
@@ -69,5 +70,14 @@ assert.match(day,/APPLY_AUTOMATION_NEXT_ACTION/);
 assert.match(day,/idempotencyKey:'automation:'/);
 assert.match(core,/SAVE_PROPOSAL_DRAFT/);
 assert.match(core,/idempotencyKey:'proposal:'/);
+assert.match(prospecting,/IMPORT_PROSPECT_LIST/);
+assert.match(prospecting,/CREATE_CONTACT/);
+assert.match(prospecting,/UPDATE_CONTACT/);
+assert.match(prospecting,/RECORD_CALL_OUTCOME/);
+assert.match(prospecting,/RECORD_CONTACT_AND_CALL_OUTCOME/);
+assert.match(prospecting,/idempotencyKey:'lead-list:'/);
+assert.match(prospecting,/idempotencyKey:'contact:'/);
+assert.match(prospecting,/idempotencyKey:'call:'/);
+assert.match(prospecting,/hasNote:Boolean\(options\.note\)/);
 
 console.log('V3 P0 connection/sync/save contract: PASS');
