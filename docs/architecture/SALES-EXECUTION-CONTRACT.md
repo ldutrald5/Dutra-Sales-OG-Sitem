@@ -64,8 +64,8 @@ During P0, existing local interaction recording remains available as fallback. D
 ## P0 transactional write path
 The reviewed migration `20260930024500_record_sales_execution_result_v1.sql` introduces `record_sales_execution_result_v1(jsonb)`.
 
-The function is `SECURITY DEFINER`, has a fixed search path, revokes execution from public/anon/authenticated, and grants execution only to `service_role`. The browser cannot call it directly. Railway invokes it through the trusted gateway.
+The function is `SECURITY DEFINER`, has a fixed search path, revokes execution from public/anon/authenticated, and grants execution only to `service_role`. The browser cannot call it directly. Railway reaches it through the token-authenticated `sales-execution-gateway` Edge Function.
 
 It atomically records the call attempt, activity, allowed opportunity progression, confirmed meeting, worked list member and next session cursor. Mandatory external id provides retry/idempotency protection.
 
-Production migration applied successfully on 2026-09-30. Runtime use remains dormant until Railway receives server-only Supabase configuration.
+Production migration applied successfully on 2026-09-30. The `sales-execution-gateway` Edge Function is deployed. Railway has its Edge URL and a dedicated server-only gateway token configured with deployment intentionally skipped until this branch is released.
