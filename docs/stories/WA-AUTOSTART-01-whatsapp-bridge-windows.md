@@ -19,16 +19,16 @@ Eliminar a necessidade de abrir terminal manualmente para manter o Bridge WhatsA
 ## Critérios de aceite
 
 - [x] Story criada antes da implementação.
-- [ ] Launcher PowerShell implementado.
-- [ ] Instalador de Scheduled Task implementado.
-- [ ] Comando de status implementado.
-- [ ] Desinstalador implementado.
-- [ ] Logs ficam em `apps/sistema-og/.data/logs/`.
-- [ ] Processo usa `.env` local já existente.
-- [ ] Task inicia no logon e tenta reiniciar em caso de queda.
-- [ ] Scripts não contêm segredo.
-- [ ] Comandos npm registrados.
-- [ ] Documentação/handoff atualizados.
+- [x] Launcher PowerShell implementado.
+- [x] Instalador de Scheduled Task implementado.
+- [x] Comando de status implementado.
+- [x] Desinstalador implementado.
+- [x] Logs ficam em `apps/sistema-og/.data/logs/`.
+- [x] Processo usa `.env` local já existente.
+- [x] Task inicia no logon e tenta reiniciar em caso de queda.
+- [x] Scripts não contêm segredo.
+- [x] Comandos npm registrados.
+- [x] Documentação/handoff atualizados.
 - [ ] CI completo passa.
 
 ## File List
@@ -37,6 +37,9 @@ Eliminar a necessidade de abrir terminal manualmente para manter o Bridge WhatsA
 - `scripts/install-whatsapp-bridge-autostart.ps1`
 - `scripts/status-whatsapp-bridge-autostart.ps1`
 - `scripts/uninstall-whatsapp-bridge-autostart.ps1`
+- `INSTALL_WHATSAPP_AUTOSTART.cmd`
+- `REMOVE_WHATSAPP_AUTOSTART.cmd`
+- `scripts/test_whatsapp_autostart_contract.mjs`
 - `package.json`
 - `docs/stories/WA-AUTOSTART-01-whatsapp-bridge-windows.md`
 - `AI_HANDOFF.md`
