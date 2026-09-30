@@ -200,6 +200,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Story:** `docs/stories/DUTRA-INT-01-intelligence-core-roadmap.md`.
 - **Status:** em andamento.
 
+## PLAYBOOK-01 — Ficha de Ataque contextual
+
+- **Objetivo:** preparar abordagem, objetivo, perguntas e check técnico antes de cada contato sem depender de IA.
+- **Escopo inicial:** seis perfis comerciais conservadores derivados do CRM/eventos; card compacto na Mesa; reutilizar PRECALL-01.
+- **Guardrails:** sem mutação; sem inferir conhecimento da OG; sem inventar aplicação/código/suporte técnico.
+- **Story:** `docs/stories/PLAYBOOK-01-contextual-attack-card.md`.
+- **Status:** em andamento — implementação em PR, aguardando CI/merge.
+
 ## DIARY-01 — Diário Inteligente Revisável
 
 - **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.

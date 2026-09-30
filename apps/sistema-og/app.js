@@ -4651,6 +4651,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const recent = OG_SALES_DESK.lastInteraction(lead);
+    const playbook = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : null;
     const resumeRegister = sessionStorage.getItem('og_sales_desk_register_open') === lead.id;
     root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
       <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
@@ -4668,6 +4669,22 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong>
         <small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small>
       </section>
+      ${playbook ? `<section class="sales-desk-playbook" aria-label="Ficha de ataque comercial">
+        <header>
+          <div><span>FICHA DE ATAQUE</span><strong>${escapeHtml(playbook.profile.label)}</strong></div>
+          <small>Regra determinística · sem IA</small>
+        </header>
+        <div class="sales-desk-playbook-focus"><b>OBJETIVO DESTA CONVERSA</b><p>${escapeHtml(playbook.approach.objective)}</p></div>
+        <div class="sales-desk-playbook-opening"><b>ABERTURA SUGERIDA</b><p>“${escapeHtml(playbook.approach.opening)}”</p><small>${escapeHtml(playbook.approach.focus)}</small></div>
+        <details>
+          <summary>Preparação antes de ligar</summary>
+          <div class="sales-desk-playbook-grid">
+            <div><b>PERGUNTAS-CHAVE</b><ol>${playbook.questions.slice(0,3).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>
+            <div><b>CHECK TÉCNICO</b><ul>${playbook.technicalPrep.slice(0,5).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>
+          </div>
+          <div class="sales-desk-playbook-guard"><b>NÃO DIGA AINDA</b><p>${escapeHtml(playbook.doNotSay[0] || 'Não transforme hipótese em fato antes de validar.')}</p></div>
+        </details>
+      </section>` : ''}
       <details class="sales-desk-register" ${resumeRegister ? 'open' : ''}>
         <summary>Registrar conversa / retorno</summary>
         <div class="sales-desk-register-body">

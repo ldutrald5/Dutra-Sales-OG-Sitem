@@ -25,6 +25,30 @@ assert.ok(b.questions.some(q=>/quem participa/i.test(q)));
 assert.ok(b.doNotSay.some(x=>/não presuma/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/não há abertura confirmada/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/percentual de economia/i.test(x)));
+assert.equal(b.profile.id,'proposal');
+assert.match(b.approach.objective,/impede a decisão|investimento|aplicação/i);
+assert.ok(b.technicalPrep.some(x=>/Necessária validação técnica/i.test(x)));
+
+const first=brief.build({
+  ...incomplete,
+  id:'L2',
+  conversationStage:'first_contact'
+},{activityEvents:[]});
+assert.equal(first.profile.id,'first_contact');
+assert.match(first.profile.label,/conhecimento da OG não confirmado/i);
+assert.match(first.approach.opening,/Antes de te explicar qualquer coisa/i);
+assert.match(first.approach.focus,/Diagnóstico primeiro/i);
+
+const customer=brief.build({
+  ...incomplete,
+  id:'L3',
+  status:'fechado',
+  conversationStage:'customer',
+  fleetSize:18
+},{activityEvents:[]});
+assert.equal(customer.profile.id,'customer');
+assert.match(customer.approach.objective,/experiência real|expansão/i);
+assert.ok(customer.technicalPrep.some(x=>/18 veículo/i.test(x)));
 
 const reopened=brief.build({
   ...incomplete,
@@ -47,5 +71,9 @@ assert.match(sw,/sales-brief-service\.js/);
 assert.match(app,/OG_SALES_BRIEF\.build/);
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/);
 assert.match(app,/NÃO DIGA AINDA/);
+assert.match(app,/FICHA DE ATAQUE/);
+assert.match(app,/OBJETIVO DESTA CONVERSA/);
+assert.match(app,/ABERTURA SUGERIDA/);
+assert.match(app,/CHECK TÉCNICO/);
 
-console.log('PRECALL-01 diagnostic + guardrails: PASS');
+console.log('PRECALL-01 + PLAYBOOK-01 sales brief: PASS');
