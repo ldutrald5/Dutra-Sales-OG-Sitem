@@ -7002,7 +7002,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!context || !lead) return;
     const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead);
     state.callAI.context = compact;
-    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[] };
+    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { attack:null, gaps:[], questions:[], doNotSay:[] };
     const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
       <div class="call-ai-account-row"><div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>
@@ -7016,6 +7016,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <div class="call-ai-context-scope"><b>Contexto compacto</b><span>${compact.recentInteractions.length} interações recentes · ${compact.objections.length} objeções · sem carregar o CRM inteiro</span></div>
       <section class="call-ai-prebrief" aria-label="Briefing de diagnóstico">
         <div class="call-ai-prebrief-head"><span class="og-kicker">BRIEFING PRÉ-LIGAÇÃO</span><small>${preCall.gaps.length ? `${preCall.gaps.length} lacuna(s) para descobrir` : 'Contexto essencial preenchido'}</small></div>
+        ${preCall.attack ? `
+          <div class="call-ai-attack-card" aria-label="Ficha de ataque">
+            <div class="call-ai-attack-head"><b>FICHA DE ATAQUE</b><small>derivada do CRM · não grava nada</small></div>
+            <div class="call-ai-attack-meta">
+              <div><span>MOMENTO</span><strong>${escapeHtml(preCall.attack.moment.label)}</strong></div>
+              <div><span>CONHECIMENTO OG</span><strong>${escapeHtml(preCall.attack.awareness.label)}</strong></div>
+            </div>
+            <div class="call-ai-attack-block"><span>OBJETIVO DESTA CONVERSA</span><p>${escapeHtml(preCall.attack.objective)}</p></div>
+            <div class="call-ai-attack-block"><span>ABERTURA SUGERIDA</span><p>${escapeHtml(preCall.attack.opening)}</p></div>
+            <div class="call-ai-attack-block"><span>PREPARAÇÃO TÉCNICA</span><ul>${preCall.attack.technicalPrep.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>
+          </div>` : ''}
         ${preCall.gaps.length ? `<div class="call-ai-gap-chips">${preCall.gaps.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>` : ''}
         <div class="call-ai-prebrief-grid">
           <div><b>PERGUNTAS PARA DESCOBRIR</b><ol>${preCall.questions.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>
