@@ -6974,6 +6974,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     const lead = state.leads.find(item => String(item.id) === String(id));
     if (!lead) return;
+    const switchingAccount = Boolean(state.callAI.selectedLeadId && String(state.callAI.selectedLeadId) !== String(id));
+    if (switchingAccount && state.callAI.recording?.blob) {
+      if (!window.confirm('Existe uma gravação local desta chamada. Trocar de cliente vai descartá-la deste navegador. Deseja continuar?')) return;
+    }
+    if (switchingAccount) resetCallRecordingState();
     state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
     resetCallAICentralForLead(lead);
     const objective = document.getElementById('call-ai-objective');
@@ -7075,7 +7080,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     state.callAI.script = buildCallScript(lead, state.callAI.objective, results);
     state.callAI.step = 0;
     state.callAI.completed = [];
-    state.callAI.sessionId = `CALL-${Date.now()}`;
+    if (!state.callAI.sessionId) state.callAI.sessionId = `CALL-${Date.now()}`;
     document.getElementById('call-ai-empty').classList.add('hidden');
     document.getElementById('call-ai-workspace').classList.remove('hidden');
     document.getElementById('call-ai-footer').classList.remove('hidden');
@@ -7209,6 +7214,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
     const sessionId = state.callAI.sessionId;
     if (lead.interactions.some(item => item.sessionId === sessionId)) return showNotification('Esta sessão já foi registrada.', 'info');
+    if (state.callAI.recording?.blob && !state.callAI.recording?.remote?.recording?.id) {
+      const continueWithoutAudio = window.confirm('Existe uma gravação local que ainda não foi salva no cofre privado. Registrar o resultado agora sem enviar o áudio?');
+      if (!continueWithoutAudio) return;
+    }
     if (lead.salesExecution?.companyId && !CALL_AI_SALES_RESULT[result]) {
       return showNotification('Para Sales Execution, escolha um resultado específico da ligação em vez de um resultado genérico.', 'warning');
     }
@@ -7257,6 +7266,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       });
       if (canonical.synced) {
         const nextMemberId = canonical.result?.nextMemberId || null;
+        if (state.callAI.recording?.remote?.recording?.id && window.OG_CALL_INTELLIGENCE_CLIENT) {
+          try {
+            await OG_CALL_INTELLIGENCE_CLIENT.linkResult({
+              callSessionId:sessionId,
+              callAttemptId:canonical.result?.callAttemptId || null,
+              opportunityId:canonical.result?.opportunityId || lead.salesExecution?.opportunityId || null
+            });
+          } catch (error) {
+            console.warn('Call Intelligence link pending', error);
+            state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+              id:newLibraryId('evt'), type:'call_intelligence.link_pending', at:new Date().toISOString(),
+              clientId:lead.id, callSessionId:sessionId, error:String(error?.message || error).slice(0,300)
+            });
+          }
+        }
         state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
           id:newLibraryId('evt'), type:'sales_execution.synced', at:new Date().toISOString(),
           clientId:lead.id, callSessionId:sessionId, nextMemberId
@@ -7730,6 +7754,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function initCallAI() {
+    if (window.OG_CALL_INTELLIGENCE_CLIENT) OG_CALL_INTELLIGENCE_CLIENT.configure({ fetcher: apiFetch });
     const input = document.getElementById('call-ai-client-search');
     const results = document.getElementById('call-ai-search-results');
     let matches = [];
@@ -7821,9 +7846,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
     document.getElementById('call-ai-record-pause')?.addEventListener('click', toggleCallRecordingPause);
     document.getElementById('call-ai-record-stop')?.addEventListener('click', stopCallRecording);
+    document.getElementById('call-ai-recording-save')?.addEventListener('click', () => persistCallRecording());
+    document.getElementById('call-ai-recording-transcribe')?.addEventListener('click', retryAutomaticCallTranscription);
+    document.getElementById('call-ai-manual-transcript-save')?.addEventListener('click', saveManualCallTranscript);
     document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
     document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
-    document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
+    document.getElementById('call-ai-reset')?.addEventListener('click', () => {
+      if (!window.confirm('Reiniciar o roteiro e iniciar uma nova sessão de chamada para esta conta?')) return;
+      resetCallRecordingState();
+      state.callAI.sessionId = null;
+      prepareCallAIScript();
+    });
     apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {
       const badge = document.getElementById('call-ai-knowledge-status');
       badge.dataset.mode = info.available ? 'ready' : 'missing';
