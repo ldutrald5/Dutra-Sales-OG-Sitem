@@ -10,6 +10,7 @@ const operationsModel = require('./operations-model.js');
 const proposalIntelligence = require('./services/proposal-intelligence-service.js');
 const proposalStore = require('./server-proposal-store.cjs');
 const salesExecutionGateway = require('./server-sales-execution-gateway.cjs');
+const callIntelligenceGateway = require('./server-call-intelligence-gateway.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
@@ -383,6 +384,68 @@ const server = http.createServer(async (req, res) => {
     try {
       if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
       const result = await salesExecutionGateway.recordCallResult(await readBody(req, 30_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/health' && req.method === 'GET') {
+    const result = await callIntelligenceGateway.health();
+    return sendJson(res, result.status, result.error
+      ? { ok:false, configured:result.configured, error:result.error }
+      : { ...(result.data || {}), configured:true, boundary:'railway_trusted_gateway' });
+  }
+
+  if (url.pathname === '/api/call-intelligence/recordings/init' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.initRecording(await readBody(req, 40_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/recordings/complete' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.completeRecording(await readBody(req, 50_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  const callRecordingStatusMatch = url.pathname.match(/^\/api\/call-intelligence\/recordings\/([^/]+)\/status$/);
+  if (callRecordingStatusMatch && req.method === 'GET') {
+    try {
+      const result = await callIntelligenceGateway.status(decodeURIComponent(callRecordingStatusMatch[1]));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/recordings/transcribe' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.transcribe(await readBody(req, 20_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/recordings/manual-transcript' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.manualTranscript(await readBody(req, 300_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, /Payload muito grande/.test(error.message) ? 413 : 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/recordings/link-result' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.linkResult(await readBody(req, 20_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : { linked:result.data });
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
+  if (url.pathname === '/api/call-intelligence/dashboard' && req.method === 'GET') {
+    try {
+      const result = await callIntelligenceGateway.dashboard(url.searchParams.get('days'));
       return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
     } catch (error) { return sendJson(res, 400, { error:error.message }); }
   }
