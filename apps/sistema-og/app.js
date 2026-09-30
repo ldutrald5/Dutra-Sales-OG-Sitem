@@ -108,7 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     leadSourceFilter: 'all',
     leadPriorityFilter: 'all',
     salesDeskSearch: '',
-    prospecting: { view: 'inbox', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    prospecting: { view: 'lists', previewRows: [], researchResults: [], skippedIds: [], currentId: null, filters: { origin: 'all', batch: 'all', priority: 'all' }, territory: 'all', session: { id: `PROS-${Date.now().toString(36).toUpperCase()}`, startedAt: new Date().toISOString(), events: [] } },
+    salesExecution: { lists: [], loading: false, error: '', session: null, current: null, briefing: null, prepared: null, busy: false, pending: null },
     communication: { selectedLeadId:null, channel:'whatsapp', objective:'FIRST_CONTACT', templateId:'', original:null, aiUsed:false, knowledgeIds:[], brain:null },
     ocrImageBase64: null,
     ocrExtractedText: '',
@@ -126,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       intent: 'prepare_call',
       centralResponse: null,
       sessionId: null,
+      salesExecution: null,
       fontSize: 1,
       recording: { recorder: null, streams: [], chunks: [], audioContext: null, url: null, startedAt: null }
     }
@@ -141,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let proposalEventsSyncInFlight = false;
   let proposalEventsLastPollAt = 0;
   let proposalEventsSince = '';
+  let salesExecutionController = null;
 
   // Carrega histórico e leads
   try {
@@ -4871,6 +4874,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function renderProspecting() {
     const root = document.getElementById('prospecting-root');
     if (!root) return;
+    if (salesExecutionController?.render(root)) return;
     if (state.prospecting.view === 'inbox') renderProspectInbox(root);
     else if (state.prospecting.view === 'queue') renderProspectQueue(root);
     else renderProspectFocus(root);
@@ -5058,6 +5062,34 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function initProspecting() {
     document.querySelectorAll('[data-prospect-view]').forEach(button => button.addEventListener('click', () => setProspectingView(button.dataset.prospectView)));
+    if (window.OG_SALES_EXECUTION_CONTROLLER && window.OG_SALES_EXECUTION && window.OG_SALES_EXECUTION_UI) {
+      salesExecutionController = OG_SALES_EXECUTION_CONTROLLER.create({
+        state,
+        service: OG_SALES_EXECUTION,
+        ui: OG_SALES_EXECUTION_UI,
+        request: apiFetch,
+        getLegacyQueue: prospectingQueueWithTerritory,
+        saveLeads: saveLeadsToStorage,
+        saveOperations: saveOperationsToStorage,
+        showNotification,
+        openMessageComposer: openDeskMessageComposer,
+        renderProspecting,
+        setProspectingView,
+        openAppDialog,
+        closeAppDialog,
+        bindAppDialog,
+        operations: () => state.operations,
+        openCallAI: (lead, execution) => {
+          state.callAI.salesExecution = execution;
+          state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { salesExecution: execution });
+          state.callAI.returnTab = 'prospeccao';
+          state.callAI.selectedLeadId = lead.id;
+          switchTab('call-ai');
+          selectCallClient(lead.id);
+        }
+      });
+      salesExecutionController.init().catch(error => console.warn('Sales Execution init indisponível.', error));
+    }
   }
 
   function closeCommandCenter() { document.querySelector('.command-center-overlay')?.remove(); }
@@ -6693,7 +6725,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function resetCallAICentralForLead(lead) {
     state.callAI.intent = 'prepare_call';
     state.callAI.centralResponse = null;
-    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent });
+    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent, salesExecution: state.callAI.salesExecution });
     const input = document.getElementById('call-ai-live-input');
     if (input) input.value = '';
     const result = document.getElementById('call-ai-structured-result');
@@ -6730,7 +6762,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const status = document.getElementById('call-ai-central-state');
     const button = document.getElementById('call-ai-generate');
     status.dataset.state = 'loading'; status.textContent = 'Preparando contexto mínimo e orientação…'; button.disabled = true;
-    const context = OG_CALL_AI_CONTEXT.build(lead, { intent });
+    const context = OG_CALL_AI_CONTEXT.build(lead, { intent, salesExecution: state.callAI.salesExecution });
     state.callAI.context = context;
     let knowledge = [];
     try {
@@ -6761,6 +6793,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (lead.status === 'negociacao') return 'negociacao';
     if (lead.pain) return 'retorno';
     return 'diagnostico';
+  }
+
+  function salesExecutionCallObjective(mode) {
+    return {
+      GATEKEEPER: 'primeiro_contato',
+      DECISION_MAKER: 'qualificacao',
+      MEETING: 'proximo_passo',
+      CUSTOMER: 'pos_venda',
+      FOLLOW_UP: 'retorno',
+      PROPOSAL: 'followup_proposta'
+    }[mode] || 'qualificacao';
   }
 
   function formatCallDate(value) {
@@ -6797,8 +6840,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     const lead = state.leads.find(item => String(item.id) === String(id));
     if (!lead) return;
-    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
+    const executionLegacyId = state.callAI.salesExecution?.company?.legacy_lead_id || '';
+    if (executionLegacyId && String(executionLegacyId) !== String(lead.id)) state.callAI.salesExecution = null;
+    const execution = state.callAI.salesExecution;
+    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: execution ? salesExecutionCallObjective(execution.mode || execution.briefing?.mode) : suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null, salesExecution: execution || null };
     resetCallAICentralForLead(lead);
+    if (execution?.briefing?.intent && OG_CALL_AI_PROMPTS.INTENTS[execution.briefing.intent]) state.callAI.intent = execution.briefing.intent;
+    state.callAI.context = OG_CALL_AI_CONTEXT.build(lead, { intent: state.callAI.intent, salesExecution: execution });
     const objective = document.getElementById('call-ai-objective');
     if (objective) objective.value = state.callAI.objective;
     const input = document.getElementById('call-ai-client-search');
@@ -6818,9 +6866,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const lead = callLead();
     const context = document.getElementById('call-ai-client-context');
     if (!context || !lead) return;
-    const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead);
+    const execution = state.callAI.salesExecution;
+    const compact = state.callAI.context?.company?.id === lead.id ? state.callAI.context : OG_CALL_AI_CONTEXT.build(lead, { salesExecution: execution });
     state.callAI.context = compact;
-    const preCall = window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[] };
+    const prepared = execution?.briefing || null;
+    const preCall = prepared ? { gaps:[], questions:prepared.questions || [], doNotSay:prepared.warnings || [] } : (window.OG_SALES_BRIEF?.build ? OG_SALES_BRIEF.build(lead, state.operations) : { gaps:[], questions:[], doNotSay:[] });
     const recent = compact.recentInteractions?.slice().sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
     context.innerHTML = `
       <div class="call-ai-account-row"><div class="call-ai-account"><strong>${escapeHtml(lead.empresa || lead.nome)}</strong><span>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(lead.cidadeUf || 'Local não informado')}</span></div><button type="button" class="client-sheet-inline-link" data-open-client-sheet="${escapeHtml(lead.id)}">Ficha</button></div>
@@ -6831,6 +6881,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       ${factRow('Situação', lead.status || 'novo')}
       ${factRow('Última interação', recent?.note || '', recent ? 'confirmed' : 'missing', recent ? formatCallDate(recent.at) : 'CRM')}
       ${factRow('Próxima ação', lead.nextAction, lead.nextAction ? 'confirmed' : 'missing')}
+      ${execution ? factRow('Sales Execution', `${execution.mode || prepared?.mode || 'CONTEXTO'} · ${prepared?.objective || 'objetivo contextual'}`, 'confirmed', prepared?.source || 'Sales Execution') : ''}
       <div class="call-ai-context-scope"><b>Contexto compacto</b><span>${compact.recentInteractions.length} interações recentes · ${compact.objections.length} objeções · sem carregar o CRM inteiro</span></div>
       <section class="call-ai-prebrief" aria-label="Briefing de diagnóstico">
         <div class="call-ai-prebrief-head"><span class="og-kicker">BRIEFING PRÉ-LIGAÇÃO</span><small>${preCall.gaps.length ? `${preCall.gaps.length} lacuna(s) para descobrir` : 'Contexto essencial preenchido'}</small></div>
@@ -6896,13 +6947,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     state.callAI.sources = results;
     state.callAI.script = buildCallScript(lead, state.callAI.objective, results);
+    const executionBrief = state.callAI.salesExecution?.briefing;
+    if (executionBrief && state.callAI.script.length) {
+      if (executionBrief.opening) state.callAI.script[0] = { ...state.callAI.script[0], speech: executionBrief.opening };
+      if (executionBrief.questions?.length) state.callAI.script[1] = { ...state.callAI.script[1], question: executionBrief.questions[0] };
+      const nextStepIndex = Math.max(0, state.callAI.script.length - 2);
+      if (executionBrief.cta) state.callAI.script[nextStepIndex] = { ...state.callAI.script[nextStepIndex], speech: executionBrief.cta };
+    }
     state.callAI.step = 0;
     state.callAI.completed = [];
     state.callAI.sessionId = `CALL-${Date.now()}`;
     document.getElementById('call-ai-empty').classList.add('hidden');
     document.getElementById('call-ai-workspace').classList.remove('hidden');
     document.getElementById('call-ai-footer').classList.remove('hidden');
-    document.getElementById('call-ai-session-state').textContent = `${callObjectives[state.callAI.objective]} · modo manual`;
+    document.getElementById('call-ai-session-state').textContent = state.callAI.salesExecution ? `${state.callAI.salesExecution.mode || 'Sales Execution'} · sessão ativa` : `${callObjectives[state.callAI.objective]} · modo manual`;
     renderCallAIStep();
     renderCallAISources();
     button.disabled = false;
@@ -6967,11 +7025,54 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
+  function restoreLegacyCallAIResultOptions(select) {
+    if (!select) return;
+    select.innerHTML = '<option value="">Selecione…</option><option value="contato_realizado">Contato realizado</option><option value="sem_contato">Não consegui falar</option><option value="interesse">Demonstrou interesse</option><option value="proposta">Pediu proposta</option><option value="negociacao">Em negociação</option><option value="sem_interesse">Sem interesse agora</option>';
+    select.dataset.mode = 'legacy';
+  }
+
+  async function saveSalesExecutionCallAIReview() {
+    const lead = callLead();
+    const controller = salesExecutionController;
+    const result = document.getElementById('call-ai-result')?.value || '';
+    const summary = document.getElementById('call-ai-summary')?.value.trim() || '';
+    if (!lead || !controller) return showNotification('Sessão Sales Execution indisponível.', 'warning');
+    if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
+    const button = document.getElementById('call-ai-save');
+    if (button?.disabled) return;
+    if (button) { button.disabled = true; button.textContent = 'Salvando…'; }
+    const externalId = 'call-ai:' + (state.callAI.sessionId || (lead.id + ':' + Date.now()));
+    try {
+      const payload = await controller.recordCallAIResult({
+        outcome: result,
+        notes: summary,
+        nextAction: document.getElementById('call-ai-next-action')?.value.trim() || '',
+        followUpAt: document.getElementById('call-ai-follow-up')?.value || null,
+        externalId
+      });
+      document.getElementById('call-ai-review')?.classList.add('hidden');
+      state.callAI.salesExecution = null;
+      state.callAI.script = [];
+      state.callAI.sessionId = null;
+      document.getElementById('call-ai-session-state').textContent = payload.current ? 'Resultado salvo · próximo passo pronto' : 'Meta da sessão concluída';
+      state.prospecting.view = 'focus';
+      switchTab('prospeccao');
+      renderProspecting();
+      showNotification(payload.current ? 'Resultado salvo. Próximo movimento carregado.' : 'Meta da sessão concluída.', 'success');
+    } catch (error) {
+      showNotification(error?.message || 'Não foi possível registrar a ligação. Tente novamente; a chave idempotente será reutilizada.', 'warning');
+    } finally {
+      if (button?.isConnected) { button.disabled = false; button.textContent = 'Aprovar e registrar no CRM'; }
+    }
+  }
   function openCallAIReview() {
     saveCurrentCallSpeech();
     const lead = callLead();
     const notes = document.getElementById('call-ai-notes').value.trim();
     state.callAI.notes = notes;
+    const resultSelect = document.getElementById('call-ai-result');
+    if (state.callAI.salesExecution && window.OG_SALES_EXECUTION_UI) { resultSelect.innerHTML = OG_SALES_EXECUTION_UI.outcomeOptions(); resultSelect.dataset.mode = 'sales-execution'; }
+    else if (resultSelect?.dataset.mode === 'sales-execution') restoreLegacyCallAIResultOptions(resultSelect);
     document.getElementById('call-ai-summary').value = notes || `Ligação com ${lead?.empresa || lead?.nome || 'cliente'} sobre ${callObjectives[state.callAI.objective]}.`;
     document.getElementById('call-ai-next-action').value = lead?.nextAction || '';
     document.getElementById('call-ai-follow-up').value = lead?.followUpAt || '';
@@ -6981,6 +7082,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function saveCallAIReview() {
+    if (state.callAI.salesExecution) { saveSalesExecutionCallAIReview(); return; }
     const lead = callLead();
     if (!lead) return;
     const result = document.getElementById('call-ai-result').value;
@@ -7234,7 +7336,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
     document.getElementById('call-ai-record-pause')?.addEventListener('click', toggleCallRecordingPause);
     document.getElementById('call-ai-record-stop')?.addEventListener('click', stopCallRecording);
-    document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
+    document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; state.callAI.salesExecution = null; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
     document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
     document.getElementById('call-ai-reset')?.addEventListener('click', () => { if (window.confirm('Reiniciar o roteiro e manter apenas a conta selecionada?')) prepareCallAIScript(); });
     apiFetch('/api/knowledge/status').then(response => response.json()).then(info => {

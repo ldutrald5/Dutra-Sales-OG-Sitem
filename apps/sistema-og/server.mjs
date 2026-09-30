@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
 const proposalIntelligence = require('./services/proposal-intelligence-service.js');
 const proposalStore = require('./server-proposal-store.cjs');
+const salesExecutionModule = require('./server-sales-execution-gateway.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
@@ -295,6 +296,18 @@ footer{margin-top:28px;border-top:1px solid #202a35;padding-top:16px;color:#6474
 </body></html>`;
 }
 
+const salesExecutionGateway = salesExecutionModule.createSalesExecutionGateway();
+const salesExecutionHttpHandler = salesExecutionModule.createHttpHandler(salesExecutionGateway, {
+  readBody,
+  sendJson,
+  allowWrite,
+  logger: {
+    info: message => console.log(message),
+    warn: message => console.warn(message),
+    error: message => console.error(message)
+  }
+});
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
@@ -341,6 +354,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
+
+  if (await salesExecutionHttpHandler(req, res, url)) return;
 
   if (url.pathname === '/api/prospects/research' && req.method === 'POST') {
     try {
