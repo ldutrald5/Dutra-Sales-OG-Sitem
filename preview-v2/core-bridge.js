@@ -208,14 +208,63 @@
     try { return JSON.parse(localStorage.getItem(CACHE_KEY)||'null')?.snapshot || null; }
     catch { return null; }
   }
-  function queuePendingSave(payload, reason = 'offline') {
-    try { localStorage.setItem(PENDING_SAVE_KEY, JSON.stringify({queuedAt:new Date().toISOString(),reason,payload:clone(payload)})); return true; }
-    catch (error) { console.warn('[DUTRA] fila local indisponível', error); return false; }
-  }
-  function pendingSave() {
+  function legacyPendingSave() {
     try { return JSON.parse(localStorage.getItem(PENDING_SAVE_KEY)||'null'); } catch { return null; }
   }
-  function clearPendingSave() { try { localStorage.removeItem(PENDING_SAVE_KEY); } catch {} }
+  function clearLegacyPendingSave() { try { localStorage.removeItem(PENDING_SAVE_KEY); } catch {} }
+
+  async function queuePendingSave(payload, reason = 'offline') {
+    const bridge=syncBridge();
+    if(bridge?.queueState){
+      try{
+        const mutations=bridge.listMutations?await bridge.listMutations():[];
+        const record=await bridge.queueState(payload,{
+          mutationIds:mutations.map(item=>item.id)
+        });
+        clearLegacyPendingSave();
+        return {queuedAt:record.queuedAt,reason,payload:clone(record.body),recordId:record.id,mutationIds:record.mutationIds||[]};
+      }catch(error){
+        console.warn('[DUTRA] outbox IndexedDB indisponível; usando fallback legado',error);
+      }
+    }
+    try{
+      const fallback={queuedAt:new Date().toISOString(),reason,payload:clone(payload),legacy:true};
+      localStorage.setItem(PENDING_SAVE_KEY,JSON.stringify(fallback));
+      return fallback;
+    }catch(error){
+      console.warn('[DUTRA] fila local indisponível',error);
+      return null;
+    }
+  }
+
+  async function pendingSave() {
+    const bridge=syncBridge();
+    if(bridge?.readQueuedState){
+      try{
+        const record=await bridge.readQueuedState();
+        if(record?.body){
+          return {queuedAt:record.queuedAt,reason:'indexeddb',payload:clone(record.body),recordId:record.id,mutationIds:record.mutationIds||[]};
+        }
+      }catch(error){console.warn('[DUTRA] leitura do outbox IndexedDB falhou',error);}
+    }
+    const legacy=legacyPendingSave();
+    if(!legacy?.payload)return null;
+    if(bridge?.queueState){
+      try{
+        const migrated=await queuePendingSave(legacy.payload,legacy.reason||'legacy');
+        if(migrated)return migrated;
+      }catch(error){console.warn('[DUTRA] migração do pending save legado falhou',error);}
+    }
+    return legacy;
+  }
+
+  async function clearPendingSave() {
+    const bridge=syncBridge();
+    if(bridge?.clearQueuedState){
+      try{await bridge.clearQueuedState();}catch(error){console.warn('[DUTRA] limpeza do outbox IndexedDB falhou',error);}
+    }
+    clearLegacyPendingSave();
+  }
 
   async function pendingMutations() {
     try { return syncBridge()?.listMutations ? await syncBridge().listMutations() : []; }
@@ -270,7 +319,7 @@
   }
   async function flushPendingSave(force=false) {
     if(state.flushingPending||!state.pin) return false;
-    const queued=pendingSave();
+    const queued=await pendingSave();
     state.flushingPending=true;
     await refreshPendingMutationCount();
     if (queued?.payload) {
@@ -284,7 +333,7 @@
         state.snapshot=next;
         state.leads=(next.leads||[]).map(normalize);
         state.lastSyncedAt=new Date().toISOString();
-        clearPendingSave();
+        await clearPendingSave();
         const pendingCount=await acknowledgePendingMutations();
         cacheSnapshot(next);
         renderAll();
@@ -365,11 +414,12 @@
     if (!state.snapshot) throw new Error('Base ainda não carregada.');
     const payload = statePayload();
     cacheSnapshot({...state.snapshot,...payload});
-    queuePendingSave(payload,'saving');
+    await queuePendingSave(payload,'saving');
 
     let mutation=null;
     try {
       mutation=await enqueueBusinessMutation(mutationMeta,message);
+      await queuePendingSave(payload,'saving');
     } catch (error) {
       console.warn('[DUTRA] mutation granular indisponível; snapshot recovery preservado',error);
     }
@@ -378,7 +428,7 @@
     setConnectionStatus('SYNCING');
 
     if (typeof navigator!=='undefined' && navigator.onLine===false) {
-      queuePendingSave(payload,'offline');
+      await queuePendingSave(payload,'offline');
       const pendingCount=await refreshPendingMutationCount();
       connectionState()?.saveQueued?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount});
       setConnectionStatus('OFFLINE');
@@ -397,7 +447,7 @@
       state.snapshot = next;
       state.leads = (next.leads || []).map(normalize);
       state.lastSyncedAt = new Date().toISOString();
-      clearPendingSave();
+      await clearPendingSave();
       const pendingCount=await acknowledgePendingMutations();
       cacheSnapshot(next);
       connectionState()?.saveSucceeded?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,message:'SALVO ✓'});
@@ -410,7 +460,7 @@
       await markPendingMutationAttempts(error?.message||String(error));
       const pendingCount=await refreshPendingMutationCount();
       if (error.status === 409) {
-        queuePendingSave(payload,'conflict');
+        await queuePendingSave(payload,'conflict');
         cacheSnapshot({...state.snapshot,...payload});
         connectionState()?.saveFailed?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'ERROR',error:error.message,detail:'CONFLITO DE SINCRONIZAÇÃO · DADOS PRESERVADOS'});
         setConnectionStatus('ERROR','CONFLITO DE SINCRONIZAÇÃO · DADOS PRESERVADOS');
@@ -418,7 +468,7 @@
         return state.snapshot;
       }
       if (networkLikeError(error)) {
-        queuePendingSave(payload,'offline');
+        await queuePendingSave(payload,'offline');
         cacheSnapshot({...state.snapshot,...payload});
         connectionState()?.saveQueued?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'OFFLINE'});
         setConnectionStatus('OFFLINE');
@@ -426,7 +476,7 @@
         scheduleReconnect();
         return state.snapshot;
       }
-      queuePendingSave(payload,'error');
+      await queuePendingSave(payload,'error');
       cacheSnapshot({...state.snapshot,...payload});
       connectionState()?.saveFailed?.({mutationId:mutation?.id||'',label:mutationMeta.label||message,pendingCount,status:'ERROR',error:error.message,message:'TENTAR NOVAMENTE'});
       setConnectionStatus('ERROR',Number(error.status)>=500?'BASE INDISPONÍVEL · TENTAR NOVAMENTE':'SINCRONIZAÇÃO PENDENTE');
@@ -819,7 +869,7 @@
     try {
       await loadState();
       hideLogin();
-      if (pendingSave()) flushPendingSave(false);
+      if (await pendingSave()) flushPendingSave(false);
     } catch (error) {
       if (error.message === 'unauthorized') return;
       console.error(error);
@@ -847,7 +897,7 @@
     getState:()=>state.snapshot,
     getLeads:()=>state.leads,
     getSelectedLead:()=>selectedLead(),
-    getConnectionStatus:()=>connectionState()?.snapshot?.()||({status:state.connectionStatus,lastSyncedAt:state.lastSyncedAt,pendingCount:state.pendingMutationCount,pending:Boolean(pendingSave())}),
+    getConnectionStatus:()=>connectionState()?.snapshot?.()||({status:state.connectionStatus,lastSyncedAt:state.lastSyncedAt,pendingCount:state.pendingMutationCount,pending:state.pendingMutationCount>0}),
     getPendingMutations:()=>pendingMutations(),
     retrySync:()=>flushPendingSave(true),
     commit:async(payload={},message='Alterações salvas.',mutationMeta={})=>{if(Array.isArray(payload.leads))state.leads=payload.leads.map(normalize);if(payload.operations&&typeof payload.operations==='object'){if(!state.snapshot)throw new Error('Base ainda não carregada.');state.snapshot.operations=payload.operations;}return saveState(message,mutationMeta);},
