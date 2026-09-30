@@ -705,6 +705,25 @@ body.og-dialog-open { overflow: hidden; }
 .sales-desk-now span { color:#ffde17; font-size:.56rem; font-weight:900; letter-spacing:.08em; }
 .sales-desk-now strong { color:#f8fafc; font-size:.82rem; line-height:1.35; }
 .sales-desk-now small { color:#94a3b8; font-size:.62rem; }
+.sales-desk-playbook { display:grid; gap:.7rem; margin-top:.8rem; padding:.85rem; border:1px solid rgba(255,222,23,.2); border-radius:.8rem; background:#0a1017; }
+.sales-desk-playbook > header { display:flex; justify-content:space-between; gap:.8rem; align-items:flex-start; }
+.sales-desk-playbook > header div { display:grid; gap:.18rem; }
+.sales-desk-playbook > header span, .sales-desk-playbook b { color:#ffde17; font-size:.56rem; font-weight:900; letter-spacing:.06em; }
+.sales-desk-playbook > header strong { color:#f8fafc; font-size:.76rem; line-height:1.35; }
+.sales-desk-playbook > header small { color:#64748b; font-size:.55rem; white-space:nowrap; }
+.sales-desk-playbook-focus, .sales-desk-playbook-opening { display:grid; gap:.24rem; padding:.68rem; border:1px solid #202833; border-radius:.68rem; background:#080d13; }
+.sales-desk-playbook-focus p, .sales-desk-playbook-opening p { color:#e5e7eb; font-size:.68rem; line-height:1.5; }
+.sales-desk-playbook-opening p { color:#f8fafc; font-weight:700; }
+.sales-desk-playbook-opening small { color:#94a3b8; font-size:.59rem; line-height:1.4; }
+.sales-desk-playbook details { border-top:1px solid #202833; padding-top:.65rem; }
+.sales-desk-playbook summary { cursor:pointer; color:#cbd5e1; font-size:.64rem; font-weight:850; }
+.sales-desk-playbook-grid { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-top:.65rem; }
+.sales-desk-playbook-grid > div { padding:.65rem; border:1px solid #202833; border-radius:.65rem; background:#080d13; }
+.sales-desk-playbook-grid ol, .sales-desk-playbook-grid ul { margin:.45rem 0 0 1rem; color:#cbd5e1; font-size:.61rem; line-height:1.5; }
+.sales-desk-playbook-grid li + li { margin-top:.3rem; }
+.sales-desk-playbook-guard { margin-top:.65rem; padding:.62rem .68rem; border:1px solid rgba(239,68,68,.28); border-radius:.65rem; background:rgba(127,29,29,.08); }
+.sales-desk-playbook-guard b { color:#fca5a5; }
+.sales-desk-playbook-guard p { margin-top:.3rem; color:#fecaca; font-size:.6rem; line-height:1.45; }
 .sales-desk-register { margin-top: .9rem; padding-top: .9rem; border-top: 1px solid var(--og-border); }
 .sales-desk-register > summary, .sales-desk-history > summary { cursor:pointer; list-style:none; padding:.65rem .75rem; border:1px solid var(--og-border); border-radius:.68rem; background:#101720; color:#e5e7eb; font-size:.7rem; font-weight:850; }
 .sales-desk-register > summary::-webkit-details-marker, .sales-desk-history > summary::-webkit-details-marker { display:none; }
@@ -760,8 +779,10 @@ body.og-dialog-open { overflow: hidden; }
 }
 
 @media (max-width: 520px) {
-  .sales-desk-facts, .sales-desk-next { grid-template-columns: 1fr; }
+  .sales-desk-facts, .sales-desk-next, .sales-desk-playbook-grid { grid-template-columns: 1fr; }
   .sales-desk-row { grid-template-columns: 1fr auto; }
+  .sales-desk-playbook > header { align-items:flex-start; flex-direction:column; }
+  .sales-desk-playbook > header small { white-space:normal; }
 }
 
 /* Motor de Prospecção */
