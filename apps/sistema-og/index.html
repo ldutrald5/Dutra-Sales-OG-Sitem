@@ -1042,6 +1042,22 @@
         <button id="call-ai-return" type="button" class="og-button og-button-ghost hidden">← Voltar à operação</button>
       </section>
 
+      <section id="call-intelligence-dashboard" class="call-intelligence-dashboard" aria-label="Métricas de ligações dos últimos 30 dias">
+        <div class="call-intelligence-dashboard-head">
+          <div><span class="og-kicker">CONVERSATION INTELLIGENCE · 30 DIAS</span><h2>Métricas reais das ligações gravadas</h2></div>
+          <button id="call-intelligence-refresh" type="button" class="og-button og-button-ghost">Atualizar</button>
+        </div>
+        <div id="call-intelligence-dashboard-grid" class="call-intelligence-dashboard-grid">
+          <div><small>Chamadas</small><b>—</b></div>
+          <div><small>Minutos gravados</small><b>—</b></div>
+          <div><small>Duração média</small><b>—</b></div>
+          <div><small>Transcritas</small><b>—</b></div>
+          <div><small>Você fala</small><b>—</b></div>
+          <div><small>Cliente fala</small><b>—</b></div>
+        </div>
+        <div id="call-intelligence-dashboard-detail" class="call-intelligence-dashboard-detail">As métricas aparecem conforme as chamadas forem salvas e analisadas.</div>
+      </section>
+
       <section class="call-ai-setup" aria-label="Preparação da ligação">
         <div class="call-ai-search-wrap">
           <label for="call-ai-client-search">Cliente ou conta</label>
@@ -1146,10 +1162,33 @@
           <button id="call-ai-adapt-notes" type="button" class="call-ai-wide-action">Adaptar às minhas anotações</button>
           <div id="call-ai-sources" class="call-ai-sources"></div>
           <div id="call-ai-recording-result" class="call-ai-recording-result hidden">
-            <strong>Gravação desta sessão</strong>
+            <div class="call-ai-recording-result-head">
+              <div><strong>Gravação desta sessão</strong><small id="call-ai-recording-local-note">Arquivo local pronto para revisão.</small></div>
+              <span id="call-ai-intelligence-badge" data-state="local">LOCAL</span>
+            </div>
             <audio id="call-ai-recording-playback" controls></audio>
-            <a id="call-ai-recording-download" download="ligacao-og.webm">Baixar gravação</a>
-            <small>O arquivo permanece neste aparelho até você baixá-lo ou fechar a página.</small>
+            <div class="call-ai-recording-file-actions">
+              <a id="call-ai-recording-download" download="ligacao-og.webm">Baixar gravação</a>
+              <button id="call-ai-recording-save" type="button" class="og-button og-button-primary">Salvar áudio + analisar</button>
+              <button id="call-ai-recording-transcribe" type="button" class="og-button hidden">Transcrever agora</button>
+            </div>
+            <div id="call-ai-intelligence-status" class="call-ai-intelligence-status" data-state="idle">A gravação ainda não foi enviada ao cofre privado.</div>
+            <div id="call-ai-capture-metrics" class="call-ai-capture-metrics"></div>
+            <section id="call-ai-transcript-panel" class="call-ai-transcript-panel hidden">
+              <div class="call-ai-panel-head"><span>TRANSCRIÇÃO</span><small id="call-ai-transcript-source"></small></div>
+              <div id="call-ai-transcript-text" class="call-ai-transcript-text"></div>
+            </section>
+            <section id="call-ai-conversation-metrics" class="call-ai-conversation-metrics hidden">
+              <div class="call-ai-panel-head"><span>MÉTRICAS DA CONVERSA</span><small>Indicadores; não alteram o CRM automaticamente</small></div>
+              <div id="call-ai-conversation-metrics-grid"></div>
+              <div id="call-ai-objection-metrics"></div>
+            </section>
+            <details class="call-ai-manual-transcript">
+              <summary>Tenho uma transcrição pronta</summary>
+              <textarea id="call-ai-manual-transcript" rows="7" placeholder="Cole aqui a transcrição da ligação. Ela será analisada, mas nenhum fato será gravado no CRM sem revisão."></textarea>
+              <button id="call-ai-manual-transcript-save" type="button" class="og-button">Analisar transcrição colada</button>
+            </details>
+            <small class="call-ai-recording-privacy">O áudio só sai deste aparelho quando você clicar em “Salvar áudio + analisar”. O armazenamento remoto é privado.</small>
           </div>
         </aside>
       </section>
@@ -1363,6 +1402,7 @@
   <script src="services/call-ai-context.js"></script>
   <script src="services/sales-execution-adapter.js"></script>
   <script src="services/sales-execution-client.js"></script>
+  <script src="services/call-intelligence-client.js"></script>
   <script src="services/knowledge-selector.js"></script>
   <script src="services/account-knowledge-service.js"></script>
   <script src="services/proposal-intelligence-service.js"></script>

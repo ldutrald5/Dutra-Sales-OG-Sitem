@@ -39,6 +39,6 @@ assert.match(app, /card\.tabIndex = 0/, 'cards clicáveis do catálogo precisam 
 assert.match(app, /card\.setAttribute\('role', 'button'\)/, 'cards clicáveis do catálogo precisam declarar papel');
 assert.match(app, /event\.key === 'Enter' \|\| event\.key === ' '/, 'cards do catálogo precisam aceitar teclado');
 
-assert.match(sw, /const SW_VERSION = 'v64';/, 'RC3 precisa invalidar cache anterior');
+assert.match(sw, /const SW_VERSION = 'v65';/, 'Call Intelligence precisa invalidar o shell PWA anterior');
 
 console.log('DUTRA OS 1.0 RC3 final candidate UX tests: PASS');

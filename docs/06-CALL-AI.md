@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O Call AI seleciona uma conta real do CRM, define objetivo, prepara roteiro em oito etapas, recebe notas e permite revisar alterações antes de gravar. O Sales Brain local é consultado sob demanda; sem ele, o fluxo continua com contexto do CRM e perguntas seguras. A gravação usa APIs do navegador e permanece local.
+O Call AI seleciona uma conta real do CRM, define objetivo, prepara roteiro em oito etapas, recebe notas e permite revisar alterações antes de gravar. O Sales Brain local é consultado sob demanda; sem ele, o fluxo continua com contexto do CRM e perguntas seguras. A gravação começa somente por ação explícita. Depois de encerrada, o vendedor pode mantê-la local ou enviá-la explicitamente para o cofre privado do Call Intelligence.
 
 ## Visão
 
@@ -55,3 +55,20 @@ Não enviar o banco completo. O montador de contexto seleciona somente campos e 
 - Sem provedor configurado, respostas seguras locais mantêm a operação disponível e informam que não houve chamada externa.
 - Respostas são estruturadas e só viram nota, próxima ação ou alteração de CRM após confirmação do vendedor.
 - A personalização de templates reutiliza o mesmo motor e sempre retorna para uma prévia editável.
+
+
+## Call Intelligence V1
+
+A gravação passa a ter um ciclo durável e auditável:
+
+`captura local → revisão → upload privado → transcrição opcional → métricas → vínculo com call_attempt`.
+
+- Microfone mede atividade da voz do vendedor.
+- Em **Áudio do PC + microfone**, os canais são medidos separadamente antes da mixagem, permitindo estimar tempo de fala do vendedor, tempo do cliente e sobreposição.
+- O áudio remoto fica no bucket privado `call-recordings`.
+- A transcrição automática é server-side e depende de um provedor configurado no Edge runtime.
+- Sem provedor, o áudio continua armazenável e uma transcrição colada manualmente pode alimentar as métricas.
+- Métricas incluem duração, cobertura de transcrição, palavras, perguntas, objeções, palavras-chave e menções numéricas.
+- Extrações da conversa são **candidatos revisáveis**; não viram frota, dor, preço, estágio, reunião ou outro fato canônico sem confirmação.
+- Quando o resultado da ligação entra no Sales Execution, a gravação pode ser vinculada ao `call_attempt` e à oportunidade.
+- O Call AI exibe também um resumo agregado dos últimos 30 dias.

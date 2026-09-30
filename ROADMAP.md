@@ -62,3 +62,13 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Escrita multi-entidade usa RPC transacional e idempotente.
 - Gateway privilegiado permanece server-side; browser não recebe chave administrativa.
 - Próximo passo: importar/reconciliar um lote piloto com `legacy_lead_id`/`external_id` e validar o fluxo ponta a ponta antes de ampliar a migração.
+
+
+## Em validação — Call Intelligence V1
+
+- Gravação iniciada somente pelo vendedor e preservada localmente até decisão de upload.
+- Storage privado para áudio e metadados normalizados por chamada.
+- Transcrição automática opcional server-side + fallback por texto colado.
+- Conversation Intelligence com métricas por chamada e agregado de 30 dias.
+- Vínculo da gravação ao resultado canônico no Sales Execution.
+- Próxima evolução: revisão assistida dos candidatos extraídos antes de promover fatos para Company/Contact/Opportunity e calibração das métricas com chamadas reais.

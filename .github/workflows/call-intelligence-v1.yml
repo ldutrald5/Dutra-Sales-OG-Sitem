@@ -1,0 +1,44 @@
+name: Call Intelligence V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/sistema-og/app.js'
+      - 'apps/sistema-og/index.html'
+      - 'apps/sistema-og/styles.css'
+      - 'apps/sistema-og/service-worker.js'
+      - 'apps/sistema-og/server.mjs'
+      - 'apps/sistema-og/server-call-intelligence-gateway.cjs'
+      - 'apps/sistema-og/services/call-intelligence-client.js'
+      - 'scripts/test_call_ai.mjs'
+      - 'scripts/test_call_intelligence_*.mjs'
+      - 'scripts/test_final_candidate_ux.mjs'
+      - 'supabase/functions/call-intelligence/**'
+      - 'supabase/migrations/*call_intelligence*'
+      - 'package.json'
+      - '.github/workflows/call-intelligence-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax checks
+        run: npm run og:check
+      - name: Call Intelligence contracts
+        run: npm run og:call-intelligence:test
+      - name: Call AI regression
+        run: npm run og:call-ai:test
+      - name: Sales Execution regression
+        run: npm run og:sales-execution:test
+      - name: PWA release regression
+        run: npm run og:final-candidate-ux:test

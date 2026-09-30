@@ -37,6 +37,12 @@ assert.ok(app.includes("getElementById('call-ai-record-start')?.addEventListener
 assert.ok(app.includes('navigator.mediaDevices.getDisplayMedia'), 'Captura opcional do áudio do computador deve existir');
 assert.ok(app.includes('navigator.mediaDevices.getUserMedia'), 'Captura do microfone deve existir');
 assert.ok(app.includes('URL.createObjectURL(blob)'), 'Gravação deve gerar reprodução local');
+assert.ok(app.includes('persistCallRecording'), 'Gravação revisada deve poder ser persistida de forma explícita');
+assert.ok(app.includes('OG_CALL_INTELLIGENCE_CLIENT.uploadSigned'), 'Áudio persistido deve usar upload privado assinado');
+assert.ok(app.includes('saveManualCallTranscript'), 'Call AI deve aceitar transcrição colada como fallback');
+assert.ok(app.includes('sellerActiveMs') && app.includes('customerActiveMs'), 'Captura deve medir atividade dos canais quando disponível');
+assert.ok(app.includes("getElementById('call-ai-recording-save')?.addEventListener"), 'Upload do áudio deve exigir ação explícita');
+assert.ok(app.includes('call_intelligence.link_pending'), 'Vínculo com resultado canônico deve ser observável em falha');
 assert.ok(html.includes('call-ai-return'), 'Call AI deve retornar à operação de origem');
 assert.ok(app.includes('OG_CALL_AI_CONTEXT.build(lead)'), 'Call AI deve usar contexto compacto por conta');
 assert.ok(app.includes('sem carregar o CRM inteiro'), 'A interface deve informar o escopo compacto');
