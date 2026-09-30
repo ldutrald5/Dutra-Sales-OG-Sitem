@@ -4324,6 +4324,57 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (target?.isConnected) setTimeout(() => target.focus(), 0);
   }
 
+  function buildClientAttackCard(lead, nextBest, conversation) {
+    const brief = window.OG_SALES_BRIEF?.build
+      ? OG_SALES_BRIEF.build(lead, state.operations)
+      : { gaps: [], questions: [], doNotSay: [] };
+    const segment = (OG_DATA.segments || []).find(item => item.id === lead.segmentId);
+    const status = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status);
+    const fleet = Math.max(0, Number(lead.fleetSize || 0) || 0);
+    const events = (state.operations?.activityEvents || [])
+      .filter(item => String(item.clientId || item.leadId || '') === String(lead.id));
+    const hasProposalHistory = events.some(item => ['proposal.prepared','proposal.sent','proposal.opened','proposal.reopened'].includes(item.type));
+    const hasContactHistory = Boolean(lead.lastContactAt || (lead.interactions || []).length);
+    const relationship = lead.status === 'fechado'
+      ? 'Cliente'
+      : hasProposalHistory
+        ? 'Proposta com histórico confirmado'
+        : hasContactHistory
+          ? 'Contato já registrado'
+          : 'Sem histórico de contato';
+    const profile = [segment?.name || lead.segmentId || 'Segmento não definido', fleet ? `${fleet} veículo(s)` : 'Frota não levantada'].join(' · ');
+    const moment = [conversation?.label || 'Situação não definida', status?.label || lead.status || 'Status não definido'].join(' · ');
+    const objective = nextBest?.objective || lead.nextActionObjective || nextBest?.action || lead.nextAction || 'Definir objetivo antes do contato';
+    const prepItems = brief.gaps?.length ? brief.gaps.slice(0, 3) : ['Contexto essencial preenchido'];
+    const questions = (brief.questions || []).slice(0, 3);
+    const doNotSay = (brief.doNotSay || []).slice(0, 3);
+
+    return `
+      <section class="client-sheet-attack-card" aria-label="Ficha de Ataque">
+        <div class="client-sheet-attack-head">
+          <div><span class="og-kicker">FICHA DE ATAQUE · V1</span><strong>Entre na conversa sabendo o que conquistar.</strong></div>
+          <small>Somente leitura · fatos + regras existentes</small>
+        </div>
+        <div class="client-sheet-attack-meta">
+          <div><small>PERFIL</small><strong>${escapeHtml(profile)}</strong></div>
+          <div><small>MOMENTO</small><strong>${escapeHtml(moment)}</strong></div>
+          <div><small>RELACIONAMENTO</small><strong>${escapeHtml(relationship)}</strong></div>
+        </div>
+        <div class="client-sheet-attack-objective">
+          <small>OBJETIVO DESTE CONTATO</small>
+          <strong>${escapeHtml(objective)}</strong>
+        </div>
+        <div class="client-sheet-attack-prep">
+          <small>PREPARAR / DESCOBRIR</small>
+          <span>${prepItems.map(item => escapeHtml(item)).join(' · ')}</span>
+        </div>
+        <div class="client-sheet-attack-lists">
+          <div><small>PERGUNTAS PARA DESCOBRIR</small><ol>${questions.map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>Nenhuma lacuna crítica detectada.</li>'}</ol></div>
+          <div class="client-sheet-attack-guardrails"><small>NÃO DIGA AINDA</small><ul>${doNotSay.map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>Mantenha apenas fatos confirmados e condições aprovadas.</li>'}</ul></div>
+        </div>
+      </section>`;
+  }
+
   function openClientSheet(leadId) {
     const lead = OG_CRM_SERVICE.getLeadById(state.leads, leadId);
     if (!lead) return;
@@ -4371,6 +4422,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         </div>
 
         <button type="button" class="client-sheet-more-toggle" data-client-sheet-more aria-expanded="false">Mostrar dados completos</button>
+
+        ${buildClientAttackCard(lead, nextBest, conversation)}
 
         <section class="client-sheet-next-move" aria-label="Próximo movimento comercial">
           <div class="client-sheet-section-title"><div><span>PRÓXIMO MOVIMENTO</span><small>Mesma inteligência da fila, com prioridade explicada.</small></div><strong class="client-sheet-score">${scoreExplanation.total} pts</strong></div>

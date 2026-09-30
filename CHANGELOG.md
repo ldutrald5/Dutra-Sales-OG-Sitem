@@ -94,6 +94,13 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Mantido fallback local observável quando a conta ainda não está normalizada ou a sincronização falha.
 
 
+## [Unreleased] — PLAYBOOK-01 Ficha de Ataque V1
+
+- Adicionada síntese comercial somente leitura na Ficha Universal.
+- A nova superfície reutiliza Next Best Action, PRECALL-01 e estado real da conta; não cria novo score, nova entidade ou nova persistência.
+- Mostra perfil, momento, relacionamento explícito, objetivo do contato, lacunas, perguntas de diagnóstico e guardrails “NÃO DIGA AINDA”.
+- Mobile mantém a primeira camada compacta e esconde listas longas até a expansão da ficha.
+
 ## [Unreleased] — Call Intelligence V1
 
 - Evoluída a gravação do Call AI de arquivo apenas local para persistência opcional em Storage privado.

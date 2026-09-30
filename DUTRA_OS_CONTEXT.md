@@ -56,6 +56,7 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **V2.8:** Prospecção conectada ao mesmo CRM + Dutra Force contextual.
 - **V2.9:** Dutra Force Central com radar, briefing e links para Conta 360/Call AI.
 - **V3.0:** Ciclo Comercial Conectado com visão Entrada → Contato → Proposta → Negociação → Venda → Pós-venda e atalhos para Cotação, ROI/Payback, CRM, Mesa e Dutra Force. Cotação salva continua sendo rascunho até ação explícita do usuário.
+- **PLAYBOOK-01 em validação:** Ficha de Ataque V1 sintetiza perfil, momento, relacionamento explícito, objetivo, lacunas, perguntas e guardrails dentro da Ficha Universal. É uma projeção somente leitura que reutiliza Next Best Action e PRECALL-01; não cria novo score, nova entidade ou novo fato.
 
 ## Regra técnica OG
 

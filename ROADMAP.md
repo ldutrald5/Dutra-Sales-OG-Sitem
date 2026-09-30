@@ -64,6 +64,12 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Próximo passo: importar/reconciliar um lote piloto com `legacy_lead_id`/`external_id` e validar o fluxo ponta a ponta antes de ampliar a migração.
 
 
+## Em validação — PLAYBOOK-01 Ficha de Ataque V1
+
+- Ficha Universal passa a condensar a preparação do próximo contato.
+- Reutiliza Account 360, Next Best Action e PRECALL-01; não cria classificação paralela de cliente.
+- Próxima evolução só deve avançar para templates/scripts comerciais depois de validar uso real desta síntese.
+
 ## Em validação — Call Intelligence V1
 
 - Gravação iniciada somente pelo vendedor e preservada localmente até decisão de upload.

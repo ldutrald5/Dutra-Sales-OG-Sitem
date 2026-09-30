@@ -104,6 +104,15 @@ assert.match(html,/id="quote-open-client-sheet"/,'Cotação deve mostrar acesso 
 assert.match(css,/\.client-sheet-inline-link/,'estilo de acesso transversal à ficha ausente');
 assert.match(css,/\.history-client-link/,'histórico deve destacar cliente clicável');
 assert.match(css,/\.call-ai-account-row/,'Call AI deve acomodar botão de ficha');
+assert.match(app,/function buildClientAttackCard\(lead, nextBest, conversation\)/,'Ficha de Ataque deve reutilizar a ficha universal, sem nova entidade');
+assert.match(app,/FICHA DE ATAQUE · V1/,'Ficha de Ataque deve estar visível na ficha do cliente');
+assert.match(app,/OG_SALES_BRIEF\.build\(lead, state\.operations\)/,'Ficha de Ataque deve reutilizar PRECALL-01');
+assert.match(app,/Somente leitura · fatos \+ regras existentes/,'Ficha de Ataque deve declarar que é projeção, não nova fonte de verdade');
+assert.match(app,/PERGUNTAS PARA DESCOBRIR/,'Ficha de Ataque deve expor perguntas de diagnóstico');
+assert.match(app,/NÃO DIGA AINDA/,'Ficha de Ataque deve expor guardrails');
+assert.match(css,/\.client-sheet-attack-card/,'estilos da Ficha de Ataque ausentes');
+assert.match(css,/client-sheet-panel:not\(\.mobile-expanded\) \.client-sheet-attack-lists/,'mobile deve manter a primeira camada compacta');
+
 
 
 console.log('Client sheet + CRM workspace tests: PASS');

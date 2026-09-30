@@ -200,6 +200,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Story:** `docs/stories/DUTRA-INT-01-intelligence-core-roadmap.md`.
 - **Status:** em andamento.
 
+## PLAYBOOK-01 — Ficha de Ataque V1
+
+- **Objetivo:** sintetizar preparação comercial imediata dentro da Ficha Universal sem duplicar Account 360, NBA, PRECALL ou Call AI.
+- **Escopo:** perfil, momento, relacionamento explícito, objetivo do contato, lacunas, perguntas e “NÃO DIGA AINDA” como projeção somente leitura.
+- **Fonte:** `state.leads`, `OG_LEAD_INTELLIGENCE`, `OG_SALES_BRIEF` e eventos explícitos já existentes.
+- **Story:** `docs/stories/PLAYBOOK-01-sales-attack-card-v1.md`.
+- **Status:** em validação.
+
 ## DIARY-01 — Diário Inteligente Revisável
 
 - **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.
