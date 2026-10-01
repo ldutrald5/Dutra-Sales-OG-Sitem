@@ -2,6 +2,17 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — DUTRA Intelligence Compiler V1
+
+- Estendido o Builder Brain existente em vez de criar uma segunda memória paralela.
+- Adicionado Context Router para carregar o menor contexto relevante por tarefa.
+- Adicionadas Skills finas: Core, Dev, Sales, CRM, OG Tech, Fleet, Product e QA/Guardian.
+- Criados playbooks comerciais por estágio, regras técnicas de validação, contexto de frota e Prompt Library consolidada.
+- Criada coleção de incidentes com causa, correção, prevenção e regressão.
+- Histórico recuperado passou a ser evidência com proveniência; código atual testado e fonte OG validada permanecem acima do chat na hierarquia de verdade.
+- Dados dinâmicos de clientes permanecem no CRM/runtime e não são congelados em Skills.
+- Adicionado teste de contrato `og:intelligence:test` e integração planejada à suíte `validate`.
+
 ## [3.0] — Ciclo Comercial Conectado
 
 - Adicionada central de Ciclo Comercial: Entrada → Contato → Proposta → Negociação → Venda → Pós-venda.
