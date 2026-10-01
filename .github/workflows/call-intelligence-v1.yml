@@ -7,6 +7,7 @@ on:
       - 'Dockerfile.whisper'
       - 'scripts/start-og-hosted.mjs'
       - 'scripts/test_local_whisper_contract.mjs'
+      - 'scripts/whisper-runtime-self-test.mjs'
       - 'apps/sistema-og/app.js'
       - 'apps/local-whisper-worker/**'
       - 'apps/sistema-og/index.html'
