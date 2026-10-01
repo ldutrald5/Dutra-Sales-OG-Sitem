@@ -9,8 +9,9 @@ Antes de alterar o DUTRA OS:
 1. Leia `DUTRA_OS_CONTEXT.md`.
 2. Leia este `AI_HANDOFF.md`.
 3. Leia `ROADMAP.md` e `CHANGELOG.md`.
-4. Leia `AGENTS.md` e somente a documentação ligada ao escopo.
-5. Inspecione o código real antes de propor refatoração ou criar módulo paralelo.
+4. Leia `AGENTS.md` e `docs/second-brain/CONTEXT_ROUTER.md`.
+5. Use o router para carregar somente a Skill DUTRA, decisões, incidentes e documentação ligados ao escopo.
+6. Inspecione o código real antes de propor refatoração ou criar módulo paralelo.
 
 ## Contrato de trabalho
 
@@ -36,6 +37,8 @@ Descubra primeiro:
 - se a mudança pode afetar dados locais ou produção.
 
 Se houver uma estrutura existente adequada, estenda-a. Não crie uma segunda fonte de verdade.
+
+Antes de afirmar que algo não existe, pesquise o repositório. Antes de corrigir um bug material, consulte `docs/second-brain/incidents.jsonl` e `anti-patterns.jsonl`. Depois de uma mudança STANDARD/STRUCTURAL, registre aprendizado durável e rode `npm run og:brain:refresh`.
 
 ## Definition of Done
 
