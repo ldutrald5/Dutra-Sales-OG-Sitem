@@ -397,6 +397,166 @@ async function requestTranscription(payload: Record<string, unknown>) {
   return { queued:true, providerReady:true, recording:queued.data };
 }
 
+function sanitizeExternalSegments(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 5000).map((segment: any) => ({
+    start: Math.max(0, Number(segment?.start) || 0),
+    end: Math.max(0, Number(segment?.end) || 0),
+    text: String(segment?.text || "").trim().slice(0, 2000),
+    speaker: String(segment?.speaker || "UNKNOWN").trim().slice(0, 40) || "UNKNOWN"
+  })).filter((segment: any) => segment.text && segment.end >= segment.start);
+}
+
+async function prepareExternalTranscription(payload: Record<string, unknown>) {
+  const callSessionId = safeSession(payload.callSessionId);
+  const provider = String(payload.provider || "faster-whisper").trim().slice(0, 80);
+  const model = String(payload.model || "base").trim().slice(0, 120);
+  if (provider !== "faster-whisper") throw new Error("Provider externo não permitido");
+
+  const rec = await admin.from("call_recordings").select("*").eq("call_session_id", callSessionId).maybeSingle();
+  if (rec.error) throw rec.error;
+  if (!rec.data) throw new Error("Gravação não encontrada");
+
+  const signed = await admin.storage.from(rec.data.storage_bucket || STORAGE_BUCKET)
+    .createSignedUrl(rec.data.storage_path, 900);
+  if (signed.error || !signed.data?.signedUrl) throw signed.error || new Error("signed_download_unavailable");
+
+  const metadata = {
+    ...(rec.data.metadata || {}),
+    external_transcription: {
+      provider,
+      model,
+      startedAt: new Date().toISOString(),
+      jobId: null
+    }
+  };
+  const updated = await admin.from("call_recordings").update({
+    recording_status: "PROCESSING",
+    transcription_status: "PROCESSING",
+    transcription_provider: provider,
+    transcription_model: model,
+    transcription_error: null,
+    metadata,
+    updated_at: new Date().toISOString()
+  }).eq("id", rec.data.id).select("*").single();
+  if (updated.error) throw updated.error;
+
+  return {
+    recording: updated.data,
+    signedDownloadUrl: signed.data.signedUrl,
+    expiresInSeconds: 900
+  };
+}
+
+async function markExternalTranscriptionJob(payload: Record<string, unknown>) {
+  const callSessionId = safeSession(payload.callSessionId);
+  const jobId = String(payload.jobId || "").trim().slice(0, 160);
+  if (!jobId) throw new Error("jobId obrigatório");
+  const rec = await admin.from("call_recordings").select("id,metadata").eq("call_session_id", callSessionId).maybeSingle();
+  if (rec.error) throw rec.error;
+  if (!rec.data) throw new Error("Gravação não encontrada");
+
+  const current = (rec.data.metadata || {}) as Record<string, any>;
+  const metadata = {
+    ...current,
+    external_transcription: {
+      ...(current.external_transcription || {}),
+      jobId,
+      queuedAt: new Date().toISOString()
+    }
+  };
+  const updated = await admin.from("call_recordings").update({
+    metadata,
+    transcription_status: "PROCESSING",
+    updated_at: new Date().toISOString()
+  }).eq("id", rec.data.id).select("id,call_session_id,transcription_status,transcription_provider,transcription_model,metadata").single();
+  if (updated.error) throw updated.error;
+  return updated.data;
+}
+
+async function saveExternalTranscript(payload: Record<string, unknown>) {
+  const callSessionId = safeSession(payload.callSessionId);
+  const provider = String(payload.provider || "").trim().slice(0, 80);
+  const model = String(payload.model || "").trim().slice(0, 120);
+  const text = String(payload.text || "").trim().slice(0, MAX_MANUAL_TRANSCRIPT);
+  const segments = sanitizeExternalSegments(payload.segments);
+  const durationMs = Math.max(0, Math.min(8 * 60 * 60 * 1000, Number(payload.durationMs) || 0));
+  if (provider !== "faster-whisper") throw new Error("Provider externo não permitido");
+  if (!model) throw new Error("Modelo externo obrigatório");
+  if (text.length < 8) throw new Error("Transcrição externa muito curta");
+
+  const rec = await admin.from("call_recordings").select("*").eq("call_session_id", callSessionId).maybeSingle();
+  if (rec.error) throw rec.error;
+  if (!rec.data) throw new Error("Gravação não encontrada");
+
+  const transcript = await admin.from("call_transcripts").upsert({
+    recording_id: rec.data.id,
+    provider,
+    model,
+    language: String(payload.language || "pt").slice(0, 12),
+    transcript_text: text,
+    segments,
+    provider_usage: {
+      engine: provider,
+      device: String(payload.device || "cpu").slice(0, 40),
+      computeType: String(payload.computeType || "int8").slice(0, 40),
+      languageProbability: Number(payload.languageProbability) || null,
+      audioBytes: Number(payload.audioBytes) || null
+    },
+    duration_ms: durationMs || rec.data.duration_ms || null,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "recording_id" }).select("*").single();
+  if (transcript.error) throw transcript.error;
+
+  const metrics = await saveMetrics(rec.data, transcript.data.id, text, segments);
+  const metadata = {
+    ...(rec.data.metadata || {}),
+    external_transcription: {
+      ...((rec.data.metadata || {}).external_transcription || {}),
+      provider,
+      model,
+      completedAt: new Date().toISOString()
+    }
+  };
+  const saved = await admin.from("call_recordings").update({
+    recording_status: "READY",
+    transcription_status: "READY",
+    transcription_provider: provider,
+    transcription_model: model,
+    transcription_error: null,
+    metadata,
+    updated_at: new Date().toISOString()
+  }).eq("id", rec.data.id).select("*").single();
+  if (saved.error) throw saved.error;
+  return { recording: saved.data, transcript: transcript.data, metrics, providerReady: providerReady() };
+}
+
+async function failExternalTranscription(payload: Record<string, unknown>) {
+  const callSessionId = safeSession(payload.callSessionId);
+  const errorText = String(payload.error || "Falha na transcrição local").trim().slice(0, 1800);
+  const rec = await admin.from("call_recordings").select("id,metadata").eq("call_session_id", callSessionId).maybeSingle();
+  if (rec.error) throw rec.error;
+  if (!rec.data) throw new Error("Gravação não encontrada");
+  const current = (rec.data.metadata || {}) as Record<string, any>;
+  const metadata = {
+    ...current,
+    external_transcription: {
+      ...(current.external_transcription || {}),
+      failedAt: new Date().toISOString(),
+      error: errorText
+    }
+  };
+  const updated = await admin.from("call_recordings").update({
+    recording_status: "UPLOADED",
+    transcription_status: "FAILED",
+    transcription_error: errorText,
+    metadata,
+    updated_at: new Date().toISOString()
+  }).eq("id", rec.data.id).select("*").single();
+  if (updated.error) throw updated.error;
+  return updated.data;
+}
+
 async function saveManualTranscript(payload: Record<string, unknown>) {
   const callSessionId = safeSession(payload.callSessionId);
   const text = String(payload.text || "").trim().slice(0, MAX_MANUAL_TRANSCRIPT);
@@ -529,6 +689,10 @@ Deno.serve(async (req: Request) => {
     else if (action === "recording_status") data = await statusForSession(payload.callSessionId);
     else if (action === "transcribe") data = await requestTranscription(payload);
     else if (action === "manual_transcript") data = await saveManualTranscript(payload);
+    else if (action === "prepare_external_transcription") data = await prepareExternalTranscription(payload);
+    else if (action === "external_transcription_job") data = await markExternalTranscriptionJob(payload);
+    else if (action === "external_transcript") data = await saveExternalTranscript(payload);
+    else if (action === "external_transcription_failed") data = await failExternalTranscription(payload);
     else if (action === "link_result") data = await linkResult(payload);
     else if (action === "dashboard") data = await dashboard(payload);
     else return json(400, { error: "Ação inválida" });
