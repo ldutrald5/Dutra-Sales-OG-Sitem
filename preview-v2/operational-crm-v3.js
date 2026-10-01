@@ -56,8 +56,9 @@ function addStyles(){
     .clientProposalItem{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px;border:1px solid #27323a;border-radius:10px;background:#091015;margin:8px 0}.clientProposalItem b{font-size:10px}.clientProposalItem small{display:block;color:#84909a;font-size:8px;margin-top:3px}.clientProposalItem strong{font-size:11px;color:#ffd400}.clientProposalItem button{grid-column:1/-1;height:34px;border:1px solid #34404a;border-radius:8px;background:#0d1419;color:#dce3e7;font-size:8px;font-weight:900}
     .clientFleetFacts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.clientFleetFact{border:1px solid #27323a;border-radius:10px;background:#091015;padding:11px}.clientFleetFact small{display:block;color:#82909a;font-size:7px}.clientFleetFact strong{display:block;font-size:12px;margin-top:4px}
     .clientNoData{padding:16px;border:1px dashed #34404a;border-radius:11px;color:#87939c;font-size:9px;text-align:center}
+    .clientAttackBrief{margin-top:12px;border:1px solid #6a5918;border-radius:14px;background:radial-gradient(circle at 95% 0,#715b1355,transparent 34%),linear-gradient(145deg,#1c1808,#091015 70%);padding:13px}.clientAttackHead{display:flex;justify-content:space-between;gap:10px;align-items:start}.clientAttackHead label{display:block;color:#ffd400;font-size:7px;font-weight:900;letter-spacing:.12em}.clientAttackHead h3{margin:3px 0 0;font-size:15px}.clientAttackMode{border:1px solid #705f1a;border-radius:999px;color:#ffd400;background:#171507;padding:5px 7px;font-size:7px;font-weight:900;white-space:nowrap}.clientAttackGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.clientAttackBlock{border:1px solid #28333a;border-radius:10px;background:#081015;padding:9px}.clientAttackBlock small{display:block;color:#7f8c95;font-size:7px;font-weight:900;letter-spacing:.08em}.clientAttackBlock b{display:block;margin-top:4px;font-size:10px;line-height:1.4}.clientAttackBlock p{margin:4px 0 0;color:#a5afb6;font-size:8px;line-height:1.45}.clientAttackBlock ul{margin:5px 0 0;padding-left:15px;color:#a5afb6;font-size:8px;line-height:1.5}.clientAttackAvoid{margin-top:8px;color:#d9b7b9;font-size:8px;border-left:2px solid #7a2f34;padding-left:8px}
     .clientAction[data-real-action],.contactBtns button[data-real-action]{cursor:pointer}.homeBell{position:relative}.homeBellCount{position:absolute;right:-4px;top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ffd400;color:#111;display:grid;place-items:center;font-size:7px;font-weight:900;border:2px solid #080d11}.homePrivacyBtn{transition:.18s ease}.homePrivacyBtn.active{color:#ffd400;border-color:#6a5918;background:#171506}.dutra-home-private #home .metric strong,.dutra-home-private #home .pipeNum strong{color:transparent!important;position:relative;user-select:none}.dutra-home-private #home .metric strong::after{content:'••••';position:absolute;left:0;top:0;color:#f7f8f9;letter-spacing:.08em}.dutra-home-private #home .pipeNum strong::after{content:'••';position:absolute;left:0;top:0;color:#f7f8f9;letter-spacing:.08em}
-    @media(max-width:560px){.clientOverviewGrid{grid-template-columns:1fr}.clientHistoryItem{grid-template-columns:34px 1fr}.clientHistoryItem time{grid-column:2}.clientFleetFacts{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.clientOverviewGrid,.clientAttackGrid{grid-template-columns:1fr}.clientHistoryItem{grid-template-columns:34px 1fr}.clientHistoryItem time{grid-column:2}.clientFleetFacts{grid-template-columns:1fr 1fr}}
   `;document.head.appendChild(s);
 }
 
@@ -304,6 +305,7 @@ function renderClient(){
   topBtns.forEach((b,i)=>{b.dataset.realAction=i===0?'call':i===1?'whatsapp':'email';b.title=i===0?'Ligar':i===1?'WhatsApp':'E-mail';b.disabled=i===2?!email:!phone});
 
   const proposals=proposalDocsFor(lead.id),people=contactsFor(lead.id),opportunities=opportunitiesFor(lead.id),meetings=meetingsFor(lead.id),nba=nextActionFor(lead),fleet=fleetValue(lead);
+  const attack=globalThis.DUTRA_SALES_PLAYBOOK?.buildAttackBrief?.(lead,{hasProposal:proposals.length>0,preferredContact:contact,fleetSize:fleet})||null;
   const stats=$$('.miniStat',screen),vals=[
     [fleet||'—','Veículos'],
     [people.length,'Pessoas'],
@@ -319,7 +321,18 @@ function renderClient(){
   const overview=$('[data-client-panel="overview"]',screen);
   if(overview){
     const latestMeeting=meetings[0],opp=opportunities.find(o=>!['won','lost','closed'].includes(clean(o.stage).toLowerCase()))||opportunities[0];
-    overview.innerHTML=`
+    const attackHtml=attack?`
+      <section class="clientAttackBrief">
+        <div class="clientAttackHead"><div><label>FICHA DE ATAQUE</label><h3>Como chegar nesta conta agora</h3></div><span class="clientAttackMode">${esc(attack.mode)}</span></div>
+        <div class="clientAttackGrid">
+          <div class="clientAttackBlock"><small>CONSCIÊNCIA / RELAÇÃO</small><b>${esc(attack.awareness)}</b><p>${esc(attack.objective)}</p></div>
+          <div class="clientAttackBlock"><small>ABERTURA RECOMENDADA</small><b>${esc(attack.opening)}</b></div>
+          <div class="clientAttackBlock"><small>ANTES DE LIGAR</small><ul>${attack.preparation.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>
+          <div class="clientAttackBlock"><small>PERGUNTAS-CHAVE</small><ul>${attack.questions.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>
+        </div>
+        <div class="clientAttackAvoid"><b>Evite:</b> ${esc(attack.avoid)}</div>
+      </section>`:'';
+    overview.innerHTML=attackHtml+`
       <div class="clientOverviewGrid">
         <div class="clientRealCard"><label>PRÓXIMA MELHOR AÇÃO</label><strong>${esc(nba.action)}</strong><p>${esc(nba.reason||'Sem motivo registrado.')}${nba.dueAt?'<br>Prazo: '+esc(fmtDate(nba.dueAt)):''}</p></div>
         <div class="clientRealCard"><label>RELACIONAMENTO OG</label><strong>${esc(relationshipLabel(lead))}</strong><p>Pipeline: ${esc(pipelineLabel(lead))}. ${esc(lead.accountSummary||lead.pain||'Sem resumo operacional registrado.')}</p></div>
