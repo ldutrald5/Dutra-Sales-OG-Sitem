@@ -48,6 +48,7 @@
     completeRecording: body => request('/recordings/complete', { method:'POST', body }),
     status: callSessionId => request('/recordings/' + encodeURIComponent(callSessionId) + '/status'),
     transcribe: body => request('/recordings/transcribe', { method:'POST', body }),
+    localTranscribe: body => request('/recordings/local-transcribe', { method:'POST', body }),
     manualTranscript: body => request('/recordings/manual-transcript', { method:'POST', body }),
     linkResult: body => request('/recordings/link-result', { method:'POST', body }),
     dashboard: (days = 30) => request('/dashboard?days=' + encodeURIComponent(days))
