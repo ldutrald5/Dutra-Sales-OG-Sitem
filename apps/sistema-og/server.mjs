@@ -427,6 +427,14 @@ const server = http.createServer(async (req, res) => {
     } catch (error) { return sendJson(res, 400, { error:error.message }); }
   }
 
+  if (url.pathname === '/api/call-intelligence/recordings/local-transcribe' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas transcrições. Aguarde um minuto.' });
+      const result = await callIntelligenceGateway.localTranscribe(await readBody(req, 20_000));
+      return sendJson(res, result.status, result.error ? { error:result.error } : result.data);
+    } catch (error) { return sendJson(res, 400, { error:error.message }); }
+  }
+
   if (url.pathname === '/api/call-intelligence/recordings/manual-transcript' && req.method === 'POST') {
     try {
       if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
