@@ -4,20 +4,27 @@ description: Connect agent research to DUTRA OS prospecting intake, research, re
 ---
 # DUTRA Prospect Intelligence
 
-Reuse the existing Prospecting Engine and prospecting services. Do not create a parallel lead database.
+Use with `dutra-core`, `dutra-crm` and `dutra-sales`.
 
-Research adapter priority:
+Do not create a parallel lead database. Smart views and lead lists reference the central account identity.
+
+## Research adapter priority
+
 1. existing DUTRA/web provider;
 2. approved public-web research tooling;
-3. optional Obscura sandbox only when the normal provider cannot satisfy an authorized workflow.
+3. optional sandbox adapter only for an authorized gap.
 
-Required output contract for researched facts:
+## Output contract
+
 - company/account identity;
 - business-relevant fact;
 - source/provenance;
 - observed/retrieved timestamp when available;
 - confidence/verification state;
-- proposed CRM action, never silent destructive overwrite.
+- proposed CRM action.
 
-Do not bypass authentication/CAPTCHA/blocks, scrape sensitive personal data, or use anti-detection to evade platform enforcement.
-Research suggestions must pass review/normalization before becoming canonical CRM data.
+Research output is a suggestion until normalized/reviewed. Preserve gatekeepers and newly discovered contacts instead of overwriting them.
+
+Do not bypass authentication/CAPTCHA/blocks, collect sensitive personal data, or evade platform enforcement.
+
+For conversation/approach after research, route to `docs/playbooks/SALES_PLAYBOOKS.md`.

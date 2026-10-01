@@ -125,6 +125,26 @@ Interprete os atalhos abaixo carregando o arquivo correspondente em `.aiox-core/
 <!-- AIOX-MANAGED-END: shortcuts -->
 
 
+
+## DUTRA Intelligence pre-flight
+
+Para trabalho STANDARD/STRUCTURAL do DUTRA OS, use a inteligência durável antes de criar solução nova:
+
+1. leia `docs/intelligence/README.md`;
+2. roteie a tarefa por `docs/intelligence/CONTEXT_ROUTER.md`;
+3. consulte a Skill da área e somente os documentos indicados;
+4. consulte `docs/second-brain/BRAIN_INDEX.md` para decisões/perguntas relacionadas;
+5. procure incidente semelhante em `docs/incidents/BUGBOOK.md`;
+6. procure implementação e testes existentes antes de afirmar que algo não existe.
+
+Regras:
+- não criar uma segunda memória/knowledge base paralela ao Second Brain;
+- dados voláteis de cliente permanecem no CRM/banco, nunca em Skills globais;
+- conhecimento substituído deve ser marcado/superseded, não apagado silenciosamente;
+- bug relevante deve gerar regra/teste quando determinístico;
+- decisões, regras e aprendizados novos devem ser avaliados para incorporação ao Second Brain;
+- rode `npm run og:intelligence:test` quando alterar Skills, context router, BUGBOOK, playbooks, prompt library ou regras permanentes.
+
 ## External Agent Skills — integration policy
 
 For third-party skills/tools surfaced during development, read `docs/AGENT-SKILLS-POLICY.md` before installing or coupling them to the product.

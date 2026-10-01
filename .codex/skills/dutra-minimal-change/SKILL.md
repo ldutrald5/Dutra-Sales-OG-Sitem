@@ -4,17 +4,19 @@ description: Apply YAGNI/minimal-change discipline to DUTRA OS engineering.
 ---
 # DUTRA Minimal Change
 
-Use this skill before architectural/refactor work.
+Use before architectural/refactor work.
 
-1. Inspect existing implementation and relevant tests.
-2. State the concrete requirement and the smallest testable change.
-3. Reuse an existing service/module before creating a new abstraction.
-4. Do not add a dependency unless the platform/current stack cannot solve the requirement simply.
-5. Keep feature commits scoped; no unrelated refactors.
-6. When moving business logic, write/keep regression tests first.
-7. Prefer extracting responsibility from app.js rather than adding more to it.
-8. Preserve persistence contracts and rollback paths.
-9. Never invent OG technical mappings.
-10. Finish with relevant tests and report known limitations.
+1. Read `docs/intelligence/CONTEXT_ROUTER.md` for the task.
+2. Inspect the existing implementation and relevant tests.
+3. Search `docs/incidents/BUGBOOK.md` and active decisions for related history.
+4. State the concrete requirement and smallest reversible change.
+5. Reuse an existing service/module before creating abstraction.
+6. Do not add dependency unless current stack cannot solve the requirement simply.
+7. Keep feature commits scoped; no unrelated refactors.
+8. When moving business logic, preserve/add regression tests first.
+9. Prefer extracting responsibility from app.js rather than growing it.
+10. Preserve persistence contracts, manual escape and rollback paths.
+11. Never invent OG technical mappings.
+12. Finish with tests and durable-learning closeout when relevant.
 
-Inspired by the minimalism/YAGNI approach of DietrichGebert/ponytail; this is a DUTRA-specific implementation and does not vendor third-party runtime code.
+Before saying “not implemented”, search the repository.
