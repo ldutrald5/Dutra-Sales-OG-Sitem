@@ -24,6 +24,9 @@ assert.match(edge, /crm_fact_mutation: false/, 'análise não pode promover fato
 assert.doesNotMatch(edge, /from\("companies"\)\.update/, 'análise de áudio não deve editar empresa');
 assert.doesNotMatch(edge, /from\("sales_opportunities"\)\.update/, 'análise de áudio não deve editar oportunidade');
 assert.match(edge, /manual_transcript/, 'fallback de transcrição colada deve existir');
+assert.match(edge, /prepare_external_transcription/, 'Edge deve emitir download assinado para fallback local');
+assert.match(edge, /external_transcript/, 'Edge deve aceitar retorno do Whisper local pelo gateway confiável');
+assert.match(edge, /provider !== "faster-whisper"/, 'provider externo deve ser explicitamente limitado');
 
 assert.match(client, /uploadSigned/);
 assert.match(client, /method:'PUT'/);
