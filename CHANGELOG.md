@@ -112,3 +112,11 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Adicionado dashboard agregado de 30 dias no Call AI.
 - Áudio só é enviado após ação explícita; análise e extrações não alteram fatos do CRM automaticamente.
 - Gravações normalizadas passam a poder ser vinculadas ao `call_attempt` do Sales Execution.
+
+
+## [Unreleased] — Local Whisper fallback
+
+- Adicionado worker `faster-whisper` CPU como fallback para transcrição quando a OpenAI falha ou fica sem créditos.
+- Áudio continua canônico no Storage privado; worker recebe apenas URL assinada temporária.
+- Call AI aciona o fallback automaticamente após falha do provider principal.
+- Resultado local volta ao mesmo pipeline de métricas e revisão, sem alterar fatos do CRM automaticamente.
