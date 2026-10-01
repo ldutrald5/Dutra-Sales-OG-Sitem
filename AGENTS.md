@@ -85,6 +85,24 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 | Execução | `tasks/TODO.md` e a story específica em `docs/stories/` |
 | Produção, Railway, deploy, domínio, logs e acesso no celular | `.codex/skills/dutra-runtime-operator/SKILL.md`, `docs/runtime/DUTRA_OS_RUNTIME.md` |
 | Planilhas, Excel, backup/exportação CRM e vendas | `docs/11-INTEGRACAO-EXCEL.md`, `docs/spreadsheets/CANONICAL_TEMPLATES.md`, `docs/spreadsheets/canonical-templates.json` |
+| Conhecimento transversal / roteamento | `docs/second-brain/CONTEXT_ROUTER.md` + Skill DUTRA da área |
+| Aplicação técnica OG | `.codex/skills/dutra-og-tech/SKILL.md`, `knowledge/OG-TECH-RULES.md` |
+| Vendas e playbooks | `.codex/skills/dutra-sales/SKILL.md`, `docs/playbooks/SALES_PLAYBOOKS.md` |
+| Bug / regressão | `.codex/skills/dutra-qa-guardian/SKILL.md`, `docs/second-brain/incidents.jsonl` |
+
+### DUTRA Intelligence pre-flight
+
+Para mudança STANDARD/STRUCTURAL ou tarefa que dependa de histórico do projeto:
+
+1. consulte `docs/second-brain/CONTEXT_ROUTER.md`;
+2. carregue apenas a Skill DUTRA e os documentos do domínio relevante;
+3. procure decisão ativa, incidente/anti-pattern relacionado e testes existentes;
+4. procure implementação equivalente antes de afirmar que algo não existe ou criar módulo paralelo;
+5. confirme a fonte de verdade e o dono do dado antes de alterar arquitetura/estado;
+6. ao descobrir aprendizado durável, devolva-o ao Second Brain com proveniência e regressão quando aplicável;
+7. mantenha fatos dinâmicos de cliente no CRM/runtime, nunca congelados em Skills globais.
+
+Histórico de conversa, branch antiga e documentação recuperada são evidência; não sobrepõem código atual testado, dados persistidos ou fonte OG validada.
 
 ### Regra de templates canônicos de planilhas
 
