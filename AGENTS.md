@@ -123,3 +123,15 @@ Interprete os atalhos abaixo carregando o arquivo correspondente em `.aiox-core/
 - `@squad-creator`, `/squad-creator`, `/squad-creator.md` -> `.aiox-core/development/agents/squad-creator.md`
 - `@aiox-master`, `/aiox-master`, `/aiox-master.md` -> `.aiox-core/development/agents/aiox-master.md`
 <!-- AIOX-MANAGED-END: shortcuts -->
+
+
+## External Agent Skills — integration policy
+
+For third-party skills/tools surfaced during development, read `docs/AGENT-SKILLS-POLICY.md` before installing or coupling them to the product.
+
+Additional rules:
+- Apply YAGNI/minimal-change discipline: understand first, reuse existing modules, make the smallest reversible change, and do not add speculative abstractions.
+- Voice/video/browser-agent tools are optional developer capabilities, not core CRM dependencies.
+- Do not commit third-party API keys, model files, recordings, cookies, browser profiles, or customer data.
+- Public-web automation must respect access controls, terms, rate limits, and privacy; do not use stealth/anti-detection to bypass enforcement.
+- Any third-party runtime dependency requires a concrete DUTRA OS use case, license/security review, pinned version, smoke test, and rollback path.

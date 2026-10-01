@@ -723,80 +723,18 @@
   async function publishProposal() {
     const lead = selectedLead();
     if (!lead) return toast('Selecione um cliente antes de gerar a proposta.');
-    if (!state.snapshot) return toast('Base real ainda não carregada.');
-
-    const qty = Math.max(1, Number($('#proposalQty')?.value) || 1);
-    const installments = Math.max(1, Number($('#proposalInstallments')?.value) || 1);
-    const tires = Math.max(0, Number($('#proposalTires')?.value) || 0);
-    const totalText = $('#proposalTotal')?.textContent || '0';
-    const total = parseMoney(totalText);
-    const units = qty * 16;
-    const quoteId = `Q-V3-${Date.now()}`;
-    const client = {
-      nome: lead.nome || '',
-      empresa: lead.empresa || lead.nome || '',
-      cnpj: lead.cnpj || '',
-      cidadeUf: lead.cidadeUf || '',
-      internalCode: lead.internalCode || '',
-      freteTexto:'Incluso / a confirmar',
-      condicaoPagamento:`${installments}x de ${formatMoney(total/installments)}`
-    };
-    const quoteState = {
-      client,
-      activePdfTemplate:'default',
-      vehicles:[{
-        id:'rodotrem',
-        name:'Rodotrem',
-        vehicleTypeId:'rodotrem',
-        libras:120,
-        includeDianteira:false,
-        qty,
-        items:[{code:'EQ-120',qty:units,customPrice:null}]
-      }],
-      extraItems:[]
-    };
-    const quote = {
-      id:quoteId,
-      clientId:lead.id,
-      clientName:lead.nome || '',
-      clientCompany:lead.empresa || '',
-      clientInternalCode:lead.internalCode || '',
-      totalValue:total,
-      totalPecas:units,
-      payload:quoteState
-    };
-
+    const contacts = state.snapshot?.operations?.contacts || [];
+    const contact = contacts.find(item => String(item.leadId || item.companyId) === String(lead.id)) || {};
+    const handoff = globalThis.DUTRA_QUOTE_HANDOFF;
+    if (!handoff?.launch) {
+      toast('Motor oficial de cotação não está disponível neste ambiente.');
+      return;
+    }
     try {
-      const proposalService = globalThis.OG_PROPOSAL_INTELLIGENCE;
-      const operationsModel = globalThis.OG_OPERATIONS_MODEL;
-      if (!proposalService?.prepareTrackingDraft || !operationsModel) throw new Error('Motor oficial de propostas não carregou.');
-      const nextOps = proposalService.prepareTrackingDraft(state.snapshot.operations || {}, {
-        clientId:lead.id,
-        quoteId,
-        quote,
-        quoteState
-      }, { operationsModel, now:new Date().toISOString() });
-      state.snapshot.operations = nextOps;
-      await saveState('Rascunho oficial salvo na base real.',{
-        action:'SAVE_PROPOSAL_DRAFT',
-        entityType:'proposal',
-        entityId:quoteId,
-        idempotencyKey:'proposal:'+quoteId,
-        label:'Proposta'
-      });
-
-      const proposalId = `PROP-${quoteId.replace(/[^a-zA-Z0-9_-]/g,'').slice(-32)}`;
-      const published = await api('/proposals/publish', {
-        method:'POST',
-        headers:{'content-type':'application/json'},
-        body:JSON.stringify({proposalId})
-      });
-      if (published?.publicUrl) {
-        toast('Proposta publicada com link rastreável.');
-        window.open(published.publicUrl,'_blank','noopener');
-      }
+      handoff.launch(lead, contact, { target:'_blank' });
+      toast('Cotação oficial aberta. Complete a aplicação técnica antes de publicar.');
     } catch (error) {
-      toast('Não foi possível publicar: ' + error.message);
+      toast('Não foi possível abrir a cotação oficial: ' + error.message);
     }
   }
 
