@@ -92,3 +92,10 @@ Fluxo:
 - O resultado volta pelo Edge gateway como provider `faster-whisper`.
 - Extrações continuam revisáveis e não escrevem fatos no CRM automaticamente.
 - “Local/gratuito” significa sem cobrança por minuto da OpenAI; o processamento ainda consome recursos do Railway.
+
+
+### Implantação Railway atual
+
+O plano atual não permite provisionar mais um serviço. Por isso o worker roda **no mesmo container do `sistema-og`**, em `127.0.0.1:8765`, sem exposição pública. O container usa `Dockerfile.whisper`, com Node 24 para o Sistema OG e Python/faster-whisper para o fallback.
+
+O limite observado do serviço é 1 GB de memória e 2 vCPU. O modelo inicial permanece `base`/CPU/int8; se uso real mostrar pressão de memória ou latência excessiva, o primeiro downgrade seguro é `tiny`, sem mudar o contrato do Call Intelligence.
