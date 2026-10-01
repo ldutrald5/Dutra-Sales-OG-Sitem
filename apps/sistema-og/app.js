@@ -4331,6 +4331,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const segment = (OG_DATA.segments || []).find(item => item.id === lead.segmentId);
     const status = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status);
     const salesProfile = OG_LEAD_INTELLIGENCE.salesProfile(lead, state.operations);
+    const approach = window.OG_SALES_BRIEF?.approachFor
+      ? OG_SALES_BRIEF.approachFor(salesProfile.route.id, lead)
+      : null;
     const profile = [segment?.name || lead.segmentId || 'Segmento não definido', salesProfile.fleet.label].join(' · ');
     const moment = [salesProfile.route.label, conversation?.label || 'Situação não definida'].join(' · ');
     const relationship = salesProfile.knowledge.label;
@@ -4350,6 +4353,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <div><small>ROTA / MOMENTO</small><strong>${escapeHtml(moment)}</strong></div>
           <div><small>RELAÇÃO OG</small><strong>${escapeHtml(relationship)}</strong></div>
         </div>
+        ${approach ? `<div class="client-sheet-attack-approach">
+          <div class="client-sheet-attack-approach-head"><small>COMO ABORDAR AGORA</small><strong>${escapeHtml(approach.label)}</strong></div>
+          <p>${escapeHtml(approach.objective)}</p>
+          <blockquote>“${escapeHtml(approach.opening)}”</blockquote>
+          <div class="client-sheet-attack-approach-grid">
+            <div><small>PERGUNTA-CHAVE</small><span>${escapeHtml(approach.primaryQuestion)}</span></div>
+            <div><small>AVANÇO DESEJADO</small><span>${escapeHtml(approach.desiredNextStep)}</span></div>
+          </div>
+        </div>` : ''}
         <div class="client-sheet-attack-objective">
           <small>OBJETIVO DESTE CONTATO</small>
           <strong>${escapeHtml(objective)}</strong>
