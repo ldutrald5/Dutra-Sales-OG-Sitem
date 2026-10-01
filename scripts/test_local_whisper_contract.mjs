@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const worker = fs.readFileSync('apps/local-whisper-worker/app.py','utf8');
+const requirements = fs.readFileSync('apps/local-whisper-worker/requirements.txt','utf8');
 const docker = fs.readFileSync('apps/local-whisper-worker/Dockerfile','utf8');
 const embeddedDocker = fs.readFileSync('Dockerfile.whisper','utf8');
 const hostedStart = fs.readFileSync('scripts/start-og-hosted.mjs','utf8');
@@ -12,6 +13,7 @@ const client = fs.readFileSync('apps/sistema-og/services/call-intelligence-clien
 const server = fs.readFileSync('apps/sistema-og/server.mjs','utf8');
 
 assert.match(worker, /faster_whisper import WhisperModel/);
+assert.match(requirements, /requests==/, 'faster-whisper runtime precisa de requests para model download');
 assert.match(worker, /WHISPER_MODEL.*base/);
 assert.match(worker, /compute_type=COMPUTE_TYPE/);
 assert.match(worker, /beam_size=1/);
