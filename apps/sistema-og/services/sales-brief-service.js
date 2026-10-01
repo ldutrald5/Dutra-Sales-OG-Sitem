@@ -34,6 +34,80 @@
     ]
   });
 
+
+  const ROUTE_APPROACHES = Object.freeze({
+    first_contact:Object.freeze({
+      label:'Primeiro contato',
+      objective:'Entender a operação, validar uma dor real e descobrir quem participa da decisão antes de apresentar a solução.',
+      opening:'Olá, {{contact}}. Aqui é o Lucas, da Olho de Gato. Antes de te explicar qualquer coisa, quero entender como vocês cuidam de pressão e desgaste dos pneus hoje. Posso te fazer duas perguntas rápidas?',
+      primaryQuestion:'Como vocês controlam a pressão dos pneus hoje e quem acompanha isso no dia a dia?',
+      desiredNextStep:'Sair com processo/dor confirmados, responsável identificado e um veículo ou conjunto para aprofundar.'
+    }),
+    relationship:Object.freeze({
+      label:'Retomada com contexto',
+      objective:'Retomar do ponto real sem reiniciar a venda e descobrir o que mudou desde o último contato.',
+      opening:'Olá, {{contact}}. Aqui é o Lucas, da Olho de Gato. Vi que já tivemos contato e não quero te repetir apresentação. Queria retomar do ponto em que ficou e entender o que mudou por aí.',
+      primaryQuestion:'Do que vocês chegaram a avaliar, o que fez sentido e o que ficou pendente?',
+      desiredNextStep:'Atualizar contexto, objeção e combinar uma próxima ação com responsável e data.'
+    }),
+    follow_up:Object.freeze({
+      label:'Follow-up',
+      objective:'Retomar o combinado, identificar a pendência atual e evitar um follow-up vazio.',
+      opening:'Olá, {{contact}}. Estou retomando exatamente do ponto que combinamos para não deixar essa conversa solta.',
+      primaryQuestion:'O que mudou desde nosso último contato e o que falta hoje para avançarmos?',
+      desiredNextStep:'Resolver a pendência ou sair com um novo compromisso objetivo e datado.'
+    }),
+    diagnosis:Object.freeze({
+      label:'Diagnóstico do interesse',
+      objective:'Transformar interesse em diagnóstico concreto de frota, dor e processo de decisão.',
+      opening:'Olá, {{contact}}. Como já existe interesse, prefiro não fazer uma apresentação genérica. Quero entender onde isso faria mais sentido na operação de vocês.',
+      primaryQuestion:'Qual veículo ou conjunto você escolheria primeiro para validar a solução e por quê?',
+      desiredNextStep:'Definir veículo/conjunto prioritário e os dados necessários para validação técnica.'
+    }),
+    proposal_followup:Object.freeze({
+      label:'Proposta / negociação',
+      objective:'Descobrir a barreira real da decisão em vez de perguntar apenas se a proposta foi vista.',
+      opening:'Olá, {{contact}}. Quero alinhar um ponto daquela proposta. Hoje, o que pesa mais para vocês avançarem: investimento, aplicação na frota ou prioridade interna?',
+      primaryQuestion:'O que precisaria ficar mais claro ou mudar para vocês conseguirem tomar uma decisão?',
+      desiredNextStep:'Isolar a objeção principal e combinar a ação que destrava a decisão.'
+    }),
+    customer_reactivation:Object.freeze({
+      label:'Reativação de cliente',
+      objective:'Retomar a relação de cliente, entender o cenário atual e identificar necessidade real antes de oferecer algo novo.',
+      opening:'Olá, {{contact}}. Aqui é o Lucas, da Olho de Gato. Estou retomando seu atendimento e quero primeiro entender como está a operação hoje antes de falar em qualquer nova compra.',
+      primaryQuestion:'O que mudou na frota ou na rotina de pneus desde a última vez que vocês compraram com a gente?',
+      desiredNextStep:'Atualizar frota, pendências e necessidade atual; só então avaliar reposição ou expansão.'
+    }),
+    post_sale:Object.freeze({
+      label:'Pós-venda / expansão',
+      objective:'Validar a experiência real, resolver pendências e só depois mapear expansão, reposição ou indicação.',
+      opening:'Olá, {{contact}}. Antes de falar em ampliar qualquer coisa, quero saber como está a experiência de vocês e se ficou alguma pendência de uso, instalação ou manutenção.',
+      primaryQuestion:'Como o equipamento está se comportando na operação e o que vocês perceberam desde a instalação?',
+      desiredNextStep:'Registrar resultado ou problema real e, se fizer sentido, abrir expansão, reposição ou indicação.'
+    }),
+    erp_review:Object.freeze({
+      label:'Conferir ERP antes de abordar',
+      objective:'Validar os dados conflitantes ou incompletos antes de qualquer contato comercial.',
+      opening:'Não abordar o cliente antes da conferência. Resolva primeiro a divergência no ERP.',
+      primaryQuestion:'Pedido, cliente, telefone, valor e situação estão confirmados no ERP?',
+      desiredNextStep:'Eliminar a divergência e somente depois liberar a conta para abordagem.'
+    })
+  });
+
+  function approachFor(routeId = 'first_contact', lead = {}) {
+    const id=key(routeId) || 'first_contact';
+    const base=ROUTE_APPROACHES[id] || ROUTE_APPROACHES.first_contact;
+    const contact=clean(lead.nome).split(/\s+/)[0] || 'tudo bem';
+    return Object.freeze({
+      id,
+      label:base.label,
+      objective:base.objective,
+      opening:base.opening.replaceAll('{{contact}}',contact),
+      primaryQuestion:base.primaryQuestion,
+      desiredNextStep:base.desiredNextStep
+    });
+  }
+
   function eventsForLead(operations = {}, leadId) {
     return (Array.isArray(operations.activityEvents) ? operations.activityEvents : [])
       .filter(item => clean(item.clientId || item.leadId) === clean(leadId))
