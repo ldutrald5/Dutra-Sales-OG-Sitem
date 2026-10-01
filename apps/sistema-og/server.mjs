@@ -43,6 +43,26 @@ const types = {
 
 fs.mkdirSync(dataDir, { recursive: true });
 
+function readWhisperSelfTestStatus() {
+  try {
+    const file = path.join(dataDir, 'whisper-self-test.json');
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return {
+      ok:Boolean(parsed.ok),
+      phase:String(parsed.phase || ''),
+      provider:String(parsed.provider || ''),
+      model:String(parsed.model || ''),
+      wordCount:Number(parsed.wordCount || 0),
+      durationMs:Number(parsed.durationMs || 0),
+      localFallbackReady:Boolean(parsed.localFallbackReady),
+      validatedAt:parsed.validatedAt || null,
+      error:parsed.ok ? null : String(parsed.error || '').slice(0,240)
+    };
+  } catch {
+    return null;
+  }
+}
+
 function sendJson(res, status, value) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -308,7 +328,7 @@ const server = http.createServer(async (req, res) => {
       'X-Content-Type-Options': 'nosniff'
     });
     if (req.method === 'HEAD') return res.end();
-    return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null }));
+    return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null, whisperSelfTest: readWhisperSelfTestStatus() }));
   }
 
   const publicProposalMatch = url.pathname.match(/^\/p\/([A-Za-z0-9_-]{24,160})$/);
