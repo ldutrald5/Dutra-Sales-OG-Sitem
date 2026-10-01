@@ -24,7 +24,7 @@ Railway:
 - commit implantado `f4c2b3c68d747b6477410ffff50521d8788f8d62`;
 - deployment `def9b0c2-301b-4c83-a459-07ff29c0dda3`;
 - status `SUCCESS`;
-- volume em `/data`;
+- Volume: `sistema-og-data` montado em `/data`, 500 MB, região `sfo`;
 - healthcheck `/health`.
 
 ### V3 Premium
