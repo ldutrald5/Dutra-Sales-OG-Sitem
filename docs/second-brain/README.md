@@ -9,6 +9,7 @@ Canonical records live in JSONL collections. Humans should normally start from:
 - `BRAIN_INDEX.md` — generated navigation/index.
 - `BRAIN_METRICS.md` — generated adoption/outcome metrics.
 - `CONTEXT_ROUTER.md` — task → minimal context/skill routing.
+- `KNOWLEDGE_SCHEMA.md` — mapping from compiler concepts to the canonical Builder Brain schema.
 
 Refresh generated surfaces and validate the graph with:
 
