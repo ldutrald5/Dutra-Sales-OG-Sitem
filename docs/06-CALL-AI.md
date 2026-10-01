@@ -72,3 +72,23 @@ A gravação passa a ter um ciclo durável e auditável:
 - Extrações da conversa são **candidatos revisáveis**; não viram frota, dor, preço, estágio, reunião ou outro fato canônico sem confirmação.
 - Quando o resultado da ligação entra no Sales Execution, a gravação pode ser vinculada ao `call_attempt` e à oportunidade.
 - O Call AI exibe também um resumo agregado dos últimos 30 dias.
+
+
+## Whisper local fallback
+
+Quando a transcrição principal não puder concluir a chamada, o Railway pode usar um worker CPU com `faster-whisper`.
+
+Fluxo:
+
+`OpenAI → falha/quota → Whisper local → transcript externo confiável → métricas → revisão`.
+
+- O worker não recebe chave do Supabase e não acessa o CRM.
+- O worker recebe somente uma URL temporária assinada do áudio privado.
+- O host do áudio é limitado ao projeto Supabase configurado.
+- A URL expira em 15 minutos.
+- O worker usa autenticação por token interno entre serviços.
+- O modelo inicial é `base` em CPU/int8 para equilibrar português, memória e velocidade.
+- Jobs são assíncronos; se o worker reiniciar durante uma transcrição, o áudio permanece no Storage e o job pode ser refeito.
+- O resultado volta pelo Edge gateway como provider `faster-whisper`.
+- Extrações continuam revisáveis e não escrevem fatos no CRM automaticamente.
+- “Local/gratuito” significa sem cobrança por minuto da OpenAI; o processamento ainda consome recursos do Railway.

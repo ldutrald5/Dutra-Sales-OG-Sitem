@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apps/sistema-og/app.js'
+      - 'apps/local-whisper-worker/**'
       - 'apps/sistema-og/index.html'
       - 'apps/sistema-og/styles.css'
       - 'apps/sistema-og/service-worker.js'
@@ -34,6 +35,8 @@ jobs:
           node-version: '24'
       - name: Syntax checks
         run: npm run og:check
+      - name: Python worker syntax
+        run: python -m py_compile apps/local-whisper-worker/app.py
       - name: Call Intelligence contracts
         run: npm run og:call-intelligence:test
       - name: Call AI regression

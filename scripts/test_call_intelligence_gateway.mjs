@@ -34,7 +34,7 @@ assert.equal(health.data.ok, true);
 assert.equal(observed.options.headers['x-og-call-intelligence-token'], 'x'.repeat(48));
 assert.match(observed.options.body, /"action":"health"/);
 
-assert.throws(
+await assert.rejects(
   () => gateway.status('../unsafe', env),
   /callSessionId inválido/
 );

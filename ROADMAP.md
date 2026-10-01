@@ -79,3 +79,11 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Conversation Intelligence com métricas por chamada e agregado de 30 dias.
 - Vínculo da gravação ao resultado canônico no Sales Execution.
 - Próxima evolução: revisão assistida dos candidatos extraídos antes de promover fatos para Company/Contact/Opportunity e calibração das métricas com chamadas reais.
+
+
+## Em validação — Whisper local fallback
+
+- Worker Railway CPU/int8 com `faster-whisper base`.
+- Fallback automático após falha/quota do provider principal.
+- Download temporário por URL assinada; sem credencial Supabase no worker.
+- Próximo gate: áudio de teste real autorizado → fallback → transcript `faster-whisper` → métricas → revisão.
