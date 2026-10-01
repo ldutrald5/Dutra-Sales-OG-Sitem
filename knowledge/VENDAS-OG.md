@@ -4,13 +4,23 @@
 
 Basear preparação de chamadas e comunicação em práticas comerciais aprovadas, mantendo fatos do cliente separados de orientações gerais.
 
-## Processo comercial
+O playbook operacional canônico desta camada está em `docs/playbooks/SALES_PLAYBOOKS.md`. Não copie estado atual de clientes para este arquivo.
 
-- Critérios de qualificação: [CONHECIMENTO PENDENTE]
-- Etapas oficiais e condições de avanço: [CONHECIMENTO PENDENTE]
-- Perfis de decisor e influenciador: [CONHECIMENTO PENDENTE]
-- Política de propostas, descontos e aprovações: [CONHECIMENTO PENDENTE]
-- Processo de pós-venda, expansão e indicação: [CONHECIMENTO PENDENTE]
+## Processo comercial estável
+
+- usar relacionamento e estágio atuais antes de escolher abordagem;
+- diferenciar gatekeeper, decisor, reunião, proposta, follow-up e cliente/pós-venda;
+- registrar resultado confirmado + próxima ação;
+- tratar listas como coleções operacionais sobre a base CRM, não como outro cadastro;
+- retomar follow-up do ponto combinado em vez de reiniciar a venda;
+- no pós-venda, validar experiência/problema antes de expansão ou indicação.
+
+## Conhecimento ainda dependente de fonte/aprovação
+
+- critérios oficiais de qualificação: [CONHECIMENTO PENDENTE]
+- política oficial de descontos e alçadas: [CONHECIMENTO PENDENTE]
+- regras fiscais/comerciais por perfil de cliente: [CONHECIMENTO PENDENTE]
+- alegações oficiais de economia/ROI: [CONHECIMENTO PENDENTE]
 
 ## Registro mínimo após interação
 
@@ -25,4 +35,4 @@ Basear preparação de chamadas e comunicação em práticas comerciais aprovada
 - Diferenciar fato, hipótese e sugestão.
 - Não declarar envio, atendimento, venda ou pagamento sem confirmação.
 - Não usar ganho financeiro ou prova social sem fonte aprovada.
-- Linguagem e argumentos oficiais: [CONHECIMENTO PENDENTE]
+- Cliente existente não recebe roteiro de lead frio.
