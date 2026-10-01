@@ -1,0 +1,33 @@
+FROM node:24-bookworm-slim
+
+ENV NODE_ENV=production \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HOME=/opt/whisper-models \
+    WHISPER_MODEL=base \
+    WHISPER_DEVICE=cpu \
+    WHISPER_COMPUTE_TYPE=int8 \
+    WHISPER_WORKERS=1 \
+    OG_LOCAL_WHISPER_URL=http://127.0.0.1:8765
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates libgomp1 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY apps/local-whisper-worker/requirements.txt /tmp/whisper-requirements.txt
+RUN python3 -m venv /opt/whisper-venv \
+ && /opt/whisper-venv/bin/pip install --no-cache-dir --upgrade pip \
+ && /opt/whisper-venv/bin/pip install --no-cache-dir -r /tmp/whisper-requirements.txt
+
+ENV PATH="/opt/whisper-venv/bin:${PATH}"
+
+# Bake the default Portuguese-capable model into the image so runtime calls do not
+# depend on a first-request model download.
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')"
+
+COPY . .
+
+EXPOSE 4321
+CMD ["npm","start"]
