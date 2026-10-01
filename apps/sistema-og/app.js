@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       centralResponse: null,
       sessionId: null,
       fontSize: 1,
-      recording: { recorder:null, streams:[], chunks:[], audioContext:null, url:null, blob:null, startedAt:null, endedAt:null, pausedAt:null, pausedMs:0, captureMode:'MICROPHONE', meterTimer:null, sellerAnalyser:null, customerAnalyser:null, sellerActiveMs:0, customerActiveMs:0, overlapMs:0, durationMs:0, remote:null, pollTimer:null, providerReady:null }
+      recording: { recorder:null, streams:[], chunks:[], audioContext:null, url:null, blob:null, startedAt:null, endedAt:null, pausedAt:null, pausedMs:0, captureMode:'MICROPHONE', meterTimer:null, sellerAnalyser:null, customerAnalyser:null, sellerActiveMs:0, customerActiveMs:0, overlapMs:0, durationMs:0, remote:null, pollTimer:null, providerReady:null, localFallbackReady:null, localFallbackStarted:false }
     }
   };
 
@@ -7382,7 +7382,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function emptyCallRecordingState() {
-    return { recorder:null, streams:[], chunks:[], audioContext:null, url:null, blob:null, startedAt:null, endedAt:null, pausedAt:null, pausedMs:0, captureMode:'MICROPHONE', meterTimer:null, sellerAnalyser:null, customerAnalyser:null, sellerActiveMs:0, customerActiveMs:0, overlapMs:0, durationMs:0, remote:null, pollTimer:null, providerReady:null };
+    return { recorder:null, streams:[], chunks:[], audioContext:null, url:null, blob:null, startedAt:null, endedAt:null, pausedAt:null, pausedMs:0, captureMode:'MICROPHONE', meterTimer:null, sellerAnalyser:null, customerAnalyser:null, sellerActiveMs:0, customerActiveMs:0, overlapMs:0, durationMs:0, remote:null, pollTimer:null, providerReady:null, localFallbackReady:null, localFallbackStarted:false };
   }
 
   function releaseCallRecordingStreams() {
@@ -7468,6 +7468,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!payload) return;
     state.callAI.recording.remote = payload;
     state.callAI.recording.providerReady = Boolean(payload.providerReady);
+    if (payload.localFallbackReady != null) state.callAI.recording.localFallbackReady = Boolean(payload.localFallbackReady);
     const recording = payload.recording || {};
     const transcript = payload.transcript || null;
     const metrics = payload.metrics || null;
@@ -7480,15 +7481,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       setCallIntelligenceBadge('PROCESSANDO', 'processing');
       setCallIntelligenceStatus('Áudio salvo. A transcrição está sendo processada.', 'processing');
     } else if (status === 'FAILED') {
-      setCallIntelligenceBadge('ÁUDIO SALVO', 'error');
-      setCallIntelligenceStatus('O áudio está seguro, mas a transcrição automática falhou. Você pode tentar novamente ou colar uma transcrição.', 'error');
+      setCallIntelligenceBadge('ÁUDIO SALVO', state.callAI.recording.localFallbackReady ? 'processing' : 'error');
+      setCallIntelligenceStatus(
+        state.callAI.recording.localFallbackReady && recording.transcription_provider !== 'faster-whisper'
+          ? 'A transcrição principal falhou. O Whisper local está disponível como fallback.'
+          : 'O áudio está seguro, mas a transcrição automática falhou. Você pode tentar novamente ou colar uma transcrição.',
+        state.callAI.recording.localFallbackReady && recording.transcription_provider !== 'faster-whisper' ? 'processing' : 'error'
+      );
     } else {
       setCallIntelligenceBadge('ÁUDIO SALVO', 'saved');
       setCallIntelligenceStatus(payload.providerReady ? 'Áudio salvo. A transcrição pode ser iniciada quando quiser.' : 'Áudio salvo. Transcrição automática ainda não configurada; a análise por texto colado já funciona.', 'success');
     }
 
     const retry = document.getElementById('call-ai-recording-transcribe');
-    retry?.classList.toggle('hidden', !payload.providerReady || ['READY','QUEUED','PROCESSING'].includes(status));
+    retry?.classList.toggle('hidden', !(payload.providerReady || payload.localFallbackReady) || ['READY','QUEUED','PROCESSING'].includes(status));
 
     const panel = document.getElementById('call-ai-transcript-panel');
     const text = document.getElementById('call-ai-transcript-text');
@@ -7496,7 +7502,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (transcript?.transcript_text) {
       panel?.classList.remove('hidden');
       if (text) text.textContent = transcript.transcript_text;
-      if (source) source.textContent = transcript.provider === 'manual' ? 'Texto revisável · inserido manualmente' : 'Transcrição automática · revisar antes do CRM';
+      if (source) source.textContent = transcript.provider === 'manual'
+        ? 'Texto revisável · inserido manualmente'
+        : transcript.provider === 'faster-whisper'
+          ? 'Whisper local · revisar antes do CRM'
+          : 'Transcrição automática · revisar antes do CRM';
     }
 
     if (metrics) {
@@ -7538,7 +7548,27 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       try {
         const payload = await refreshCallIntelligenceStatus();
         const status = payload?.recording?.transcription_status;
-        if (['READY','FAILED','UNAVAILABLE'].includes(status) || checks >= 40) {
+        const provider = payload?.recording?.transcription_provider;
+        if (
+          status === 'FAILED'
+          && payload?.localFallbackReady
+          && provider !== 'faster-whisper'
+          && !recording.localFallbackStarted
+        ) {
+          recording.localFallbackStarted = true;
+          setCallIntelligenceBadge('WHISPER LOCAL', 'processing');
+          setCallIntelligenceStatus('OpenAI indisponível. Iniciando transcrição local sem cobrança por minuto da OpenAI…', 'processing');
+          try {
+            const fallback = await OG_CALL_INTELLIGENCE_CLIENT.localTranscribe({ callSessionId:state.callAI.sessionId });
+            renderCallIntelligencePayload({ ...payload, ...fallback, localFallbackReady:true, recording:fallback.recording || payload.recording });
+            checks = 0;
+            return;
+          } catch (fallbackError) {
+            console.error('Local Whisper fallback failed', fallbackError);
+            setCallIntelligenceStatus('O fallback local também falhou. O áudio permanece salvo para nova tentativa.', 'error');
+          }
+        }
+        if (status === 'READY' || status === 'UNAVAILABLE' || (status === 'FAILED' && (provider === 'faster-whisper' || !payload?.localFallbackReady)) || checks >= 120) {
           clearInterval(recording.pollTimer);
           recording.pollTimer = null;
         }
@@ -7637,6 +7667,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const button = document.getElementById('call-ai-recording-transcribe');
     if (button) button.disabled = true;
     try {
+      state.callAI.recording.localFallbackStarted = false;
       const payload = await OG_CALL_INTELLIGENCE_CLIENT.transcribe({ callSessionId:state.callAI.sessionId });
       renderCallIntelligencePayload(payload);
       startCallIntelligencePolling();
@@ -7677,6 +7708,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       recording.pausedMs = 0;
       recording.pausedAt = null;
       recording.remote = null;
+      recording.localFallbackStarted = false;
+      recording.localFallbackReady = null;
 
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (mode === 'computer') {
