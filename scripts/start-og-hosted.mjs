@@ -21,6 +21,10 @@ function startEmbeddedWhisper() {
     stdio: 'inherit'
   });
   console.log('Whisper local iniciado em loopback: 127.0.0.1:8765');
+  whisperChild.on('error', error => {
+    whisperChild = null;
+    console.error('Falha ao iniciar Whisper local:', error.message);
+  });
   whisperChild.on('exit', (code, signal) => {
     whisperChild = null;
     if (signal === 'SIGTERM' || signal === 'SIGINT') return;
@@ -33,13 +37,6 @@ function startEmbeddedWhisper() {
     }
   });
 }
-
-function stopEmbeddedWhisper(signal) {
-  if (whisperChild && !whisperChild.killed) whisperChild.kill(signal);
-}
-
-process.once('SIGTERM', () => stopEmbeddedWhisper('SIGTERM'));
-process.once('SIGINT', () => stopEmbeddedWhisper('SIGINT'));
 
 startEmbeddedWhisper();
 
