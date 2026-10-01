@@ -1,5 +1,7 @@
 # Context Manifest — Baseline 2026-09-28 / CIC-03
 
+> **Scope note — historical baseline:** this file preserves the CIC-03 baseline. For current implemented capability/runtime direction, prefer `EXECUTION_CONTEXT.md`, current tested code on `main`, and live infrastructure evidence. Do not interpret the historical “not yet implemented” list below as a current feature matrix.
+
 ## Source of truth
 
 - Repository: `ldutrald5/Dutra-Sales-OG-Sitem`
@@ -13,7 +15,8 @@
 2. `docs/roadmap/BASELINE_2026-09-28.md`
 3. `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
 4. `docs/second-brain/BRAIN_INDEX.md`
-5. task/story specific to the change
+5. `docs/second-brain/CONTEXT_ROUTER.md`
+6. task/story specific to the change
 
 ## Current architectural facts
 
