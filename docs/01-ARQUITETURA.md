@@ -133,3 +133,8 @@ Para evitar pesquisa externa durante validação, o insight leva `metadata.e2e=t
 O harness valida caminho feliz, idempotência, proveniência e bloqueio de hipótese não confirmada. Cleanup padrão remove somente IDs criados pelo próprio run. `OG_WHATSAPP_E2E_KEEP=true` existe apenas para diagnóstico explícito.
 
 A chave usada pelo harness é server-side. Preferir chave Supabase moderna `sb_secret_...`; nunca expor essa chave no PWA/browser.
+
+
+## ADRs relacionados — Inteligência operacional
+
+- `docs/architecture/ADR-INTELLIGENCE-COMPILER-001.md` — estende o Builder Brain existente como camada durável de evidência/decisão, usa Skills finas + Context Router e mantém dados voláteis no CRM/runtime.
