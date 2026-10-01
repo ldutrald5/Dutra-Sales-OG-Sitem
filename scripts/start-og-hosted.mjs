@@ -1,3 +1,45 @@
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const hostedScriptDir = path.dirname(fileURLToPath(import.meta.url));
+let whisperChild = null;
+let whisperRestartCount = 0;
+
+function localWhisperConfigured() {
+  const url = String(process.env.OG_LOCAL_WHISPER_URL || '').trim();
+  const token = String(process.env.OG_LOCAL_WHISPER_TOKEN || '').trim();
+  return /^http:\/\/(127\.0\.0\.1|localhost):8765\/?$/.test(url) && token.length >= 32;
+}
+
+function startEmbeddedWhisper() {
+  if (!localWhisperConfigured()) return;
+  const cwd = path.resolve(hostedScriptDir, '../apps/local-whisper-worker');
+  whisperChild = spawn('uvicorn', ['app:app', '--host', '127.0.0.1', '--port', '8765'], {
+    cwd,
+    env: process.env,
+    stdio: 'inherit'
+  });
+  console.log('Whisper local iniciado em loopback: 127.0.0.1:8765');
+  whisperChild.on('error', error => {
+    whisperChild = null;
+    console.error('Falha ao iniciar Whisper local:', error.message);
+  });
+  whisperChild.on('exit', (code, signal) => {
+    whisperChild = null;
+    if (signal === 'SIGTERM' || signal === 'SIGINT') return;
+    whisperRestartCount += 1;
+    if (whisperRestartCount <= 3) {
+      console.warn(`Whisper local encerrou (code=${code}). Nova tentativa ${whisperRestartCount}/3 em 5s.`);
+      setTimeout(startEmbeddedWhisper, 5000).unref();
+    } else {
+      console.error('Whisper local indisponível após 3 reinícios; Sistema OG continuará sem fallback local.');
+    }
+  });
+}
+
+startEmbeddedWhisper();
+
 const token = String(process.env.OG_LOCAL_ACCESS_TOKEN || process.env.OG_ACCESS_TOKEN || '');
 if (token.length < 16) {
   throw new Error('OG_LOCAL_ACCESS_TOKEN com pelo menos 16 caracteres é obrigatório no ambiente hospedado.');

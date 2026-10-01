@@ -3,6 +3,8 @@ import fs from 'node:fs';
 
 const worker = fs.readFileSync('apps/local-whisper-worker/app.py','utf8');
 const docker = fs.readFileSync('apps/local-whisper-worker/Dockerfile','utf8');
+const embeddedDocker = fs.readFileSync('Dockerfile.whisper','utf8');
+const hostedStart = fs.readFileSync('scripts/start-og-hosted.mjs','utf8');
 const gateway = fs.readFileSync('apps/sistema-og/server-call-intelligence-gateway.cjs','utf8');
 const edge = fs.readFileSync('supabase/functions/call-intelligence/index.ts','utf8');
 const app = fs.readFileSync('apps/sistema-og/app.js','utf8');
@@ -22,6 +24,13 @@ assert.match(worker, /ThreadPoolExecutor/);
 assert.match(worker, /status="PROCESSING"/);
 assert.doesNotMatch(worker, /supabase|sales_opportunities|companies/, 'worker local não deve ter acesso ao CRM/Supabase');
 assert.match(docker, /python:3\.11-slim/);
+assert.match(embeddedDocker, /node:24-bookworm-slim/);
+assert.match(embeddedDocker, /python3 -m venv \/opt\/whisper-venv/);
+assert.match(embeddedDocker, /WhisperModel\('base'/);
+assert.match(embeddedDocker, /OG_LOCAL_WHISPER_URL=http:\/\/127\.0\.0\.1:8765/);
+assert.match(hostedStart, /spawn\('uvicorn'/);
+assert.match(hostedStart, /127\.0\.0\.1/);
+assert.match(hostedStart, /Whisper local iniciado em loopback/);
 
 assert.match(gateway, /OG_LOCAL_WHISPER_URL/);
 assert.match(gateway, /OG_LOCAL_WHISPER_TOKEN/);
