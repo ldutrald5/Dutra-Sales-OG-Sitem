@@ -73,3 +73,11 @@ for (const key of Object.keys(process.env)) {
 }
 
 await import('../apps/sistema-og/server.mjs');
+
+if (/^(1|true|yes)$/i.test(String(process.env.OG_WHISPER_SELF_TEST || ''))) {
+  setTimeout(() => {
+    import('./whisper-runtime-self-test.mjs')
+      .then(module => module.runWhisperRuntimeSelfTest())
+      .catch(error => console.error('Whisper self-test assíncrono falhou:', String(error?.message || error)));
+  }, 2500).unref();
+}

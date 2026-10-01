@@ -56,11 +56,19 @@ try {
 
   let response = await fetch(`http://127.0.0.1:${port}/health`);
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { ok: true, service: 'sistema-og', release: 'test-release-sha' });
+  let healthBody = await response.json();
+  assert.equal(healthBody.ok, true);
+  assert.equal(healthBody.service, 'sistema-og');
+  assert.equal(healthBody.release, 'test-release-sha');
+  assert.equal(healthBody.whisperSelfTest, null);
 
   response = await fetch(`http://127.0.0.1:${port}/api/health`);
   assert.equal(response.status, 200, '/api/health deve permanecer público para diagnóstico');
-  assert.deepEqual(await response.json(), { ok: true, service: 'sistema-og', release: 'test-release-sha' });
+  healthBody = await response.json();
+  assert.equal(healthBody.ok, true);
+  assert.equal(healthBody.service, 'sistema-og');
+  assert.equal(healthBody.release, 'test-release-sha');
+  assert.equal(healthBody.whisperSelfTest, null);
 
   response = await fetch(`http://127.0.0.1:${port}/api/state`);
   assert.equal(response.status, 401, 'API hosted deve exigir código de acesso');

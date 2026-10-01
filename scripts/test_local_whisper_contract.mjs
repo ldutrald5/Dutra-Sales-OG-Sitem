@@ -6,6 +6,7 @@ const requirements = fs.readFileSync('apps/local-whisper-worker/requirements.txt
 const docker = fs.readFileSync('apps/local-whisper-worker/Dockerfile','utf8');
 const embeddedDocker = fs.readFileSync('Dockerfile.whisper','utf8');
 const hostedStart = fs.readFileSync('scripts/start-og-hosted.mjs','utf8');
+const runtimeSelfTest = fs.readFileSync('scripts/whisper-runtime-self-test.mjs','utf8');
 const gateway = fs.readFileSync('apps/sistema-og/server-call-intelligence-gateway.cjs','utf8');
 const edge = fs.readFileSync('supabase/functions/call-intelligence/index.ts','utf8');
 const app = fs.readFileSync('apps/sistema-og/app.js','utf8');
@@ -33,6 +34,11 @@ assert.match(embeddedDocker, /OG_LOCAL_WHISPER_URL=http:\/\/127\.0\.0\.1:8765/);
 assert.match(hostedStart, /spawn\('uvicorn'/);
 assert.match(hostedStart, /127\.0\.0\.1/);
 assert.match(hostedStart, /Whisper local iniciado em loopback/);
+assert.match(hostedStart, /OG_WHISPER_SELF_TEST/);
+assert.match(runtimeSelfTest, /TEST-WHISPER-LOCAL/);
+assert.match(runtimeSelfTest, /gateway\.localTranscribe/);
+assert.match(runtimeSelfTest, /provider === 'faster-whisper'/);
+assert.match(runtimeSelfTest, /autoTranscribe:false/);
 
 assert.match(gateway, /OG_LOCAL_WHISPER_URL/);
 assert.match(gateway, /OG_LOCAL_WHISPER_TOKEN/);
