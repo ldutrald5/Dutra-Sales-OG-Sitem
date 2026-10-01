@@ -68,6 +68,17 @@ For these, use the **MICRO** path. If the task unexpectedly reveals structural u
 
 A new external reference is **input**, not authority.
 
+## Operational knowledge compiler routing
+
+When the task comes from recovered history, a prior incident, a new durable commercial rule or a request to make the project "remember":
+
+1. read `docs/second-brain/CONTEXT_ROUTER.md`;
+2. route to the smallest DUTRA domain Skill/context;
+3. keep volatile customer/account facts in CRM/runtime rather than the brain;
+4. record material bugs in `incidents.jsonl` as symptom → root cause → resolution → prevention → regression test;
+5. never let conversation recovery override current tested code or validated OG evidence without an explicit conflict record.
+
+
 ## Activation protocol
 
 1. Read local instructions (`AGENTS.md`, project context and scoped docs).
