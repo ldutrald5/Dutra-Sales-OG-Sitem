@@ -26,6 +26,26 @@ assert.ok(b.doNotSay.some(x=>/não presuma/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/não há abertura confirmada/i.test(x)));
 assert.ok(b.doNotSay.some(x=>/percentual de economia/i.test(x)));
 
+const firstApproach=brief.approachFor('first_contact',incomplete);
+assert.equal(firstApproach.id,'first_contact');
+assert.match(firstApproach.opening,/antes de te explicar qualquer coisa/i);
+assert.match(firstApproach.primaryQuestion,/controlam a pressão/i);
+assert.match(firstApproach.desiredNextStep,/veículo ou conjunto/i);
+
+const proposalApproach=brief.approachFor('proposal_followup',{...incomplete,nome:'Maria'});
+assert.equal(proposalApproach.label,'Proposta / negociação');
+assert.match(proposalApproach.opening,/investimento, aplicação na frota ou prioridade interna/i);
+assert.match(proposalApproach.desiredNextStep,/objeção principal/i);
+
+const postSaleApproach=brief.approachFor('post_sale',{...incomplete,nome:'Carlos'});
+assert.equal(postSaleApproach.id,'post_sale');
+assert.match(postSaleApproach.objective,/experiência real/i);
+assert.match(postSaleApproach.primaryQuestion,/equipamento está se comportando/i);
+
+const erpApproach=brief.approachFor('erp_review',incomplete);
+assert.match(erpApproach.opening,/não abordar o cliente/i);
+assert.match(erpApproach.desiredNextStep,/liberar a conta/i);
+
 const reopened=brief.build({
   ...incomplete,
   fleetSize:80,
@@ -47,5 +67,8 @@ assert.match(sw,/sales-brief-service\.js/);
 assert.match(app,/OG_SALES_BRIEF\.build/);
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/);
 assert.match(app,/NÃO DIGA AINDA/);
+assert.match(app,/COMO ABORDAR AGORA/);
+assert.match(app,/PERGUNTA-CHAVE/);
+assert.match(app,/AVANÇO DESEJADO/);
 
 console.log('PRECALL-01 diagnostic + guardrails: PASS');
