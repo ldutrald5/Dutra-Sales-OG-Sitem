@@ -77,6 +77,20 @@ O fluxo ideal compartilha a mesma conta/lead:
 
 Follow-up e `nextAction` alimentam Meu Dia, Agenda e Mesa. Mudanças de estágio relevantes devem gerar atividade operacional. Cotações e propostas só alimentam valor de oportunidade quando houver valor real calculado/salvo.
 
+## Inteligência operacional e memória de projeto
+
+O DUTRA OS mantém inteligência em nível de sistema, não por alteração de pesos de modelo. O conhecimento durável é organizado no Builder Brain (`docs/second-brain/`), documentos de domínio e Skills finas em `.codex/skills/`.
+
+Regras:
+
+- use `docs/second-brain/CONTEXT_ROUTER.md` para carregar o menor contexto relevante;
+- Skills roteiam para fontes; não copiam a Base Mestra inteira;
+- dados dinâmicos de conta permanecem no CRM/runtime;
+- histórico recuperado é evidência e nunca sobrepõe silenciosamente código atual testado ou fonte OG validada;
+- bugs materiais entram em `incidents.jsonl` com sintoma, causa, correção, prevenção e regressão;
+- decisões substituídas permanecem rastreáveis por status/supersession;
+- mudanças STANDARD/STRUCTURAL devolvem aprendizado durável ao brain e executam `npm run og:brain:refresh`.
+
 ## Regras de documentação
 
 Toda entrega relevante deve atualizar, no mesmo pacote/repositório:
