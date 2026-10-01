@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {createRequire} from 'node:module';
+import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(__dirname,'..');
-const require=createRequire(import.meta.url);
-const {buildAttackBrief,relationshipKey}=require(path.join(root,'preview-v2/sales-playbook-v3.js'));
+const playbookSource=fs.readFileSync(path.join(root,'preview-v2/sales-playbook-v3.js'),'utf8');
+const sandbox={globalThis:{}};
+vm.runInNewContext(playbookSource,sandbox,{filename:'sales-playbook-v3.js'});
+const {buildAttackBrief,relationshipKey}=sandbox.globalThis.DUTRA_SALES_PLAYBOOK;
 
 const cold=buildAttackBrief({status:'novo',empresa:'Conta A'},{});
 assert.equal(cold.mode,'COLD');
