@@ -14,6 +14,7 @@ Default location: `docs/second-brain/`.
 - `experiments.jsonl` — uncertainty-reduction tests and outcomes.
 - `open-questions.jsonl` — material unknowns.
 - `anti-patterns.jsonl` — failures/risks to avoid.
+- `incidents.jsonl` — durable bug/incident knowledge.
 - `cycles.jsonl` — STANDARD/STRUCTURAL work-cycle adoption and outcome log.
 
 ## Required common schema
@@ -61,6 +62,10 @@ Requires `decision_impact`.
 ### anti_pattern
 Requires `risk`.
 
+### incident
+Requires `symptom`, `root_cause`, `resolution`, `prevention`, and `regression_test`.
+Use an incident for a material production/development failure whose learning should prevent recurrence. A bug is not complete knowledge until the prevention/test is explicit.
+
 ### cycle
 Requires `scope_class`, `brain_available`, `brain_consulted`, `brain_updated`, `outcome`, `started_at`, `completed_at`.
 
@@ -82,10 +87,11 @@ Common statuses include `candidate`, `validated`, `active`, `planned`, `implemen
 
 JSONL remains the canonical lightweight store, but humans should start with generated files:
 
-- `BRAIN_INDEX.md` — collection summary, active decisions, open questions, ideas, sources and relation overview.
+- `BRAIN_INDEX.md` — collection summary, active decisions, open questions, incidents, ideas, sources and relation overview.
 - `BRAIN_METRICS.md` — adoption and effectiveness metrics.
+- `CONTEXT_ROUTER.md` — minimal context routing.
 
-Do not hand-maintain these generated files. Run:
+Do not hand-maintain generated index/metrics. Run:
 
 ```bash
 npm run og:brain:refresh
@@ -110,7 +116,7 @@ It still cannot prove truth. Human/agent evidence discipline remains necessary.
 After each STANDARD/STRUCTURAL cycle:
 
 1. consult relevant brain entries before material decisions;
-2. capture newly confirmed facts/decisions/patterns;
+2. capture newly confirmed facts/decisions/patterns/incidents;
 3. preserve rejected/deferred ideas when the reason is reusable;
 4. close/create open questions;
 5. record a `cycle` entry;
