@@ -2,6 +2,19 @@
 
 Prompts históricos são preservados somente quando ainda agregam valor. O objetivo é reduzir prompts gigantes por meio de Skills + Context Router.
 
+
+## PROMPT-ARCHITECT-001 — DUTRA Prompt Architect
+
+**STATUS:** SYSTEMIZED / ACTIVE VIA SKILL  
+**VERSÃO:** 1.0  
+**FINALIDADE:** converter uma intenção natural em missão L0–L3 com contexto mínimo, escopo, guardrails, critérios de aceite e testes.  
+**QUANDO USAR:** antes de delegar feature, bug, refactor, UX, arquitetura, integração ou planejamento que ainda esteja ambíguo.  
+**MECANISMO:** `.codex/skills/dutra-prompt-architect/SKILL.md` + Context Router + referências em `docs/prompts/architect/`.  
+**DEPENDÊNCIAS:** Skill de domínio correspondente; Builder Brain/BUGBOOK/ADR somente quando alterarem a decisão.  
+**SAÍDA:** Execution Prompt + Context Manifest + lacunas/validações necessárias.
+
+**Regra:** não reenviar a Base Mestra nem definições estáticas AIOX; referenciar fontes e deixar `SubagentPromptBuilder` empacotar agent/task/checklists quando aplicável.
+
 ## PROMPT-SALES-EXEC-001 — Sales Execution Sprint
 
 **STATUS:** ACTIVE AS SPECIFICATION / prefer Skills for execution  
@@ -81,3 +94,8 @@ Referência canônica: `docs/DUTRA-OS-REINTEGRATION-PLAN.md`.
 - prompts não armazenam segredos;
 - dados de cliente entram como input runtime, não no prompt global;
 - quando um prompt vira processo permanente, migrar para Skill/procedimento e marcar como superseded.
+
+
+## Compatibilidade
+
+O arquivo `docs/prompts/PROMPT-MESTRE-EVOLUCAO-SISTEMA-OG.md` permanece como **Prompt Mestre legado/compatibilidade**. Para trabalho novo, preferir `dutra-prompt-architect`, que escolhe nível, contexto e contrato de execução de forma proporcional.
