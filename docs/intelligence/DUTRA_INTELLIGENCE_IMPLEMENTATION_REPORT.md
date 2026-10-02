@@ -1,21 +1,26 @@
 # DUTRA INTELLIGENCE IMPLEMENTATION REPORT
 
-Branch: `feat/dutra-intelligence-compiler-v1`
-Base: current GitHub `main` audited at `f4c2b3c68d747b6477410ffff50521d8788f8d62`.
-Production/main status: **not merged, not deployed by this package**.
+Original implementation branch: `feat/dutra-intelligence-compiler-v1`  
+PR: **#104 — feat: DUTRA Intelligence Compiler V1**  
+Base audited: `main@f4c2b3c68d747b6477410ffff50521d8788f8d62`  
+PR head validated: `4e9020b863ab18a51af9c6bbaac2360feba491ee`  
+Merged to `main`: `72354a1f04d6fdd5584fe876ec4b09bb050a312a`
+
+**Final state:** merged into current `main` and validated in CI. This package changes project intelligence/governance, not browser runtime behavior; Railway production was not redeployed merely to publish documentation/Skills.
 
 ## 1. O QUE FOI ANALISADO
 
-- current `main`, AGENTS, canonical context, execution context and manifest;
+- current `main`, `AGENTS.md`, canonical context, execution context and manifest;
 - Builder Brain/Second Brain schema, records, generator/checker/metrics;
 - runtime/domain services including knowledge selector, account knowledge and command core;
 - Sales Execution contract, current tests/package scripts and current Call Intelligence/Whisper line;
 - recovered conversation/master handoff as historical evidence;
-- root `knowledge/` commercial/product templates.
+- root `knowledge/` commercial/product templates;
+- current CI contracts and historical incidents relevant to regressions.
 
 ## 2. INTELIGÊNCIA EXTRAÍDA
 
-- truth precedence and conflict handling;
+- truth precedence and explicit conflict handling;
 - stable vs dynamic knowledge boundary;
 - one canonical CRM / lists as operational collections;
 - stage-aware sales guidance;
@@ -23,7 +28,8 @@ Production/main status: **not merged, not deployed by this package**.
 - automation with manual escape;
 - bug → root cause → prevention → regression;
 - minimal context routing;
-- current main supersedes historical V3 branch assumptions.
+- current tested `main` supersedes remembered historical branch assumptions;
+- runtime state must be checked live when current infrastructure status matters.
 
 ## 3. SKILLS CRIADAS
 
@@ -31,7 +37,7 @@ Production/main status: **not merged, not deployed by this package**.
 
 ## 4. SKILLS ATUALIZADAS
 
-`dutra-builder-brain` now routes recovered operational knowledge through the context router/domain skills and supports durable incidents.
+`dutra-builder-brain` now routes recovered operational knowledge through the context router/domain Skills and supports durable incidents.
 
 ## 5. CONTEXTOS CRIADOS
 
@@ -39,7 +45,7 @@ Production/main status: **not merged, not deployed by this package**.
 - `docs/second-brain/KNOWLEDGE_SCHEMA.md`;
 - `knowledge/OG-TECH-RULES.md`;
 - `knowledge/FLEET-OG.md`;
-- canonical context/handoff/AGENTS updated to use the router.
+- canonical context/handoff/`AGENTS.md` updated to use the router.
 
 ## 6. PLAYBOOKS
 
@@ -47,69 +53,137 @@ Production/main status: **not merged, not deployed by this package**.
 
 ## 7. ADRs
 
-`ADR-INTELLIGENCE-COMPILER-001`: extend the existing Builder Brain instead of creating a second memory; thin Skills; dynamic account facts remain in CRM/runtime.
+`docs/architecture/ADR-INTELLIGENCE-COMPILER-001.md`: extend the existing Builder Brain instead of creating a second memory; use thin Skills; dynamic account facts remain in CRM/runtime.
 
 ## 8. BUGS TRANSFORMADOS EM REGRESSÃO
 
-Incident store added with 8 records covering historical V3 first-paint, technical data load, close-rate population bug, CRM/list isolation, sync conflict, XLSX repair, current Call Intelligence audio/metric contract defects and Whisper runtime dependency.
+The durable incident store contains 8+ recovered incidents covering historical V3 first-paint, technical data load, close-rate population bug, CRM/list isolation, sync conflict, XLSX repair, Call Intelligence audio/metric contract defects and Whisper runtime dependency.
+
+Each incident requires symptom, root cause, resolution, prevention and regression-test reference.
 
 ## 9. ANTI-PATTERNS
 
-Added protection against parallel knowledge memories, volatile CRM facts in global Skills, remembered deploy state as runtime truth, universal sales pitch and code/history mappings promoted to confirmed OG facts.
+Protection exists against:
+
+- parallel knowledge memories;
+- volatile CRM facts frozen in global Skills;
+- remembered deploy state treated as runtime truth;
+- universal sales pitch independent of relationship stage;
+- code/history technical mappings promoted to confirmed OG physical truth;
+- silent conflict resolution and other previously recorded brownfield failure modes.
 
 ## 10. PROMPTS CONSOLIDADOS
 
-`docs/prompts/PROMPT_LIBRARY.md` classifies active, superseded and experimental prompt families; Intelligence Compiler and Sales Execution remain active.
+`docs/prompts/PROMPT_LIBRARY.md` classifies active, superseded and experimental prompt families. Intelligence Compiler, Sales Execution and V3 reintegration prompts have explicit lifecycle/usage instead of being repeatedly pasted as giant context.
 
 ## 11. CONFLITOS ENCONTRADOS
 
-- historical V3/agent-skills branches vs current `main`: current `main` wins for code/current behavior;
+- historical V3/agent-skills branches vs current `main`: current tested `main` wins for code/current behavior;
 - old “Supabase is future only” framing vs current hybrid Supabase verticals: recorded as transitional hybrid, not full master-data cutover;
-- CIC-03 Context Manifest feature matrix vs later implementation: manifest explicitly marked historical baseline;
-- runtime code mappings vs OG physical truth: code is implementation evidence, validated OG source is required for `Confirmada OG`.
+- CIC-03 Context Manifest feature matrix vs later implementation: historical baseline is not treated as current runtime proof;
+- runtime code mappings vs OG physical truth: code is implementation evidence; validated OG source is required for `Confirmada OG`.
+
+Conflicts are retained as explicit provenance/validation state rather than silently collapsed.
 
 ## 12. INFORMAÇÕES QUE PRECISAM DE VALIDAÇÃO HUMANA
 
 - exact official OG source that certifies each support/equalizer/application mapping;
 - which reviewed compiled playbooks/technical guardrails should be imported into the live private Knowledge Command Center;
 - real Excel certification of critical exports after the historical repair incident;
-- live Railway state whenever deployment/health is asked (must be checked live).
+- any new physical/commercial OG claim before promotion to confirmed knowledge;
+- live Railway state whenever deployment/health is asked.
 
 ## 13. TESTES CRIADOS/ALTERADOS
 
 - added `scripts/test_intelligence_compiler_contract.mjs`;
 - added `npm run og:intelligence:test`;
-- added the intelligence test to `scripts/validate.mjs`;
-- Builder Brain checker/index/metrics now understand incidents.
+- added intelligence regression to `scripts/validate.mjs`;
+- Builder Brain checker/index/metrics now understand durable incidents;
+- this follow-up explicitly protects `TECHNICAL_RULES`, `TECHNICAL_EXCEPTIONS`, `TECHNICAL_VALIDATIONS` and `TECHNICAL_FALLBACKS` headings.
 
-Validation executed in this package: connector-side contract simulation **PASS**; Second Brain JSON/referential-integrity simulation **PASS** (90 records); generated index/metrics refreshed. Full local `npm test` / CI **NOT RUN** because the current repository checkout was not available in the execution container and no workflow run was triggered for this branch. No PASS is claimed for tests not executed.
+Final GitHub validation on PR #104 head:
+
+- **Package 00R CI run 404: SUCCESS**
+- **Sales Execution P0 run 24: SUCCESS**
+- **Call Intelligence V1 run 22: SUCCESS**
+- `npm run og:intelligence:test`: **PASS**
+- full `Validation suite`: **PASS**
+- Security baseline: **PASS**
+- Release Gate on Node 24.21.0 / npm 11.19.0: **PASS**
+- Builder Brain: **90 records across 10 collections, 0 warnings**
 
 ## 14. ARQUIVOS ALTERADOS
 
-See branch diff against `main`. Main groups: `.codex/skills/`, `docs/second-brain/`, `docs/playbooks/`, `docs/prompts/`, `knowledge/`, project context/handoff files, package/test wiring.
+Implementation groups:
+
+- `.codex/skills/`;
+- `docs/second-brain/`;
+- `docs/playbooks/`;
+- `docs/prompts/`;
+- `docs/architecture/`;
+- `docs/intelligence/`;
+- `knowledge/`;
+- canonical project context/handoff files;
+- package/test wiring.
+
+PR #104 changed 45 files.
 
 ## 15. O QUE O SISTEMA PASSOU A SABER
 
-- how to choose the smallest context for a task;
+- how to choose the smallest relevant context for a task;
 - which source has authority when history conflicts;
 - how to distinguish stable project knowledge from volatile CRM state;
 - how to route sales/CRM/technical/fleet/product/dev/QA work;
 - how to preserve a bug as prevention instead of a one-off patch;
 - why uncertain OG application must remain validation-required;
-- why current main cannot be replaced by remembered historical branch status.
+- why current tested `main` cannot be replaced by remembered historical branch status;
+- why a technical runtime mapping is not automatically an externally confirmed OG claim.
 
 ## 16. COMO O SISTEMA VAI USAR ESSE CONHECIMENTO
 
-`AGENTS.md` and `AI_HANDOFF.md` now require Context Router + relevant Skill/preflight for material work. The Builder Brain stores provenance/decisions/incidents. Domain Skills load scoped docs rather than copied master history. Knowledge regression is part of `validate` once this branch is run/merged.
+`AGENTS.md` and `AI_HANDOFF.md` require Context Router + relevant Skill/pre-flight for material work.
+
+The Builder Brain stores provenance, decisions, patterns and incidents. Domain Skills load scoped references instead of copied master history. Dynamic customer/proposal/task state remains in CRM/runtime. Knowledge regression is part of the normal validation suite.
+
+Operational flow:
+
+```text
+TASK
+→ AGENTS / pre-flight
+→ CONTEXT ROUTER
+→ DOMAIN SKILL
+→ relevant decisions/incidents/playbook
+→ affected code/tests
+→ implementation
+→ evaluate durable learning
+→ Second Brain / regression when applicable
+```
 
 ## 17. O QUE AINDA ESTÁ FORA DA BASE
 
-- dynamic customer/opportunity/proposal/current-next-action data (correctly remains CRM/runtime);
-- secrets/credentials/raw customer exports/recordings (intentionally excluded);
+Correctly excluded:
+
+- dynamic customer/opportunity/proposal/current-next-action data;
+- secrets/credentials/raw customer exports/recordings;
 - unvalidated OG technical/commercial claims;
-- runtime KCC ingestion of these new stable docs pending explicit review;
-- old agent-skill experimental branch content not automatically ported to current main.
+- live infrastructure state as a static memory.
+
+Still pending by design:
+
+- selective ingestion of approved stable guardrails into the live private Knowledge Command Center;
+- official technical source attachment for mappings that need `Confirmada OG`;
+- continued compilation of future incidents/decisions as they occur.
 
 ## 18. PRÓXIMA EVOLUÇÃO RECOMENDADA
 
-Run the full supported Node 24/npm 11 validation suite on this branch, inspect failures, then review the diff before PR/merge. After that, perform a small KCC ingestion pilot using only approved stable sales/technical guardrails; do not ingest volatile CRM facts or unvalidated OG mappings.
+Do not create another memory architecture.
+
+Next evolution should be incremental:
+
+1. run a small KCC ingestion pilot using only approved stable sales/technical guardrails;
+2. attach official OG provenance to technical mappings that need confirmed external use;
+3. keep dynamic account state in CRM/runtime;
+4. require new bugs/decisions to close the loop into Second Brain + regression;
+5. periodically regenerate/check the Brain index and metrics to prevent knowledge drift.
+
+The Intelligence Compiler V1 is now a project capability, not a chat-only prompt.
