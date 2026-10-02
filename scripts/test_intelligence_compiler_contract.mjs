@@ -58,9 +58,13 @@ for (const heading of ['GATEKEEPER','DECISION MAKER','MEETING','PROPOSAL / NEGOT
 assert.match(playbook, /Existing customer is not approached as a cold lead/i);
 
 const tech = read('knowledge/OG-TECH-RULES.md');
+for (const heading of ['TECHNICAL_RULES','TECHNICAL_EXCEPTIONS','TECHNICAL_VALIDATIONS','TECHNICAL_FALLBACKS']) {
+  assert.ok(tech.includes(heading), `Missing technical knowledge section: ${heading}`);
+}
 assert.match(tech, /Confirmada OG/);
 assert.match(tech, /Precisa validar/);
 assert.match(tech, /Não determinada/);
+assert.match(tech, /STATUS = VALIDAR/);
 assert.match(tech, /Never invent a support code/i);
 
 const promptLibrary = read('docs/prompts/PROMPT_LIBRARY.md');
