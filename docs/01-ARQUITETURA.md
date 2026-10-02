@@ -26,7 +26,8 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 - AIOX Core para organização do ambiente de agentes.
 - Husky para hooks do repositório.
 - Wrangler para desenvolvimento e publicação Cloudflare.
-- Não há banco SQL nem framework React/Vue/Angular.
+- O CRM operacional principal continua local-first, mas já existe uma camada Supabase/Postgres real e normalizada para proposta/ROI, integrações WhatsApp, Sales Execution e Call Intelligence. Isso não representa cutover total do `state.leads`.
+- Não há framework React/Vue/Angular.
 
 ### Módulos reutilizáveis
 
@@ -39,11 +40,12 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 
 ### Integrações existentes
 
-- WhatsApp por link explícito; nenhuma leitura automática.
-- Áudio por APIs do navegador, com consentimento do usuário e arquivo local.
+- WhatsApp por link explícito e bridge local opcional Kaption/MCP em modo de leitura; o bridge não envia mensagens nem promove estágio automaticamente.
+- Áudio por APIs do navegador, com consentimento do usuário e permanência local até a ação explícita de upload; Call Intelligence usa Storage privado e transcrição server-side/fallback local.
 - Sales Brain local por `/api/knowledge/status` e `/api/knowledge/search`.
 - Cloudflare Worker/Assets/KV para acesso HTTPS.
 - Importadores locais para CRM e conhecimento; dados importados não devem entrar no Git.
+- Supabase/Postgres, Storage privado e Edge Functions já sustentam verticais normalizadas; browser administrativo continua atrás de gateways server-side.
 
 ## Decisões preservadas
 
@@ -63,6 +65,7 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 - Existem duas experiências de celular (`/` responsivo e `/mobile` legado), com risco de divergência.
 - Autenticação Cloudflare por código não equivale a perfis e permissões por usuário.
 - Os quality gates genéricos do AIOX citam comandos que este `package.json` não possui; devem ser usados os testes reais disponíveis.
+- Auditoria live de 2026-10-01 encontrou drift de reprodutibilidade no Supabase: 25 migrations aplicadas e 13 Edge Functions ativas no remoto, contra 4 arquivos de migration e 2 fontes de Edge Function versionadas no Git naquele momento. Tratar `INC-SUPABASE-DRIFT-001` antes de nova expansão estrutural do backend.
 
 ## Regras para evolução
 
