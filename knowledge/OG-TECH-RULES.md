@@ -12,17 +12,15 @@ This file stores stable technical decision rules. It is not a substitute for val
 
 A lower level never silently overrides a higher one.
 
-## Required result states
+## TECHNICAL_RULES
 
-- **Confirmada OG** — source explicitly supports the application.
-- **Precisa validar** — a plausible/current-code mapping exists but evidence is insufficient or conflicting.
-- **Não determinada** — the system cannot determine safely.
+- Capture only inputs relevant to the selected vehicle/configuration.
+- Use validated OG evidence for externally confirmed application claims.
+- Treat runtime/code mappings as implementation evidence, not automatic physical-field certification.
+- Never assume a missing vehicle/configuration field.
+- Automatic calculation is a starting point, not an immutable order.
 
-If the engine cannot determine an application with sufficient evidence, return **Precisa validar / Não determinada**. Never invent a support code.
-
-## Inputs that can change application
-
-Capture only what is relevant to the selected vehicle/configuration, including when applicable:
+Inputs that can change application include, when applicable:
 
 - vehicle type/configuration;
 - brand/model/year;
@@ -34,15 +32,49 @@ Capture only what is relevant to the selected vehicle/configuration, including w
 - front axle included or not;
 - target PSI/librage.
 
-Do not assume missing values.
+## TECHNICAL_EXCEPTIONS
 
-## Automation escape
+An exception exists when any of these is true:
 
-Automatic calculation is a starting point. The authorized user must be able to:
+- the real vehicle/order is not represented by the current deterministic mapping;
+- required configuration data is missing or ambiguous;
+- code/history conflicts with a stronger validated OG source;
+- the customer needs an authorized special order or manual item adjustment;
+- the runtime can calculate a plausible result but physical/commercial confirmation is still absent.
+
+Exceptions must remain visible. Do not force-fit them into the nearest known mapping.
+
+## TECHNICAL_VALIDATIONS
+
+Required result states:
+
+- **Confirmada OG** — a validated OG source explicitly supports the application.
+- **Precisa validar** — a plausible/current-code mapping exists but evidence is insufficient or conflicting.
+- **Não determinada** — the system cannot determine safely.
+
+Validation should preserve provenance: source file/document/photo/table, date/revision when available, and the specific configuration being confirmed.
+
+A code mapping may support software behavior while still remaining **Precisa validar** for an external technical claim.
+
+## TECHNICAL_FALLBACKS
+
+When the engine cannot determine an application with sufficient evidence:
+
+```text
+STATUS = VALIDAR
+```
+
+Operational fallback:
 
 AUTO → REVIEW → EDIT → REPLACE → ADD → REMOVE → NOTE → VALIDATE.
 
-A special order must not be blocked because automation cannot model it.
+Rules:
+
+- never invent a support code;
+- never infer a physical application only from fuzzy/natural-language similarity;
+- never block a legitimate special order because automation cannot model it;
+- preserve manual review/override;
+- unresolved application remains validation-required instead of being silently coerced into a known rule.
 
 ## Runtime mappings
 
