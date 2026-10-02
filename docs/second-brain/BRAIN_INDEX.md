@@ -1,20 +1,20 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 84 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 88 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 11 |
-| cycle | 9 |
-| decision | 16 |
+| cycle | 10 |
+| decision | 17 |
 | experiment | 1 |
 | idea | 3 |
 | knowledge | 8 |
 | open_question | 4 |
-| pattern | 16 |
-| source | 16 |
+| pattern | 17 |
+| source | 17 |
 
 ## Active decisions
 
@@ -48,6 +48,8 @@ Generated from 84 records. Do not edit by hand; run `npm run og:brain:refresh`.
   AI research and call analysis may propose structured updates, but inferred fields, notes and next actions require explicit review before persistence as customer truth.
 - **DEC-INT-COMPILER-001 — Compile history into existing Second Brain plus routed Skills** (active/high)
   Conversation history is not a runtime dependency: durable knowledge is classified into the existing Second Brain and domain files, exposed through compact Skills and context routing, while volatile account data stays in CRM storage.
+- **DEC-PROMPT-ARCH-001 — Prompt Architect owns intent-to-mission compilation** (active/high)
+  Use a dedicated Prompt Architect to convert human intent into scoped L0-L3 execution missions; Builder Brain remains decision/learning governance, Context Router remains retrieval authority, and SubagentPromptBuilder remains AIOX static task/agent packaging.
 - **DEC-METRIC-UNIVERSE-001 — Conversion metrics use consistent attribution populations** (active/high)
   A conversion rate may only combine numerator and denominator from the same attributed population/filter; close rate must not be inflated by unrelated historical CRM sales.
 
@@ -101,6 +103,8 @@ Generated from 84 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Conversion metrics must derive numerator and denominator from compatible filters, attribution and time/population scope; historical totals cannot be divided by current-session denominators.
 - **PAT-CONTEXT-ROUTER-001 — Skill to context to source routing** (active/high)
   Keep Skills procedural and compact, route each task to a bounded context set, and retain deeper evidence in canonical source files instead of copying the master context into every prompt.
+- **PAT-PROMPT-MINCTX-001 — Mission prompts use minimal decision-changing context** (active/high)
+  Execution prompts should reference bounded required context, conditional context and explicit do-not-load areas, scaling prompt depth with risk instead of copying the whole project history into each delegation.
 - **PAT-V3-INTERNAL-LEGACY-001 — New shell over extracted brownfield engines** (validated/high)
   When a new UX is approved but the legacy system owns mature domain logic, keep one user-facing shell and progressively extract/reuse legacy engines behind it until transitional bridges can be removed.
 
@@ -112,6 +116,8 @@ Generated from 84 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Technical handoff reconciled the recovery report with live GitHub/Railway evidence, distinguishing core main from the V3 shell and identifying current architecture, migrations, runtime state, bugs and technical debt.
 - **SRC-INT-COMPILER-20261001 — DUTRA Intelligence Compiler specification** (active/high)
   User specification requiring project history to be compiled into the existing Second Brain, Skills, context routing, playbooks, incident prevention, prompts and tests instead of being left as chat-only documentation.
+- **SRC-PROMPT-ARCH-20261001 — DUTRA Prompt Architect specification and implementation** (implemented/high)
+  User-directed implementation adds a dedicated intent-to-mission layer that classifies prompt depth, routes minimal context and defines execution/acceptance contracts without duplicating Builder Brain or AIOX task packaging.
 - **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
 - **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
@@ -124,8 +130,6 @@ Generated from 84 records. Do not edit by hand; run `npm run og:brain:refresh`.
   CIC-01 consolidated explainable prioritization and next-action context around shared deterministic contracts, then passed final audit before closeout on PR #23 without introducing a second score, queue or agenda.
 - **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
-- **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
-  Open-source CRM studied as an engineering reference; patterns were extracted together with limitations and NOT CONFIRMED areas rather than copied wholesale.
 
 ## Retrieval workflow
 
