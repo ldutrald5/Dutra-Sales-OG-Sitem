@@ -208,6 +208,14 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Story:** `docs/stories/PLAYBOOK-01-sales-attack-card-v1.md`.
 - **Status:** em validação.
 
+## PLAYBOOK-02 — Abordagem Guiada V1
+
+- **Objetivo:** transformar a rota da Ficha de Ataque em abertura, perguntas, avanço desejado e check técnico antes do contato.
+- **Escopo:** somente leitura; regras determinísticas por rota; sem nova fonte de verdade, sem IA obrigatória e sem envio automático.
+- **Fonte:** `OG_LEAD_INTELLIGENCE.salesProfile()` + fatos já existentes no lead/operações.
+- **Story:** `docs/stories/PLAYBOOK-02-guided-approach-v1.md`.
+- **Status:** em validação.
+
 ## DIARY-01 — Diário Inteligente Revisável
 
 - **Objetivo:** transformar relato pós-contato ou transcrição em preview estruturado revisável, reduzindo atualização manual sem gravar inferências como fatos.
