@@ -155,3 +155,18 @@ Additional rules:
 - Do not commit third-party API keys, model files, recordings, cookies, browser profiles, or customer data.
 - Public-web automation must respect access controls, terms, rate limits, and privacy; do not use stealth/anti-detection to bypass enforcement.
 - Any third-party runtime dependency requires a concrete DUTRA OS use case, license/security review, pinned version, smoke test, and rollback path.
+
+
+## DUTRA Prompt architecture
+
+Quando o usuário pedir para transformar uma ideia, bug ou planejamento em prompt/especificação para outro agente:
+
+1. carregue `.codex/skills/dutra-prompt-architect/SKILL.md`;
+2. roteie o contexto por `docs/intelligence/CONTEXT_ROUTER.md`;
+3. use L0/L1/L2/L3 de forma proporcional ao risco;
+4. para L2/L3, inclua `CONTEXT_MANIFEST` com `required`, `conditional` e `do_not_load`;
+5. não cole toda a Base Mestra, Second Brain, `docs/` ou `knowledge/` “por garantia”;
+6. Prompt Architect não substitui Builder Brain, QA Guardian, Skills de domínio nem `SubagentPromptBuilder`;
+7. prompts reutilizáveis podem entrar em `docs/prompts/PROMPT_LIBRARY.md`; prompts temporários não precisam virar memória permanente.
+
+Rode `npm run og:prompt:test` quando alterar Prompt Architect, seus contratos ou o lint.
