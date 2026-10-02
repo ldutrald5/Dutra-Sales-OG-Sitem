@@ -1,20 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 60 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 90 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
-| anti_pattern | 6 |
-| cycle | 8 |
-| decision | 11 |
+| anti_pattern | 11 |
+| cycle | 9 |
+| decision | 12 |
 | experiment | 1 |
 | idea | 3 |
-| knowledge | 4 |
-| open_question | 2 |
-| pattern | 12 |
-| source | 13 |
+| incident | 8 |
+| knowledge | 9 |
+| open_question | 4 |
+| pattern | 17 |
+| source | 16 |
 
 ## Active decisions
 
@@ -40,11 +41,39 @@ Generated from 60 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Smart lists are projections of one state.leads base. Conversation state, commercial pipeline status, source/list and priority remain independent fields; deterministic scoring may order work but never changes commercial truth automatically.
 - **DEC-CIC01-001 — One deterministic score and shared commercial contracts** (active/high)
   All prioritization surfaces must delegate to the same deterministic score contract, and all next-action flows must use the same central mutation/normalization contracts instead of reimplementing weights, fallbacks or context rules per UI.
+- **DEC-INTEL-COMPILER-001 — Extend Builder Brain as the DUTRA operational knowledge layer** (active/high)
+  The existing Builder Brain remains the canonical durable evidence/decision layer; domain Skills stay thin and route to scoped context, stable domain guidance lives in existing knowledge/docs, dynamic account facts stay in CRM/runtime, and material bugs enter an incident collection with regression linkage.
 
 ## Open questions
 
 - **OQ-PKG02-001 — Package 02 operational auth bootstrap details** (open/medium)
   Exact bootstrap/session/organization-membership implementation details must be confirmed against the chosen Supabase project/environment before enabling auth paths.
+- **OQ-OG-TECH-001 — Which OG documents certify the current technical mappings** (open/high)
+  Current code contains operational support/equalizer/vehicle mappings, but the exact validated OG source set that certifies each mapping must be attached/indexed before those mappings can be promoted to Confirmada OG outside implementation behavior.
+- **OQ-INTEL-KCC-001 — Promote compiled domain knowledge into runtime Knowledge Command Center after review** (open/medium)
+  The new agent-facing Skills/playbooks/context are available to repository agents immediately, while live Sales Brain/KCC uses its private imported knowledge index; decide which reviewed stable domain records should be ingested into that runtime index without importing volatile CRM facts or unvalidated OG claims.
+
+## Open / active incidents
+
+- **INC-XLSX-REPAIR-001 — Excel repaired generated workbook structures** (active/medium)
+  A historical generated workbook opened with Excel recovery that removed an AutoFilter/table and a worksheet formula; the exact original serialization defect is not conclusively proven by recovered evidence.
+
+## Recent resolved incidents
+
+- **INC-V3-BLACK-001 — Historical V3 black screen and delayed first paint** (resolved/medium)
+  The earlier V3 preview could render a black screen or delay the shell; the durable lesson is that the primary interface must render before optional/heavy modules.
+- **INC-TECH-DATA-LOAD-001 — Historical technical configurator returned zero OG configurations** (resolved/medium)
+  A technical configurator showed zero configurations when its OG data dependency had not been loaded before initialization.
+- **INC-METRIC-CLOSE-001 — Historical close rate reached 48400 percent** (resolved/medium)
+  A historical close-rate calculation mixed sales from a broad CRM population with proposals from a narrower prospecting population, producing an impossible 48400 percent result.
+- **INC-PROSPECT-LIST-001 — Historical prospecting showed zero lists despite usable CRM views** (resolved/medium)
+  Prospecting became operationally empty when lists were treated as an isolated module instead of projections/collections over the CRM base.
+- **INC-SYNC-CONFLICT-001 — Silent revision conflict could overwrite local or remote work** (resolved/high)
+  Revision conflicts require preserved local/remote state and explicit review; silent merge/resend is prohibited.
+- **INC-CALLINT-AUDIO-001 — Call Intelligence real validation exposed audio and metric contract defects** (resolved/high)
+  Real Call Intelligence validation required signed audio uploads to use raw binary, truck quantities to be recognized correctly, duplicate objection inflation to be prevented and synthetic TEST sessions to be excluded from production dashboards.
+- **INC-WHISPER-DEPS-001 — Embedded faster-whisper fallback missed runtime dependency** (resolved/high)
+  The embedded local faster-whisper fallback required an explicit runtime dependency that was missing from the first deployment path.
 
 ## Candidate / planned ideas
 
@@ -81,9 +110,25 @@ Generated from 60 records. Do not edit by hand; run `npm run og:brain:refresh`.
   For a brownfield app that was local-only, add a dedicated hosted entrypoint that validates secrets before boot, binds provider PORT on 0.0.0.0, exposes a minimal unauthenticated healthcheck, routes persistent state to the provider volume and keeps production architecture boundaries explicit.
 - **PAT-CIC01-001 — Context-aware deterministic decision contract** (validated/high)
   Centralize deterministic decisions in one contract, make dependent context invalidation explicit, include relevant business context in cache keys, and exercise every alternate UI path through the same contract in regression tests.
+- **PAT-CONTEXT-ROUTING-001 — Route minimal context by task** (active/high)
+  Load a small core context plus the domain Skill/docs needed for the task instead of injecting the full project history into every agent invocation.
+- **PAT-BUG-LEARNING-001 — Bug to prevention to regression** (active/high)
+  A material bug is not fully closed when behavior is patched; capture symptom and root cause, derive a prevention rule, attach a regression test and preserve provenance in the incident store.
+- **PAT-SALES-STAGE-001 — Stage-aware commercial guidance** (active/high)
+  Select commercial objective, questions and next step from current relationship/pipeline context: gatekeeper seeks access, decision maker gets diagnosis, proposal gets blocker analysis, follow-up resumes commitments and customer/post-sale starts with experience.
+- **PAT-TECH-VALIDATION-001 — Technical uncertainty becomes a validation state** (active/high)
+  When technical evidence is insufficient or conflicting, preserve uncertainty as Precisa validar/Não determinada and route to manual validation rather than filling the gap from plausibility, code history or model inference.
+- **PAT-AUTOMATION-ESCAPE-001 — Automation with manual escape** (active/high)
+  Automation should accelerate common work while preserving review, edit, replace, add, remove, note and validate paths for real exceptions.
 
 ## Recent sources
 
+- **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
+  Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
+- **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
+  Live repository audit established GitHub main at f4c2b3c68d747b6477410ffff50521d8788f8d62 as the current canonical code line and identified the existing Builder Brain, context manifests, knowledge services, current tests and newer Call Intelligence/Whisper implementation.
+- **SRC-CALLINT-20261001-001 — Call Intelligence and local Whisper production hardening commits** (implemented/high)
+  Main commit chain 39be4d18 → 445ac095 → d631ef29 → af5469eb → f4c2b3c6 hardened signed audio upload, fact extraction, production metric hygiene and the local faster-whisper fallback, then added an opt-in production end-to-end self-test.
 - **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
 - **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
@@ -98,25 +143,22 @@ Generated from 60 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
 - **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
   Open-source CRM studied as an engineering reference; patterns were extracted together with limitations and NOT CONFIRMED areas rather than copied wholesale.
-- **SRC-GAP-001 — DUTRA OS × DeskcommCRM gap analysis** (validated/high)
-  Capability-by-capability comparison used to separate useful patterns from unnecessary complexity.
-- **SRC-ARCH-V1-001 — DUTRA OS Architecture V1** (active/high)
-  Approved architectural direction: evolve incrementally, use canonical relational truth and individual identity while preserving differentiated commercial UX/intelligence.
-- **SRC-PLAN-001 — DUTRA OS Master Implementation Plan** (active/high)
-  Turns Architecture V1 into small reversible packages across Foundation and Commercial Product tracks.
 
 ## Retrieval workflow
 
 1. Start here.
-2. Search by ID/tag in the relevant JSONL collection.
-3. Follow `source_ids`, `derived_from`, and `supersedes` for provenance.
-4. Load only the records needed for the task.
+2. Use `CONTEXT_ROUTER.md` to select the smallest relevant domain context.
+3. Search by ID/tag in the relevant JSONL collection.
+4. Follow `source_ids`, `derived_from`, and `supersedes` for provenance.
+5. Load only the records needed for the task.
 
 ## Relationship model
 
 ```mermaid
 flowchart LR
   S[Source] --> K[Knowledge / Pattern]
+  S --> N[Incident]
+  N --> K
   K --> I[Idea / Open Question]
   K --> D[Decision]
   I --> E[Experiment]

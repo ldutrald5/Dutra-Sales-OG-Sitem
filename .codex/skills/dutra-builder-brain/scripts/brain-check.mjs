@@ -12,6 +12,7 @@ const specs = {
   'experiments.jsonl': { type: 'experiment', extra: ['hypothesis'] },
   'open-questions.jsonl': { type: 'open_question', extra: ['decision_impact'] },
   'anti-patterns.jsonl': { type: 'anti_pattern', extra: ['risk'] },
+  'incidents.jsonl': { type: 'incident', extra: ['symptom','root_cause','resolution','prevention','regression_test'] },
   'cycles.jsonl': { type: 'cycle', extra: ['scope_class','brain_available','brain_consulted','brain_updated','outcome','started_at','completed_at'] },
 };
 const allowedConfidence = new Set(['low','medium','high']);

@@ -2,6 +2,8 @@
 
 ## Uso deste arquivo
 
+As regras de validação e fallback técnico estão em `knowledge/OG-TECH-RULES.md`. Este arquivo continua reservado a afirmações oficiais/rastreáveis de produto.
+
 Registrar somente informações oficiais e rastreáveis sobre produtos Olho de Gato. Cada entrada deve informar fonte, data de verificação e responsável pela validação.
 
 ## Catálogo e aplicações

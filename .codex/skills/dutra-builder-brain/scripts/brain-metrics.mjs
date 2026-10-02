@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.argv[2] || path.resolve(process.cwd(),'docs/second-brain');
 const read=(f)=>fs.existsSync(path.join(root,f))?fs.readFileSync(path.join(root,f),'utf8').split(/\r?\n/).filter(Boolean).map(JSON.parse):[];
-const cycles=read('cycles.jsonl'); const ideas=read('ideas.jsonl'); const decisions=read('decisions.jsonl'); const exps=read('experiments.jsonl'); const oq=read('open-questions.jsonl'); const sources=read('sources.jsonl');
+const cycles=read('cycles.jsonl'); const ideas=read('ideas.jsonl'); const decisions=read('decisions.jsonl'); const exps=read('experiments.jsonl'); const oq=read('open-questions.jsonl'); const sources=read('sources.jsonl'); const incidents=read('incidents.jsonl');
 const tracked=cycles.filter(c=>c.brain_available && ['STANDARD','STRUCTURAL'].includes(c.scope_class));
 const pct=(n,d)=>d?`${Math.round(n/d*100)}%`:'n/a';
 const consulted=tracked.filter(c=>c.brain_consulted).length;
@@ -12,6 +12,8 @@ const discarded=cycles.reduce((s,c)=>s+(Number(c.discarded_ideas)||0),0) + ideas
 const superseded=decisions.filter(d=>['superseded','deprecated'].includes(d.status)).length;
 const completedExp=exps.filter(e=>['completed','implemented','validated'].includes(e.status)).length;
 const resolved=oq.filter(q=>q.status==='resolved').length;
+const resolvedIncidents=incidents.filter(i=>i.status==='resolved').length;
+const activeIncidents=incidents.filter(i=>['active','open'].includes(i.status)).length;
 const blocked=cycles.filter(c=>c.gate_blocked===true).length;
 const durations=tracked.map(c=>(Date.parse(c.completed_at)-Date.parse(c.started_at))/3600000).filter(x=>Number.isFinite(x)&&x>=0).sort((a,b)=>a-b);
 const median=durations.length ? (durations.length%2?durations[(durations.length-1)/2]:(durations[durations.length/2-1]+durations[durations.length/2])/2) : null;
@@ -26,6 +28,8 @@ const md=[
 `| Decisions superseded/deprecated | ${superseded} |`,
 `| Experiments completed/implemented | ${completedExp}/${exps.length} |`,
 `| Open questions resolved | ${resolved}/${oq.length} |`,
+`| Incidents resolved | ${resolvedIncidents}/${incidents.length} |`,
+`| Open/active incidents | ${activeIncidents} |`,
 `| Correctly blocked cycles/releases recorded | ${blocked} |`,
 `| Median tracked cycle time | ${median===null?'n/a':median.toFixed(1)+' h'} |`,
 `| Sources in brain | ${sources.length} |`,
@@ -33,6 +37,7 @@ const md=[
 '## Interpretation','',
 '- **Consultation rate** answers whether the brain is actually used before material decisions.',
 '- **Update completion** answers whether new learning returns to the brain after work.',
+'- **Incident resolution** is useful only when prevention and regression coverage are also recorded.',
 '- **Rejected/deferred-before-code** is a waste-prevention signal, not a failure count.',
 '- **Superseded decisions** should include rationale/provenance; reversals are expected when evidence changes.',
 '- **Blocked gates** are positive when they prevent uncertified releases.',
