@@ -235,3 +235,15 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Validação:** GitHub Actions Package 00R CI run 398 passou a suíte completa, DUTRA Intelligence regression, Brain check (84 registros/0 warnings), Security e Release Gate em Node 24.21.0/npm 11.19.0.
 - **Limites:** não congelou clientes/propostas atuais nas Skills; não ativou Supabase; não alterou motores de negócio; não mesclou na `main`.
 
+
+
+## DPA-01 — DUTRA Prompt Architect V1
+
+- **Data:** 2026-10-01.
+- **Mudança observável:** o projeto passa a possuir uma camada dedicada que transforma uma intenção de Lucas em Execution Prompt L0–L3, com Context Manifest, estado atual/alvo, escopo, reuso, guardrails, aceite e testes.
+- **Arquitetura:** Prompt Architect compila a missão; Context Router escolhe contexto; Builder Brain governa evidência/aprendizado; Skills de domínio executam; QA Guardian valida; `SubagentPromptBuilder` continua empacotando agent/task/checklists AIOX.
+- **Economia de contexto:** referências por caminho/ID, `required/conditional/do_not_load`, progressive disclosure e proibição de carregar Base Mestra/docs inteiros sem necessidade.
+- **Proteção:** `scripts/prompt-lint.mjs` verifica estrutura por nível, possíveis secrets, placeholders, contexto excessivo e tamanho aproximado; `og:prompt:test` cobre L0/L1/L2/L3.
+- **Inteligência:** Prompt Library, ADR, Context Router, AGENTS, Knowledge Changelog e Second Brain foram atualizados sem criar outra memória.
+- **Validação:** GitHub Actions **Package 00R CI run 401 — success** no PR #103; suíte completa, Brain, Security, npm audit e Release Gate passaram.
+- **Limites:** não altera código de negócio do Sistema OG, não faz deploy e não realiza merge na `main`.
