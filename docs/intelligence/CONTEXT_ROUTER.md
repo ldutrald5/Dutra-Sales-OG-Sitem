@@ -8,6 +8,7 @@ Sempre leia `AGENTS.md`. Para trabalho STANDARD/STRUCTURAL, consulte também `do
 
 | Tarefa | Skills | Contexto primário | Complementos |
 |---|---|---|---|
+| geração de prompt/spec/plano de execução | dutra-prompt-architect + skill de domínio | `docs/prompts/architect/PROMPT-ARCHITECTURE.md`, `docs/prompts/architect/PROMPT-TYPES.md` | Builder Brain/BUGBOOK/ADR somente se mudarem a decisão |
 | visão/priorização de produto | dutra-core + dutra-product | `docs/00-VISAO-SISTEMA.md`, `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`, `docs/10-ROADMAP.md` | decisões ativas |
 | bug/regressão | dutra-core + dutra-dev + dutra-qa-guardian | `docs/incidents/BUGBOOK.md`, código e testes do módulo | decisões/anti-patterns relacionados |
 | arquitetura/refatoração | dutra-core + dutra-dev + dutra-minimal-change | `docs/01-ARQUITETURA.md`, `docs/architecture/DUTRA_INTELLIGENCE_DECISIONS.md` | Builder Brain |
@@ -46,3 +47,8 @@ Antes de criar ou reescrever:
 7. carregar apenas os arquivos afetados.
 
 Se a resposta a “já existe algo equivalente?” for desconhecida, a implementação ainda não deve começar.
+
+
+## Regra para geração de prompts
+
+Prompt Architect é camada de missão, não uma segunda memória. Ele usa este router para carregar contexto mínimo e referencia as fontes canônicas; não copia o projeto inteiro para cada delegação.

@@ -200,3 +200,13 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Pendência para conclusão:** executar CASO 1 e CASO 2 da story em navegador autenticado real, incluindo desligar rede, editar, reconectar e reload.
 - **Branch:** `dutra-os-ui-v3-premium`; não mergear na `main` sem aprovação explícita.
 - **Status:** em andamento.
+
+
+## DPA-01 — DUTRA Prompt Architect V1
+
+- **Objetivo:** transformar intenção natural em missão executável com contexto mínimo, escopo, critérios de aceite e testes, sem duplicar Builder Brain/Context Router/AIOX.
+- **Escopo:** Skill Codex/Claude, L0–L3, Context Manifest, token economy, guardrails, prompt lint, regression test e integração com Intelligence Compiler/Second Brain.
+- **Arquivos relevantes:** `.codex/skills/dutra-prompt-architect/`, `.claude/skills/dutra-prompt-architect/`, `docs/prompts/architect/`, `scripts/prompt-lint.mjs`, `scripts/test_prompt_architect.mjs`.
+- **Critério de aceite:** prompt proporcional ao risco, contexto seletivo, ausência de secrets, integração com roteamento existente e gates verdes.
+- **Dependências:** INT-01 / Builder Brain / Context Router.
+- **Status:** concluída em 2026-10-01; evidência em `tasks/DONE.md`, story DPA-01 e PR #103.
