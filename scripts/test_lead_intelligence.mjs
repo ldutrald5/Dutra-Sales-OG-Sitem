@@ -122,4 +122,26 @@ assert.equal(profileCustomer.fleet.id,'50_plus');
 const profileErp=intelligence.salesProfile({id:'P-ERP',status:'novo',nextAction:'Conferir ERP antes de abordar'},{activityEvents:[]});
 assert.equal(profileErp.route.id,'erp_review','pendência de ERP deve bloquear a rota comercial normal');
 
+const approachFirst=intelligence.approachGuide({id:'A-NEW',segmentId:'transportadora',fleetSize:0},{activityEvents:[]});
+assert.equal(approachFirst.routeId,'first_contact');
+assert.match(approachFirst.opening,/duas perguntas rápidas sobre a frota/,'primeiro contato precisa abrir com permissão e diagnóstico');
+assert.ok(approachFirst.technicalPrep.some(item=>/marca, modelo e configuração/i.test(item)),'primeiro contato deve pedir contexto técnico antes de recomendar');
+
+const approachFleet=intelligence.approachGuide({id:'A-FLEET',segmentId:'transportadora',fleetSize:30},{activityEvents:[]});
+assert.match(approachFleet.cta,/simulação em cima da frota real/i,'frota maior deve levar a simulação real em vez de pitch genérico');
+
+const approachProposal=intelligence.approachGuide({id:'A-PROP',conversationStage:'proposal',status:'proposta_enviada'},{activityEvents:[]});
+assert.equal(approachProposal.routeId,'proposal_followup');
+assert.match(approachProposal.opening,/o que precisa acontecer para a decisão avançar/i);
+assert.ok(approachProposal.technicalPrep.some(item=>/desconto/i.test(item)),'follow-up de proposta não deve saltar direto para desconto');
+
+const approachCustomer=intelligence.approachGuide({id:'A-CUST',status:'fechado',conversationStage:'customer'},{activityEvents:[]});
+assert.equal(approachCustomer.routeId,'post_sale');
+assert.match(approachCustomer.opening,/experiência com o que já foi instalado/i);
+assert.ok(approachCustomer.technicalPrep.some(item=>/indicação/i.test(item)),'pós-venda deve validar experiência antes de indicação');
+
+const approachErp=intelligence.approachGuide({id:'A-ERP',nextAction:'Conferir ERP antes de abordar'},{activityEvents:[]});
+assert.equal(approachErp.routeId,'erp_review');
+assert.match(approachErp.opening,/Não abordar ainda/i,'ERP pendente deve bloquear abordagem comercial');
+
 console.log('Lead intelligence tests: PASS');
