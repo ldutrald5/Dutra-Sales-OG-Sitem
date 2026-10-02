@@ -1,8 +1,10 @@
 # DUTRA INTELLIGENCE IMPLEMENTATION REPORT
 
-Branch: `feat/dutra-intelligence-compiler-v1`
-Base: current GitHub `main` audited at `f4c2b3c68d747b6477410ffff50521d8788f8d62`.
-Production/main status: **not merged, not deployed by this package**.
+Original implementation branch: `feat/dutra-intelligence-compiler-v1`
+Initial audited base: `f4c2b3c68d747b6477410ffff50521d8788f8d62`.
+Merge: **PR #104 → main as `72354a1f04d6fdd5584fe876ec4b09bb050a312a`**.
+Validation: **PR CI and post-merge main CI passed on Node 24**.
+Railway: the live application was checked after merge and still served the earlier runtime SHA `f4c2b3c68d747b6477410ffff50521d8788f8d62`; this knowledge package did not force a production redeploy because it changed agent/docs/tests, not customer runtime behavior.
 
 ## 1. O QUE FOI ANALISADO
 
@@ -51,7 +53,7 @@ Production/main status: **not merged, not deployed by this package**.
 
 ## 8. BUGS TRANSFORMADOS EM REGRESSÃO
 
-Incident store added with 8 records covering historical V3 first-paint, technical data load, close-rate population bug, CRM/list isolation, sync conflict, XLSX repair, current Call Intelligence audio/metric contract defects and Whisper runtime dependency.
+Incident store now covers historical V3 first-paint, technical data load, close-rate population bug, CRM/list isolation, sync conflict, XLSX repair, Call Intelligence audio/metric defects, Whisper runtime dependency and the live Supabase versioning drift discovered during technical recovery.
 
 ## 9. ANTI-PATTERNS
 
@@ -82,7 +84,14 @@ Added protection against parallel knowledge memories, volatile CRM facts in glob
 - added the intelligence test to `scripts/validate.mjs`;
 - Builder Brain checker/index/metrics now understand incidents.
 
-Validation executed in this package: connector-side contract simulation **PASS**; Second Brain JSON/referential-integrity simulation **PASS** (90 records); generated index/metrics refreshed. Full local `npm test` / CI **NOT RUN** because the current repository checkout was not available in the execution container and no workflow run was triggered for this branch. No PASS is claimed for tests not executed.
+Validation evidence:
+- connector-side contract/referential-integrity checks: **PASS**;
+- PR #104 Package 00R CI #404: **PASS** on Node 24;
+- PR #104 Sales Execution P0 #24: **PASS**;
+- PR #104 Call Intelligence V1 #22: **PASS**;
+- post-merge `main` Package 00R CI #405: **PASS**.
+
+The local execution container remained on Node 22, so local unsupported-runtime results are not used as release evidence.
 
 ## 14. ARQUIVOS ALTERADOS
 
@@ -100,7 +109,7 @@ See branch diff against `main`. Main groups: `.codex/skills/`, `docs/second-brai
 
 ## 16. COMO O SISTEMA VAI USAR ESSE CONHECIMENTO
 
-`AGENTS.md` and `AI_HANDOFF.md` now require Context Router + relevant Skill/preflight for material work. The Builder Brain stores provenance/decisions/incidents. Domain Skills load scoped docs rather than copied master history. Knowledge regression is part of `validate` once this branch is run/merged.
+`AGENTS.md` and `AI_HANDOFF.md` now require Context Router + relevant Skill/preflight for material work. The Builder Brain stores provenance/decisions/incidents. Domain Skills load scoped docs rather than copied master history. Knowledge regression is part of `validate` on `main` and was exercised successfully by CI.
 
 ## 17. O QUE AINDA ESTÁ FORA DA BASE
 
@@ -112,4 +121,6 @@ See branch diff against `main`. Main groups: `.codex/skills/`, `docs/second-brai
 
 ## 18. PRÓXIMA EVOLUÇÃO RECOMENDADA
 
-Run the full supported Node 24/npm 11 validation suite on this branch, inspect failures, then review the diff before PR/merge. After that, perform a small KCC ingestion pilot using only approved stable sales/technical guardrails; do not ingest volatile CRM facts or unvalidated OG mappings.
+1. Keep the Intelligence Compiler on `main` as the agent/project knowledge layer.
+2. Resolve `INC-SUPABASE-DRIFT-001` before further structural backend expansion so the live Supabase project becomes reproducible from Git.
+3. After explicit review, run a small KCC ingestion pilot using only stable approved sales/technical guardrails; never ingest volatile CRM facts or unvalidated OG mappings.

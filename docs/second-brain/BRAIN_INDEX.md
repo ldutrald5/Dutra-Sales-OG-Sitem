@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 90 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
-| anti_pattern | 11 |
+| anti_pattern | 12 |
 | cycle | 9 |
 | decision | 12 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 8 |
+| incident | 9 |
 | knowledge | 9 |
-| open_question | 4 |
+| open_question | 5 |
 | pattern | 17 |
-| source | 16 |
+| source | 18 |
 
 ## Active decisions
 
@@ -52,11 +52,15 @@ Generated from 90 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Current code contains operational support/equalizer/vehicle mappings, but the exact validated OG source set that certifies each mapping must be attached/indexed before those mappings can be promoted to Confirmada OG outside implementation behavior.
 - **OQ-INTEL-KCC-001 — Promote compiled domain knowledge into runtime Knowledge Command Center after review** (open/medium)
   The new agent-facing Skills/playbooks/context are available to repository agents immediately, while live Sales Brain/KCC uses its private imported knowledge index; decide which reviewed stable domain records should be ingested into that runtime index without importing volatile CRM facts or unvalidated OG claims.
+- **OQ-SUPABASE-VERSIONING-001 — How to reconstruct and freeze the current Supabase backend as reproducible Git history** (open/high)
+  Choose and execute a controlled method to reconcile the 25 live migrations and 13 active Edge Functions with the partial repository history before expanding the normalized backend.
 
 ## Open / active incidents
 
 - **INC-XLSX-REPAIR-001 — Excel repaired generated workbook structures** (active/medium)
   A historical generated workbook opened with Excel recovery that removed an AutoFilter/table and a worksheet formula; the exact original serialization defect is not conclusively proven by recovered evidence.
+- **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (open/high)
+  The live Supabase backend contains structural state that cannot currently be reconstructed from the Git repository alone.
 
 ## Recent resolved incidents
 
@@ -129,6 +133,10 @@ Generated from 90 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Live repository audit established GitHub main at f4c2b3c68d747b6477410ffff50521d8788f8d62 as the current canonical code line and identified the existing Builder Brain, context manifests, knowledge services, current tests and newer Call Intelligence/Whisper implementation.
 - **SRC-CALLINT-20261001-001 — Call Intelligence and local Whisper production hardening commits** (implemented/high)
   Main commit chain 39be4d18 → 445ac095 → d631ef29 → af5469eb → f4c2b3c6 hardened signed audio upload, fact extraction, production metric hygiene and the local faster-whisper fallback, then added an opt-in production end-to-end self-test.
+- **SRC-TECH-HANDOFF-20261001-001 — Live GitHub/Railway/Supabase technical recovery audit** (validated/high)
+  Live audit verified GitHub main and Railway production alignment before the Intelligence Compiler merge, persistent Railway volume /data, PWA cache v67, an active hybrid Supabase/Postgres backend, and a reproducibility gap: the remote Supabase project had 25 applied migrations and 13 active Edge Functions while the repository versioned only 4 migration files and 2 Edge Function sources.
+- **SRC-INTEL-CLOSEOUT-001 — DUTRA Intelligence Compiler V1 PR and CI closeout** (implemented/high)
+  PR #104 merged the Intelligence Compiler V1 to main as commit 72354a1f04d6fdd5584fe876ec4b09bb050a312a after PR workflows Package 00R CI #404, Sales Execution P0 #24 and Call Intelligence V1 #22 passed; main Package 00R CI #405 also passed after merge.
 - **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
   Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
 - **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
@@ -139,10 +147,6 @@ Generated from 90 records. Do not edit by hand; run `npm run og:brain:refresh`.
   OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
 - **SRC-CIC01-001 — CIC-01 Next Best Action + Score Explicável closeout** (implemented/high)
   CIC-01 consolidated explainable prioritization and next-action context around shared deterministic contracts, then passed final audit before closeout on PR #23 without introducing a second score, queue or agenda.
-- **SRC-DUTRA-AUDIT-001 — DUTRA OS technical audit** (validated/high)
-  Audit of the actual DUTRA OS code/data paths used to establish current-state risks and assets before architecture work.
-- **SRC-DESKCOMM-REV-001 — DeskcommCRM reverse engineering** (validated/high)
-  Open-source CRM studied as an engineering reference; patterns were extracted together with limitations and NOT CONFIRMED areas rather than copied wholesale.
 
 ## Retrieval workflow
 

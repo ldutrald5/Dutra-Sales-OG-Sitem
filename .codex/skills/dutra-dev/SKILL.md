@@ -24,11 +24,12 @@ For live hosted state also load `.codex/skills/dutra-runtime-operator/SKILL.md` 
 1. Search existing code/service/contract first.
 2. Check active ADR/decision and historical incident.
 3. Identify canonical data owner and rollback.
-4. Implement the smallest reversible change.
-5. Reuse existing contracts instead of parallel logic.
-6. Add/extend a regression test.
-7. Run relevant tests; never report NOT RUN as PASS.
-8. Return durable learning to the Second Brain when material.
+4. For Supabase/schema/Edge Function work, compare the live project inventory with versioned `supabase/migrations/` and `supabase/functions/` before changing structure.
+5. Implement the smallest reversible change.
+6. Reuse existing contracts instead of parallel logic.
+7. Add/extend a regression test.
+8. Run relevant tests; never report NOT RUN as PASS.
+9. Return durable learning to the Second Brain when material.
 
 ## Guardrails
 - Keep vanilla JS unless evidence justifies a framework change.
@@ -36,6 +37,7 @@ For live hosted state also load `.codex/skills/dutra-runtime-operator/SKILL.md` 
 - No silent conflict overwrite.
 - No secret in browser persistent storage or docs.
 - Do not rewrite mature behavior solely because a newer UI exists.
+- Do not treat live-only Supabase migrations/functions as a reproducible release; preserve schema/function source in Git and record intentional drift.
 
 ## Output
 BEFORE / AFTER / WHY / FILES / RISK / VALIDATION / ROLLBACK.
