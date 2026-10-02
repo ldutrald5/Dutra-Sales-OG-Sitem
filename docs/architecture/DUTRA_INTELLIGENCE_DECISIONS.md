@@ -62,3 +62,13 @@ Formato ADR compacto. Decisões duráveis também devem possuir registro corresp
 **CONTEXTO:** fechamento chegou a 48400% por misturar vendas históricas e propostas filtradas.  
 **DECISÃO:** numerador e denominador devem compartilhar população, filtro e atribuição compatíveis.  
 **CONSEQUÊNCIA:** regressões de taxa precisam falhar em teste.
+
+
+## ADR-INT-003 — Prompt Architect é camada de missão, não novo Builder
+
+**DATA:** 2026-10-01  
+**STATUS:** ACCEPTED  
+**CONTEXTO:** Builder Brain governa método/evidência/aprendizado, Context Router decide o que carregar e `SubagentPromptBuilder` empacota definições AIOX. Faltava uma camada explícita para converter a intenção atual do usuário em missão delegável, proporcional e testável.  
+**DECISÃO:** criar `dutra-prompt-architect` para classificar tipo e nível L0–L3, recuperar contexto mínimo, definir `CURRENT_STATE → TARGET_STATE`, escopo, guardrails, critérios de aceite e testes. Não cria memória paralela, não duplica agentes/tasks AIOX e não executa a feature por padrão quando a solicitação é apenas gerar a missão.  
+**MOTIVO:** reduzir ambiguidade e desperdício de tokens sem perder decisões históricas que realmente mudam a implementação.  
+**CONSEQUÊNCIA:** delegações relevantes passam a usar Context Manifest e profundidade proporcional; prompts reutilizáveis podem ser registrados, enquanto one-offs permanecem efêmeros.
