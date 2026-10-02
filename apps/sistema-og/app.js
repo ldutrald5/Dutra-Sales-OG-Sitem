@@ -4331,6 +4331,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const segment = (OG_DATA.segments || []).find(item => item.id === lead.segmentId);
     const status = (OG_DATA.leadStatuses || []).find(item => item.id === lead.status);
     const salesProfile = OG_LEAD_INTELLIGENCE.salesProfile(lead, state.operations);
+    const approach = OG_LEAD_INTELLIGENCE.approachGuide(lead, state.operations);
     const profile = [segment?.name || lead.segmentId || 'Segmento não definido', salesProfile.fleet.label].join(' · ');
     const moment = [salesProfile.route.label, conversation?.label || 'Situação não definida'].join(' · ');
     const relationship = salesProfile.knowledge.label;
@@ -4357,6 +4358,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         <div class="client-sheet-attack-prep">
           <small>PREPARAR / DESCOBRIR</small>
           <span>${prepItems.map(item => escapeHtml(item)).join(' · ')}</span>
+        </div>
+        <div class="client-sheet-attack-script">
+          <div>
+            <small>ABERTURA SUGERIDA</small>
+            <strong>${escapeHtml(approach.opening)}</strong>
+          </div>
+          <div>
+            <small>COMO AVANÇAR</small>
+            <strong>${escapeHtml(approach.cta)}</strong>
+          </div>
+        </div>
+        <div class="client-sheet-attack-tech">
+          <small>CHECK TÉCNICO ANTES DE FALAR</small>
+          <ul>${approach.technicalPrep.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
         </div>
         <div class="client-sheet-attack-lists">
           <div><small>PERGUNTAS PARA DESCOBRIR</small><ol>${questions.map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>Nenhuma lacuna crítica detectada.</li>'}</ol></div>

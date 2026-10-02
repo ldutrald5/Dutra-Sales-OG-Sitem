@@ -220,6 +220,70 @@
     });
   }
 
+  function approachGuide(lead = {}, operations = {}) {
+    const profile = salesProfile(lead, operations);
+    const largeFleet = profile.fleet.count >= 10;
+    const guides = {
+      erp_review: {
+        opening:'Não abordar ainda: valide primeiro os dados pendentes no ERP.',
+        questions:['O registro e o cliente estão corretos?','Pedido, valor e configuração conferem?','Existe alguma informação que ainda precisa ser validada antes do contato?'],
+        cta:'Liberar a conta para abordagem somente depois da conferência.',
+        technicalPrep:['Conferir identidade do cadastro e pedido no ERP.','Não citar valor, peça ou configuração duvidosa.','Registrar o que foi confirmado antes de ligar.']
+      },
+      first_contact: {
+        opening:'Olá, aqui é o Lucas, da Olho de Gato. Posso te fazer duas perguntas rápidas sobre a frota?',
+        questions:['Como vocês controlam hoje pressão e desgaste dos pneus?','Quem responde por frota ou manutenção?','Qual tipo de veículo ou conjunto roda mais na operação?'],
+        cta:largeFleet ? 'Se fizer sentido, montar uma simulação em cima da frota real e combinar uma conversa rápida.' : 'Conquistar permissão para levantar a frota e definir o próximo passo.',
+        technicalPrep:['Descobrir marca, modelo e configuração antes de recomendar aplicação.','Levantar quantidade de veículos e tipo de conjunto.','Não indicar suporte, PSI ou economia sem dados suficientes.']
+      },
+      relationship: {
+        opening:'Quero retomar de onde vocês pararam com a Olho de Gato, sem repetir apresentação que talvez você já conheça.',
+        questions:['O que você chegou a conhecer ou avaliar da solução?','O que impediu o avanço naquela época?','O que mudou na frota ou na prioridade desde então?'],
+        cta:'Sair da conversa com um bloqueio real identificado e um próximo passo combinado.',
+        technicalPrep:['Reabrir o histórico antes de ligar.','Confirmar se a frota/configuração continua a mesma.','Separar fato registrado de hipótese antes de falar de aplicação.']
+      },
+      follow_up: {
+        opening:'Estou retomando exatamente do ponto que combinamos.',
+        questions:['O que mudou desde o último contato?','Conseguiu validar internamente?','Existe algum bloqueio novo?'],
+        cta:'Definir avanço, objeção concreta ou nova data de decisão.',
+        technicalPrep:['Revisar a última ação prometida e a data combinada.','Levar somente material que responda ao bloqueio atual.','Não reiniciar a venda do zero.']
+      },
+      diagnosis: {
+        opening:'Você demonstrou interesse e eu quero entender melhor a operação antes de te passar uma solução.',
+        questions:['Onde hoje o pneu mais pesa na operação?','Como vocês fazem calibragem e acompanham desgaste?','Quais veículos fariam mais sentido avaliar primeiro?'],
+        cta:largeFleet ? 'Transformar o interesse em levantamento de frota e simulação real.' : 'Fechar o diagnóstico mínimo para dimensionar uma aplicação.',
+        technicalPrep:['Levantar veículo, eixos, uso e pressão antes da cotação.','Identificar quem valida a parte técnica.','Não transformar interesse em proposta genérica sem diagnóstico.']
+      },
+      proposal_followup: {
+        opening:'Quero revisar o que ficou pendente na proposta e entender o que precisa acontecer para a decisão avançar.',
+        questions:['O bloqueio é técnico, financeiro ou de timing?','Quem mais precisa aprovar?','Qual condição destrava o próximo passo?'],
+        cta:'Sair com decisão, objeção concreta ou compromisso de próximo passo com data.',
+        technicalPrep:['Abrir a última proposta e a configuração usada.','Revalidar a frota se houver chance de mudança.','Não oferecer desconto antes de entender o bloqueio.']
+      },
+      customer_reactivation: {
+        opening:'Como vocês já são clientes, quero primeiro entender como está a operação hoje e o que mudou desde a última compra.',
+        questions:['O que foi instalado continua atendendo bem?','Entraram veículos novos ou houve mudança de configuração?','Existe reposição, expansão ou algum problema pendente?'],
+        cta:'Recuperar contexto real da conta antes de falar em nova venda.',
+        technicalPrep:['Confirmar o que já foi instalado.','Checar reposições ou ocorrências abertas.','Não tratar cliente existente como lead frio.']
+      },
+      post_sale: {
+        opening:'Quero entender como está a experiência com o que já foi instalado e se mudou algo na frota.',
+        questions:['Como está performando?','Entraram veículos novos?','Existe reposição pendente ou oportunidade de expansão?'],
+        cta:'Registrar experiência, resolver pendência e só então avaliar expansão ou indicação.',
+        technicalPrep:['Revisar itens/aplicações já instalados.','Levantar veículos novos e reposições.','Não pedir indicação antes de validar a experiência do cliente.']
+      }
+    };
+    const guide = guides[profile.route.id] || guides.first_contact;
+    return Object.freeze({
+      routeId:profile.route.id,
+      routeLabel:profile.route.label,
+      opening:guide.opening,
+      questions:Object.freeze(guide.questions.slice()),
+      cta:guide.cta,
+      technicalPrep:Object.freeze(guide.technicalPrep.slice())
+    });
+  }
+
   function matchesCrmView(lead = {}, viewId = 'all') {
     const id = clean(viewId || 'all');
     if (id === 'all') return true;
@@ -379,6 +443,7 @@
     proposalEventEvidence,
     fleetProfile,
     salesProfile,
+    approachGuide,
     matchesCrmView,
     crmViewDefinition,
     summarizeCrmViews,

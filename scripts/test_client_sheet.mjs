@@ -113,7 +113,13 @@ assert.match(app,/ROTA \/ MOMENTO/,'Ficha de Ataque deve mostrar a rota comercia
 assert.match(app,/RELAÇÃO OG/,'Ficha de Ataque deve separar relação confirmada de suposição de conhecimento');
 assert.match(app,/PERGUNTAS PARA DESCOBRIR/,'Ficha de Ataque deve expor perguntas de diagnóstico');
 assert.match(app,/NÃO DIGA AINDA/,'Ficha de Ataque deve expor guardrails');
+assert.match(app,/OG_LEAD_INTELLIGENCE\.approachGuide\(lead, state\.operations\)/,'Ficha de Ataque deve reutilizar a rota comercial para guiar a abordagem');
+assert.match(app,/ABERTURA SUGERIDA/,'Ficha de Ataque deve mostrar uma abertura contextual');
+assert.match(app,/COMO AVANÇAR/,'Ficha de Ataque deve mostrar o avanço desejado');
+assert.match(app,/CHECK TÉCNICO ANTES DE FALAR/,'Ficha de Ataque deve preparar a conversa técnica sem inventar aplicação');
 assert.match(css,/\.client-sheet-attack-card/,'estilos da Ficha de Ataque ausentes');
+assert.match(css,/\.client-sheet-attack-script/,'estilo do guia de abordagem ausente');
+assert.match(css,/client-sheet-panel:not\(\.mobile-expanded\) \.client-sheet-attack-tech/,'mobile deve esconder o check técnico até expansão');
 assert.match(css,/client-sheet-panel:not\(\.mobile-expanded\) \.client-sheet-attack-lists/,'mobile deve manter a primeira camada compacta');
 
 
