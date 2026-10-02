@@ -33,16 +33,17 @@ assert.match(router, /Stable knowledge vs dynamic data/i);
 assert.match(router, /Mandatory pre-flight/i);
 assert.match(router, /technical application[\s\S]*dutra-og-tech/i);
 assert.match(router, /bug \/ regression \/ incident[\s\S]*dutra-qa-guardian/i);
+assert.match(router, /Supabase \/ schema \/ Edge Functions[\s\S]*INC-SUPABASE-DRIFT-001/i);
 
 const incidents = jsonl('docs/second-brain/incidents.jsonl');
-assert.ok(incidents.length >= 8, 'Recovered material incidents should be durable records');
+assert.ok(incidents.length >= 9, 'Recovered material incidents should be durable records');
 for (const item of incidents) {
   assert.equal(item.type, 'incident');
   for (const field of ['id','title','symptom','root_cause','resolution','prevention','regression_test']) {
     assert.ok(String(item[field] || '').trim(), `${item.id || 'incident'} missing ${field}`);
   }
 }
-for (const id of ['INC-V3-BLACK-001','INC-METRIC-CLOSE-001','INC-SYNC-CONFLICT-001','INC-XLSX-REPAIR-001','INC-CALLINT-AUDIO-001','INC-WHISPER-DEPS-001']) {
+for (const id of ['INC-V3-BLACK-001','INC-METRIC-CLOSE-001','INC-SYNC-CONFLICT-001','INC-XLSX-REPAIR-001','INC-CALLINT-AUDIO-001','INC-WHISPER-DEPS-001','INC-SUPABASE-DRIFT-001']) {
   assert.ok(incidents.some((item) => item.id === id), `Missing incident ${id}`);
 }
 
@@ -70,9 +71,12 @@ const decisions = jsonl('docs/second-brain/decisions.jsonl');
 assert.ok(decisions.some((item) => item.id === 'DEC-INTEL-COMPILER-001' && item.status === 'active'));
 
 const anti = jsonl('docs/second-brain/anti-patterns.jsonl');
-for (const id of ['ANTI-INTEL-001','ANTI-INTEL-002','ANTI-INTEL-003','ANTI-SALES-001','ANTI-TECH-001']) {
+for (const id of ['ANTI-INTEL-001','ANTI-INTEL-002','ANTI-INTEL-003','ANTI-SALES-001','ANTI-TECH-001','ANTI-INFRA-001']) {
   assert.ok(anti.some((item) => item.id === id), `Missing anti-pattern ${id}`);
 }
+
+const openQuestions = jsonl('docs/second-brain/open-questions.jsonl');
+assert.ok(openQuestions.some((item) => item.id === 'OQ-SUPABASE-VERSIONING-001' && item.status === 'open'));
 
 const agents = read('AGENTS.md');
 assert.match(agents, /DUTRA Intelligence pre-flight/);
