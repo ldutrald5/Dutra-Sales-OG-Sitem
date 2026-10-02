@@ -225,3 +225,11 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 5. **WAVE-05:** Aplicação Visual 360° — projeção visual do Technical Brain.
 6. **WAVE-06:** Proposal + ROI Engine — uma fonte para mensagem, proposta e cenários financeiros.
 7. **WAVE-07:** Coach DUTRA — orientação baseada em dados reais estruturados.
+
+## PLAYBOOK-02 — Abordagem contextual por rota comercial
+
+- **Objetivo:** transformar a rota já derivada pela Ficha de Ataque em objetivo, abertura, pergunta-chave e avanço desejado.
+- **Escopo:** somente leitura; reutiliza `OG_LEAD_INTELLIGENCE.salesProfile()` e `OG_SALES_BRIEF`; sem novo score ou persistência.
+- **Story:** `docs/stories/PLAYBOOK-02-contextual-approach.md`.
+- **Status:** em validação.
+

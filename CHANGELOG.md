@@ -105,6 +105,12 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Mantido fallback local observável quando a conta ainda não está normalizada ou a sincronização falha.
 
 
+## [Unreleased] — PLAYBOOK-02 Abordagem contextual
+
+- A Ficha de Ataque passa a transformar a rota comercial já calculada em objetivo, abertura sugerida, pergunta-chave e avanço desejado.
+- Rotas de primeiro contato, retomada, follow-up, interesse, proposta/negociação, cliente e conferência ERP recebem orientações diferentes sem IA obrigatória.
+- Nenhum estágio ou fato do CRM é alterado pela recomendação.
+
 ## [Unreleased] — PLAYBOOK-01 Ficha de Ataque V1
 
 - Adicionada classificação determinística de relação OG, rota comercial e faixa de frota usando somente fatos/eventos existentes.
