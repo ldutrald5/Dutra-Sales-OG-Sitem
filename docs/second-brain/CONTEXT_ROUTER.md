@@ -29,6 +29,7 @@ Never freeze dynamic customer data inside a global Skill.
 | project direction / cross-cutting | dutra-core | `DUTRA_OS_CONTEXT.md`, `EXECUTION_CONTEXT.md` | `docs/second-brain/BRAIN_INDEX.md` |
 | code / architecture / refactor | dutra-dev | `AGENTS.md`, scoped architecture docs | incidents + active decisions |
 | Railway / production / logs | dutra-dev + dutra-runtime-operator | runtime skill + live infrastructure | `docs/runtime/DUTRA_OS_RUNTIME.md` |
+| Supabase / schema / Edge Functions | dutra-dev | live Supabase inventory + `supabase/migrations/` + `supabase/functions/` | `INC-SUPABASE-DRIFT-001` + architecture docs |
 | client/account | dutra-crm + dutra-sales | current CRM record, Sales Execution contract | relevant playbook |
 | prospecting / call | dutra-sales + dutra-crm | `knowledge/VENDAS-OG.md`, sales playbook | Call AI docs |
 | proposal / negotiation | dutra-sales + dutra-crm + dutra-og-tech | current account + quote/proposal | product evidence + proposal services |
@@ -50,6 +51,7 @@ Before implementation answer internally:
 - Which tests guard the behavior?
 - Am I creating a second entity, score, queue, knowledge store or rule engine?
 - Is the change reversible?
+- If Supabase is involved, can the live schema/functions be reproduced from Git?
 - What needs human validation?
 
 Then implement the smallest safe change.
