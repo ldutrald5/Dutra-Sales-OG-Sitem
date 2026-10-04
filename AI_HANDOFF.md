@@ -116,3 +116,8 @@ Alternativa CLI:
 A tarefa se chama `DUTRA-OS-WhatsApp-Bridge`, inicia no logon do usuário atual e tenta reiniciar após falha. O launcher resolve o caminho do repositório dinamicamente, usa o `.env` local e grava logs em `apps/sistema-og/.data/logs/`.
 
 Nunca colocar segredo no Task Scheduler, arquivo .cmd ou scripts versionados. O segredo continua somente no `.env` local.
+
+
+## GEO domain pre-flight
+
+Antes de qualquer mapa/geocoding, preserve o contrato de `docs/architecture/GEO-LOCATION-DOMAIN.md`: Company é conta comercial, CompanyEstablishment é estabelecimento jurídico/CNPJ e CompanyLocation é lugar físico. CNPJ não pode ser tratado como número nem reduzido a somente dígitos; o contrato compartilhado está em `apps/sistema-og/domain/cnpj.js`. Não grave lat/lng diretamente como única verdade em Company e não crie uma segunda base de empresas para o mapa.
