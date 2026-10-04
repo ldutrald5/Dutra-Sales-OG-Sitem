@@ -190,6 +190,8 @@ create table if not exists public.integration_events (
   constraint integration_events_processing_status_check check (processing_status = any (array['received'::text,'processed'::text,'ignored'::text,'failed'::text]))
 );
 
+-- DUTRA REPLAY PHASE: POST_MIGRATIONS
+
 alter table public.crm_contacts
   add constraint crm_contacts_company_id_fkey foreign key (company_id) references public.companies(id) on delete set null;
 

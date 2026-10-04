@@ -21,14 +21,20 @@ const expectedArray='array['+tableNames.map(quote).join(',')+']::text[]';
 const supplementPath=path.resolve('supabase/recovery/20261003/untracked-live-baseline.sql');
 if(!fs.existsSync(supplementPath))throw new Error('missing untracked live baseline supplement');
 const supplement=fs.readFileSync(supplementPath,'utf8');
+const phaseMarker='-- DUTRA REPLAY PHASE: POST_MIGRATIONS';
+const phaseParts=supplement.split(phaseMarker);
+if(phaseParts.length!==2)throw new Error('untracked live baseline must contain exactly one replay phase marker');
+const preMigrations=phaseParts[0].trimEnd();
+const postMigrations=phaseParts[1].trimStart();
 
 let sql="\\set ON_ERROR_STOP on\nBEGIN;\n";
-sql+="\n-- BEGIN untracked-live-baseline.sql\n"+supplement.trimEnd()+"\n-- END untracked-live-baseline.sql\n";
+sql+="\n-- BEGIN untracked-live-baseline PRE\n"+preMigrations+"\n-- END untracked-live-baseline PRE\n";
 for(const file of migrationFiles){
   sql+=`\n-- BEGIN ${file}\n`;
   sql+=fs.readFileSync(path.join(migrationDir,file),'utf8').trimEnd()+"\n";
   sql+=`-- END ${file}\n`;
 }
+sql+="\n-- BEGIN untracked-live-baseline POST\n"+postMigrations.trimEnd()+"\n-- END untracked-live-baseline POST\n";
 sql+=`
 DO $dutra_replay$
 declare
