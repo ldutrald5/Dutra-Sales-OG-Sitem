@@ -64,7 +64,9 @@ const created=await gateway.createAssetWithUpload(
 );
 assert.equal(created.status,201,created.error||'Falha ao criar Asset E2E.');
 const assetId=created.data.asset.id;
+const originalVersionId=created.data.asset.current_version_id;
 assert.ok(assetId);
+assert.ok(originalVersionId);
 
 const duplicate=await gateway.createAssetWithUpload(
   {legacyLeadId},
@@ -128,6 +130,14 @@ const replaced=await gateway.replaceAssetFile(
 assert.equal(replaced.error,null);
 assert.equal(Number(replaced.data.version.version_number),2);
 assert.ok(replaced.data.version.id);
+
+const pinnedOriginal=await gateway.signAsset(assetId,{ttl:60,versionId:originalVersionId},process.env);
+assert.equal(pinnedOriginal.error,null);
+assert.equal(pinnedOriginal.data.versionId,originalVersionId,'Signing com versionId deve preservar a versão histórica.');
+const pinnedRead=await fetch(pinnedOriginal.data.url);
+assert.equal(pinnedRead.ok,true);
+const pinnedBytes=Buffer.from(await pinnedRead.arrayBuffer());
+assert.equal(pinnedBytes.equals(png),true,'A versão histórica assinada deve manter os bytes originais.');
 
 const contactLink=await gateway.createAssetLink(assetId,{
   contactId:CONTACT_ID,
@@ -202,6 +212,7 @@ console.log(JSON.stringify({
   assetId,
   legacyLeadId,
   version:replaced.data.version.version_number,
+  pinnedHistoricalVersion:true,
   signedUrlTtl:signed.data.expiresIn,
   contextualLinks:links.data.length,
   anonDbBlocked:!anonDb.ok,
