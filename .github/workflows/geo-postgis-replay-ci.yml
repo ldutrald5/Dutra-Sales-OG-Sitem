@@ -1,0 +1,60 @@
+name: GEO PostGIS Replay
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/pending/20261004213000_geo_postgis_locations_v1.sql'
+      - 'scripts/test_geo_postgis_migration.mjs'
+      - 'scripts/geo_postgis_replay_assertions.sql'
+      - 'scripts/build_supabase_transactional_replay.mjs'
+      - '.github/workflows/geo-postgis-replay-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb
+        with:
+          version: 2.119.0
+
+      - name: Static GEO persistence contract
+        run: node scripts/test_geo_postgis_migration.mjs
+
+      - name: Hide canonical migrations from local auto-apply
+        run: |
+          mkdir -p /tmp/dutra-supabase
+          mv supabase/migrations /tmp/dutra-supabase/migrations
+
+      - name: Initialize local Supabase config
+        run: supabase init --force
+
+      - name: Start disposable local database
+        run: supabase db start
+
+      - name: Build GEO replay tail
+        run: |
+          cat supabase/pending/20261004213000_geo_postgis_locations_v1.sql               scripts/geo_postgis_replay_assertions.sql               > /tmp/dutra-geo-tail.sql
+
+      - name: Build rollback-only base plus GEO replay
+        run: |
+          node scripts/build_supabase_transactional_replay.mjs             /tmp/dutra-supabase/migrations             /tmp/dutra-geo-replay.sql             /tmp/dutra-geo-tail.sql
+
+      - name: Replay GEO persistence inside one transaction
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres"             -v ON_ERROR_STOP=1             -f /tmp/dutra-geo-replay.sql
+
+      - name: Stop disposable stack
+        if: always()
+        run: supabase stop --no-backup || true
