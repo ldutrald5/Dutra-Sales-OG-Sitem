@@ -12,7 +12,7 @@ const migrationFiles=fs.readdirSync(migrationDir).filter(name=>name.endsWith('.s
 if(migrationFiles.length!==25)throw new Error(`expected 25 canonical migrations, got ${migrationFiles.length}`);
 
 const snapshot=JSON.parse(fs.readFileSync(path.resolve('supabase/recovery/20261003/remote-public-tables.json'),'utf8'));
-const tableNames=(snapshot.tables||[]).map(item=>String(item.name||'').replace(/^public\\./,'')).filter(Boolean).sort();
+const tableNames=(snapshot.tables||[]).map(item=>{const name=String(item.name||'');return name.startsWith('public.')?name.slice(7):name;}).filter(Boolean).sort();
 if(!tableNames.length)throw new Error('remote public table snapshot is empty');
 
 const quote=value=>"'" + String(value).replaceAll("'","''") + "'";
