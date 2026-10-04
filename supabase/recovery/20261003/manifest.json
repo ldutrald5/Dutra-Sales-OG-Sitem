@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "og-proposal-engine",
+    "ref": "hlyffyguxqxmgxlevfeq"
+  },
+  "captured_at": "2026-10-03",
+  "source": "live Supabase inspection",
+  "safety": {
+    "executable_migration_chain": false,
+    "secrets_included": false,
+    "cron_commands_included": false,
+    "omitted_secret_like_files": 0
+  },
+  "remote_counts": {
+    "migrations": 25,
+    "edge_functions": 13,
+    "public_tables": 34
+  },
+  "edge_functions": [
+    {
+      "slug": "proposal-engine",
+      "version": 9,
+      "verify_jwt": false,
+      "ezbr_sha256": "192fb4cc6265f383b8450b5bbf1d5d07adbc61ba6ce26295f434ee912b72a2a5",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "proposal-html",
+      "version": 6,
+      "verify_jwt": false,
+      "ezbr_sha256": "2ccb9d381a71ee81d56023e90d0f3f3e825f10109b503e43224a9acc74f73a6816",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "proposal-pdf-fallback",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "c2ebcdf4850306ec143fe6e37fcf3e825f10109b503e43224a9acc74f73a6816",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "proposal-access",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "0e75360a7780592550ecff4d1303d8f050c6ebee7b2cee9bc042edf695f4f04e",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "brand-asset-copy",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "950ec6249cbfa491d2563708b46811551c35ff55aaa47c48a11f378eefcecf40",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "whatsapp-ingest",
+      "version": 5,
+      "verify_jwt": false,
+      "ezbr_sha256": "16202d8579f050079eb26b3662954b815b9a4ded06ef899ffb079a3c22a814a5",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "company-discovery",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "51c0696c625426da1993f9b8cbbb1be7bd509fd2feba5972a56e8cfd2a44343c",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "proposal-pdf-premium",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "7d1263324b466b0ae653bace130dc5b05362be04346547233165ab7ff017fa33",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "pipeline-recovery",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "60c8e6c90af184e528b3a08d3abd1476c2a9635b348566e19980f05d2b87a407",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "commercial-processor",
+      "version": 6,
+      "verify_jwt": false,
+      "ezbr_sha256": "c8d865f84ea1ac09c394d9d9b55343d0ff5a3d3cce93de5c23d8f09126196666",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "whatsapp-e2e-runner",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "d0becab1430ac8aa56edf26ef80ad68880947fd5cef2492beb81f77b0854a4d4",
+      "files": [
+        "index.ts",
+        "deno.json"
+      ]
+    },
+    {
+      "slug": "sales-execution-gateway",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "c9b8ee9a1eb387efb47bf957c0f8ea82d0b4287d10dea8c8adf76781ccaca603",
+      "files": [
+        "index.ts"
+      ],
+      "matches_versioned_main": true
+    },
+    {
+      "slug": "call-intelligence",
+      "version": 7,
+      "verify_jwt": false,
+      "ezbr_sha256": "edd047e5475d30f8fccb5cfc7b23e75dbc729a17ec9e1472324b94a5a9223fb1",
+      "files": [
+        "index.ts"
+      ],
+      "matches_versioned_main": true
+    }
+  ]
+}
