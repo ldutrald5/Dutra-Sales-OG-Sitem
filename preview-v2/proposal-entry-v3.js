@@ -110,7 +110,7 @@ async function loadProposalVisuals(lead){
   if(list)list.innerHTML='';
   try{
     const params=new URLSearchParams(proposalAssetRef(lead));params.set('limit','60');
-    const data=await core().request('/assets?'+params.toString(),{timeoutMs:10000});
+    const data=await core().request('/assets/proposal-eligible?'+params.toString(),{timeoutMs:10000});
     if(token!==visualLoadToken||String(selectedId)!==String(lead.id))return;
     visualCandidates=(data.items||[]).filter(item=>
       item.media_kind==='IMAGE'
