@@ -1,0 +1,55 @@
+name: Supabase Canonical Replay
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'scripts/test_supabase_recovery_snapshot.mjs'
+      - 'scripts/test_supabase_replay_safety.mjs'
+      - 'scripts/build_supabase_transactional_replay.mjs'
+      - '.github/workflows/supabase-replay-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb
+        with:
+          version: 2.119.0
+
+      - name: Static replay safety gate
+        run: node scripts/test_supabase_replay_safety.mjs
+
+      - name: Hide canonical migrations from local auto-apply
+        run: |
+          mkdir -p /tmp/dutra-supabase
+          mv supabase/migrations /tmp/dutra-supabase/migrations
+
+      - name: Initialize local Supabase config
+        run: supabase init --force
+
+      - name: Start disposable local database
+        run: supabase db start
+
+      - name: Build rollback-only replay transaction
+        run: node scripts/build_supabase_transactional_replay.mjs /tmp/dutra-supabase/migrations /tmp/dutra-replay.sql
+
+      - name: Replay canonical history inside one transaction
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres"             -v ON_ERROR_STOP=1             -f /tmp/dutra-replay.sql
+
+      - name: Stop disposable stack
+        if: always()
+        run: supabase stop --no-backup || true
