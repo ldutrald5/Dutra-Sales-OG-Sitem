@@ -6,6 +6,7 @@ const recoveryRoot=path.resolve('supabase/recovery/20261003');
 const canonicalMigrationRoot=path.resolve('supabase/migrations');
 const canonicalFunctionRoot=path.resolve('supabase/functions');
 const pendingRoot=path.resolve('supabase/pending');
+const untrackedBaselinePath=path.join(recoveryRoot,'untracked-live-baseline.sql');
 const readJson=name=>JSON.parse(fs.readFileSync(path.join(recoveryRoot,name),'utf8'));
 
 assert.ok(fs.existsSync(recoveryRoot),'recovery snapshot directory missing');
@@ -23,6 +24,11 @@ assert.equal(manifest.remote_counts.edge_functions,13);
 assert.equal(migrations.migrations.length,25);
 assert.equal(edgeList.functions.length,13);
 assert.equal(manifest.edge_functions.length,13);
+assert.ok(fs.existsSync(untrackedBaselinePath),'untracked live baseline supplement missing');
+const untrackedBaseline=fs.readFileSync(untrackedBaselinePath,'utf8');
+for(const table of ['crm_activities','crm_contacts','crm_conversations','crm_insights','crm_messages','crm_processor_runs','integration_events','sales_opportunities']){
+  assert.match(untrackedBaseline,new RegExp('create table if not exists public\\\\.'+table,'i'),\`untracked baseline missing ${table}\`);
+}
 
 const expectedMigrations=migrations.migrations
   .map(item=>`${item.version}_${item.name}.sql`)
