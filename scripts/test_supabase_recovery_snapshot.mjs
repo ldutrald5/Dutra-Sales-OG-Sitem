@@ -27,7 +27,7 @@ assert.equal(manifest.edge_functions.length,13);
 assert.ok(fs.existsSync(untrackedBaselinePath),'untracked live baseline supplement missing');
 const untrackedBaseline=fs.readFileSync(untrackedBaselinePath,'utf8');
 for(const table of ['crm_activities','crm_contacts','crm_conversations','crm_insights','crm_messages','crm_processor_runs','integration_events','sales_opportunities']){
-  assert.match(untrackedBaseline,new RegExp('create table if not exists public\\\\.'+table,'i'),\`untracked baseline missing ${table}\`);
+  assert.match(untrackedBaseline,new RegExp('create table if not exists public\\.'+table,'i'),'untracked baseline missing '+table);
 }
 
 const expectedMigrations=migrations.migrations
@@ -90,8 +90,8 @@ function walk(dir){
   });
 }
 for(const file of walk(recoveryRoot)){
-  const content=fs.readFileSync(file,'utf8');
-  for(const re of risky)assert.equal(re.test(content),false,`secret-like content detected in ${path.relative(recoveryRoot,file)}`);
+  const fileContent=fs.readFileSync(file,'utf8');
+  for(const re of risky)assert.equal(re.test(fileContent),false,`secret-like content detected in ${path.relative(recoveryRoot,file)}`);
 }
 
 console.log('Supabase recovery + canonical alignment: PASS');
