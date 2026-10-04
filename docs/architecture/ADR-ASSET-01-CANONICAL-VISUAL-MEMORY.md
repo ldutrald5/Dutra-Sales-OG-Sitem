@@ -27,12 +27,15 @@ O módulo não cria uma tabela paralela de clientes e não usa `legacy_lead_id` 
 
 ### 2. Separar entidade lógica de versão binária
 
-Serão criadas duas tabelas canônicas:
+Serão criadas três tabelas canônicas:
 
-- `public.assets`: identidade e contexto comercial do material;
-- `public.asset_versions`: versões físicas do arquivo, hash, MIME, tamanho e caminho no Storage.
+- `public.assets`: identidade e contexto comercial do material, sempre pertencente a uma Company;
+- `public.asset_versions`: versões físicas do arquivo, hash, MIME, tamanho e caminho no Storage;
+- `public.asset_links`: vínculos secundários com Contact, Opportunity, Proposal ou Activity, sem duplicar o arquivo.
 
-Editar título, categoria ou descrição não cria uma nova versão binária. Substituir o arquivo cria uma nova `asset_versions.version_number` para o mesmo `asset_id`. `assets.current_version_id` aponta para a versão vigente; propostas futuras devem poder fixar a versão exata usada.
+Editar título, categoria ou descrição não cria uma nova versão binária. Substituir o arquivo cria uma nova `asset_versions.version_number` para o mesmo `asset_id`. `assets.current_version_id` aponta para a versão vigente.
+
+`asset_links` exige exatamente um alvo contextual por linha e o alvo deve pertencer à mesma Company canônica do Asset. Quando o alvo é Proposal, `pinned_version_id` é obrigatório para preservar exatamente o material usado naquela proposta, mesmo que o Asset seja substituído depois.
 
 ### 3. `company_brand_assets` permanece especializado
 
