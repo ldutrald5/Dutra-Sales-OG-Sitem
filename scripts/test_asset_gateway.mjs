@@ -9,6 +9,7 @@ assert.throws(()=>gateway.safeUuid('lead-1'),/inválido/);
 assert.equal(gateway.mediaForMime('image/jpeg').mediaKind,'IMAGE');
 assert.equal(gateway.mediaForMime('application/pdf').mediaKind,'DOCUMENT');
 assert.throws(()=>gateway.mediaForMime('text/html'),/não permitido/);
+assert.throws(()=>gateway.mediaForMime('image/heic'),/não permitido/);
 assert.equal(gateway.validateContentSignature(Buffer.from([0xff,0xd8,0xff,0xdb]),'image/jpeg'),true);
 assert.equal(gateway.validateContentSignature(Buffer.from('%PDF-1.7\n'),'application/pdf'),true);
 assert.throws(()=>gateway.validateContentSignature(Buffer.from('not-a-pdf'),'application/pdf'),/não corresponde/);
