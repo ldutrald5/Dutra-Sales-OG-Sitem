@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
 const proposalIntelligence = require('./services/proposal-intelligence-service.js');
 const proposalStore = require('./server-proposal-store.cjs');
+const assetGateway = require('./server-asset-gateway.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
@@ -164,6 +165,49 @@ async function readBody(req, maxBytes = 5_000_000) {
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+}
+
+async function readBinary(req, maxBytes = 15 * 1024 * 1024) {
+  const declared = Number(req.headers['content-length'] || 0);
+  if (declared > maxBytes) throw new Error('Arquivo excede o limite permitido');
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > maxBytes) throw new Error('Arquivo excede o limite permitido');
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+function decodeHeaderFilename(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try { return decodeURIComponent(raw); } catch { return raw; }
+}
+
+function assetRefFromUrl(url) {
+  return {
+    companyId:String(url.searchParams.get('companyId') || '').trim(),
+    legacyLeadId:String(url.searchParams.get('legacyLeadId') || '').trim()
+  };
+}
+
+function assetMetaFromRequest(req, url) {
+  return {
+    mimeType:String(req.headers['content-type'] || '').split(';')[0].trim(),
+    originalFilename:decodeHeaderFilename(req.headers['x-file-name']),
+    title:String(url.searchParams.get('title') || '').trim(),
+    description:String(url.searchParams.get('description') || '').trim(),
+    businessCategory:String(url.searchParams.get('category') || 'OTHER').trim(),
+    sourceType:String(url.searchParams.get('sourceType') || 'MANUAL_UPLOAD').trim(),
+    visibilityClass:String(url.searchParams.get('visibility') || 'INTERNAL').trim(),
+    sensitivityLevel:String(url.searchParams.get('sensitivity') || 'NORMAL').trim(),
+    usagePolicy:String(url.searchParams.get('usagePolicy') || 'INTERNAL_REFERENCE').trim(),
+    sourceUrl:String(url.searchParams.get('sourceUrl') || '').trim(),
+    capturedAt:String(url.searchParams.get('capturedAt') || '').trim(),
+    isPrimary:url.searchParams.get('isPrimary') === '1'
+  };
 }
 
 function escapeHtml(value) {
@@ -353,6 +397,73 @@ const server = http.createServer(async (req, res) => {
     const since = String(url.searchParams.get('since') || '').trim();
     if (since && Number.isNaN(Date.parse(since))) return sendJson(res, 400, { error:'since inválido' });
     return sendJson(res, 200, { events:proposalStore.listEvents(proposalStoreFile, { since, limit:500 }) });
+  }
+
+  if (url.pathname === '/api/assets/health' && req.method === 'GET') {
+    const result = await assetGateway.health(process.env);
+    return sendJson(res, result.status || 200, result.error ? { ok:false, configured:result.configured, error:result.error } : result.data);
+  }
+
+  if (url.pathname === '/api/assets' && req.method === 'GET') {
+    const result = await assetGateway.listAssets(assetRefFromUrl(url), {
+      businessCategory:url.searchParams.get('category'),
+      limit:url.searchParams.get('limit'),
+      cursor:url.searchParams.get('cursor')
+    }, process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
+  if (url.pathname === '/api/assets/upload' && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const bytes = await readBinary(req, assetGateway.cfg(process.env).maxBytes);
+      const result = await assetGateway.createAssetWithUpload(assetRefFromUrl(url), assetMetaFromRequest(req,url), bytes, process.env);
+      return sendJson(res, result.status || 500, result.error ? { error:result.error, cleanup:result.data?.cleanup || [] } : result.data);
+    } catch (error) {
+      return sendJson(res, /limite|excede/i.test(error.message) ? 413 : 400, { error:error.message });
+    }
+  }
+
+  const assetVersionMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/versions$/i);
+  if (assetVersionMatch && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const bytes = await readBinary(req, assetGateway.cfg(process.env).maxBytes);
+      const result = await assetGateway.replaceAssetFile(assetVersionMatch[1], assetMetaFromRequest(req,url), bytes, process.env);
+      return sendJson(res, result.status || 500, result.error ? { error:result.error, cleanup:result.data?.cleanup || [] } : result.data);
+    } catch (error) {
+      return sendJson(res, /limite|excede/i.test(error.message) ? 413 : 400, { error:error.message });
+    }
+  }
+
+  const assetAccessMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/access$/i);
+  if (assetAccessMatch && req.method === 'GET') {
+    const result = await assetGateway.signAsset(assetAccessMatch[1], {
+      ttl:url.searchParams.get('ttl'),
+      download:url.searchParams.get('download') === '1'
+    }, process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
+  const assetPrimaryMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/primary$/i);
+  if (assetPrimaryMatch && req.method === 'POST') {
+    if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+    const result = await assetGateway.setPrimary(assetPrimaryMatch[1], process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
+  const assetArchiveMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/archive$/i);
+  if (assetArchiveMatch && req.method === 'POST') {
+    if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+    const result = await assetGateway.setStatus(assetArchiveMatch[1], 'ARCHIVED', process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
+  const assetDeleteMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})$/i);
+  if (assetDeleteMatch && req.method === 'DELETE') {
+    if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+    const result = await assetGateway.setStatus(assetDeleteMatch[1], 'DELETED', process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
   }
 
   if (url.pathname === '/api/state' && req.method === 'GET') {
