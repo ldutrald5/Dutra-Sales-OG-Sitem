@@ -1,0 +1,165 @@
+name: Asset Local E2E (Free)
+
+on:
+  pull_request:
+    branches:
+      - dutra-os-ui-v3-premium
+    paths:
+      - 'apps/sistema-og/server-asset-gateway.cjs'
+      - 'apps/sistema-og/server.mjs'
+      - 'preview-v2/account-assets-v3.js'
+      - 'supabase/migrations/20261003120000_add_canonical_account_assets.sql'
+      - 'supabase/tests/asset_local_baseline.sql'
+      - 'scripts/asset_gateway_e2e_smoke.mjs'
+      - '.github/workflows/asset-local-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  asset-local-e2e:
+    name: Local Supabase + Asset Gateway
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start isolated local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p /tmp/og-migrations
+          cp supabase/migrations/20261003120000_add_canonical_account_assets.sql /tmp/asset-migration.sql
+          mv supabase/migrations/*.sql /tmp/og-migrations/
+
+          supabase init --force
+          supabase start -x studio,imgproxy,realtime,mailpit,postgres-meta,edge-runtime,logflare,vector,supavisor
+
+          mv /tmp/og-migrations/*.sql supabase/migrations/
+
+          supabase status -o env > /tmp/supabase.env
+          set -a
+          source /tmp/supabase.env
+          set +a
+
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y postgresql-client
+          fi
+
+          {
+            echo "OG_SUPABASE_URL=$API_URL"
+            echo "OG_SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "OG_ASSET_E2E_LEGACY_LEAD_ID=ASSET-E2E-GITHUB"
+            echo "OG_ASSET_E2E_ALLOW_WRITE=YES_I_AM_USING_A_DISPOSABLE_BRANCH"
+          } >> "$GITHUB_ENV"
+
+          echo "$DB_URL" > /tmp/asset-db-url
+
+      - name: Bootstrap canonical test schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          DB_URL="$(cat /tmp/asset-db-url)"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/asset_local_baseline.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261003120000_add_canonical_account_assets.sql
+
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          insert into public.companies (id, legacy_lead_id, name)
+          values (
+            '11111111-1111-4111-8111-111111111111',
+            'ASSET-E2E-GITHUB',
+            'ASSET E2E TEST'
+          )
+          on conflict (legacy_lead_id) do update
+            set name = excluded.name,
+                updated_at = now();
+
+          notify pgrst, 'reload schema';
+          SQL
+
+          sleep 2
+
+      - name: Provision private local Storage bucket through API
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl --fail-with-body --silent --show-error             -X POST "$OG_SUPABASE_URL/storage/v1/bucket"             -H "Authorization: Bearer $OG_SUPABASE_SERVICE_ROLE_KEY"             -H "apikey: $OG_SUPABASE_SERVICE_ROLE_KEY"             -H "Content-Type: application/json"             --data '{
+              "id":"account-assets",
+              "name":"account-assets",
+              "public":false,
+              "file_size_limit":15728640,
+              "allowed_mime_types":[
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "application/pdf"
+              ]
+            }' > /tmp/create-bucket.json
+
+          curl --fail-with-body --silent --show-error             "$OG_SUPABASE_URL/storage/v1/bucket/account-assets"             -H "Authorization: Bearer $OG_SUPABASE_SERVICE_ROLE_KEY"             -H "apikey: $OG_SUPABASE_SERVICE_ROLE_KEY" > /tmp/bucket.json
+
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const bucket=JSON.parse(fs.readFileSync('/tmp/bucket.json','utf8'));
+          if(bucket.id!=='account-assets') throw new Error('Bucket id inválido');
+          if(bucket.public!==false) throw new Error('Bucket precisa ser privado');
+          if(Number(bucket.file_size_limit)!==15728640) throw new Error('Limite do bucket divergente');
+          const expected=['application/pdf','image/jpeg','image/png','image/webp'].sort();
+          const actual=[...(bucket.allowed_mime_types||[])].sort();
+          if(JSON.stringify(actual)!==JSON.stringify(expected)) throw new Error('MIME types do bucket divergentes');
+          console.log('Private bucket contract: PASS');
+          NODE
+
+      - name: Run full Asset Gateway smoke
+        run: npm run og:asset:e2e
+
+      - name: Verify DB and Storage invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          DB_URL="$(cat /tmp/asset-db-url)"
+
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          do $$
+          declare
+            asset_count integer;
+            version_count integer;
+            link_count integer;
+            bad_paths integer;
+          begin
+            select count(*) into asset_count from public.assets;
+            select count(*) into version_count from public.asset_versions;
+            select count(*) into link_count from public.asset_links;
+
+            if asset_count < 1 then raise exception 'E2E não criou Asset'; end if;
+            if version_count < 2 then raise exception 'E2E não preservou versões'; end if;
+            if link_count <> 0 then raise exception 'Smoke básico não deveria criar links'; end if;
+
+            select count(*) into bad_paths
+            from public.asset_versions
+            where storage_path !~ '^companies/[0-9a-f-]{36}/assets/[0-9a-f-]{36}/versions/[0-9a-f-]{36}\.[a-z0-9]+$'
+               or storage_path ilike '%ASSET-E2E%'
+               or storage_path ilike '%ASSET E2E%';
+
+            if bad_paths <> 0 then raise exception 'Storage path canônico inválido'; end if;
+          end $$;
+          SQL
+
+          echo "DB/Storage invariants: PASS"
+
+      - name: Stop and destroy local Supabase
+        if: always()
+        shell: bash
+        run: |
+          supabase stop --no-backup || true
