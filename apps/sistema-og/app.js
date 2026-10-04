@@ -1806,6 +1806,64 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // 3 TEMPLATES OFICIAIS DE PDF / IMPRESSÃO (CORES EXATAS & PSICOLOGIA)
   // =========================================================================
 
+  function proposalVisualRefsForTracking() {
+    const items = window.__DUTRA_QUOTE_HANDOFF__?.visuals?.items;
+    return (Array.isArray(items) ? items : []).slice(0, 2).filter(item =>
+      safeProposalVisualUrl(item?.runtimeUrl)
+      && String(item?.usagePolicy || '').trim().toUpperCase() === 'PROPOSAL_ALLOWED'
+    ).map(item => ({
+      assetId: String(item?.assetId || '').trim().slice(0, 80),
+      versionId: String(item?.versionId || '').trim().slice(0, 80),
+      category: String(item?.category || '').trim().toUpperCase().slice(0, 60),
+      title: String(item?.title || '').trim().slice(0, 160),
+      usagePolicy: 'PROPOSAL_ALLOWED'
+    })).filter(item => item.assetId && item.versionId);
+  }
+
+  function safeProposalVisualUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw, location.origin);
+      if (url.protocol === 'https:') return url.href;
+      if (url.protocol === 'http:' && ['127.0.0.1','localhost'].includes(url.hostname)) return url.href;
+    } catch {}
+    return '';
+  }
+
+  function buildProposalVisualHtml() {
+    const items = (Array.isArray(window.__DUTRA_QUOTE_HANDOFF__?.visuals?.items)
+      ? window.__DUTRA_QUOTE_HANDOFF__.visuals.items
+      : [])
+      .filter(item => item?.usagePolicy === 'PROPOSAL_ALLOWED' && item?.sensitivityLevel !== 'CONFIDENTIAL')
+      .map(item => ({ ...item, runtimeUrl:safeProposalVisualUrl(item.runtimeUrl) }))
+      .filter(item => item.runtimeUrl)
+      .slice(0, 2);
+    if (!items.length) return '';
+
+    const cards = items.map(item => {
+      const logo = String(item.category || '').toUpperCase() === 'LOGO';
+      return `<div style="min-width:0;border:1px solid #334155;border-radius:8px;overflow:hidden;background:${logo?'#ffffff':'#0b111a'};">
+        <div style="height:${logo?'92px':'150px'};display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          <img src="${escapeHtml(item.runtimeUrl)}" alt="${escapeHtml(item.title || 'Imagem da conta')}" style="width:100%;height:100%;object-fit:${logo?'contain':'cover'};">
+        </div>
+        <div style="padding:6px 8px;background:#101722;color:#94a3b8;font-size:8px;">
+          ${escapeHtml(item.title || (logo ? 'Identidade da empresa' : 'Imagem da operação'))}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div data-proposal-account-visual="1" style="margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">CONTEXTO VISUAL DA CONTA</div>
+      <div style="display:grid;grid-template-columns:repeat(${items.length},minmax(0,1fr));gap:8px;">${cards}</div>
+    </div>`;
+  }
+
+  window.addEventListener('dutra:proposal-visuals-ready', () => {
+    try { recalculateQuote(); }
+    catch (error) { console.warn('Visual da proposta será aplicado na próxima renderização.', error); }
+  });
+
   function renderOfficialProposalDocument(quoteData) {
     const docEl = document.getElementById('official-proposal-print');
     if (!docEl) return;
@@ -1829,6 +1887,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const clientCnpj = state.client.cnpj || '';
     const clientIe = state.client.ie || '';
     const freteLabel = state.client.freteTexto || 'FRETE A NEGOCIAR (+/- R$ 120,00)';
+    const accountVisualHtml = buildProposalVisualHtml();
 
     // Resumo dos nomes dos veículos
     const kitNomeFrota = data.vehicles.map(v => `${v.qty > 1 ? v.qty + 'x ' : ''}${v.name}`).join(' + ') || 'KIT COMPLETO';
@@ -1883,6 +1942,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             <span><b>IE:</b> ${clientIe}</span>
           </div>
         </div>
+
+        ${accountVisualHtml}
 
         <!-- BANNER AMARELO DO KIT / VEÍCULO -->
         <div style="border-top: 2px solid #f59e0b; border-bottom: 2px solid #f59e0b; padding: 6px 0; margin-bottom: 18px;">
@@ -1989,6 +2050,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const clientIe = state.client.ie || '';
     const clientSocio = state.client.socioAdmin || '';
     const freteLabel = state.client.freteTexto || 'FRETE A NEGOCIAR (+/- R$ 120,00)';
+    const accountVisualHtml = buildProposalVisualHtml();
     const veicNomes = data.vehicles.map(v => `${v.qty}x ${v.name}`).join(' + ');
 
     let rowsHtml = '';
@@ -2035,6 +2097,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
             PROPOSTA COMERCIAL · ${freteLabel}
           </div>
         </div>
+
+        ${accountVisualHtml}
 
         <div style="margin-bottom: 18px;">
           <div style="font-size: 12px; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">
@@ -2126,6 +2190,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const clientCnpj = state.client.cnpj || '';
     const clientIe = state.client.ie || '';
     const freteLabel = state.client.freteTexto || 'FRETE A NEGOCIAR (+/- R$ 120,00)';
+    const accountVisualHtml = buildProposalVisualHtml();
 
     let vehicleCardsHtml = data.vehicles.map(v => `
       <div style="background: #161b26; border: 1px solid #283244; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
@@ -2161,6 +2226,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           </div>
           <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Proposta Técnica Integrada para Frota Mista (${data.totalConjuntos} veículos · ${data.totalPneus} pneus equalizados)</div>
         </div>
+
+        ${accountVisualHtml}
 
         <!-- QUADRO DE VEÍCULOS -->
         <div style="margin-bottom: 16px;">
@@ -2533,7 +2600,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       if (relatedLead && window.OG_PROPOSAL_INTELLIGENCE?.prepareTrackingDraft) {
         state.operations = OG_PROPOSAL_INTELLIGENCE.prepareTrackingDraft(
           state.operations,
-          { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id },
+          { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id, assetRefs:proposalVisualRefsForTracking() },
           { operationsModel:OG_OPERATIONS_MODEL }
         );
         const proposalDocument = (state.operations.generatedDocuments || []).find(item =>

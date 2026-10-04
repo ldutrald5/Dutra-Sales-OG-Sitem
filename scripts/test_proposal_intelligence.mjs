@@ -25,12 +25,19 @@ assert.equal(proposal.validatePublicSnapshot(snapshot),true);
 assert.throws(()=>proposal.validatePublicSnapshot({...snapshot,secret:'x'}),/Campo proibido/);
 
 const ops=operationsModel.createEmptyOperations('2026-09-28T04:59:00.000Z');
-const prepared=proposal.prepareTrackingDraft(ops,{quote,quoteState,clientId:'LEAD-1'},{operationsModel,now:'2026-09-28T05:00:00.000Z'});
+const prepared=proposal.prepareTrackingDraft(ops,{quote,quoteState,clientId:'LEAD-1',assetRefs:[
+  {assetId:'asset-1',versionId:'version-2',category:'FLEET',title:'Pátio da frota',usagePolicy:'PROPOSAL_ALLOWED'},
+  {assetId:'asset-internal',versionId:'version-x',category:'LOGO',title:'Interno',usagePolicy:'INTERNAL_REFERENCE'}
+]},{operationsModel,now:'2026-09-28T05:00:00.000Z'});
 assert.equal(prepared.quotes.length,1);
 assert.equal(prepared.generatedDocuments.length,1);
 assert.equal(prepared.generatedDocuments[0].status,'internal_draft');
 assert.equal(prepared.generatedDocuments[0].publication.publicEnabled,false);
 assert.equal(prepared.generatedDocuments[0].publication.publicToken,null);
+assert.equal(prepared.generatedDocuments[0].assetRefs.length,1);
+assert.equal(prepared.generatedDocuments[0].assetRefs[0].assetId,'asset-1');
+assert.equal(prepared.generatedDocuments[0].assetRefs[0].versionId,'version-2');
+assert.equal(Object.hasOwn(prepared.generatedDocuments[0].snapshot,'assetRefs'),false,'IDs internos de Asset não entram no snapshot público');
 assert.equal(prepared.activityEvents[0].type,'proposal.prepared');
 assert.equal(proposal.canPublish(prepared.generatedDocuments[0]),true);
 
@@ -56,6 +63,8 @@ const app=fs.readFileSync('apps/sistema-og/app.js','utf8');
 const html=fs.readFileSync('apps/sistema-og/index.html','utf8');
 const sw=fs.readFileSync('apps/sistema-og/service-worker.js','utf8');
 assert.match(app,/OG_PROPOSAL_INTELLIGENCE\.prepareTrackingDraft/);
+assert.match(app,/assetRefs:proposalVisualRefsForTracking\(\)/);
+assert.match(app,/data-proposal-account-visual/);
 assert.match(app,/rascunho de proposta rastreável preparado com segurança/);
 assert.match(html,/proposal-intelligence-service\.js/);
 assert.match(sw,/proposal-intelligence-service\.js/);

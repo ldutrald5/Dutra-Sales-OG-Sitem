@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const ui=fs.readFileSync('preview-v2/account-assets-v3.js','utf8');
+const html=fs.readFileSync('preview-v2/index.html','utf8');
+const server=fs.readFileSync('preview-v2/server.mjs','utf8');
+
+assert.match(html,/data-client-tab="media"/);
+assert.match(html,/data-client-panel="media"/);
+assert.match(html,/account-assets-v3\.js/);
+assert.match(server,/\/account-assets-v3\.js/);
+
+assert.match(ui,/DUTRA_CORE/);
+assert.match(ui,/\.request\('\/assets/);
+assert.match(ui,/\/assets\/upload/);
+assert.match(ui,/x-file-name/);
+assert.match(ui,/capture','environment/);
+assert.match(ui,/application\/pdf/);
+assert.match(ui,/HEIC ainda não/);
+assert.match(ui,/nextCursor/);
+assert.match(ui,/ttl=600/);
+assert.match(ui,/assetMakePrimary/);
+assert.match(ui,/\/primary/);
+assert.match(ui,/\/archive/);
+assert.match(ui,/mode==='delete'\?'DELETE':'POST'/);
+assert.match(ui,/usage_policy/);
+assert.match(ui,/sensitivity_level/);
+assert.match(ui,/assetReplace/);
+assert.match(ui,/\/versions/);
+assert.match(ui,/usagePolicy/);
+assert.match(ui,/sensitivity/);
+assert.match(ui,/15\*1024\*1024/);
+assert.match(ui,/IntersectionObserver/);
+assert.match(ui,/toBlob/);
+assert.match(ui,/2200/);
+assert.match(ui,/dataTransfer/);
+assert.match(ui,/URL\.revokeObjectURL/);
+assert.match(ui,/\/assets\/summary/);
+assert.match(ui,/assetLogo/);
+assert.match(ui,/assetCover/);
+assert.match(ui,/heroToken/);
+assert.doesNotMatch(ui,/SUPABASE_SERVICE_ROLE_KEY|service_role/i);
+assert.doesNotMatch(ui,/supabase\.co|createClient\(/i);
+
+console.log('V3 account assets UI contract: PASS');

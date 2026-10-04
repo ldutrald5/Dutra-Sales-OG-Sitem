@@ -56,6 +56,15 @@
       customPrice: item.customPrice == null ? null : safeNumber(item.customPrice)
     };
   }
+  function safeAssetRefs(input) {
+    return (Array.isArray(input) ? input : []).slice(0, 3).map(item => ({
+      assetId: clean(item?.assetId).slice(0, 80),
+      versionId: clean(item?.versionId).slice(0, 80),
+      category: clean(item?.category).toUpperCase().slice(0, 60),
+      title: clean(item?.title).slice(0, 160),
+      usagePolicy: clean(item?.usagePolicy).toUpperCase().slice(0, 60)
+    })).filter(item => item.assetId && item.versionId && item.usagePolicy === 'PROPOSAL_ALLOWED');
+  }
 
   function buildSnapshot(input = {}, options = {}) {
     const quote = input.quote || {};
@@ -143,6 +152,7 @@
       version: 1,
       preparedAt,
       snapshot,
+      assetRefs: safeAssetRefs(input.assetRefs),
       publication: {
         publicEnabled: false,
         publicToken: null,
@@ -217,6 +227,7 @@
     USER_EVENT_TYPES,
     EVENT_ALIASES,
     normalizeProposalEventType,
+    safeAssetRefs,
     buildSnapshot,
     validatePublicSnapshot,
     prepareTrackingDraft,

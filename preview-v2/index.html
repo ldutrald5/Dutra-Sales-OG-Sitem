@@ -86,7 +86,7 @@ button,input,select{font:inherit}.shell{max-width:720px;margin:0 auto;min-height
 <section class="screen" id="clients">
 <div class="pageHead"><button class="iconBtn" data-go="home"><i data-lucide="arrow-left"></i></button><div class="titles"><h1>Cliente 360°</h1><p>Visão completa do cliente</p></div><button class="iconBtn"><i data-lucide="ellipsis"></i></button></div>
 <div class="clientHero"><div class="clientBanner"><i class="star" data-lucide="star"></i></div><div class="clientInfo"><div class="bigAvatar">•</div><div><h2>Selecione um cliente</h2><p>Os dados desta tela vêm da base real</p><div class="clientBadges"><span class="pill">CRM</span></div></div><div class="contactBtns"><button class="iconBtn"><i data-lucide="phone"></i></button><button class="iconBtn"><i data-lucide="message-circle"></i></button><button class="iconBtn"><i data-lucide="mail"></i></button></div></div></div>
-<div class="tabs"><button class="tabBtn active" data-client-tab="overview">Visão geral</button><button class="tabBtn" data-client-tab="fleet">Frota</button><button class="tabBtn" data-client-tab="proposals">Propostas</button><button class="tabBtn" data-client-tab="history">Histórico</button></div>
+<div class="tabs"><button class="tabBtn active" data-client-tab="overview">Visão geral</button><button class="tabBtn" data-client-tab="fleet">Frota</button><button class="tabBtn" data-client-tab="proposals">Propostas</button><button class="tabBtn" data-client-tab="history">Histórico</button><button class="tabBtn" data-client-tab="media">Mídia</button></div>
 <div class="miniStats"><div class="miniStat"><strong>—</strong><small>Veículos</small></div><div class="miniStat"><strong>0</strong><small>Pessoas</small></div><div class="miniStat"><strong>0</strong><small>Propostas</small></div><div class="miniStat"><strong>0</strong><small>Oportunidades</small></div></div>
 <div class="clientActions"><button class="clientAction"><i data-lucide="phone"></i>Ligar</button><button class="clientAction"><i data-lucide="message-circle"></i>WhatsApp</button><button class="clientAction"><i data-lucide="calendar-plus"></i>Próxima ação</button><button class="clientAction primary" data-go="proposal"><i data-lucide="file-plus-2"></i>Proposta</button></div>
 <div class="clientPanel active" data-client-panel="overview">
@@ -102,7 +102,7 @@ button,input,select{font:inherit}.shell{max-width:720px;margin:0 auto;min-height
 <div class="proposalRow" data-go="proposal"><i data-lucide="file-text"></i><div class="rowBody"><b>Lorentrans · 10 Rodotrens</b><small>320 pneus protegidos · EQ-120</small><strong>R$ 41.518,00</strong></div><span class="status">EM NEGOCIAÇÃO</span></div>
 <button class="btn primary full" data-go="proposal"><i data-lucide="file-plus-2"></i> Nova proposta para este cliente</button>
 </section></div>
-<div class="clientPanel" data-client-panel="history">
+<div class="clientPanel" data-client-panel="media"><section class="section"><div id="assetMemoryRoot"><div class="assetEmpty">Memória visual carregará ao abrir esta aba.</div></div></section></div><div class="clientPanel" data-client-panel="history">
 <section class="section"><div class="sectionHead"><h2>Atividades recentes</h2><button>Ver todas →</button></div>
 <div class="listRow"><i data-lucide="phone-call" style="color:#55e766"></i><div class="rowBody"><b>Ligação / acompanhamento</b><small>Revisar expansão e próximos passos comerciais.</small></div></div>
 <div class="listRow"><i data-lucide="send" style="color:#7de6ef"></i><div class="rowBody"><b>Proposta enviada</b><small>10 Rodotrens · 320 pneus · 6 parcelas.</small></div></div>
@@ -224,7 +224,7 @@ window.lucide?.createIcons?.();
 <script defer src="/core/services/proposal-intelligence-service.js"></script>
 <script defer src="/core/services/connection-state-service.js"></script>
 <script defer src="/core/services/sync-bridge-service.js"></script>
-<script defer src="/core-bridge.js"></script>
+<script defer src="/core-bridge.js"></script>\n<script defer src="/account-assets-v3.js"></script>
 <script src="capability-bridge-v3.js"></script>
 <script src="review-gate-v3.js"></script>
 <script src="capability-ui-v3.js"></script>
