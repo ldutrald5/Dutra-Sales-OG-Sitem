@@ -9,6 +9,9 @@ assert.throws(()=>gateway.safeUuid('lead-1'),/inválido/);
 assert.equal(gateway.mediaForMime('image/jpeg').mediaKind,'IMAGE');
 assert.equal(gateway.mediaForMime('application/pdf').mediaKind,'DOCUMENT');
 assert.throws(()=>gateway.mediaForMime('text/html'),/não permitido/);
+assert.equal(gateway.validateContentSignature(Buffer.from([0xff,0xd8,0xff,0xdb]),'image/jpeg'),true);
+assert.equal(gateway.validateContentSignature(Buffer.from('%PDF-1.7\n'),'application/pdf'),true);
+assert.throws(()=>gateway.validateContentSignature(Buffer.from('not-a-pdf'),'application/pdf'),/não corresponde/);
 
 assert.equal(
   gateway.buildStoragePath(
@@ -61,6 +64,7 @@ try {
         legacy_lead_id:'LEAD-1'
       }]);
     }
+    if(u.includes('/rest/v1/asset_versions?sha256=eq.') && init.method==='GET') return json(200,[]);
     if(u.endsWith('/rest/v1/assets') && init.method==='POST') {
       return json(201,[JSON.parse(init.body)]);
     }
@@ -94,7 +98,7 @@ try {
       businessCategory:'FLEET',
       sourceType:'CAMERA'
     },
-    Buffer.from('fake-image'),
+    Buffer.from([0xff,0xd8,0xff,0xdb,0x00]),
     env
   );
 
@@ -120,6 +124,7 @@ try {
         legacy_lead_id:'LEAD-1'
       }]);
     }
+    if(u.includes('/rest/v1/asset_versions?sha256=eq.') && init.method==='GET') return json(200,[]);
     if(u.endsWith('/rest/v1/assets') && init.method==='POST') return json(201,[JSON.parse(init.body)]);
     if(u.endsWith('/rest/v1/asset_versions') && init.method==='POST') return json(201,[JSON.parse(init.body)]);
     if(u.includes('/storage/v1/object/account-assets/') && init.method==='POST') return json(500,{message:'storage down'});
@@ -135,7 +140,7 @@ try {
       originalFilename:'doc.pdf',
       businessCategory:'COMMERCIAL_DOCUMENT'
     },
-    Buffer.from('pdf'),
+    Buffer.from('%PDF-1.7\n'),
     env
   );
 
@@ -145,6 +150,26 @@ try {
     calls.some(c=>c.method==='DELETE'&&c.url.includes('/rest/v1/assets?id=eq.')),
     'Falha de Storage deve compensar o Asset incompleto'
   );
+
+  calls.length=0;
+  globalThis.fetch=async (url,init={})=>{
+    calls.push({url:String(url),method:init.method||'GET',body:init.body});
+    const u=String(url);
+    if(u.includes('/rest/v1/companies?')) return json(200,[{id:'11111111-1111-4111-8111-111111111111',name:'Transportadora Teste',legacy_lead_id:'LEAD-1'}]);
+    if(u.includes('/rest/v1/asset_versions?sha256=eq.') && init.method==='GET') return json(200,[{asset_id:'55555555-5555-4555-8555-555555555555',version_number:1}]);
+    if(u.includes('/rest/v1/assets?id=in.') && init.method==='GET') return json(200,[{id:'55555555-5555-4555-8555-555555555555',title:'Frota',business_category:'FLEET'}]);
+    throw new Error('Unexpected duplicate fetch '+(init.method||'GET')+' '+u);
+  };
+  const duplicate=await gateway.createAssetWithUpload(
+    {legacyLeadId:'LEAD-1'},
+    {mimeType:'image/jpeg',originalFilename:'frota-duplicada.jpg',businessCategory:'FLEET'},
+    Buffer.from([0xff,0xd8,0xff,0xdb,0x01]),
+    env
+  );
+  assert.equal(duplicate.status,409);
+  assert.match(duplicate.error,/já existe/i);
+  assert.equal(duplicate.data.duplicateAssetId,'55555555-5555-4555-8555-555555555555');
+
 } finally {
   globalThis.fetch=originalFetch;
 }
