@@ -1808,13 +1808,16 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
 
   function proposalVisualRefsForTracking() {
     const items = window.__DUTRA_QUOTE_HANDOFF__?.visuals?.items;
-    return (Array.isArray(items) ? items : []).slice(0, 2).map(item => ({
+    return (Array.isArray(items) ? items : []).slice(0, 2).filter(item =>
+      safeProposalVisualUrl(item?.runtimeUrl)
+      && String(item?.usagePolicy || '').trim().toUpperCase() === 'PROPOSAL_ALLOWED'
+    ).map(item => ({
       assetId: String(item?.assetId || '').trim().slice(0, 80),
       versionId: String(item?.versionId || '').trim().slice(0, 80),
       category: String(item?.category || '').trim().toUpperCase().slice(0, 60),
       title: String(item?.title || '').trim().slice(0, 160),
-      usagePolicy: String(item?.usagePolicy || '').trim().toUpperCase().slice(0, 60)
-    })).filter(item => item.assetId && item.versionId && item.usagePolicy === 'PROPOSAL_ALLOWED');
+      usagePolicy: 'PROPOSAL_ALLOWED'
+    })).filter(item => item.assetId && item.versionId);
   }
 
   function safeProposalVisualUrl(value) {
