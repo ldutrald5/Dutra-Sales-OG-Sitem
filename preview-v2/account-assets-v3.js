@@ -37,7 +37,7 @@ function render(){
   const categories=Object.entries(labels).map(([v,l])=>'<option value="'+esc(v)+'">'+esc(l)+'</option>').join('');
   root.innerHTML='<div class="assetHead"><div><h2>Memória visual</h2><small>'+esc(lead.empresa||lead.nome||'Conta')+' · mídia e documentos da conta</small></div><button class="assetBtn primary" id="assetAdd">+ Adicionar</button></div>'+
   '<div class="assetFilters">'+filters.map(v=>'<button class="assetChip '+(state.filter===v?'active':'')+'" data-asset-filter="'+esc(v)+'">'+esc(v?(labels[v]||v):'Todos')+'</button>').join('')+'</div>'+
-  '<div class="assetComposer" id="assetComposer"><div class="assetComposerRow"><select id="assetCategory">'+categories+'</select><input id="assetNote" maxlength="240" placeholder="Observação opcional"></div><div class="assetPickers"><button class="assetBtn" data-asset-pick="camera">Câmera</button><button class="assetBtn" data-asset-pick="gallery">Galeria</button><button class="assetBtn" data-asset-pick="document">Documento</button></div><input type="file" id="assetInput" hidden></div>'+
+  '<div class="assetComposer" id="assetComposer"><div class="assetComposerRow"><select id="assetCategory">'+categories+'</select><input id="assetNote" maxlength="240" placeholder="Observação opcional"><select id="assetUsage"><option value="INTERNAL_REFERENCE">Uso interno</option><option value="PROPOSAL_ALLOWED">Permitido em proposta</option><option value="MARKETING_ALLOWED">Permitido em marketing</option><option value="RESTRICTED">Restrito</option></select><select id="assetSensitivity"><option value="NORMAL">Normal</option><option value="PERSONAL_DATA">Dados pessoais</option><option value="COMMERCIAL_SENSITIVE">Comercial sensível</option><option value="CONFIDENTIAL">Confidencial</option></select></div><div class="assetPickers"><button class="assetBtn" data-asset-pick="camera">Câmera</button><button class="assetBtn" data-asset-pick="gallery">Galeria</button><button class="assetBtn" data-asset-pick="document">Documento</button></div><input type="file" id="assetInput" hidden></div>'+
   '<div id="assetList">'+renderList()+'</div>';
   $('#assetAdd',root)?.addEventListener('click',()=>$('#assetComposer',root)?.classList.toggle('open'));
   $$('[data-asset-filter]',root).forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.assetFilter||'';load(true)}));
@@ -76,10 +76,12 @@ async function openDetail(id){
   sheet.innerHTML='<div class="assetSheetHead"><div><small>'+esc(labels[item.business_category]||item.business_category||'Material')+'</small><h3>'+esc(item.title||v.original_filename||'Material da conta')+'</h3><small>'+esc([item.source_type,fmt(item.captured_at||item.created_at)].filter(Boolean).join(' · '))+'</small></div><button class="assetBtn" id="assetClose">Fechar</button></div>'+
     '<div class="assetPreviewLarge" id="assetPreviewLarge">'+(item.media_kind==='IMAGE'?'▧':'▤')+'</div>'+
     '<div class="assetFacts"><div class="assetFact"><small>POLÍTICA DE USO</small><strong>'+esc(item.usage_policy||'INTERNAL_REFERENCE')+'</strong></div><div class="assetFact"><small>SENSIBILIDADE</small><strong>'+esc(item.sensitivity_level||'NORMAL')+'</strong></div><div class="assetFact"><small>ORIGEM</small><strong>'+esc(item.source_type||'MANUAL_UPLOAD')+'</strong></div><div class="assetFact"><small>VERSÃO</small><strong>'+esc(v.version_number?'v'+v.version_number:'—')+'</strong></div></div>'+
-    '<div class="assetDetailActions"><button class="assetBtn primary" id="assetOpen">Abrir arquivo</button><button class="assetBtn" id="assetMakePrimary">'+(item.is_primary?'Principal ✓':'Definir principal')+'</button><button class="assetBtn" id="assetArchive">Arquivar</button><button class="assetBtn assetDanger" id="assetDelete">Excluir</button></div>';
+    '<div class="assetDetailActions"><button class="assetBtn primary" id="assetOpen">Abrir arquivo</button><button class="assetBtn" id="assetReplace">Substituir arquivo</button><button class="assetBtn" id="assetMakePrimary">'+(item.is_primary?'Principal ✓':'Definir principal')+'</button><button class="assetBtn" id="assetArchive">Arquivar</button><button class="assetBtn assetDanger" id="assetDelete">Excluir</button></div><input type="file" id="assetReplaceInput" hidden>';
   drawer.classList.add('open');
   $('#assetClose')?.addEventListener('click',closeDetail);
   $('#assetOpen')?.addEventListener('click',()=>openSigned(id));
+  $('#assetReplace')?.addEventListener('click',()=>{const input=$('#assetReplaceInput');if(!input)return;input.value='';input.accept=item.media_kind==='IMAGE'?'image/jpeg,image/png,image/webp,image/heic,image/heif':item.media_kind==='DOCUMENT'?'application/pdf':'*/*';input.click()});
+  $('#assetReplaceInput')?.addEventListener('change',e=>replaceFile(id,e));
   $('#assetMakePrimary')?.addEventListener('click',()=>setPrimary(id));
   $('#assetArchive')?.addEventListener('click',()=>changeStatus(id,'archive'));
   $('#assetDelete')?.addEventListener('click',()=>changeStatus(id,'delete'));
@@ -91,6 +93,19 @@ async function openDetail(id){
   }
 }
 function closeDetail(){$('#assetDrawer')?.classList.remove('open')}
+async function replaceFile(id,e){
+  const file=e.target.files?.[0];if(!file)return;
+  if(file.size>15*1024*1024){notify('Arquivo acima de 15 MB.');return}
+  try{
+    await core().request('/assets/'+encodeURIComponent(id)+'/versions',{
+      method:'POST',
+      headers:{'content-type':file.type||'application/octet-stream','x-file-name':encodeURIComponent(file.name||'arquivo')},
+      body:file,
+      timeoutMs:35000
+    });
+    notify('Nova versão salva ✓');closeDetail();await load(true);
+  }catch(err){notify('Falha ao substituir: '+err.message)}
+}
 async function setPrimary(id){
   try{
     await core().request('/assets/'+encodeURIComponent(id)+'/primary',{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
@@ -133,9 +148,10 @@ function pick(mode){
 }
 async function upload(e){
   const file=e.target.files?.[0],lead=selected();if(!file||!lead)return;
+  if(file.size>15*1024*1024){notify('Arquivo acima de 15 MB.');return}
   const root=shell();root?.classList.add('assetBusy');
   try{
-    const p=new URLSearchParams(refParams(lead));p.set('category',$('#assetCategory')?.value||'OTHER');p.set('sourceType',e.target.dataset.source||'MANUAL_UPLOAD');const note=clean($('#assetNote')?.value);if(note)p.set('title',note);
+    const p=new URLSearchParams(refParams(lead));p.set('category',$('#assetCategory')?.value||'OTHER');p.set('sourceType',e.target.dataset.source||'MANUAL_UPLOAD');p.set('usagePolicy',$('#assetUsage')?.value||'INTERNAL_REFERENCE');p.set('sensitivity',$('#assetSensitivity')?.value||'NORMAL');const note=clean($('#assetNote')?.value);if(note)p.set('title',note);
     await core().request('/assets/upload?'+p.toString(),{method:'POST',headers:{'content-type':file.type||'application/octet-stream','x-file-name':encodeURIComponent(file.name||'arquivo')},body:file,timeoutMs:35000});
     notify('Material salvo ✓');await load(true);
   }catch(err){notify('Falha no upload: '+err.message)}
