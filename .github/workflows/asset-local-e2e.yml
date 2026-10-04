@@ -61,6 +61,7 @@ jobs:
             echo "OG_SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
             echo "OG_ASSET_E2E_LEGACY_LEAD_ID=ASSET-E2E-GITHUB"
             echo "OG_ASSET_E2E_ALLOW_WRITE=YES_I_AM_USING_A_DISPOSABLE_BRANCH"
+            echo "OG_ASSET_E2E_ANON_KEY=$ANON_KEY"
           } >> "$GITHUB_ENV"
 
           echo "$DB_URL" > /tmp/asset-db-url
@@ -75,14 +76,54 @@ jobs:
 
           psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
           insert into public.companies (id, legacy_lead_id, name)
-          values (
-            '11111111-1111-4111-8111-111111111111',
-            'ASSET-E2E-GITHUB',
-            'ASSET E2E TEST'
-          )
+          values
+            (
+              '11111111-1111-4111-8111-111111111111',
+              'ASSET-E2E-GITHUB',
+              'ASSET E2E TEST'
+            ),
+            (
+              '22222222-2222-4222-8222-222222222222',
+              'ASSET-E2E-OTHER',
+              'ASSET E2E OTHER COMPANY'
+            )
           on conflict (legacy_lead_id) do update
             set name = excluded.name,
                 updated_at = now();
+
+          insert into public.crm_contacts (id, company_id, full_name)
+          values (
+            '33333333-3333-4333-8333-333333333333',
+            '11111111-1111-4111-8111-111111111111',
+            'Contato E2E'
+          );
+
+          insert into public.sales_opportunities (id, company_id, title)
+          values (
+            '44444444-4444-4444-8444-444444444444',
+            '11111111-1111-4111-8111-111111111111',
+            'Oportunidade E2E'
+          );
+
+          insert into public.proposals (id, company_id, title)
+          values
+            (
+              '55555555-5555-4555-8555-555555555555',
+              '11111111-1111-4111-8111-111111111111',
+              'Proposta E2E'
+            ),
+            (
+              '66666666-6666-4666-8666-666666666666',
+              '22222222-2222-4222-8222-222222222222',
+              'Proposta E2E Outra Empresa'
+            );
+
+          insert into public.crm_activities (id, company_id, activity_type)
+          values (
+            '77777777-7777-4777-8777-777777777777',
+            '11111111-1111-4111-8111-111111111111',
+            'VISIT'
+          );
 
           notify pgrst, 'reload schema';
           SQL
@@ -144,7 +185,7 @@ jobs:
 
             if asset_count < 1 then raise exception 'E2E não criou Asset'; end if;
             if version_count < 2 then raise exception 'E2E não preservou versões'; end if;
-            if link_count <> 0 then raise exception 'Smoke básico não deveria criar links'; end if;
+            if link_count <> 4 then raise exception 'E2E deveria criar exatamente quatro links contextuais'; end if;
 
             select count(*) into bad_paths
             from public.asset_versions
@@ -153,7 +194,21 @@ jobs:
                or storage_path ilike '%ASSET E2E%';
 
             if bad_paths <> 0 then raise exception 'Storage path canônico inválido'; end if;
-          end $$;
+
+            if exists (
+              select 1
+              from public.asset_links l
+              join public.assets a on a.id = l.asset_id
+              left join public.proposals p on p.id = l.proposal_id
+              where l.proposal_id is not null
+                and (
+                  l.pinned_version_id is null
+                  or p.company_id <> a.company_id
+                )
+            ) then
+              raise exception 'Proposal link perdeu version pin ou fronteira de Company';
+            end if;
+          end $;
           SQL
 
           echo "DB/Storage invariants: PASS"
