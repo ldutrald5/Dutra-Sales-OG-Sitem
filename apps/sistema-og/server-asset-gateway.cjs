@@ -392,6 +392,38 @@ async function getAsset(assetId, env) {
   return row?{...result,data:row}:{...result,status:404,data:null,error:'Asset não encontrado'};
 }
 
+async function visualSummary(ref = {}, env = process.env) {
+  let company;
+  try { company=await resolveCompany(ref,env); }
+  catch(error){ return {configured:cfg(env).enabled,status:400,data:null,error:error.message}; }
+  if(company.error)return company;
+
+  const params=new URLSearchParams();
+  params.set('company_id','eq.'+company.data.id);
+  params.set('status','eq.ACTIVE');
+  params.set('business_category','in.(LOGO,COVER,FLEET)');
+  params.set('select','id,title,business_category,current_version_id,is_primary,created_at');
+  params.set('order','is_primary.desc,created_at.desc,id.desc');
+  params.set('limit','24');
+
+  const result=await rest('assets?'+params.toString(),{},env);
+  if(result.error)return result;
+  const rows=Array.isArray(result.data)?result.data:[];
+  const pick=category=>rows.find(x=>x.business_category===category&&x.is_primary)||rows.find(x=>x.business_category===category)||null;
+  const logo=pick('LOGO');
+  const fleet=pick('FLEET');
+  const cover=pick('COVER')||fleet;
+  return {
+    configured:true,status:200,error:null,
+    data:{
+      company:company.data,
+      logo:logo?{id:logo.id,title:logo.title,category:logo.business_category}:null,
+      cover:cover?{id:cover.id,title:cover.title,category:cover.business_category}:null,
+      fleet:fleet?{id:fleet.id,title:fleet.title,category:fleet.business_category}:null
+    }
+  };
+}
+
 async function listAssets(ref = {}, options = {}, env = process.env) {
   let company;
   try { company=await resolveCompany(ref,env); }
@@ -586,5 +618,5 @@ async function health(env = process.env) {
 module.exports={
   BUCKET,MIME,MEDIA_KINDS,BUSINESS_CATEGORIES,SOURCE_TYPES,VISIBILITY_CLASSES,SENSITIVITY_LEVELS,USAGE_POLICIES,
   cfg,safeUuid,mediaForMime,buildStoragePath,encodeCursor,decodeCursor,normalizeMetadata,validateBytes,validateContentSignature,
-  rest,storageRequest,resolveCompany,findDuplicateAsset,health,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,setStatus
+  rest,storageRequest,resolveCompany,findDuplicateAsset,health,visualSummary,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,setStatus
 };
