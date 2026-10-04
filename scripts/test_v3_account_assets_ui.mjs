@@ -17,6 +17,12 @@ assert.match(ui,/application\/pdf/);
 assert.match(ui,/image\/heic/);
 assert.match(ui,/nextCursor/);
 assert.match(ui,/ttl=600/);
+assert.match(ui,/assetMakePrimary/);
+assert.match(ui,/\/primary/);
+assert.match(ui,/\/archive/);
+assert.match(ui,/method:'DELETE'/);
+assert.match(ui,/usage_policy/);
+assert.match(ui,/sensitivity_level/);
 assert.doesNotMatch(ui,/SUPABASE_SERVICE_ROLE_KEY|service_role/i);
 assert.doesNotMatch(ui,/supabase\.co|createClient\(/i);
 
