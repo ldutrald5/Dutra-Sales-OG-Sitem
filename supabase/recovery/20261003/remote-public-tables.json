@@ -1,0 +1,6448 @@
+{
+  "tables": [
+    {
+      "name": "public.companies",
+      "rls_enabled": true,
+      "rows": 9,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "legal_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "cnpj",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "domain",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "website",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "sector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "subsector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "logo_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "city",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "state",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "enrichment_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "enrichment_status = ANY (ARRAY['pending'::text, 'enriched'::text, 'partial'::text, 'needs_review'::text, 'failed'::text])"
+        },
+        {
+          "name": "enrichment_confidence",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "enrichment_confidence IS NULL OR enrichment_confidence >= 0::numeric AND enrichment_confidence <= 1::numeric"
+        },
+        {
+          "name": "enrichment_data",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "normalized_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "relationship_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'UNKNOWN'::text",
+          "check": "relationship_status = ANY (ARRAY['UNKNOWN'::text, 'COLD'::text, 'KNOWS_OG'::text, 'PREVIOUS_CONTACT'::text, 'PREVIOUS_PROPOSAL'::text, 'NEGOTIATION'::text, 'CUSTOMER'::text, 'INACTIVE_CUSTOMER'::text])"
+        },
+        {
+          "name": "legacy_lead_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_conversations_company_id_fkey",
+          "source_table": "public.crm_conversations",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_company_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lead_list_members_company_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_company_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "meetings_company_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_company_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_company_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_company_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "enrichment_jobs_company_id_fkey",
+          "source_table": "public.enrichment_jobs",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "company_discovery_sources_company_id_fkey",
+          "source_table": "public.company_discovery_sources",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "company_brand_assets_company_id_fkey",
+          "source_table": "public.company_brand_assets",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_contacts_company_id_fkey",
+          "source_table": "public.crm_contacts",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_company_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.vehicle_profiles",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "tires_per_vehicle",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "tires_per_vehicle > 0"
+        },
+        {
+          "name": "equalizers_per_vehicle",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "equalizers_per_vehicle IS NULL OR equalizers_per_vehicle >= 0::numeric"
+        },
+        {
+          "name": "supports_per_vehicle",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "supports_per_vehicle IS NULL OR supports_per_vehicle >= 0::numeric"
+        },
+        {
+          "name": "avg_monthly_km",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "avg_monthly_km IS NULL OR avg_monthly_km >= 0::numeric"
+        },
+        {
+          "name": "avg_consumption_km_l",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "avg_consumption_km_l IS NULL OR avg_consumption_km_l > 0::numeric"
+        },
+        {
+          "name": "default_tire_price",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "default_tire_price IS NULL OR default_tire_price >= 0::numeric"
+        },
+        {
+          "name": "config_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'needs_configuration'::text",
+          "check": "config_status = ANY (ARRAY['ready'::text, 'needs_configuration'::text, 'inactive'::text])"
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposals_vehicle_profile_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "vehicle_profile_id"
+          ],
+          "target_table": "public.vehicle_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_vehicle_profile_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "vehicle_profile_id"
+          ],
+          "target_table": "public.vehicle_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.financial_parameter_sets",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "currency",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'BRL'::text"
+        },
+        {
+          "name": "diesel_price",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "diesel_price IS NULL OR diesel_price >= 0::numeric"
+        },
+        {
+          "name": "tire_price",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "tire_price IS NULL OR tire_price >= 0::numeric"
+        },
+        {
+          "name": "diesel_savings_min",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0.02",
+          "check": "diesel_savings_min >= 0::numeric AND diesel_savings_min <= 1::numeric"
+        },
+        {
+          "name": "diesel_savings_default",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0.02",
+          "check": "diesel_savings_default >= 0::numeric AND diesel_savings_default <= 1::numeric"
+        },
+        {
+          "name": "diesel_savings_max",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0.06",
+          "check": "diesel_savings_max >= 0::numeric AND diesel_savings_max <= 1::numeric"
+        },
+        {
+          "name": "tire_life_gain",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0.20",
+          "check": "tire_life_gain >= 0::numeric AND tire_life_gain <= 1::numeric"
+        },
+        {
+          "name": "equalizer_unit_price",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "equalizer_unit_price IS NULL OR equalizer_unit_price >= 0::numeric"
+        },
+        {
+          "name": "support_unit_price",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "support_unit_price IS NULL OR support_unit_price >= 0::numeric"
+        },
+        {
+          "name": "installation_cost",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "installation_cost >= 0::numeric"
+        },
+        {
+          "name": "annual_operational_cost",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "annual_operational_cost >= 0::numeric"
+        },
+        {
+          "name": "valid_from",
+          "data_type": "date",
+          "format": "date",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "CURRENT_DATE"
+        },
+        {
+          "name": "valid_until",
+          "data_type": "date",
+          "format": "date",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "assumptions",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "annual_tire_replacement_factor",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "annual_tire_replacement_factor IS NULL OR annual_tire_replacement_factor >= 0::numeric"
+        },
+        {
+          "name": "package_price_per_vehicle",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "package_price_per_vehicle IS NULL OR package_price_per_vehicle >= 0::numeric"
+        },
+        {
+          "name": "tire_cycle_months",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "tire_cycle_months IS NULL OR tire_cycle_months > 0::numeric"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposals_financial_parameter_set_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "financial_parameter_set_id"
+          ],
+          "target_table": "public.financial_parameter_sets",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.reference_clients",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "sector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "subsector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "logo_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "website",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "priority",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "approved_for_marketing",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "approval_note",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "relationship_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'candidate'::text",
+          "check": "relationship_status = ANY (ARRAY['candidate'::text, 'confirmed_client'::text, 'former_client'::text, 'prospect'::text])"
+        },
+        {
+          "name": "approval_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "approval_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])"
+        },
+        {
+          "name": "evidence",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "confirmed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "approved_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposal_references_reference_client_id_fkey",
+          "source_table": "public.proposal_references",
+          "source_columns": [
+            "reference_client_id"
+          ],
+          "target_table": "public.reference_clients",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.sector_assets",
+      "rls_enabled": true,
+      "rows": 11,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "sector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "cover_image_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "page2_image_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "page3_image_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "page4_image_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "page5_image_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "visual_theme",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "public.proposal_templates",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "renderer",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'html_pdf'::text",
+          "check": "renderer = ANY (ARRAY['html_pdf'::text, 'apitemplate'::text, 'bannerbear'::text, 'placid'::text, 'other'::text])"
+        },
+        {
+          "name": "template_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'1.0.0'::text"
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposals_proposal_template_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "proposal_template_id"
+          ],
+          "target_table": "public.proposal_templates",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.proposals",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "company_name_input",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "fleet_size",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "fleet_size > 0"
+        },
+        {
+          "name": "vehicle_profile_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "financial_parameter_set_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "proposal_template_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "calculation_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'1.0.0'::text"
+        },
+        {
+          "name": "template_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'1.0.0'::text"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'draft'::text",
+          "check": "status = ANY (ARRAY['draft'::text, 'enriching'::text, 'calculating'::text, 'rendering'::text, 'ready'::text, 'sent'::text, 'failed'::text, 'archived'::text])"
+        },
+        {
+          "name": "total_tires",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "total_tires IS NULL OR total_tires >= 0"
+        },
+        {
+          "name": "total_equalizers",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "total_equalizers IS NULL OR total_equalizers >= 0::numeric"
+        },
+        {
+          "name": "total_supports",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "total_supports IS NULL OR total_supports >= 0::numeric"
+        },
+        {
+          "name": "investment_total",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "investment_total IS NULL OR investment_total >= 0::numeric"
+        },
+        {
+          "name": "protected_asset_value",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "protected_asset_value IS NULL OR protected_asset_value >= 0::numeric"
+        },
+        {
+          "name": "annual_tire_savings",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "annual_tire_savings IS NULL OR annual_tire_savings >= 0::numeric"
+        },
+        {
+          "name": "annual_fuel_savings",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "annual_fuel_savings IS NULL OR annual_fuel_savings >= 0::numeric"
+        },
+        {
+          "name": "annual_total_savings",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "annual_total_savings IS NULL OR annual_total_savings >= 0::numeric"
+        },
+        {
+          "name": "roi_percent",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "payback_months",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "payback_months IS NULL OR payback_months >= 0::numeric"
+        },
+        {
+          "name": "proposal_snapshot",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "pdf_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "pdf_storage_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposal_artifacts_proposal_id_fkey",
+          "source_table": "public.proposal_artifacts",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_company_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_vehicle_profile_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "vehicle_profile_id"
+          ],
+          "target_table": "public.vehicle_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_financial_parameter_set_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "financial_parameter_set_id"
+          ],
+          "target_table": "public.financial_parameter_sets",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_proposal_template_id_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "proposal_template_id"
+          ],
+          "target_table": "public.proposal_templates",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposals_created_by_fkey",
+          "source_table": "public.proposals",
+          "source_columns": [
+            "created_by"
+          ],
+          "target_table": "auth.users",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposal_references_proposal_id_fkey",
+          "source_table": "public.proposal_references",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "enrichment_jobs_proposal_id_fkey",
+          "source_table": "public.enrichment_jobs",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "render_jobs_proposal_id_fkey",
+          "source_table": "public.render_jobs",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "pipeline_events_proposal_id_fkey",
+          "source_table": "public.pipeline_events",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_latest_proposal_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "latest_proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.proposal_references",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "reference_client_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "position",
+          "data_type": "smallint",
+          "format": "int2",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1",
+          "check": "\"position\" > 0"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "proposal_id",
+        "reference_client_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposal_references_reference_client_id_fkey",
+          "source_table": "public.proposal_references",
+          "source_columns": [
+            "reference_client_id"
+          ],
+          "target_table": "public.reference_clients",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "proposal_references_proposal_id_fkey",
+          "source_table": "public.proposal_references",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.enrichment_jobs",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['pending'::text, 'processing'::text, 'completed'::text, 'needs_review'::text, 'failed'::text, 'cancelled'::text])"
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "attempts",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "attempts >= 0"
+        },
+        {
+          "name": "input",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "output",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "next_attempt_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "locked_by",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "locked_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "enrichment_jobs_proposal_id_fkey",
+          "source_table": "public.enrichment_jobs",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "enrichment_jobs_company_id_fkey",
+          "source_table": "public.enrichment_jobs",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "company_discovery_sources_enrichment_job_id_fkey",
+          "source_table": "public.company_discovery_sources",
+          "source_columns": [
+            "enrichment_job_id"
+          ],
+          "target_table": "public.enrichment_jobs",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.render_jobs",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['waiting'::text, 'pending'::text, 'processing'::text, 'completed'::text, 'failed'::text, 'cancelled'::text])"
+        },
+        {
+          "name": "renderer",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'html_pdf'::text"
+        },
+        {
+          "name": "input",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "output",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "attempts",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "attempts >= 0"
+        },
+        {
+          "name": "next_attempt_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "locked_by",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "locked_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "render_jobs_proposal_id_fkey",
+          "source_table": "public.render_jobs",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.proposal_artifacts",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "artifact_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "artifact_type = ANY (ARRAY['html'::text, 'pdf'::text, 'cover_image'::text, 'preview_image'::text, 'json'::text])"
+        },
+        {
+          "name": "storage_bucket",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'proposal-artifacts'::text"
+        },
+        {
+          "name": "storage_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "mime_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "size_bytes",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "size_bytes IS NULL OR size_bytes >= 0"
+        },
+        {
+          "name": "sha256",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "proposal_artifacts_proposal_id_fkey",
+          "source_table": "public.proposal_artifacts",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.pipeline_events",
+      "rls_enabled": true,
+      "rows": 8,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "nextval('pipeline_events_id_seq'::regclass)"
+        },
+        {
+          "name": "proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "entity_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "entity_type = ANY (ARRAY['proposal'::text, 'enrichment_job'::text, 'render_job'::text])"
+        },
+        {
+          "name": "entity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "event_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "from_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "to_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "payload",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "pipeline_events_proposal_id_fkey",
+          "source_table": "public.pipeline_events",
+          "source_columns": [
+            "proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.sector_taxonomy",
+      "rls_enabled": true,
+      "rows": 11,
+      "columns": [
+        {
+          "name": "code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "description",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "aliases",
+          "data_type": "ARRAY",
+          "format": "_text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::text[]"
+        },
+        {
+          "name": "priority",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "code"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "visual_asset_library_sector_fkey",
+          "source_table": "public.visual_asset_library",
+          "source_columns": [
+            "sector"
+          ],
+          "target_table": "public.sector_taxonomy",
+          "target_columns": [
+            "code"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.company_discovery_sources",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "enrichment_job_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "source_type = ANY (ARRAY['official_site'::text, 'search_result'::text, 'social'::text, 'directory'::text, 'registry'::text, 'manual'::text, 'other'::text])"
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "is_official",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "confidence",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "confidence IS NULL OR confidence >= 0::numeric AND confidence <= 1::numeric"
+        },
+        {
+          "name": "extracted",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "company_discovery_sources_enrichment_job_id_fkey",
+          "source_table": "public.company_discovery_sources",
+          "source_columns": [
+            "enrichment_job_id"
+          ],
+          "target_table": "public.enrichment_jobs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "company_discovery_sources_company_id_fkey",
+          "source_table": "public.company_discovery_sources",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.company_brand_assets",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "asset_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "asset_type = ANY (ARRAY['logo'::text, 'favicon'::text, 'hero'::text, 'photo'::text, 'brand_palette'::text])"
+        },
+        {
+          "name": "source_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "storage_bucket",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "storage_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "data_uri_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "mime_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "width",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "height",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "confidence",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "confidence IS NULL OR confidence >= 0::numeric AND confidence <= 1::numeric"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'discovered'::text",
+          "check": "status = ANY (ARRAY['discovered'::text, 'pending_copy'::text, 'stored'::text, 'rejected'::text, 'failed'::text])"
+        },
+        {
+          "name": "is_primary",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "attempts",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "attempts >= 0"
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "locked_by",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "locked_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "company_brand_assets_company_id_fkey",
+          "source_table": "public.company_brand_assets",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_contacts",
+      "rls_enabled": true,
+      "rows": 8,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'kaption'::text"
+        },
+        {
+          "name": "external_contact_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "full_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "phone_e164",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "email",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "role_title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "decision_level",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'unknown'::text",
+          "check": "decision_level = ANY (ARRAY['decision_maker'::text, 'influencer'::text, 'user'::text, 'gatekeeper'::text, 'unknown'::text])"
+        },
+        {
+          "name": "source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'whatsapp'::text"
+        },
+        {
+          "name": "source_metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "last_contact_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "whatsapp_e164",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "role_category",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'UNKNOWN'::text",
+          "check": "role_category = ANY (ARRAY['GATEKEEPER'::text, 'OPERATIONAL'::text, 'FLEET_MANAGER'::text, 'MAINTENANCE_MANAGER'::text, 'PROCUREMENT'::text, 'DIRECTOR'::text, 'OWNER'::text, 'UNKNOWN'::text])"
+        },
+        {
+          "name": "influence_level",
+          "data_type": "smallint",
+          "format": "int2",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "influence_level >= 0 AND influence_level <= 5"
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "legacy_contact_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_contacts_company_id_fkey",
+          "source_table": "public.crm_contacts",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_conversations_contact_id_fkey",
+          "source_table": "public.crm_conversations",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_primary_contact_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_contact_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lead_list_members_primary_contact_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_contact_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "meetings_primary_contact_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_contact_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_contact_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_conversations",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'kaption'::text"
+        },
+        {
+          "name": "channel",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'whatsapp'::text"
+        },
+        {
+          "name": "external_thread_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "chat_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'direct'::text",
+          "check": "chat_type = ANY (ARRAY['direct'::text, 'group'::text, 'unknown'::text])"
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'open'::text",
+          "check": "status = ANY (ARRAY['open'::text, 'archived'::text])"
+        },
+        {
+          "name": "last_message_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "summary",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "summary_updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_messages_conversation_id_fkey",
+          "source_table": "public.crm_messages",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_conversations_contact_id_fkey",
+          "source_table": "public.crm_conversations",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_conversations_company_id_fkey",
+          "source_table": "public.crm_conversations",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_source_conversation_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "source_conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_insights_conversation_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_conversation_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_messages",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "conversation_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'kaption'::text"
+        },
+        {
+          "name": "external_message_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "direction",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "direction = ANY (ARRAY['inbound'::text, 'outbound'::text, 'system'::text])"
+        },
+        {
+          "name": "sender_external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "sender_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "body",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "message_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'text'::text"
+        },
+        {
+          "name": "sent_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "raw_payload",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_messages_conversation_id_fkey",
+          "source_table": "public.crm_messages",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_insights_message_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "message_id"
+          ],
+          "target_table": "public.crm_messages",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.visual_asset_library",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "sector",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "asset_role",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "asset_role = ANY (ARRAY['cover'::text, 'technical'::text, 'investment'::text, 'roi'::text, 'social_proof'::text, 'esg'::text])"
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_url",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "storage_bucket",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "storage_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "mime_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "tags",
+          "data_type": "ARRAY",
+          "format": "_text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::text[]"
+        },
+        {
+          "name": "license_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "license_reference",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "approved_for_commercial_use",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "priority",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "visual_asset_library_sector_fkey",
+          "source_table": "public.visual_asset_library",
+          "source_columns": [
+            "sector"
+          ],
+          "target_table": "public.sector_taxonomy",
+          "target_columns": [
+            "code"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.sales_opportunities",
+      "rls_enabled": true,
+      "rows": 8,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "primary_contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_conversation_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'whatsapp'::text"
+        },
+        {
+          "name": "stage",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'lead'::text",
+          "check": "stage = ANY (ARRAY['lead'::text, 'qualified'::text, 'discovery'::text, 'proposal'::text, 'negotiation'::text, 'won'::text, 'lost'::text, 'dormant'::text])"
+        },
+        {
+          "name": "fleet_size",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "fleet_size IS NULL OR fleet_size > 0"
+        },
+        {
+          "name": "fleet_source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "fleet_confidence",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "fleet_confidence IS NULL OR fleet_confidence >= 0::numeric AND fleet_confidence <= 1::numeric"
+        },
+        {
+          "name": "vehicle_profile_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "primary_pain",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "objections",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "next_action",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "next_action_due_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "latest_proposal_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "pipeline_stage",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'PROSPECT'::text",
+          "check": "pipeline_stage = ANY (ARRAY['PROSPECT'::text, 'CONTACT_ATTEMPTED'::text, 'CONNECTED'::text, 'DECISION_MAKER_IDENTIFIED'::text, 'DECISION_MAKER_CONTACTED'::text, 'QUALIFIED'::text, 'MEETING_TO_SCHEDULE'::text, 'MEETING_SCHEDULED'::text, 'MEETING_COMPLETED'::text, 'PROPOSAL'::text, 'NEGOTIATION'::text, 'WON'::text, 'LOST'::text])"
+        },
+        {
+          "name": "relationship_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'UNKNOWN'::text",
+          "check": "relationship_status = ANY (ARRAY['UNKNOWN'::text, 'COLD'::text, 'KNOWS_OG'::text, 'PREVIOUS_CONTACT'::text, 'PREVIOUS_PROPOSAL'::text, 'NEGOTIATION'::text, 'CUSTOMER'::text, 'INACTIVE_CUSTOMER'::text])"
+        },
+        {
+          "name": "next_action_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "next_action_type IS NULL OR (next_action_type = ANY (ARRAY['CALL'::text, 'WHATSAPP'::text, 'MEETING'::text, 'FOLLOW_UP'::text, 'SEND_MATERIAL'::text, 'CREATE_PROPOSAL'::text, 'PROPOSAL_FOLLOW_UP'::text, 'CUSTOMER_EXPANSION'::text]))"
+        },
+        {
+          "name": "next_action_reason",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "next_action_priority",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "next_action_priority IS NULL OR (next_action_priority = ANY (ARRAY['LOW'::text, 'MEDIUM'::text, 'HIGH'::text, 'URGENT'::text]))"
+        },
+        {
+          "name": "legacy_opportunity_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "data_provenance",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "proposal_triggered_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "call_recordings_opportunity_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_opportunity_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_opportunity_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "meetings_opportunity_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_insights_opportunity_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_latest_proposal_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "latest_proposal_id"
+          ],
+          "target_table": "public.proposals",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_source_conversation_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "source_conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_vehicle_profile_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "vehicle_profile_id"
+          ],
+          "target_table": "public.vehicle_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_primary_contact_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "sales_opportunities_company_id_fkey",
+          "source_table": "public.sales_opportunities",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_insights",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "conversation_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "message_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "opportunity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "insight_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'conversation_snapshot'::text"
+        },
+        {
+          "name": "facts",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "hypotheses",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "objections",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "buying_signals",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "open_questions",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "next_action",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "confidence",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "confidence IS NULL OR confidence >= 0::numeric AND confidence <= 1::numeric"
+        },
+        {
+          "name": "review_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "review_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'auto_applied'::text])"
+        },
+        {
+          "name": "model_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "model_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_message_ids",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_insights_conversation_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_insights_opportunity_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_processor_runs_insight_id_fkey",
+          "source_table": "public.crm_processor_runs",
+          "source_columns": [
+            "insight_id"
+          ],
+          "target_table": "public.crm_insights",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_source_insight_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "source_insight_id"
+          ],
+          "target_table": "public.crm_insights",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_insights_message_id_fkey",
+          "source_table": "public.crm_insights",
+          "source_columns": [
+            "message_id"
+          ],
+          "target_table": "public.crm_messages",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_activities",
+      "rls_enabled": true,
+      "rows": 9,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "conversation_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "opportunity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "activity_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "activity_type = ANY (ARRAY['call'::text, 'message'::text, 'follow_up'::text, 'meeting'::text, 'proposal'::text, 'note'::text, 'task'::text])"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['pending'::text, 'completed'::text, 'cancelled'::text])"
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "description",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "due_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_insight_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_activities_contact_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_company_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_conversation_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "conversation_id"
+          ],
+          "target_table": "public.crm_conversations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_opportunity_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "crm_activities_source_insight_id_fkey",
+          "source_table": "public.crm_activities",
+          "source_columns": [
+            "source_insight_id"
+          ],
+          "target_table": "public.crm_insights",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.integration_events",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "identity",
+            "updatable"
+          ],
+          "identity_generation": "BY DEFAULT"
+        },
+        {
+          "name": "source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "external_event_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "event_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "payload_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "raw_payload",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "processing_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'received'::text",
+          "check": "processing_status = ANY (ARRAY['received'::text, 'processed'::text, 'ignored'::text, 'failed'::text])"
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "processed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "public.internal_service_tokens",
+      "rls_enabled": true,
+      "rows": 4,
+      "columns": [
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "token_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "rotated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "name"
+      ]
+    },
+    {
+      "name": "public.lead_lists",
+      "rls_enabled": true,
+      "rows": 1,
+      "comment": "Operational prospecting collections; companies remain canonical in public.companies.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "length(btrim(name)) >= 1 AND length(btrim(name)) <= 180"
+        },
+        {
+          "name": "source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "source_owner",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "owner_user_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "imported_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'ACTIVE'::text",
+          "check": "status = ANY (ARRAY['ACTIVE'::text, 'ARCHIVED'::text])"
+        },
+        {
+          "name": "total_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "total_count >= 0"
+        },
+        {
+          "name": "worked_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "worked_count >= 0"
+        },
+        {
+          "name": "meetings_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "meetings_count >= 0"
+        },
+        {
+          "name": "proposals_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "proposals_count >= 0"
+        },
+        {
+          "name": "sales_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "sales_count >= 0"
+        },
+        {
+          "name": "pipeline_value",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "pipeline_value >= 0::numeric"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "lead_list_members_list_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "list_id"
+          ],
+          "target_table": "public.lead_lists",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "prospecting_sessions_list_id_fkey",
+          "source_table": "public.prospecting_sessions",
+          "source_columns": [
+            "list_id"
+          ],
+          "target_table": "public.lead_lists",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.lead_list_members",
+      "rls_enabled": true,
+      "rows": 8,
+      "comment": "Membership of canonical companies in prospecting lists; does not duplicate account data.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "list_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "primary_contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "position",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "work_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'AVAILABLE'::text",
+          "check": "work_status = ANY (ARRAY['AVAILABLE'::text, 'IN_PROGRESS'::text, 'WORKED'::text, 'SKIPPED'::text])"
+        },
+        {
+          "name": "enrichment_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'PENDING'::text",
+          "check": "enrichment_status = ANY (ARRAY['PENDING'::text, 'PROCESSING'::text, 'READY'::text, 'FAILED'::text])"
+        },
+        {
+          "name": "briefing_cache",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "briefing_valid_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "last_attempt_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "worked_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "lead_list_members_company_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lead_list_members_list_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "list_id"
+          ],
+          "target_table": "public.lead_lists",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lead_list_members_primary_contact_id_fkey",
+          "source_table": "public.lead_list_members",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "prospecting_sessions_current_member_id_fkey",
+          "source_table": "public.prospecting_sessions",
+          "source_columns": [
+            "current_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_list_member_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "list_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_lead_list_member_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "lead_list_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.prospecting_sessions",
+      "rls_enabled": true,
+      "rows": 0,
+      "comment": "Persistent seller prospecting sessions and conversion counters.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "list_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "seller_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "finished_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'ACTIVE'::text",
+          "check": "status = ANY (ARRAY['ACTIVE'::text, 'PAUSED'::text, 'COMPLETED'::text, 'CANCELLED'::text])"
+        },
+        {
+          "name": "target_calls",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "target_calls > 0"
+        },
+        {
+          "name": "attempted_calls",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "attempted_calls >= 0"
+        },
+        {
+          "name": "connected_calls",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "connected_calls >= 0"
+        },
+        {
+          "name": "decision_makers_reached",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "decision_makers_reached >= 0"
+        },
+        {
+          "name": "qualified_opportunities",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "qualified_opportunities >= 0"
+        },
+        {
+          "name": "meetings_booked",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "meetings_booked >= 0"
+        },
+        {
+          "name": "proposals_created",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "proposals_created >= 0"
+        },
+        {
+          "name": "sales_created",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "sales_created >= 0"
+        },
+        {
+          "name": "current_member_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "session_state",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "prospecting_sessions_list_id_fkey",
+          "source_table": "public.prospecting_sessions",
+          "source_columns": [
+            "list_id"
+          ],
+          "target_table": "public.lead_lists",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "prospecting_sessions_current_member_id_fkey",
+          "source_table": "public.prospecting_sessions",
+          "source_columns": [
+            "current_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_session_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_session_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_prospecting_session_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "prospecting_session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.call_attempts",
+      "rls_enabled": true,
+      "rows": 0,
+      "comment": "Normalized call outcomes linked to session, company and optional contact.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "list_member_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "phone_e164",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "ended_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "outcome",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "outcome = ANY (ARRAY['NO_ANSWER'::text, 'INVALID_NUMBER'::text, 'GATEKEEPER'::text, 'DECISION_MAKER_IDENTIFIED'::text, 'DECISION_MAKER_REACHED'::text, 'RETURN_LATER'::text, 'QUALIFIED'::text, 'MEETING_BOOKED'::text, 'SEND_MATERIAL'::text, 'PROPOSAL'::text, 'NOT_INTERESTED'::text])"
+        },
+        {
+          "name": "connected",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "decision_maker_reached",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "qualified",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "call_attempts_contact_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_session_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_list_member_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "list_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_attempts_company_id_fkey",
+          "source_table": "public.call_attempts",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_call_attempt_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "call_attempt_id"
+          ],
+          "target_table": "public.call_attempts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.meetings",
+      "rls_enabled": true,
+      "rows": 0,
+      "comment": "Sales meeting lifecycle prepared for future calendar adapters.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "opportunity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "primary_contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "seller_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "meeting_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'MEETING_SCHEDULED'::text",
+          "check": "meeting_status = ANY (ARRAY['MEETING_TO_SCHEDULE'::text, 'MEETING_SCHEDULED'::text, 'MEETING_CONFIRMED'::text, 'MEETING_COMPLETED'::text, 'NO_SHOW'::text, 'RESCHEDULED'::text, 'CANCELLED'::text])"
+        },
+        {
+          "name": "meeting_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "mode",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'ONLINE'::text",
+          "check": "mode = ANY (ARRAY['ONLINE'::text, 'PRESENCIAL'::text, 'PHONE'::text])"
+        },
+        {
+          "name": "scheduled_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "duration_minutes",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "30",
+          "check": "duration_minutes >= 5 AND duration_minutes <= 480"
+        },
+        {
+          "name": "objective",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "participants",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "confirmation_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "follow_up_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "calendar_provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "calendar_event_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "meetings_company_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "meetings_opportunity_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "meetings_primary_contact_id_fkey",
+          "source_table": "public.meetings",
+          "source_columns": [
+            "primary_contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.ai_briefings",
+      "rls_enabled": true,
+      "rows": 0,
+      "comment": "Cached contextual call briefings; external actions always require explicit user confirmation.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "opportunity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "mode",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "mode = ANY (ARRAY['GATEKEEPER'::text, 'DECISION_MAKER'::text, 'MEETING'::text, 'CUSTOMER'::text, 'FOLLOW_UP'::text, 'PROPOSAL'::text])"
+        },
+        {
+          "name": "processing_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'PENDING'::text",
+          "check": "processing_status = ANY (ARRAY['PENDING'::text, 'PROCESSING'::text, 'READY'::text, 'FAILED'::text])"
+        },
+        {
+          "name": "source_fingerprint",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "briefing",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "valid_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "external_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "ai_briefings_company_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_contact_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_opportunity_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_briefings_session_id_fkey",
+          "source_table": "public.ai_briefings",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.crm_processor_runs",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "insight_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "processor_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'1.0.0'::text"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'started'::text",
+          "check": "status = ANY (ARRAY['started'::text, 'processed'::text, 'skipped'::text, 'failed'::text])"
+        },
+        {
+          "name": "decision",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "actions",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "error_message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "crm_processor_runs_insight_id_fkey",
+          "source_table": "public.crm_processor_runs",
+          "source_columns": [
+            "insight_id"
+          ],
+          "target_table": "public.crm_insights",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.call_recordings",
+      "rls_enabled": true,
+      "rows": 2,
+      "comment": "Private call audio metadata. Objects live in the private call-recordings Storage bucket.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "company_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "contact_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "opportunity_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "call_attempt_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "prospecting_session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "lead_list_member_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "call_session_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "storage_bucket",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'call-recordings'::text"
+        },
+        {
+          "name": "storage_path",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "capture_mode",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "capture_mode = ANY (ARRAY['MICROPHONE'::text, 'COMPUTER_MIX'::text])"
+        },
+        {
+          "name": "mime_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "size_bytes",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "size_bytes IS NULL OR size_bytes >= 0"
+        },
+        {
+          "name": "duration_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "duration_ms IS NULL OR duration_ms >= 0"
+        },
+        {
+          "name": "seller_active_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "seller_active_ms IS NULL OR seller_active_ms >= 0"
+        },
+        {
+          "name": "customer_active_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "customer_active_ms IS NULL OR customer_active_ms >= 0"
+        },
+        {
+          "name": "overlap_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "overlap_ms IS NULL OR overlap_ms >= 0"
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "ended_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "recording_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'PENDING_UPLOAD'::text",
+          "check": "recording_status = ANY (ARRAY['PENDING_UPLOAD'::text, 'UPLOADED'::text, 'PROCESSING'::text, 'READY'::text, 'FAILED'::text, 'DELETED'::text])"
+        },
+        {
+          "name": "transcription_status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'NOT_REQUESTED'::text",
+          "check": "transcription_status = ANY (ARRAY['NOT_REQUESTED'::text, 'QUEUED'::text, 'PROCESSING'::text, 'READY'::text, 'UNAVAILABLE'::text, 'FAILED'::text])"
+        },
+        {
+          "name": "transcription_provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "transcription_model",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "transcription_error",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "user_initiated",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "call_recordings_company_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "company_id"
+          ],
+          "target_table": "public.companies",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_contact_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "contact_id"
+          ],
+          "target_table": "public.crm_contacts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_opportunity_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "opportunity_id"
+          ],
+          "target_table": "public.sales_opportunities",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_call_attempt_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "call_attempt_id"
+          ],
+          "target_table": "public.call_attempts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_prospecting_session_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "prospecting_session_id"
+          ],
+          "target_table": "public.prospecting_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_recordings_lead_list_member_id_fkey",
+          "source_table": "public.call_recordings",
+          "source_columns": [
+            "lead_list_member_id"
+          ],
+          "target_table": "public.lead_list_members",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_transcripts_recording_id_fkey",
+          "source_table": "public.call_transcripts",
+          "source_columns": [
+            "recording_id"
+          ],
+          "target_table": "public.call_recordings",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_conversation_metrics_recording_id_fkey",
+          "source_table": "public.call_conversation_metrics",
+          "source_columns": [
+            "recording_id"
+          ],
+          "target_table": "public.call_recordings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.call_transcripts",
+      "rls_enabled": true,
+      "rows": 2,
+      "comment": "Transcription generated from a call_recording. Transcript output is guidance and remains reviewable.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "recording_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "model",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "language",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pt'::text"
+        },
+        {
+          "name": "transcript_text",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "segments",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "provider_usage",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "duration_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "duration_ms IS NULL OR duration_ms >= 0"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "call_transcripts_recording_id_fkey",
+          "source_table": "public.call_transcripts",
+          "source_columns": [
+            "recording_id"
+          ],
+          "target_table": "public.call_recordings",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_conversation_metrics_transcript_id_fkey",
+          "source_table": "public.call_conversation_metrics",
+          "source_columns": [
+            "transcript_id"
+          ],
+          "target_table": "public.call_transcripts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.call_conversation_metrics",
+      "rls_enabled": true,
+      "rows": 2,
+      "comment": "Deterministic and capture-derived call metrics; extracted candidates are not canonical CRM facts until reviewed.",
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "recording_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "transcript_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "analysis_version",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'call-intelligence-v1'::text"
+        },
+        {
+          "name": "duration_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "duration_ms IS NULL OR duration_ms >= 0"
+        },
+        {
+          "name": "word_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "word_count >= 0"
+        },
+        {
+          "name": "question_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "question_count >= 0"
+        },
+        {
+          "name": "seller_talk_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "seller_talk_ms IS NULL OR seller_talk_ms >= 0"
+        },
+        {
+          "name": "customer_talk_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "customer_talk_ms IS NULL OR customer_talk_ms >= 0"
+        },
+        {
+          "name": "overlap_ms",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "overlap_ms IS NULL OR overlap_ms >= 0"
+        },
+        {
+          "name": "seller_talk_ratio",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "seller_talk_ratio IS NULL OR seller_talk_ratio >= 0::numeric AND seller_talk_ratio <= 1::numeric"
+        },
+        {
+          "name": "customer_talk_ratio",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "customer_talk_ratio IS NULL OR customer_talk_ratio >= 0::numeric AND customer_talk_ratio <= 1::numeric"
+        },
+        {
+          "name": "objection_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "objection_count >= 0"
+        },
+        {
+          "name": "objections",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "keyword_counts",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "numeric_mentions",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "extracted_candidates",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "speaker_map",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "metadata",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "call_conversation_metrics_transcript_id_fkey",
+          "source_table": "public.call_conversation_metrics",
+          "source_columns": [
+            "transcript_id"
+          ],
+          "target_table": "public.call_transcripts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "call_conversation_metrics_recording_id_fkey",
+          "source_table": "public.call_conversation_metrics",
+          "source_columns": [
+            "recording_id"
+          ],
+          "target_table": "public.call_recordings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ]
+}

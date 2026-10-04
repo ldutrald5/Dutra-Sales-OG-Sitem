@@ -1,0 +1,104 @@
+{
+  "migrations": [
+    {
+      "version": "20260929195252",
+      "name": "initialize_og_proposal_engine"
+    },
+    {
+      "version": "20260929195322",
+      "name": "add_proposal_foreign_key_indexes"
+    },
+    {
+      "version": "20260929200716",
+      "name": "add_calculation_engine_v1"
+    },
+    {
+      "version": "20260929201135",
+      "name": "add_og_confirmed_parameters_and_calculator_v2"
+    },
+    {
+      "version": "20260929201821",
+      "name": "add_pipeline_jobs_and_artifact_storage"
+    },
+    {
+      "version": "20260929201919",
+      "name": "add_pipeline_orchestration"
+    },
+    {
+      "version": "20260929202305",
+      "name": "add_make_worker_rpc_queue"
+    },
+    {
+      "version": "20260929202411",
+      "name": "add_pipeline_observability"
+    },
+    {
+      "version": "20260929204812",
+      "name": "add_discovery_taxonomy_and_brand_assets"
+    },
+    {
+      "version": "20260929204853",
+      "name": "add_company_discovery_v2"
+    },
+    {
+      "version": "20260929204957",
+      "name": "add_licensed_visual_assets_and_design_tokens"
+    },
+    {
+      "version": "20260929205059",
+      "name": "add_brand_asset_copy_queue"
+    },
+    {
+      "version": "20260929205334",
+      "name": "add_single_entry_proposal_rpc"
+    },
+    {
+      "version": "20260929205435",
+      "name": "add_system_health_check"
+    },
+    {
+      "version": "20260929205532",
+      "name": "add_reference_client_approval_workflow"
+    },
+    {
+      "version": "20260929205556",
+      "name": "update_system_health_reference_approval"
+    },
+    {
+      "version": "20260929210229",
+      "name": "promote_premium_vector_template_1_1"
+    },
+    {
+      "version": "20260929210734",
+      "name": "enable_cron_net_and_internal_token"
+    },
+    {
+      "version": "20260929210824",
+      "name": "schedule_pipeline_recovery_cron_v2"
+    },
+    {
+      "version": "20260929222041",
+      "name": "add_sales_execution_p0"
+    },
+    {
+      "version": "20260929222950",
+      "name": "add_sales_execution_fk_indexes"
+    },
+    {
+      "version": "20260929232101",
+      "name": "add_sales_execution_external_ids"
+    },
+    {
+      "version": "20260930023756",
+      "name": "record_sales_execution_result_v1"
+    },
+    {
+      "version": "20260930030530",
+      "name": "harden_sales_execution_result_v1"
+    },
+    {
+      "version": "20260930103929",
+      "name": "call_intelligence_v1"
+    }
+  ]
+}
