@@ -171,6 +171,27 @@ try {
   assert.match(duplicate.error,/já existe/i);
   assert.equal(duplicate.data.duplicateAssetId,'55555555-5555-4555-8555-555555555555');
 
+  calls.length=0;
+  globalThis.fetch=async (url,init={})=>{
+    calls.push({url:String(url),method:init.method||'GET'});
+    const u=String(url);
+    if(u.includes('/rest/v1/companies?')) return json(200,[{id:'11111111-1111-4111-8111-111111111111',name:'Transportadora Teste',legacy_lead_id:'LEAD-1'}]);
+    if(u.includes('/rest/v1/assets?') && u.includes('business_category=in.%28LOGO%2CCOVER%2CFLEET%29')) {
+      return json(200,[
+        {id:'66666666-6666-4666-8666-666666666666',title:'Logo antiga',business_category:'LOGO',is_primary:false,created_at:'2026-10-01T00:00:00Z'},
+        {id:'77777777-7777-4777-8777-777777777777',title:'Logo principal',business_category:'LOGO',is_primary:true,created_at:'2026-10-02T00:00:00Z'},
+        {id:'88888888-8888-4888-8888-888888888888',title:'Frota principal',business_category:'FLEET',is_primary:true,created_at:'2026-10-03T00:00:00Z'},
+        {id:'99999999-9999-4999-8999-999999999999',title:'Capa',business_category:'COVER',is_primary:false,created_at:'2026-10-04T00:00:00Z'}
+      ]);
+    }
+    throw new Error('Unexpected visual summary fetch '+(init.method||'GET')+' '+u);
+  };
+  const visual=await gateway.visualSummary({legacyLeadId:'LEAD-1'},env);
+  assert.equal(visual.error,null);
+  assert.equal(visual.data.logo.id,'77777777-7777-4777-8777-777777777777');
+  assert.equal(visual.data.cover.id,'99999999-9999-4999-8999-999999999999');
+  assert.equal(visual.data.fleet.id,'88888888-8888-4888-8888-888888888888');
+
 } finally {
   globalThis.fetch=originalFetch;
 }
