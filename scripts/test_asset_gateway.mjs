@@ -37,6 +37,21 @@ const whatsapp=gateway.normalizeMetadata({sourceType:'WHATSAPP'},'image/png');
 assert.equal(whatsapp.businessCategory,'CONVERSATION');
 assert.equal(whatsapp.sourceType,'WHATSAPP');
 
+const proposalLink=gateway.normalizeLinkInput(
+  {proposalId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',role:'PROPOSAL_INPUT'},
+  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+);
+assert.equal(proposalLink.proposal_id,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+assert.equal(proposalLink.pinned_version_id,'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+assert.equal(proposalLink.role,'PROPOSAL_INPUT');
+assert.throws(
+  ()=>gateway.normalizeLinkInput({
+    contactId:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    activityId:'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+  }),
+  /exatamente um alvo/
+);
+
 const env={
   OG_SUPABASE_URL:'https://demo.supabase.co',
   OG_SUPABASE_SERVICE_ROLE_KEY:'server-secret',
