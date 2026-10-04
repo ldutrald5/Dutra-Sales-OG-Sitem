@@ -59,6 +59,14 @@ O caminho do objeto deve ser gerado pelo backend, no formato lógico:
 
 O navegador não escolhe livremente `storage_path`.
 
+### 4.1 Formatos físicos do MVP e privacidade da foto
+
+O MVP aceita no gateway somente `image/jpeg`, `image/png`, `image/webp` e `application/pdf`.
+
+A V3 reprocessa JPEG/PNG/WebP em canvas antes do upload, preservando dimensões úteis e limitando o maior lado a 2200 px. A regravação remove EXIF/GPS e reduz peso de fotos comuns. O backend ainda valida a assinatura binária do arquivo; `Content-Type` informado pelo navegador não é tratado como prova suficiente.
+
+HEIC/HEIF, vídeo e áudio permanecem representáveis na taxonomia, mas o upload físico fica adiado até existir pipeline seguro de conversão/processamento. Isso evita aceitar formatos que o MVP ainda não consegue sanitizar de forma consistente.
+
 ### 5. Segurança do MVP é gateway-only
 
 Nesta etapa:
@@ -166,4 +174,4 @@ Não usar `DROP ... CASCADE` ou exclusão destrutiva improvisada em produção.
 
 ## Gate para próxima fase
 
-A Fase 2 pode preparar a migration e testes estáticos. O bucket fica como passo de provisionamento separado via Storage API. Aplicação no Supabase live fica bloqueada até revisão explícita do SQL, do provisionamento e do contrato de gateway.
+A fundação de schema, gateway e superfície V3 já está preparada na branch de feature. O próximo gate é validar migration + bucket + fluxo ponta a ponta em ambiente Supabase isolado. O bucket continua sendo provisionado separadamente via Storage API. Aplicação no Supabase live permanece bloqueada até esse ensaio passar, o CI de aplicação permanecer verde e houver autorização explícita de rollout.
