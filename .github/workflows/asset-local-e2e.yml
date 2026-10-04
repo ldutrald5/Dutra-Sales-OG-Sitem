@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: asset-local-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   asset-local-e2e:
     name: Local Supabase + Asset Gateway
