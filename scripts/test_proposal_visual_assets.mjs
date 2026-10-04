@@ -20,13 +20,15 @@ assert.match(entry,/selectedVisualIds\.size>=2/);
 assert.match(entry,/visuals:selectedProposalVisuals\(\)/);
 
 assert.match(proxy,/\/core-api\/assets\//);
-assert.match(proxy,/access\?ttl=600/);
+assert.match(proxy,/access\?ttl=600&versionId=/);
+assert.match(proxy,/encodeURIComponent\(item\.versionId\)/);
 assert.match(proxy,/runtimeUrl/);
 assert.match(proxy,/dutra:proposal-visuals-ready/);
 assert.match(proxy,/sessionStorage\.removeItem\(key\)/);
 
 assert.match(coreServer,/\/api\/assets\/proposal-eligible/);
 assert.match(coreServer,/proposalEligible:true/);
+assert.match(coreServer,/versionId:url\.searchParams\.get\('versionId'\)/);
 assert.match(assetGateway,/options\.proposalEligible===true/);
 assert.match(assetGateway,/usage_policy','eq\.PROPOSAL_ALLOWED/);
 assert.match(assetGateway,/sensitivity_level','neq\.CONFIDENTIAL/);
