@@ -52,5 +52,8 @@ assert.match(adr, /PUBLIC_SOURCE.*nunca significa/is);
 assert.match(adr, /WhatsApp é origem, não categoria comercial/i);
 assert.match(server, /\/api\/assets\/upload/);
 assert.match(server, /server-asset-gateway\.cjs/);
+assert.match(server, /assetLinksMatch/);
+assert.match(server, /createAssetLink/);
+assert.match(server, /deleteAssetLink/);
 
 console.log('Asset domain contract tests: PASS');
