@@ -46,6 +46,7 @@ for (const item of incidents) {
 for (const id of ['INC-V3-BLACK-001','INC-METRIC-CLOSE-001','INC-SYNC-CONFLICT-001','INC-XLSX-REPAIR-001','INC-CALLINT-AUDIO-001','INC-WHISPER-DEPS-001','INC-SUPABASE-DRIFT-001']) {
   assert.ok(incidents.some((item) => item.id === id), `Missing incident ${id}`);
 }
+assert.ok(incidents.some((item) => item.id === 'INC-SUPABASE-DRIFT-001' && item.status === 'resolved'));
 
 const checker = read('.codex/skills/dutra-builder-brain/scripts/brain-check.mjs');
 assert.match(checker, /'incidents\.jsonl'/);
@@ -76,7 +77,7 @@ for (const id of ['ANTI-INTEL-001','ANTI-INTEL-002','ANTI-INTEL-003','ANTI-SALES
 }
 
 const openQuestions = jsonl('docs/second-brain/open-questions.jsonl');
-assert.ok(openQuestions.some((item) => item.id === 'OQ-SUPABASE-VERSIONING-001' && item.status === 'open'));
+assert.ok(openQuestions.some((item) => item.id === 'OQ-SUPABASE-VERSIONING-001' && item.status === 'resolved'));
 
 const agents = read('AGENTS.md');
 assert.match(agents, /DUTRA Intelligence pre-flight/);
