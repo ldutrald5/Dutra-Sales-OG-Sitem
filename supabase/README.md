@@ -35,6 +35,10 @@ The pilot defines:
 
 Live validation and an explicit rollout decision are still required before promoting/applying it.
 
+O navegador **não recebe `service_role`**.
+
+A pendência ambiental `OQ-PKG02-001` permanece aberta até um ensaio real confirmar Auth, RLS, membership e bootstrap no ambiente escolhido.
+
 ## Structural-change pre-flight
 
 Before any new Supabase migration or Edge Function deployment:
