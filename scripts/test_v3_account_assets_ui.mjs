@@ -20,7 +20,7 @@ assert.match(ui,/ttl=600/);
 assert.match(ui,/assetMakePrimary/);
 assert.match(ui,/\/primary/);
 assert.match(ui,/\/archive/);
-assert.match(ui,/method:'DELETE'/);
+assert.match(ui,/mode==='delete'\?'DELETE':'POST'/);
 assert.match(ui,/usage_policy/);
 assert.match(ui,/sensitivity_level/);
 assert.doesNotMatch(ui,/SUPABASE_SERVICE_ROLE_KEY|service_role/i);
