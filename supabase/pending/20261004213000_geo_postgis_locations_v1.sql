@@ -118,3 +118,189 @@ create index if not exists company_locations_purpose_active_idx on public.compan
 create index if not exists company_locations_verification_idx on public.company_locations (verification_status);
 create unique index if not exists company_locations_primary_purpose_uq on public.company_locations (company_id, purpose) where is_primary and is_active;
 create index if not exists company_locations_geo_gist on public.company_locations using gist (geo);
+
+
+create or replace function public.enforce_company_location_establishment_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.establishment_id is not null and not exists (
+    select 1 from public.company_establishments e
+    where e.id = new.establishment_id
+      and e.company_id = new.company_id
+  ) then
+    raise exception 'company_location establishment must belong to the same company'
+      using errcode = '23514';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger company_locations_establishment_guard
+before insert or update of company_id, establishment_id
+on public.company_locations
+for each row execute function public.enforce_company_location_establishment_v1();
+
+create or replace function public.touch_geo_updated_at_v1()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger company_establishments_touch_updated_at
+before update on public.company_establishments
+for each row execute function public.touch_geo_updated_at_v1();
+
+create trigger company_locations_touch_updated_at
+before update on public.company_locations
+for each row execute function public.touch_geo_updated_at_v1();
+
+alter table public.company_establishments enable row level security;
+alter table public.company_locations enable row level security;
+
+revoke all on table public.company_establishments from anon, authenticated;
+revoke all on table public.company_locations from anon, authenticated;
+grant select, insert, update, delete on table public.company_establishments to service_role;
+grant select, insert, update, delete on table public.company_locations to service_role;
+
+revoke all on function public.is_valid_cnpj_v1(text) from public, anon, authenticated;
+grant execute on function public.is_valid_cnpj_v1(text) to service_role;
+revoke all on function public.enforce_company_location_establishment_v1() from public, anon, authenticated;
+revoke all on function public.touch_geo_updated_at_v1() from public, anon, authenticated;
+
+create or replace function public.company_locations_nearby_v1(
+  p_lat double precision,
+  p_long double precision,
+  p_radius_meters double precision default null,
+  p_limit integer default 100
+)
+returns table (
+  location_id uuid,
+  company_id uuid,
+  establishment_id uuid,
+  purpose text,
+  label text,
+  city text,
+  state text,
+  latitude double precision,
+  longitude double precision,
+  geocode_precision text,
+  geocode_confidence numeric,
+  verification_status text,
+  distance_meters double precision
+)
+language plpgsql
+stable
+set search_path = ''
+as $$
+declare
+  v_origin extensions.geography;
+  v_limit integer := least(greatest(coalesce(p_limit,100),1),5000);
+begin
+  if p_lat < -90 or p_lat > 90 or p_long < -180 or p_long > 180 then
+    raise exception 'invalid latitude/longitude';
+  end if;
+  if p_radius_meters is not null and (p_radius_meters < 0 or p_radius_meters > 1000000) then
+    raise exception 'invalid radius';
+  end if;
+
+  v_origin := extensions.st_setsrid(extensions.st_point(p_long,p_lat),4326)::extensions.geography;
+
+  return query
+  select
+    l.id,
+    l.company_id,
+    l.establishment_id,
+    l.purpose,
+    l.label,
+    l.city,
+    l.state,
+    extensions.st_y(l.geo::extensions.geometry),
+    extensions.st_x(l.geo::extensions.geometry),
+    l.geocode_precision,
+    l.geocode_confidence,
+    l.verification_status,
+    extensions.st_distance(l.geo,v_origin)
+  from public.company_locations l
+  where l.is_active
+    and l.geo is not null
+    and (p_radius_meters is null or extensions.st_dwithin(l.geo,v_origin,p_radius_meters))
+  order by l.geo operator(extensions.<->) v_origin
+  limit v_limit;
+end;
+$$;
+
+create or replace function public.company_locations_in_view_v1(
+  p_min_lat double precision,
+  p_min_long double precision,
+  p_max_lat double precision,
+  p_max_long double precision,
+  p_limit integer default 5000
+)
+returns table (
+  location_id uuid,
+  company_id uuid,
+  establishment_id uuid,
+  purpose text,
+  label text,
+  city text,
+  state text,
+  latitude double precision,
+  longitude double precision,
+  geocode_precision text,
+  geocode_confidence numeric,
+  verification_status text
+)
+language plpgsql
+stable
+set search_path = ''
+as $$
+declare
+  v_limit integer := least(greatest(coalesce(p_limit,5000),1),10000);
+  v_box extensions.geometry;
+begin
+  if p_min_lat < -90 or p_max_lat > 90 or p_min_long < -180 or p_max_long > 180
+     or p_min_lat >= p_max_lat or p_min_long >= p_max_long then
+    raise exception 'invalid viewport bounds';
+  end if;
+
+  v_box := extensions.st_makeenvelope(p_min_long,p_min_lat,p_max_long,p_max_lat,4326);
+
+  return query
+  select
+    l.id,
+    l.company_id,
+    l.establishment_id,
+    l.purpose,
+    l.label,
+    l.city,
+    l.state,
+    extensions.st_y(l.geo::extensions.geometry),
+    extensions.st_x(l.geo::extensions.geometry),
+    l.geocode_precision,
+    l.geocode_confidence,
+    l.verification_status
+  from public.company_locations l
+  where l.is_active
+    and l.geo is not null
+    and l.geo::extensions.geometry operator(extensions.&&) v_box
+  order by l.updated_at desc, l.id
+  limit v_limit;
+end;
+$$;
+
+revoke all on function public.company_locations_nearby_v1(double precision,double precision,double precision,integer) from public, anon, authenticated;
+revoke all on function public.company_locations_in_view_v1(double precision,double precision,double precision,double precision,integer) from public, anon, authenticated;
+grant execute on function public.company_locations_nearby_v1(double precision,double precision,double precision,integer) to service_role;
+grant execute on function public.company_locations_in_view_v1(double precision,double precision,double precision,double precision,integer) to service_role;
+
+comment on table public.company_establishments is 'Legal CNPJ establishments linked to canonical CRM companies.';
+comment on table public.company_locations is 'Physical commercial locations. PostGIS geo is the canonical coordinate source.';
