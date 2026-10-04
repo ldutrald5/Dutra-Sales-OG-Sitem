@@ -50,9 +50,9 @@ Signed URLs, Storage paths, hashes e credenciais **não** são persistidos no ha
 
 Ao abrir o motor legado dentro da V3, a ponte assina cada Asset selecionado somente naquele momento usando:
 
-`/core-api/assets/<assetId>/access?ttl=600`
+`/core-api/assets/<assetId>/access?ttl=600&versionId=<versionId>`
 
-A signed URL existe apenas em memória no objeto `window.__DUTRA_QUOTE_HANDOFF__` do iframe e não volta para `sessionStorage`, CRM ou banco.
+A signed URL existe apenas em memória no objeto `window.__DUTRA_QUOTE_HANDOFF__` do iframe e não volta para `sessionStorage`, CRM ou banco. O `versionId` selecionado é enviado à assinatura para impedir que uma substituição ocorrida entre seleção e geração troque silenciosamente a imagem da proposta.
 
 Os três templates oficiais de proposta podem então renderizar o bloco **Contexto Visual da Conta** usando somente esses URLs temporários.
 
