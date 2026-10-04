@@ -22,6 +22,8 @@ The Auth + Organization pilot is currently pending:
 
 It must not be treated as applied merely because it exists in Git.
 
+A migration do piloto **não é aplicada automaticamente** pelo DUTRA OS atual.
+
 ## Auth pilot boundary
 
 The pilot defines:
