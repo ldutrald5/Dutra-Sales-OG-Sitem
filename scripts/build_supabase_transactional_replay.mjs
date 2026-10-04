@@ -18,7 +18,12 @@ if(!tableNames.length)throw new Error('remote public table snapshot is empty');
 const quote=value=>"'" + String(value).replaceAll("'","''") + "'";
 const expectedArray='array['+tableNames.map(quote).join(',')+']::text[]';
 
+const supplementPath=path.resolve('supabase/recovery/20261003/untracked-live-baseline.sql');
+if(!fs.existsSync(supplementPath))throw new Error('missing untracked live baseline supplement');
+const supplement=fs.readFileSync(supplementPath,'utf8');
+
 let sql="\\set ON_ERROR_STOP on\nBEGIN;\n";
+sql+="\n-- BEGIN untracked-live-baseline.sql\n"+supplement.trimEnd()+"\n-- END untracked-live-baseline.sql\n";
 for(const file of migrationFiles){
   sql+=`\n-- BEGIN ${file}\n`;
   sql+=fs.readFileSync(path.join(migrationDir,file),'utf8').trimEnd()+"\n";
