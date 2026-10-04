@@ -101,7 +101,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $asset_current_version$
 begin
   if new.current_version_id is null then
     return new;
@@ -120,7 +120,7 @@ begin
 
   return new;
 end;
-$;
+$asset_current_version$;
 
 revoke all on function public.assert_asset_current_version_ownership() from public;
 grant execute on function public.assert_asset_current_version_ownership() to service_role;
@@ -211,7 +211,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $asset_link_integrity$
 declare
   asset_company uuid;
   target_company uuid;
@@ -253,7 +253,7 @@ begin
 
   return new;
 end;
-$;
+$asset_link_integrity$;
 
 revoke all on function public.assert_asset_link_integrity() from public;
 grant execute on function public.assert_asset_link_integrity() to service_role;
