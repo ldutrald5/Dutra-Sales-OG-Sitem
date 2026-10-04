@@ -20,6 +20,14 @@ assert.equal(merged.leads[0].observacoes,'Humana','texto humano existente deve p
 assert.equal(merged.leads[0].cidadeUf,'Maringá/PR','campo vazio pode ser enriquecido');
 assert.deepEqual(merged.leads[0].interactions,[{id:'I1'}],'interações existentes não podem ser inventadas/substituídas');
 
+const alphaCnpjMerge = mergeSeedLeads(
+  [{ id:'CNPJ-A', empresa:'Alpha Matriz', cnpj:'12ABC34501DE35' }],
+  [{ id:'CNPJ-B', empresa:'Alpha Importada', cnpj:'12.ABC.345/01DE-35', email:'alpha@example.com' }]
+);
+assert.equal(alphaCnpjMerge.leads.length,1,'CNPJ alfanumérico deve continuar sendo chave forte no seed');
+assert.equal(alphaCnpjMerge.matched,1);
+assert.equal(alphaCnpjMerge.leads[0].email,'alpha@example.com');
+
 const conflictingCode = mergeSeedLeads(
   [{ id:'CODE-A', empresa:'JOSE CARLOS', internalCode:'8374' }],
   [{ id:'CODE-B', empresa:'VERBO DA VIDA TRANSPORTES RODOVIARIOS LTDA', internalCode:'008374' }]
