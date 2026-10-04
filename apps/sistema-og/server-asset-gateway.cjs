@@ -442,6 +442,12 @@ async function listAssets(ref = {}, options = {}, env = process.env) {
   params.set('company_id','eq.'+company.data.id);
   params.set('status','eq.ACTIVE');
   if(category) params.set('business_category','eq.'+category);
+  if(options.proposalEligible===true){
+    params.set('usage_policy','eq.PROPOSAL_ALLOWED');
+    params.set('media_kind','eq.IMAGE');
+    params.set('sensitivity_level','neq.CONFIDENTIAL');
+    params.set('visibility_class','neq.RESTRICTED');
+  }
   if(cursor) params.set('or','(created_at.lt.'+cursor.createdAt+',and(created_at.eq.'+cursor.createdAt+',id.lt.'+cursor.id+'))');
   params.set('select','id,company_id,title,description,media_kind,business_category,source_type,visibility_class,sensitivity_level,usage_policy,source_url,current_version_id,is_primary,is_verified,status,deleted_at,metadata,captured_at,created_at,updated_at');
   params.set('order','created_at.desc,id.desc');
