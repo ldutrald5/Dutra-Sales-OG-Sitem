@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const [migrationDirArg,outputArg]=process.argv.slice(2);
+const [migrationDirArg,outputArg,tailSqlArg]=process.argv.slice(2);
 if(!migrationDirArg||!outputArg){
-  console.error('usage: node scripts/build_supabase_transactional_replay.mjs <migration-dir> <output.sql>');
+  console.error('usage: node scripts/build_supabase_transactional_replay.mjs <migration-dir> <output.sql> [tail.sql]');
   process.exit(2);
 }
 const migrationDir=path.resolve(migrationDirArg);
@@ -35,6 +35,11 @@ for(const file of migrationFiles){
   sql+=`-- END ${file}\n`;
 }
 sql+="\n-- BEGIN untracked-live-baseline POST\n"+postMigrations.trimEnd()+"\n-- END untracked-live-baseline POST\n";
+if(tailSqlArg){
+  const tailPath=path.resolve(tailSqlArg);
+  if(!fs.existsSync(tailPath))throw new Error('tail SQL file not found: '+tailPath);
+  sql+="\n-- BEGIN optional replay tail\n"+fs.readFileSync(tailPath,'utf8').trimEnd()+"\n-- END optional replay tail\n";
+}
 sql+=`
 DO $dutra_replay$
 declare
