@@ -151,13 +151,128 @@ create index if not exists asset_versions_sha256_idx
   on public.asset_versions (lower(sha256))
   where sha256 is not null;
 
+create table if not exists public.asset_links (
+  id uuid primary key default gen_random_uuid(),
+  asset_id uuid not null references public.assets(id) on delete cascade,
+
+  contact_id uuid references public.crm_contacts(id) on delete cascade,
+  opportunity_id uuid references public.sales_opportunities(id) on delete cascade,
+  proposal_id uuid references public.proposals(id) on delete cascade,
+  activity_id uuid references public.crm_activities(id) on delete cascade,
+
+  role text not null default 'ATTACHMENT'
+    check (role in ('ATTACHMENT','EVIDENCE','VISIT_PHOTO','PROPOSAL_INPUT','REFERENCE','OTHER')),
+  pinned_version_id uuid references public.asset_versions(id) on delete restrict,
+
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+
+  check (num_nonnulls(contact_id, opportunity_id, proposal_id, activity_id) = 1),
+  check (proposal_id is null or pinned_version_id is not null)
+);
+
+create index if not exists asset_links_asset_idx
+  on public.asset_links (asset_id, created_at desc);
+
+create index if not exists asset_links_contact_idx
+  on public.asset_links (contact_id)
+  where contact_id is not null;
+
+create index if not exists asset_links_opportunity_idx
+  on public.asset_links (opportunity_id)
+  where opportunity_id is not null;
+
+create index if not exists asset_links_proposal_idx
+  on public.asset_links (proposal_id)
+  where proposal_id is not null;
+
+create index if not exists asset_links_activity_idx
+  on public.asset_links (activity_id)
+  where activity_id is not null;
+
+create unique index if not exists asset_links_unique_contact_role_uq
+  on public.asset_links (asset_id, contact_id, role)
+  where contact_id is not null;
+
+create unique index if not exists asset_links_unique_opportunity_role_uq
+  on public.asset_links (asset_id, opportunity_id, role)
+  where opportunity_id is not null;
+
+create unique index if not exists asset_links_unique_proposal_role_uq
+  on public.asset_links (asset_id, proposal_id, role)
+  where proposal_id is not null;
+
+create unique index if not exists asset_links_unique_activity_role_uq
+  on public.asset_links (asset_id, activity_id, role)
+  where activity_id is not null;
+
+create or replace function public.assert_asset_link_integrity()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  asset_company uuid;
+  target_company uuid;
+begin
+  select a.company_id into asset_company
+  from public.assets a
+  where a.id = new.asset_id;
+
+  if asset_company is null then
+    raise exception 'asset link requires a canonical asset/company'
+      using errcode = '23514';
+  end if;
+
+  if new.pinned_version_id is not null and not exists (
+    select 1
+    from public.asset_versions v
+    where v.id = new.pinned_version_id
+      and v.asset_id = new.asset_id
+      and v.processing_status <> 'DELETED'
+  ) then
+    raise exception 'pinned_version_id must belong to the linked asset'
+      using errcode = '23514';
+  end if;
+
+  if new.contact_id is not null then
+    select c.company_id into target_company from public.crm_contacts c where c.id = new.contact_id;
+  elsif new.opportunity_id is not null then
+    select o.company_id into target_company from public.sales_opportunities o where o.id = new.opportunity_id;
+  elsif new.proposal_id is not null then
+    select p.company_id into target_company from public.proposals p where p.id = new.proposal_id;
+  elsif new.activity_id is not null then
+    select a.company_id into target_company from public.crm_activities a where a.id = new.activity_id;
+  end if;
+
+  if target_company is null or target_company <> asset_company then
+    raise exception 'asset link target must belong to the same canonical company'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$;
+
+revoke all on function public.assert_asset_link_integrity() from public;
+grant execute on function public.assert_asset_link_integrity() to service_role;
+
+create trigger asset_links_integrity_guard
+before insert or update on public.asset_links
+for each row
+execute function public.assert_asset_link_integrity();
+
 alter table public.assets enable row level security;
 alter table public.asset_versions enable row level security;
+alter table public.asset_links enable row level security;
 
 revoke all on public.assets from anon, authenticated;
 revoke all on public.asset_versions from anon, authenticated;
+revoke all on public.asset_links from anon, authenticated;
 grant all on public.assets to service_role;
 grant all on public.asset_versions to service_role;
+grant all on public.asset_links to service_role;
 
 -- Provision the private account-assets bucket through the Storage API.
 -- Never INSERT/UPDATE/DELETE storage.buckets or storage.objects from this migration.
@@ -169,5 +284,6 @@ comment on column public.assets.usage_policy is 'Controls reuse intent; PUBLIC_S
 comment on column public.assets.is_primary is 'At most one ACTIVE primary Asset per Company/business_category.';
 comment on table public.asset_versions is 'Immutable binary revisions for canonical Assets. Storage objects are managed through the Storage API.';
 comment on column public.asset_versions.storage_path is 'Backend-generated object path; never trust a raw browser path.';
+comment on table public.asset_links is 'Secondary canonical links from a Company-owned Asset to CRM context. Proposal links pin an exact AssetVersion.';
 
 commit;
