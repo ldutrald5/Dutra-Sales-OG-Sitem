@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const sql = await readFile('supabase/migrations/20260926233000_auth_organization_pilot.sql', 'utf8');
+const sql = await readFile('supabase/pending/20260926233000_auth_organization_pilot.sql', 'utf8');
 const readme = await readFile('supabase/README.md', 'utf8');
 
 for (const table of ['organizations', 'profiles', 'organization_members']) {
