@@ -172,7 +172,7 @@ jobs:
           DB_URL="$(cat /tmp/asset-db-url)"
 
           psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          do $$
+          do $asset_invariants$
           declare
             asset_count integer;
             version_count integer;
@@ -208,7 +208,7 @@ jobs:
             ) then
               raise exception 'Proposal link perdeu version pin ou fronteira de Company';
             end if;
-          end $;
+          end $asset_invariants$;
           SQL
 
           echo "DB/Storage invariants: PASS"
