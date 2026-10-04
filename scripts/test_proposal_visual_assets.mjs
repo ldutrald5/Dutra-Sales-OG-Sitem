@@ -41,6 +41,7 @@ assert.match(legacy,/function buildProposalVisualHtml\(\)/);
 assert.match(legacy,/data-proposal-account-visual/);
 assert.match(legacy,/assetRefs:proposalVisualRefsForTracking\(\)/);
 assert.match(legacy,/safeProposalVisualUrl/);
+assert.match(legacy,/safeProposalVisualUrl\(item\?\.runtimeUrl\)/);
 
 assert.match(intelligence,/assetRefs: safeAssetRefs\(input\.assetRefs\)/);
 const snapshotBlock=intelligence.slice(intelligence.indexOf('function buildSnapshot'),intelligence.indexOf('function validatePublicSnapshot'));
