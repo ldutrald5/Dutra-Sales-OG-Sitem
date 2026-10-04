@@ -45,8 +45,8 @@ O P0 não apaga `state.leads`, IndexedDB nem estado compartilhado. Sem configura
 - `apps/sistema-og/services/sales-execution-adapter.js`
 - `apps/sistema-og/services/sales-execution-client.js`
 - `supabase/functions/sales-execution-gateway/index.ts`
-- `supabase/migrations/20260930024500_record_sales_execution_result_v1.sql`
-- `supabase/migrations/20260930031500_harden_sales_execution_result_v1.sql`
+- `supabase/migrations/20260930023756_record_sales_execution_result_v1.sql`
+- `supabase/migrations/20260930030530_harden_sales_execution_result_v1.sql`
 - `scripts/test_sales_execution_adapter.mjs`
 - `scripts/test_sales_execution_gateway.mjs`
 - `scripts/test_call_ai.mjs`
