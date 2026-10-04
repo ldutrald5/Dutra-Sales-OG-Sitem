@@ -96,6 +96,40 @@ alter table public.assets
   on delete set null
   deferrable initially deferred;
 
+create or replace function public.assert_asset_current_version_ownership()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if new.current_version_id is null then
+    return new;
+  end if;
+
+  if not exists (
+    select 1
+    from public.asset_versions v
+    where v.id = new.current_version_id
+      and v.asset_id = new.id
+      and v.processing_status <> 'DELETED'
+  ) then
+    raise exception 'current_version_id must reference a live version owned by the same asset'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$;
+
+revoke all on function public.assert_asset_current_version_ownership() from public;
+grant execute on function public.assert_asset_current_version_ownership() to service_role;
+
+create trigger assets_current_version_ownership_guard
+before insert or update of current_version_id on public.assets
+for each row
+execute function public.assert_asset_current_version_ownership();
+
 create index if not exists assets_company_status_created_idx
   on public.assets (company_id, status, created_at desc, id desc);
 
