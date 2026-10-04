@@ -20,6 +20,7 @@ const SOURCE_TYPES = new Set([
 const VISIBILITY_CLASSES = new Set(['INTERNAL','RESTRICTED','SHAREABLE','PUBLIC_SOURCE']);
 const SENSITIVITY_LEVELS = new Set(['NORMAL','PERSONAL_DATA','COMMERCIAL_SENSITIVE','CONFIDENTIAL']);
 const USAGE_POLICIES = new Set(['INTERNAL_REFERENCE','PROPOSAL_ALLOWED','MARKETING_ALLOWED','RESTRICTED']);
+const LINK_ROLES = new Set(['ATTACHMENT','EVIDENCE','VISIT_PHOTO','PROPOSAL_INPUT','REFERENCE','OTHER']);
 
 const MIME = Object.freeze({
   'image/jpeg': { ext:'jpg', mediaKind:'IMAGE' },
@@ -589,6 +590,71 @@ async function setPrimary(assetId, env = process.env) {
   return selected.error?selected:{...selected,data:selected.data?.[0]||null};
 }
 
+function normalizeLinkInput(input = {}, currentVersionId = null) {
+  const rawTargets = {
+    contact_id:input.contactId,
+    opportunity_id:input.opportunityId,
+    proposal_id:input.proposalId,
+    activity_id:input.activityId
+  };
+  const entries = Object.entries(rawTargets).filter(([,value])=>clean(value));
+  if (entries.length !== 1) throw new Error('Asset link exige exatamente um alvo contextual');
+  const [targetColumn,targetValue] = entries[0];
+  const row = {
+    [targetColumn]:safeUuid(targetValue,targetColumn),
+    role:safeEnum(input.role,LINK_ROLES,'ATTACHMENT','role')
+  };
+  if (input.pinnedVersionId) row.pinned_version_id=safeUuid(input.pinnedVersionId,'pinnedVersionId');
+  if (targetColumn === 'proposal_id') {
+    const pinned = row.pinned_version_id || clean(currentVersionId);
+    if (!pinned) throw new Error('Proposal link exige versão atual pronta');
+    row.pinned_version_id=safeUuid(pinned,'pinnedVersionId');
+  }
+  return row;
+}
+
+async function createAssetLink(assetId, input = {}, env = process.env) {
+  const asset=await getAsset(assetId,env);
+  if(asset.error)return asset;
+  if(asset.data.status!=='ACTIVE')return {configured:true,status:409,data:null,error:'Asset precisa estar ativo para criar vínculo'};
+
+  let row;
+  try { row=normalizeLinkInput(input,asset.data.current_version_id); }
+  catch(error){ return {configured:true,status:400,data:null,error:error.message}; }
+
+  const created=await rest('asset_links',{
+    method:'POST',
+    headers:{Prefer:'return=representation'},
+    body:{asset_id:asset.data.id,...row}
+  },env);
+  if(created.error)return created;
+  return {configured:true,status:201,data:created.data?.[0]||null,error:null};
+}
+
+async function listAssetLinks(assetId, env = process.env) {
+  let id;
+  try{id=safeUuid(assetId,'assetId')}catch(error){return {configured:cfg(env).enabled,status:400,data:null,error:error.message}}
+  const result=await rest(
+    'asset_links?asset_id=eq.'+encodeURIComponent(id)
+    +'&select=id,asset_id,contact_id,opportunity_id,proposal_id,activity_id,role,pinned_version_id,created_at'
+    +'&order=created_at.desc,id.desc',
+    {},env
+  );
+  return result.error?result:{...result,status:200,data:Array.isArray(result.data)?result.data:[]};
+}
+
+async function deleteAssetLink(linkId, env = process.env) {
+  let id;
+  try{id=safeUuid(linkId,'linkId')}catch(error){return {configured:cfg(env).enabled,status:400,data:null,error:error.message}}
+  const result=await rest('asset_links?id=eq.'+encodeURIComponent(id),{
+    method:'DELETE',
+    headers:{Prefer:'return=representation'}
+  },env);
+  if(result.error)return result;
+  const row=result.data?.[0];
+  return row?{...result,status:200,data:row}:{...result,status:404,data:null,error:'Vínculo não encontrado'};
+}
+
 async function setStatus(assetId, status, env = process.env) {
   let id;
   try { id=safeUuid(assetId,'assetId'); }
@@ -616,7 +682,7 @@ async function health(env = process.env) {
 }
 
 module.exports={
-  BUCKET,MIME,MEDIA_KINDS,BUSINESS_CATEGORIES,SOURCE_TYPES,VISIBILITY_CLASSES,SENSITIVITY_LEVELS,USAGE_POLICIES,
+  BUCKET,MIME,MEDIA_KINDS,BUSINESS_CATEGORIES,SOURCE_TYPES,VISIBILITY_CLASSES,SENSITIVITY_LEVELS,USAGE_POLICIES,LINK_ROLES,
   cfg,safeUuid,mediaForMime,buildStoragePath,encodeCursor,decodeCursor,normalizeMetadata,validateBytes,validateContentSignature,
-  rest,storageRequest,resolveCompany,findDuplicateAsset,health,visualSummary,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,setStatus
+  rest,storageRequest,resolveCompany,findDuplicateAsset,health,visualSummary,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,normalizeLinkInput,createAssetLink,listAssetLinks,deleteAssetLink,setStatus
 };
