@@ -404,6 +404,11 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, result.status || 200, result.error ? { ok:false, configured:result.configured, error:result.error } : result.data);
   }
 
+  if (url.pathname === '/api/assets/summary' && req.method === 'GET') {
+    const result = await assetGateway.visualSummary(assetRefFromUrl(url), process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
   if (url.pathname === '/api/assets' && req.method === 'GET') {
     const result = await assetGateway.listAssets(assetRefFromUrl(url), {
       businessCategory:url.searchParams.get('category'),
