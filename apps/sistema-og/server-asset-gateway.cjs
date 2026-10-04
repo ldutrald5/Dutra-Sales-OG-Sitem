@@ -207,6 +207,25 @@ function validateBytes(bytes, env = process.env) {
   return buffer;
 }
 
+function publicVersion(version) {
+  if (!version) return null;
+  return {
+    id:version.id,
+    asset_id:version.asset_id,
+    version_number:version.version_number,
+    original_filename:version.original_filename,
+    mime_type:version.mime_type,
+    file_extension:version.file_extension,
+    file_size_bytes:version.file_size_bytes,
+    width:version.width,
+    height:version.height,
+    duration_ms:version.duration_ms,
+    page_count:version.page_count,
+    processing_status:version.processing_status,
+    created_at:version.created_at
+  };
+}
+
 async function uploadObject(path, bytes, mimeType, env) {
   return storageRequest('object/' + BUCKET + '/' + encodedObjectPath(path), {
     method:'POST',
@@ -263,7 +282,7 @@ async function createAssetWithUpload(ref = {}, input = {}, bytes, env = process.
     media_kind:normalized.mediaKind, business_category:normalized.businessCategory, source_type:normalized.sourceType,
     visibility_class:normalized.visibilityClass, sensitivity_level:normalized.sensitivityLevel, usage_policy:normalized.usagePolicy,
     source_url:normalized.sourceUrl, captured_at:normalized.capturedAt, current_version_id:null,
-    is_primary:Boolean(input.isPrimary), is_verified:false, status:'ACTIVE',
+    is_primary:false, is_verified:false, status:'ACTIVE',
     metadata:input.metadata && typeof input.metadata === 'object' && !Array.isArray(input.metadata) ? input.metadata : {},
     created_at:now, updated_at:now
   };
@@ -299,7 +318,13 @@ async function createAssetWithUpload(ref = {}, input = {}, bytes, env = process.
     },env);
     if(current.error) throw new Error(current.error);
 
-    return {configured:true,status:201,data:{asset:current.data?.[0]||assetRow,version:ready.data?.[0]||null,company:company.data},error:null};
+    let currentAsset=current.data?.[0]||assetRow;
+    if(input.isPrimary){
+      const primary=await setPrimary(assetId,env);
+      if(primary.error) return {configured:true,status:502,data:{asset:currentAsset},error:'Asset salvo, mas não foi possível defini-lo como principal: '+primary.error};
+      currentAsset=primary.data||currentAsset;
+    }
+    return {configured:true,status:201,data:{asset:currentAsset,version:publicVersion(ready.data?.[0]),company:company.data},error:null};
   } catch(error) {
     if(objectUploaded){
       const removed=await removeObject(storagePath,env);
@@ -360,7 +385,7 @@ async function listAssets(ref = {}, options = {}, env = process.env) {
   if(versionIds.length){
     const vp=new URLSearchParams();
     vp.set('id','in.('+versionIds.join(',')+')');
-    vp.set('select','id,asset_id,version_number,storage_bucket,storage_path,original_filename,mime_type,file_extension,file_size_bytes,sha256,width,height,duration_ms,page_count,processing_status,metadata,created_at');
+    vp.set('select','id,asset_id,version_number,original_filename,mime_type,file_extension,file_size_bytes,width,height,duration_ms,page_count,processing_status,created_at');
     const versions=await rest('asset_versions?'+vp.toString(),{},env);
     if(versions.error) return versions;
     versionsById=new Map((versions.data||[]).map(v=>[v.id,v]));
@@ -370,7 +395,7 @@ async function listAssets(ref = {}, options = {}, env = process.env) {
     configured:true,status:200,error:null,
     data:{
       company:company.data,
-      items:page.map(asset=>({...asset,currentVersion:versionsById.get(asset.current_version_id)||null})),
+      items:page.map(asset=>({...asset,currentVersion:publicVersion(versionsById.get(asset.current_version_id))})),
       nextCursor:hasMore?encodeCursor(page[page.length-1]):null
     }
   };
@@ -426,7 +451,7 @@ async function replaceAssetFile(assetId, input = {}, bytes, env = process.env) {
     },env);
     if(updated.error) throw new Error(updated.error);
 
-    return {configured:true,status:200,data:{asset:updated.data?.[0]||asset.data,version:ready.data?.[0]||null},error:null};
+    return {configured:true,status:200,data:{asset:updated.data?.[0]||asset.data,version:publicVersion(ready.data?.[0])},error:null};
   } catch(error) {
     if(objectUploaded){
       const removed=await removeObject(storagePath,env);
