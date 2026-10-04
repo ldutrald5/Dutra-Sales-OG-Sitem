@@ -33,6 +33,10 @@ assert.match(ui,/toBlob/);
 assert.match(ui,/2200/);
 assert.match(ui,/dataTransfer/);
 assert.match(ui,/URL\.revokeObjectURL/);
+assert.match(ui,/\/assets\/summary/);
+assert.match(ui,/assetLogo/);
+assert.match(ui,/assetCover/);
+assert.match(ui,/heroToken/);
 assert.doesNotMatch(ui,/SUPABASE_SERVICE_ROLE_KEY|service_role/i);
 assert.doesNotMatch(ui,/supabase\.co|createClient\(/i);
 
