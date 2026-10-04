@@ -248,3 +248,16 @@ This package does not:
 - deploy production code.
 
 Those belong to later controlled packages.
+
+
+## GEO-02R persistence projection
+
+The approved pending database projection uses:
+
+- `public.company_establishments` for legal establishments;
+- `public.company_locations` for physical locations;
+- `extensions.geography(Point,4326)` as canonical coordinates;
+- GiST for spatial indexing;
+- backend-only radius/nearest and viewport RPCs until an authenticated browser boundary is deliberately rolled out.
+
+The pending migration is validated by the rollback-only `GEO PostGIS Replay` workflow and remains unapplied to production.

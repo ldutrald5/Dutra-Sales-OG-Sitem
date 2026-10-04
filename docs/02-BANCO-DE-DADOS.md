@@ -2,7 +2,9 @@
 
 ## Estado real hoje
 
-Não há banco relacional. O navegador é a fonte operacional local e usa:
+O DUTRA OS está em transição brownfield. O navegador/JSON ainda é fonte operacional de partes do produto legado, **mas já existe um backend relacional normalizado no Supabase `og-proposal-engine`** com `companies`, CRM, opportunities, activities, proposal pipeline e integrações. A história estrutural desse backend foi reconciliada por SUPABASE-00S e possui replay descartável reproduzível.
+
+A camada local/legada continua usando:
 
 | Camada | Chave/local | Conteúdo |
 |---|---|---|
@@ -46,6 +48,18 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 - Áudio e arquivos ficam por referência e não entram no JSON principal.
 - Campos importados mantêm origem, data e confirmação.
 - Exclusões futuras usam tombstone e backup; nunca apagar dados automaticamente.
+
+## Supabase canônico e geografia
+
+A expansão estrutural do Supabase deve obedecer ao gate `Supabase Canonical Replay`.
+
+O modelo geográfico aprovado separa:
+
+- `Company`: conta comercial;
+- `CompanyEstablishment`: estabelecimento jurídico/CNPJ;
+- `CompanyLocation`: local físico comercial.
+
+GEO-02R mantém uma migration **pendente**, ainda não aplicada à produção, em `supabase/pending/20261004213000_geo_postgis_locations_v1.sql`. Ela foi validada em Supabase local descartável e define PostGIS, `company_establishments`, `company_locations`, `geography(Point,4326)`, GiST e RPCs espaciais. O browser não recebe acesso direto privilegiado: até Auth/Organization/RLS ser deliberadamente promovido, a fronteira continua backend/service-role.
 
 ## Lacunas
 
