@@ -15,7 +15,9 @@ if(!legacyLeadId.startsWith('ASSET-E2E-')){
 }
 const cfg=gateway.cfg(process.env);
 if(!cfg.enabled)throw new Error('OG_SUPABASE_URL e OG_SUPABASE_SERVICE_ROLE_KEY são obrigatórios.');
-if(!/\.supabase\.co$/i.test(new URL(cfg.base).hostname))throw new Error('OG_SUPABASE_URL inválida.');
+const host=new URL(cfg.base).hostname;
+const disposableHost=/^(127\.0\.0\.1|localhost)$/i.test(host)||/\.supabase\.co$/i.test(host);
+if(!disposableHost)throw new Error('OG_SUPABASE_URL inválida para smoke descartável.');
 
 const png=Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlEeKkAAAAASUVORK5CYII=',
