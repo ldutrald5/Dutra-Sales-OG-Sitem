@@ -52,17 +52,16 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Current code contains operational support/equalizer/vehicle mappings, but the exact validated OG source set that certifies each mapping must be attached/indexed before those mappings can be promoted to Confirmada OG outside implementation behavior.
 - **OQ-INTEL-KCC-001 — Promote compiled domain knowledge into runtime Knowledge Command Center after review** (open/medium)
   The new agent-facing Skills/playbooks/context are available to repository agents immediately, while live Sales Brain/KCC uses its private imported knowledge index; decide which reviewed stable domain records should be ingested into that runtime index without importing volatile CRM facts or unvalidated OG claims.
-- **OQ-SUPABASE-VERSIONING-001 — How to reconstruct and freeze the current Supabase backend as reproducible Git history** (open/high)
-  Choose and execute a controlled method to reconcile the 25 live migrations and 13 active Edge Functions with the partial repository history before expanding the normalized backend.
 
 ## Open / active incidents
 
 - **INC-XLSX-REPAIR-001 — Excel repaired generated workbook structures** (active/medium)
   A historical generated workbook opened with Excel recovery that removed an AutoFilter/table and a worksheet formula; the exact original serialization defect is not conclusively proven by recovered evidence.
-- **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (open/high)
-  The live Supabase backend contains structural state that cannot currently be reconstructed from the Git repository alone.
 
 ## Recent resolved incidents
+
+- **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (resolved/high)
+  SUPABASE-00S recovered the exact recorded migration SQL, all deployed Edge Function source and the historically untracked CRM bootstrap; the rollback-only disposable Supabase Canonical Replay now reconstructs the backend successfully.
 
 - **INC-V3-BLACK-001 — Historical V3 black screen and delayed first paint** (resolved/medium)
   The earlier V3 preview could render a black screen or delay the shell; the durable lesson is that the primary interface must render before optional/heavy modules.

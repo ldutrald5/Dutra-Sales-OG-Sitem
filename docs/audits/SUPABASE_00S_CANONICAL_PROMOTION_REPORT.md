@@ -2,7 +2,7 @@
 
 ## Status
 
-**GIT PROMOTION COMPLETE / DISPOSABLE REPLAY FOUND AN UNTRACKED-SCHEMA GAP**
+**PASS — CANONICAL RECOVERY + DISPOSABLE REPLAY GREEN**
 
 ## Changes prepared
 
@@ -80,14 +80,23 @@ This branch does not:
 - change production data;
 - change Railway.
 
-## Remaining gate
+## Replay result
 
-A fresh replay must now pass with the untracked live baseline supplement plus the exact 25 recorded migrations before this history can be declared fully reproducible.
+The zero-platform-cost local/CI replay now passes.
 
-Because a managed Supabase development branch may have account-specific cost, creating one requires an explicit cost check/confirmation first.
+Evidence from the dedicated `Supabase Canonical Replay` workflow:
 
-A local/CI Supabase replay is a possible zero-platform-cost alternative and should be preferred if it can reproduce required extensions/services reliably.
+- pinned Supabase CLI installation: PASS;
+- replay safety gate: PASS;
+- disposable local database startup: PASS;
+- recovery bootstrap + exact 25 recorded migrations: PASS;
+- recovered FK/index/RLS/grant phase: PASS;
+- table/function structural assertions: PASS;
+- transaction rollback: PASS;
+- disposable stack shutdown: PASS.
+
+The replay intentionally mutates only the disposable local database and rolls back the structural transaction.
 
 ## GEO consequence
 
-No PostGIS/company location migration should be applied to production until this canonical history passes disposable replay.
+Git-only GEO/domain implementation may proceed. Any production PostGIS/company-location DDL still requires a separate reviewed package, current live-vs-Git pre-flight and explicit rollout decision.
