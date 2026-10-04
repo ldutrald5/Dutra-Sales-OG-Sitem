@@ -450,6 +450,15 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  const assetProposalAccessMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/proposal-access$/i);
+  if (assetProposalAccessMatch && req.method === 'GET') {
+    const result = await assetGateway.signProposalAsset(assetProposalAccessMatch[1], {
+      ttl:url.searchParams.get('ttl'),
+      versionId:url.searchParams.get('versionId')
+    }, process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
   const assetAccessMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/access$/i);
   if (assetAccessMatch && req.method === 'GET') {
     const result = await assetGateway.signAsset(assetAccessMatch[1], {
