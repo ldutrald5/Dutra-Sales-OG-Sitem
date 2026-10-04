@@ -44,7 +44,7 @@ async function proxy(req, res, targetPath) {
   try {
     const target = new URL(targetPath, coreBase);
     const headers = new Headers();
-    for (const name of ['authorization','content-type','accept','if-none-match']) {
+    for (const name of ['authorization','content-type','accept','if-none-match','x-file-name']) {
       const value = req.headers[name];
       if (value) headers.set(name, value);
     }
