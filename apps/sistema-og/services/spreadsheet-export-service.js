@@ -1,4 +1,4 @@
-(function attach(root,factory){const api=factory(root);if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_SPREADSHEET_EXPORT=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root){
+(function attach(root,factory){const cnpjDomain=typeof module!=='undefined'&&module.exports?require('../domain/cnpj.js'):root.OG_CNPJ;const api=factory(root,cnpjDomain);if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_SPREADSHEET_EXPORT=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root,cnpjDomain){
   'use strict';
 
   const CRM_HEADERS=[
@@ -49,9 +49,10 @@
   }
 
   function personType(lead={}){
-    const doc=digits(documentValue(lead));
-    if(doc.length===14)return'PJ';
-    if(doc.length===11)return'PF';
+    const cnpj=cnpjDomain?.normalize?cnpjDomain.normalize(lead.cnpj):clean(lead.cnpj).toUpperCase().replace(/[.\/\-\s]/g,'');
+    const isCnpj=cnpjDomain?.isShape?cnpjDomain.isShape(cnpj):/^[A-Z0-9]{12}\d{2}$/.test(cnpj);
+    if(isCnpj)return'PJ';
+    if(digits(lead.cpf).length===11)return'PF';
     return'';
   }
 
