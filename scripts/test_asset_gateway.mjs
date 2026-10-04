@@ -123,7 +123,7 @@ try {
     if(u.endsWith('/rest/v1/assets') && init.method==='POST') return json(201,[JSON.parse(init.body)]);
     if(u.endsWith('/rest/v1/asset_versions') && init.method==='POST') return json(201,[JSON.parse(init.body)]);
     if(u.includes('/storage/v1/object/account-assets/') && init.method==='POST') return json(500,{message:'storage down'});
-    if(u.includes('/rest/v1/assets?id=eq.') && init.method==='DELETE') return new Response('',{status:204});
+    if(u.includes('/rest/v1/assets?id=eq.') && init.method==='DELETE') return new Response(null,{status:204});
 
     throw new Error('Unexpected compensation fetch '+(init.method||'GET')+' '+u);
   };
