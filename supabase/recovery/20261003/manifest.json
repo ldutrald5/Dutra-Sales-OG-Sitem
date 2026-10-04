@@ -32,7 +32,7 @@
       "slug": "proposal-html",
       "version": 6,
       "verify_jwt": false,
-      "ezbr_sha256": "2ccb9d381a71ee81d56023e90d0f3f3e825f10109b503e43224a9acc74f73a6816",
+      "ezbr_sha256": "2ccb9d381a71ee81d56023e90d0f3fbc7317ce63d66d08d265e15406ab407703",
       "files": [
         "index.ts",
         "deno.json"
