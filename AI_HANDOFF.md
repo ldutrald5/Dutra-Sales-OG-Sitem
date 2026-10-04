@@ -40,7 +40,7 @@ Se houver uma estrutura existente adequada, estenda-a. Não crie uma segunda fon
 
 Antes de afirmar que algo não existe, pesquise o repositório. Antes de corrigir um bug material, consulte `docs/second-brain/incidents.jsonl` e `anti-patterns.jsonl`. Depois de uma mudança STANDARD/STRUCTURAL, registre aprendizado durável e rode `npm run og:brain:refresh`.
 
-Para qualquer mudança estrutural em Supabase, faça também um pre-flight live-vs-Git. A auditoria de 2026-10-01 registrou `INC-SUPABASE-DRIFT-001`: o projeto remoto possuía mais migrations e Edge Functions do que o repositório conseguia reproduzir. Não amplie essa divergência; consulte o inventário remoto atual e a pasta `supabase/` antes de aplicar DDL/deploy de função.
+Para qualquer mudança estrutural em Supabase, faça pre-flight live-vs-Git e preserve o gate `Supabase Canonical Replay`. O incidente `INC-SUPABASE-DRIFT-001` foi resolvido por SUPABASE-00S recuperando os 25 migrations registrados, as 13 Edge Functions e um bootstrap explícito para oito tabelas CRM históricas fora do migration log. Consulte `supabase/migrations/`, `supabase/functions/`, `supabase/recovery/20261003/` e os relatórios SUPABASE-00S antes de novo DDL/deploy. Se o replay ou o pre-flight divergir, pare a expansão estrutural.
 
 ## Definition of Done
 

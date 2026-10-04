@@ -62,7 +62,7 @@ During P0, existing local interaction recording remains available as fallback. D
 
 
 ## P0 transactional write path
-The reviewed migration `20260930024500_record_sales_execution_result_v1.sql` introduces `record_sales_execution_result_v1(jsonb)`.
+The reviewed migration `20260930023756_record_sales_execution_result_v1.sql` introduces `record_sales_execution_result_v1(jsonb)`.
 
 The function is `SECURITY DEFINER`, has a fixed search path, revokes execution from public/anon/authenticated, and grants execution only to `service_role`. The browser cannot call it directly. Railway reaches it through the token-authenticated `sales-execution-gateway` Edge Function.
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const migration = fs.readFileSync('supabase/migrations/20260930104500_call_intelligence_v1.sql','utf8');
+const migration = fs.readFileSync('supabase/migrations/20260930103929_call_intelligence_v1.sql','utf8');
 const edge = fs.readFileSync('supabase/functions/call-intelligence/index.ts','utf8');
 const app = fs.readFileSync('apps/sistema-og/app.js','utf8');
 const html = fs.readFileSync('apps/sistema-og/index.html','utf8');

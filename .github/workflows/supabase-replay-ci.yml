@@ -1,0 +1,145 @@
+name: Supabase Canonical Replay
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'scripts/test_supabase_recovery_snapshot.mjs'
+      - 'scripts/test_supabase_replay_safety.mjs'
+      - 'scripts/build_supabase_transactional_replay.mjs'
+      - 'scripts/check_supabase_schema_parity.mjs'
+      - '.github/workflows/supabase-replay-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_TELEMETRY_DISABLED: '1'
+      PGURL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb
+        with:
+          version: 2.119.0
+
+      - name: Static replay safety gate
+        run: node scripts/test_supabase_replay_safety.mjs
+
+      - name: Hide canonical migrations from local auto-apply
+        run: |
+          mkdir -p /tmp/dutra-supabase
+          mv supabase/migrations /tmp/dutra-supabase/migrations
+
+      - name: Initialize local Supabase config
+        run: supabase init --force
+
+      - name: Replay #1 from empty disposable project schema
+        run: |
+          rm -rf /tmp/dutra-parity-run1
+          mkdir -p /tmp/dutra-parity-run1
+          supabase db start
+          psql "$PGURL" -v ON_ERROR_STOP=1 <<'SQL'
+          DO $empty$
+          BEGIN
+            IF EXISTS (
+              SELECT 1
+              FROM pg_class c
+              JOIN pg_namespace n ON n.oid = c.relnamespace
+              WHERE n.nspname = 'public'
+                AND c.relkind IN ('r','p','v','m','S')
+            ) OR EXISTS (
+              SELECT 1
+              FROM pg_proc p
+              JOIN pg_namespace n ON n.oid = p.pronamespace
+              WHERE n.nspname = 'public'
+                AND p.prokind IN ('f','p')
+            ) THEN
+              RAISE EXCEPTION 'disposable replay did not start from an empty public project schema';
+            END IF;
+          END
+          $empty$;
+          SQL
+          node scripts/build_supabase_transactional_replay.mjs \
+            /tmp/dutra-supabase/migrations \
+            /tmp/dutra-parity-run1/replay.sql \
+            /tmp/dutra-parity-run1/actual-schema.json
+          psql "$PGURL" -v ON_ERROR_STOP=1 -f /tmp/dutra-parity-run1/replay.sql
+          node scripts/check_supabase_schema_parity.mjs \
+            /tmp/dutra-parity-run1/actual-schema.json \
+            /tmp/dutra-parity-run1/parity-report.json \
+            /tmp/dutra-parity-run1/actual-normalized.json \
+            /tmp/dutra-parity-run1/expected-normalized.json
+
+      - name: Destroy replay #1 without backup
+        if: always()
+        run: supabase stop --no-backup || true
+
+      - name: Replay #2 from a newly empty disposable project schema
+        run: |
+          rm -rf /tmp/dutra-parity-run2
+          mkdir -p /tmp/dutra-parity-run2
+          supabase db start
+          psql "$PGURL" -v ON_ERROR_STOP=1 <<'SQL'
+          DO $empty$
+          BEGIN
+            IF EXISTS (
+              SELECT 1
+              FROM pg_class c
+              JOIN pg_namespace n ON n.oid = c.relnamespace
+              WHERE n.nspname = 'public'
+                AND c.relkind IN ('r','p','v','m','S')
+            ) OR EXISTS (
+              SELECT 1
+              FROM pg_proc p
+              JOIN pg_namespace n ON n.oid = p.pronamespace
+              WHERE n.nspname = 'public'
+                AND p.prokind IN ('f','p')
+            ) THEN
+              RAISE EXCEPTION 'second disposable replay did not start from an empty public project schema';
+            END IF;
+          END
+          $empty$;
+          SQL
+          node scripts/build_supabase_transactional_replay.mjs \
+            /tmp/dutra-supabase/migrations \
+            /tmp/dutra-parity-run2/replay.sql \
+            /tmp/dutra-parity-run2/actual-schema.json
+          psql "$PGURL" -v ON_ERROR_STOP=1 -f /tmp/dutra-parity-run2/replay.sql
+          node scripts/check_supabase_schema_parity.mjs \
+            /tmp/dutra-parity-run2/actual-schema.json \
+            /tmp/dutra-parity-run2/parity-report.json \
+            /tmp/dutra-parity-run2/actual-normalized.json \
+            /tmp/dutra-parity-run2/expected-normalized.json
+
+      - name: Prove clean replay fingerprint determinism
+        run: |
+          cmp /tmp/dutra-parity-run1/expected-normalized.json /tmp/dutra-parity-run2/expected-normalized.json
+          cmp /tmp/dutra-parity-run1/actual-normalized.json /tmp/dutra-parity-run2/actual-normalized.json
+          node -e "const fs=require('fs'); const a=JSON.parse(fs.readFileSync('/tmp/dutra-parity-run1/parity-report.json')); const b=JSON.parse(fs.readFileSync('/tmp/dutra-parity-run2/parity-report.json')); if(a.structural_parity!=='PASS'||b.structural_parity!=='PASS'||a.fingerprints.actual_sha256!==b.fingerprints.actual_sha256||a.fingerprints.actual_sha256!==a.fingerprints.expected_sha256){process.exit(1)} console.log('Clean replay fingerprint determinism: PASS'); console.log('Fingerprint:',a.fingerprints.actual_sha256);"
+
+      - name: Upload schema parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-schema-parity-${{ github.sha }}
+          path: |
+            /tmp/dutra-parity-run1/parity-report.json
+            /tmp/dutra-parity-run1/actual-normalized.json
+            /tmp/dutra-parity-run1/expected-normalized.json
+            /tmp/dutra-parity-run2/parity-report.json
+            /tmp/dutra-parity-run2/actual-normalized.json
+            /tmp/dutra-parity-run2/expected-normalized.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop disposable stack
+        if: always()
+        run: supabase stop --no-backup || true

@@ -2,14 +2,19 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const root=path.resolve('supabase/recovery/20261003');
-const readJson=name=>JSON.parse(fs.readFileSync(path.join(root,name),'utf8'));
-assert.ok(fs.existsSync(root),'recovery snapshot directory missing');
+const recoveryRoot=path.resolve('supabase/recovery/20261003');
+const canonicalMigrationRoot=path.resolve('supabase/migrations');
+const canonicalFunctionRoot=path.resolve('supabase/functions');
+const pendingRoot=path.resolve('supabase/pending');
+const untrackedBaselinePath=path.join(recoveryRoot,'untracked-live-baseline.sql');
+const readJson=name=>JSON.parse(fs.readFileSync(path.join(recoveryRoot,name),'utf8'));
+
+assert.ok(fs.existsSync(recoveryRoot),'recovery snapshot directory missing');
 
 const manifest=readJson('manifest.json');
 const migrations=readJson('remote-migrations.json');
 const edgeList=readJson('remote-edge-functions-list.json');
-const readme=fs.readFileSync(path.join(root,'README.md'),'utf8');
+const readme=fs.readFileSync(path.join(recoveryRoot,'README.md'),'utf8');
 
 assert.equal(manifest.schema_version,1);
 assert.equal(manifest.safety.executable_migration_chain,false);
@@ -19,40 +24,52 @@ assert.equal(manifest.remote_counts.edge_functions,13);
 assert.equal(migrations.migrations.length,25);
 assert.equal(edgeList.functions.length,13);
 assert.equal(manifest.edge_functions.length,13);
+assert.ok(fs.existsSync(untrackedBaselinePath),'untracked live baseline supplement missing');
+const untrackedBaseline=fs.readFileSync(untrackedBaselinePath,'utf8');
+for(const table of ['crm_activities','crm_contacts','crm_conversations','crm_insights','crm_messages','crm_processor_runs','integration_events','sales_opportunities']){
+  assert.match(untrackedBaseline,new RegExp('create table if not exists public\\.'+table,'i'),'untracked baseline missing '+table);
+}
+
+const expectedMigrations=migrations.migrations
+  .map(item=>`${item.version}_${item.name}.sql`)
+  .sort();
+const recoveredMigrationRoot=path.join(recoveryRoot,'migrations-original');
+const recoveredMigrations=fs.readdirSync(recoveredMigrationRoot)
+  .filter(name=>name.endsWith('.sql'))
+  .sort();
+const canonicalMigrations=fs.readdirSync(canonicalMigrationRoot)
+  .filter(name=>name.endsWith('.sql'))
+  .sort();
+
+assert.deepEqual(recoveredMigrations,expectedMigrations,'recovery must contain the exact remote migration file set');
+assert.deepEqual(canonicalMigrations,expectedMigrations,'canonical migrations must match the live remote history exactly');
+
+for(const file of expectedMigrations){
+  const recovered=fs.readFileSync(path.join(recoveredMigrationRoot,file),'utf8').replace(/\r\n/g,'\n').trim();
+  const canonical=fs.readFileSync(path.join(canonicalMigrationRoot,file),'utf8').replace(/\r\n/g,'\n').trim();
+  assert.ok(recovered.length>0,`empty recovered migration SQL: ${file}`);
+  assert.equal(canonical,recovered,`canonical migration differs from live recovered SQL: ${file}`);
+}
+
+const authPilot='20260926233000_auth_organization_pilot.sql';
+assert.equal(expectedMigrations.includes(authPilot),false,'Auth pilot must not be represented as applied live history');
+assert.ok(fs.existsSync(path.join(pendingRoot,authPilot)),'unapplied Auth pilot must remain explicit under supabase/pending');
+assert.equal(fs.existsSync(path.join(canonicalMigrationRoot,authPilot)),false,'unapplied Auth pilot must not sit in canonical applied migration history');
 
 const liveSlugs=new Set(edgeList.functions.map(item=>item.slug));
 for(const fn of manifest.edge_functions){
   assert.ok(liveSlugs.has(fn.slug),`manifest function not present in live list: ${fn.slug}`);
   for(const file of fn.files){
-    const target=path.join(root,'edge-functions',fn.slug,file);
-    assert.ok(fs.existsSync(target),`missing recovered source: ${fn.slug}/${file}`);
+    const recoveredPath=path.join(recoveryRoot,'edge-functions',fn.slug,file);
+    const canonicalPath=path.join(canonicalFunctionRoot,fn.slug,file);
+    assert.ok(fs.existsSync(recoveredPath),`missing recovered source: ${fn.slug}/${file}`);
+    assert.ok(fs.existsSync(canonicalPath),`missing canonical source: ${fn.slug}/${file}`);
+    assert.equal(
+      fs.readFileSync(canonicalPath,'utf8'),
+      fs.readFileSync(recoveredPath,'utf8'),
+      `canonical Edge Function differs from live recovered source: ${fn.slug}/${file}`
+    );
   }
-}
-
-const migrationRoot=path.join(root,'migrations-original');
-const recoveredMigrationFiles=fs.readdirSync(migrationRoot).filter(name=>name.endsWith('.sql')).sort();
-assert.equal(recoveredMigrationFiles.length,25,'all 25 live migration SQL payloads must be recovered');
-for(const migration of migrations.migrations){
-  const expected=`${migration.version}_${migration.name}.sql`;
-  assert.ok(recoveredMigrationFiles.includes(expected),`missing recovered migration SQL: ${expected}`);
-  assert.ok(fs.readFileSync(path.join(migrationRoot,expected),'utf8').trim().length>0,`empty migration SQL: ${expected}`);
-}
-assert.equal(migrations.migrations.some(item=>item.version==='20260926233000'),false,'Auth pilot must not be represented as applied live history');
-
-for(const slug of ['sales-execution-gateway','call-intelligence']){
-  const canonical=fs.readFileSync(path.resolve('supabase/functions',slug,'index.ts'),'utf8');
-  const recovered=fs.readFileSync(path.join(root,'edge-functions',slug,'index.ts'),'utf8');
-  assert.equal(recovered,canonical,`${slug} recovered source drifted from canonical main source`);
-}
-
-for(const [canonicalPath,recoveredName] of [
-  ['supabase/migrations/20260930024500_record_sales_execution_result_v1.sql','20260930023756_record_sales_execution_result_v1.sql'],
-  ['supabase/migrations/20260930031500_harden_sales_execution_result_v1.sql','20260930030530_harden_sales_execution_result_v1.sql'],
-  ['supabase/migrations/20260930104500_call_intelligence_v1.sql','20260930103929_call_intelligence_v1.sql']
-]){
-  const canonical=fs.readFileSync(path.resolve(canonicalPath),'utf8').replace(/\r\n/g,'\n').trim();
-  const recovered=fs.readFileSync(path.join(migrationRoot,recoveredName),'utf8').replace(/\r\n/g,'\n').trim();
-  assert.equal(recovered,canonical,`recovered migration differs from current Git SQL: ${recoveredName}`);
 }
 
 assert.match(readme,/original SQL statements stored by Supabase/i);
@@ -72,8 +89,9 @@ function walk(dir){
     return entry.isDirectory()?walk(target):[target];
   });
 }
-for(const file of walk(root)){
-  const content=fs.readFileSync(file,'utf8');
-  for(const re of risky)assert.equal(re.test(content),false,`secret-like content detected in ${path.relative(root,file)}`);
+for(const file of walk(recoveryRoot)){
+  const fileContent=fs.readFileSync(file,'utf8');
+  for(const re of risky)assert.equal(re.test(fileContent),false,`secret-like content detected in ${path.relative(recoveryRoot,file)}`);
 }
-console.log('Supabase recovery snapshot: PASS');
+
+console.log('Supabase recovery + canonical alignment: PASS');

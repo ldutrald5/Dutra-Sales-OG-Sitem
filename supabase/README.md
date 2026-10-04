@@ -1,25 +1,55 @@
-# Package 02R — Auth + Organization Pilot
+# Supabase — canonical backend history
 
-Esta pasta contém o contrato versionado do piloto de identidade. A migration **não é aplicada automaticamente** pelo DUTRA OS atual.
+The DUTRA OS repository now distinguishes three different states explicitly.
 
-## Fronteira
+## 1. Applied live history
 
-- Supabase Auth é a origem da identidade do usuário.
-- `profiles.id` referencia `auth.users.id`.
-- `organization_members` define a associação explícita entre usuário e organização.
-- RLS usa membership ativa para leitura da organização.
-- O navegador não recebe `service_role`.
-- Criação de organização, criação de membership e elevação de papel ficam fora do cliente público neste incremento.
-- O token Cloudflare atual continua sendo uma ponte de compatibilidade até o corte explícito de um Package posterior.
+`supabase/migrations/` contains the exact migration versions/names and SQL recorded in the live `og-proposal-engine` project during the 2026-10-03 recovery.
 
-## Bootstrap seguro
+This folder is the canonical **applied backend history** used for drift comparison.
 
-O primeiro bootstrap deve ser executado em ambiente administrativo controlado: criar usuário no Auth, inserir Profile, criar Organization e inserir OrganizationMember owner. O Package 02R não implementa auto-signup que possa criar organizações arbitrárias.
+## 2. Deployed Edge Functions
 
-## Rollback
+`supabase/functions/` contains the source recovered from all active live Edge Functions. Existing Git sources for `sales-execution-gateway` and `call-intelligence` were verified as exact matches before the missing function sources were restored.
 
-A migration não toca `state.leads`, localStorage, IndexedDB, JSON local ou KV. Antes de aplicação remota, rollback é simplesmente não aplicar. Após aplicação em ambiente piloto vazio, remover policies/tabelas na ordem inversa somente por migration de rollback revisada.
+## 3. Pending / not applied
 
-## Pendência ambiental
+`supabase/pending/` contains reviewed migrations that exist as project work but are **not part of the current live migration history**.
 
-`OQ-PKG02-001` só pode ser encerrada quando existir um projeto Supabase escolhido e um ensaio real confirmar migration, Auth, RLS e bootstrap. Até lá, este pacote mantém o caminho remoto desligado.
+The Auth + Organization pilot is currently pending:
+
+`supabase/pending/20260926233000_auth_organization_pilot.sql`
+
+It must not be treated as applied merely because it exists in Git.
+
+A migration do piloto **não é aplicada automaticamente** pelo DUTRA OS atual.
+
+## Auth pilot boundary
+
+The pilot defines:
+
+- Supabase Auth as user identity;
+- `profiles.id` → `auth.users.id`;
+- `organization_members` membership/roles;
+- organization-aware RLS.
+
+Live validation and an explicit rollout decision are still required before promoting/applying it.
+
+O navegador **não recebe `service_role`**.
+
+A pendência ambiental `OQ-PKG02-001` permanece aberta até um ensaio real confirmar Auth, RLS, membership e bootstrap no ambiente escolhido.
+
+## Structural-change pre-flight
+
+Before any new Supabase migration or Edge Function deployment:
+
+1. compare live migration versions against `supabase/migrations/`;
+2. compare active live Edge Function source/checksums against `supabase/functions/`;
+3. stop if drift exists;
+4. create the new change in Git first;
+5. validate it in a disposable environment;
+6. only then consider production application.
+
+Never use service-role values in browser code or Git.
+
+Never run `supabase db reset --linked` against production.

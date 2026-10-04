@@ -65,7 +65,7 @@ server.mjs + JSON privado       ou       Cloudflare Worker + KV
 - Existem duas experiências de celular (`/` responsivo e `/mobile` legado), com risco de divergência.
 - Autenticação Cloudflare por código não equivale a perfis e permissões por usuário.
 - Os quality gates genéricos do AIOX citam comandos que este `package.json` não possui; devem ser usados os testes reais disponíveis.
-- Auditoria live de 2026-10-01 encontrou drift de reprodutibilidade no Supabase: 25 migrations aplicadas e 13 Edge Functions ativas no remoto, contra 4 arquivos de migration e 2 fontes de Edge Function versionadas no Git naquele momento. Tratar `INC-SUPABASE-DRIFT-001` antes de nova expansão estrutural do backend.
+- O drift Supabase detectado em 2026-10-01 foi reconciliado por SUPABASE-00S: os 25 SQLs registrados e as 13 Edge Functions ativas foram recuperados para Git; oito tabelas CRM que existiam fora do histórico de migrations ganharam bootstrap de recuperação explícito. O workflow rollback-only `Supabase Canonical Replay` reconstrói esse backend em ambiente descartável. Toda expansão estrutural futura deve manter esse gate verde e fazer pre-flight live-vs-Git.
 
 ## Regras para evolução
 
