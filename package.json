@@ -81,7 +81,8 @@
     "og:v3:proposal-safety:test": "node scripts/test_v3_proposal_technical_safety.mjs",
     "og:intelligence:test": "node scripts/test_intelligence_compiler.mjs && node scripts/test_prompt_architect.mjs",
     "og:prompt:lint": "node scripts/prompt-lint.mjs",
-    "og:prompt:test": "node scripts/test_prompt_architect.mjs"
+    "og:prompt:test": "node scripts/test_prompt_architect.mjs",
+    "og:asset:contract:test": "node scripts/test_asset_domain_contract.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
