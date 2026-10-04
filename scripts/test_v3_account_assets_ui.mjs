@@ -3,10 +3,12 @@ import fs from 'node:fs';
 
 const ui=fs.readFileSync('preview-v2/account-assets-v3.js','utf8');
 const html=fs.readFileSync('preview-v2/index.html','utf8');
+const server=fs.readFileSync('preview-v2/server.mjs','utf8');
 
 assert.match(html,/data-client-tab="media"/);
 assert.match(html,/data-client-panel="media"/);
 assert.match(html,/account-assets-v3\.js/);
+assert.match(server,/\/account-assets-v3\.js/);
 
 assert.match(ui,/DUTRA_CORE/);
 assert.match(ui,/\.request\('\/assets/);
