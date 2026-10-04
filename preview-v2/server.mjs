@@ -136,7 +136,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'HEAD') return res.end();
     return res.end(html);
   }
-  if (['/core-bridge.js','/core-pricing.js','/meu-dia-v3.js','/sales-execution-service.js','/call-provider-v3.js','/calendar-provider-v3.js','/quote-handoff-v3.js','/technical-application-core-v3.js','/technical-quote-service-v3.js','/whatsapp-action-service-v3.js','/feature-loader-v3.js','/prospecting-execution-v3.js','/sales-action-center-v3.js','/proposal-entry-v3.js','/operational-crm-v3.js','/technical-center-v3.js'].includes(url.pathname)) {
+  if (['/core-bridge.js','/account-assets-v3.js','/core-pricing.js','/meu-dia-v3.js','/sales-execution-service.js','/call-provider-v3.js','/calendar-provider-v3.js','/quote-handoff-v3.js','/technical-application-core-v3.js','/technical-quote-service-v3.js','/whatsapp-action-service-v3.js','/feature-loader-v3.js','/prospecting-execution-v3.js','/sales-action-center-v3.js','/proposal-entry-v3.js','/operational-crm-v3.js','/technical-center-v3.js'].includes(url.pathname)) {
     return sendFile(res, path.join(dir, url.pathname.slice(1)), req.method);
   }
 
