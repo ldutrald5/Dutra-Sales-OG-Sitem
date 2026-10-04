@@ -23,6 +23,11 @@ assert.match(ui,/\/archive/);
 assert.match(ui,/mode==='delete'\?'DELETE':'POST'/);
 assert.match(ui,/usage_policy/);
 assert.match(ui,/sensitivity_level/);
+assert.match(ui,/assetReplace/);
+assert.match(ui,/\/versions/);
+assert.match(ui,/usagePolicy/);
+assert.match(ui,/sensitivity/);
+assert.match(ui,/15\*1024\*1024/);
 assert.doesNotMatch(ui,/SUPABASE_SERVICE_ROLE_KEY|service_role/i);
 assert.doesNotMatch(ui,/supabase\.co|createClient\(/i);
 
