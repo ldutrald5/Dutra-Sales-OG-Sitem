@@ -586,6 +586,20 @@ async function signAsset(assetId, options = {}, env = process.env) {
   return {configured:true,status:200,data:{url,expiresIn:ttl,assetId:asset.data.id,versionId:v.id,mimeType:v.mime_type,filename:v.original_filename},error:null};
 }
 
+async function signProposalAsset(assetId, options = {}, env = process.env) {
+  const asset=await getAsset(assetId,env);
+  if(asset.error)return asset;
+  const allowed=asset.data.status==='ACTIVE'
+    && asset.data.media_kind==='IMAGE'
+    && asset.data.usage_policy==='PROPOSAL_ALLOWED'
+    && asset.data.visibility_class!=='RESTRICTED'
+    && asset.data.sensitivity_level!=='CONFIDENTIAL';
+  if(!allowed){
+    return {configured:true,status:403,data:null,error:'Asset não está aprovado para uso em proposta'};
+  }
+  return signAsset(asset.data.id,{ttl:options.ttl,versionId:options.versionId,download:false},env);
+}
+
 async function setPrimary(assetId, env = process.env) {
   const asset=await getAsset(assetId,env);
   if(asset.error) return asset;
@@ -699,5 +713,5 @@ async function health(env = process.env) {
 module.exports={
   BUCKET,MIME,MEDIA_KINDS,BUSINESS_CATEGORIES,SOURCE_TYPES,VISIBILITY_CLASSES,SENSITIVITY_LEVELS,USAGE_POLICIES,LINK_ROLES,
   cfg,safeUuid,mediaForMime,buildStoragePath,encodeCursor,decodeCursor,normalizeMetadata,validateBytes,validateContentSignature,
-  rest,storageRequest,resolveCompany,findDuplicateAsset,health,visualSummary,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,normalizeLinkInput,createAssetLink,listAssetLinks,deleteAssetLink,setStatus
+  rest,storageRequest,resolveCompany,findDuplicateAsset,health,visualSummary,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,signProposalAsset,setPrimary,normalizeLinkInput,createAssetLink,listAssetLinks,deleteAssetLink,setStatus
 };
