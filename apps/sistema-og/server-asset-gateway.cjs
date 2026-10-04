@@ -207,6 +207,28 @@ function validateBytes(bytes, env = process.env) {
   return buffer;
 }
 
+function validateContentSignature(buffer, mimeType) {
+  const b = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer || []);
+  const mime = normalizeMime(mimeType);
+  const ascii = (start, end) => b.subarray(start,end).toString('ascii');
+  let ok = true;
+
+  if (mime === 'image/jpeg') ok = b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
+  else if (mime === 'image/png') ok = b.length >= 8 && b.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]));
+  else if (mime === 'image/webp') ok = b.length >= 12 && ascii(0,4) === 'RIFF' && ascii(8,12) === 'WEBP';
+  else if (mime === 'application/pdf') ok = b.length >= 5 && ascii(0,5) === '%PDF-';
+  else if (mime === 'image/heic' || mime === 'image/heif') {
+    const brand = ascii(8,16).toLowerCase();
+    ok = b.length >= 12 && ascii(4,8) === 'ftyp' && /(heic|heix|hevc|hevx|mif1|msf1|heif|heis)/.test(brand);
+  } else if (mime === 'video/mp4' || mime === 'audio/mp4') ok = b.length >= 12 && ascii(4,8) === 'ftyp';
+  else if (mime === 'video/webm') ok = b.length >= 4 && b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3;
+  else if (mime === 'audio/mpeg') ok = (b.length >= 3 && ascii(0,3) === 'ID3') || (b.length >= 2 && b[0] === 0xff && (b[1] & 0xe0) === 0xe0);
+  else if (mime === 'audio/wav' || mime === 'audio/x-wav') ok = b.length >= 12 && ascii(0,4) === 'RIFF' && ascii(8,12) === 'WAVE';
+
+  if (!ok) throw new Error('Conteúdo do arquivo não corresponde ao MIME informado');
+  return true;
+}
+
 function publicVersion(version) {
   if (!version) return null;
   return {
@@ -254,6 +276,26 @@ async function hardDeleteVersion(versionId, env) {
   }, env);
 }
 
+async function findDuplicateAsset(companyId, sha256, env = process.env) {
+  const versions = await rest(
+    'asset_versions?sha256=eq.' + encodeURIComponent(sha256)
+    + '&processing_status=eq.READY&select=asset_id,version_number&limit=30',
+    {}, env
+  );
+  if (versions.error) return versions;
+  const ids = [...new Set((versions.data || []).map(v => v.asset_id).filter(Boolean))];
+  if (!ids.length) return { configured:true, status:200, data:null, error:null };
+
+  const assets = await rest(
+    'assets?id=in.(' + ids.join(',') + ')'
+    + '&company_id=eq.' + encodeURIComponent(safeUuid(companyId,'companyId'))
+    + '&status=eq.ACTIVE&select=id,title,business_category,current_version_id&limit=30',
+    {}, env
+  );
+  if (assets.error) return assets;
+  return { configured:true, status:200, data:assets.data?.[0] || null, error:null };
+}
+
 async function createAssetWithUpload(ref = {}, input = {}, bytes, env = process.env) {
   const c = cfg(env);
   if (!c.enabled) return { configured:false, status:503, data:null, error:'Asset Gateway não configurado.' };
@@ -262,6 +304,7 @@ async function createAssetWithUpload(ref = {}, input = {}, bytes, env = process.
   try {
     normalized = normalizeMetadata(input, input.mimeType);
     buffer = validateBytes(bytes, env);
+    validateContentSignature(buffer, normalized.mimeType);
   } catch (error) {
     return { configured:true, status:400, data:null, error:error.message };
   }
@@ -276,6 +319,11 @@ async function createAssetWithUpload(ref = {}, input = {}, bytes, env = process.
   const storagePath = buildStoragePath(company.data.id, assetId, versionId, normalized.ext);
   const now = new Date().toISOString();
   const hash = createHash('sha256').update(buffer).digest('hex');
+  const duplicate = await findDuplicateAsset(company.data.id, hash, env);
+  if (duplicate.error) return duplicate;
+  if (duplicate.data) {
+    return { configured:true, status:409, data:{ duplicateAssetId:duplicate.data.id }, error:'Arquivo já existe nesta conta.' };
+  }
   const assetRow = {
     id:assetId, company_id:company.data.id,
     title:normalized.title, description:normalized.description,
@@ -367,7 +415,7 @@ async function listAssets(ref = {}, options = {}, env = process.env) {
   const limit=Math.max(1,Math.min(MAX_LIST_LIMIT,Number(options.limit)||24));
   const params=new URLSearchParams();
   params.set('company_id','eq.'+company.data.id);
-  params.set('status','neq.DELETED');
+  params.set('status','eq.ACTIVE');
   if(category) params.set('business_category','eq.'+category);
   if(cursor) params.set('or','(created_at.lt.'+cursor.createdAt+',and(created_at.eq.'+cursor.createdAt+',id.lt.'+cursor.id+'))');
   params.set('select','id,company_id,title,description,media_kind,business_category,source_type,visibility_class,sensitivity_level,usage_policy,source_url,current_version_id,is_primary,is_verified,status,deleted_at,metadata,captured_at,created_at,updated_at');
@@ -410,6 +458,7 @@ async function replaceAssetFile(assetId, input = {}, bytes, env = process.env) {
   try {
     normalized=normalizeMetadata({...input,businessCategory:asset.data.business_category},input.mimeType);
     buffer=validateBytes(bytes,env);
+    validateContentSignature(buffer, normalized.mimeType);
   } catch(error){ return {configured:true,status:400,data:null,error:error.message}; }
 
   const latest=await rest(
@@ -422,6 +471,9 @@ async function replaceAssetFile(assetId, input = {}, bytes, env = process.env) {
   const versionId=randomUUID();
   const storagePath=buildStoragePath(asset.data.company_id,asset.data.id,versionId,normalized.ext);
   const hash=createHash('sha256').update(buffer).digest('hex');
+  const duplicate=await findDuplicateAsset(asset.data.company_id,hash,env);
+  if(duplicate.error)return duplicate;
+  if(duplicate.data)return {configured:true,status:409,data:{duplicateAssetId:duplicate.data.id},error:'Este arquivo já existe nesta conta.'};
   let versionCreated=false,objectUploaded=false;
   const cleanup=[];
 
@@ -541,6 +593,6 @@ async function health(env = process.env) {
 
 module.exports={
   BUCKET,MIME,MEDIA_KINDS,BUSINESS_CATEGORIES,SOURCE_TYPES,VISIBILITY_CLASSES,SENSITIVITY_LEVELS,USAGE_POLICIES,
-  cfg,safeUuid,mediaForMime,buildStoragePath,encodeCursor,decodeCursor,normalizeMetadata,validateBytes,
-  rest,storageRequest,resolveCompany,health,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,setStatus
+  cfg,safeUuid,mediaForMime,buildStoragePath,encodeCursor,decodeCursor,normalizeMetadata,validateBytes,validateContentSignature,
+  rest,storageRequest,resolveCompany,findDuplicateAsset,health,listAssets,createAssetWithUpload,replaceAssetFile,signAsset,setPrimary,setStatus
 };
