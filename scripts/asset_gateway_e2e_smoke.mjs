@@ -68,6 +68,34 @@ const originalVersionId=created.data.asset.current_version_id;
 assert.ok(assetId);
 assert.ok(originalVersionId);
 
+const proposalDenied=await gateway.signProposalAsset(assetId,{ttl:60,versionId:originalVersionId},process.env);
+assert.equal(proposalDenied.status,403);
+assert.match(proposalDenied.error,/não está aprovado/i);
+
+const proposalApprovedBytes=Buffer.concat([png,Buffer.from('proposal-approved')]);
+const proposalApproved=await gateway.createAssetWithUpload(
+  {legacyLeadId},
+  {
+    mimeType:'image/png',
+    originalFilename:'asset-proposal.png',
+    businessCategory:'FLEET',
+    sourceType:'MANUAL_UPLOAD',
+    title:'Frota aprovada para proposta',
+    usagePolicy:'PROPOSAL_ALLOWED',
+    sensitivityLevel:'NORMAL'
+  },
+  proposalApprovedBytes,
+  process.env
+);
+assert.equal(proposalApproved.status,201,proposalApproved.error||'Falha ao criar Asset aprovado para proposta.');
+const proposalSigned=await gateway.signProposalAsset(
+  proposalApproved.data.asset.id,
+  {ttl:60,versionId:proposalApproved.data.asset.current_version_id},
+  process.env
+);
+assert.equal(proposalSigned.error,null);
+assert.equal(proposalSigned.data.versionId,proposalApproved.data.asset.current_version_id);
+
 const duplicate=await gateway.createAssetWithUpload(
   {legacyLeadId},
   {
@@ -217,6 +245,7 @@ console.log(JSON.stringify({
   contextualLinks:links.data.length,
   anonDbBlocked:!anonDb.ok,
   anonStorageBlocked:!anonStorage.ok,
+  proposalPolicyGate:true,
   crossCompanyBlocked:Boolean(crossCompany.error),
   finalStatus:deleted.data.status
 },null,2));
