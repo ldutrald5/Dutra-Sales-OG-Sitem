@@ -25,15 +25,7 @@ const MIME = Object.freeze({
   'image/jpeg': { ext:'jpg', mediaKind:'IMAGE' },
   'image/png': { ext:'png', mediaKind:'IMAGE' },
   'image/webp': { ext:'webp', mediaKind:'IMAGE' },
-  'image/heic': { ext:'heic', mediaKind:'IMAGE' },
-  'image/heif': { ext:'heif', mediaKind:'IMAGE' },
-  'application/pdf': { ext:'pdf', mediaKind:'DOCUMENT' },
-  'video/mp4': { ext:'mp4', mediaKind:'VIDEO' },
-  'video/webm': { ext:'webm', mediaKind:'VIDEO' },
-  'audio/mpeg': { ext:'mp3', mediaKind:'AUDIO' },
-  'audio/mp4': { ext:'m4a', mediaKind:'AUDIO' },
-  'audio/wav': { ext:'wav', mediaKind:'AUDIO' },
-  'audio/x-wav': { ext:'wav', mediaKind:'AUDIO' }
+  'application/pdf': { ext:'pdf', mediaKind:'DOCUMENT' }
 });
 
 function clean(value) { return String(value ?? '').trim(); }
