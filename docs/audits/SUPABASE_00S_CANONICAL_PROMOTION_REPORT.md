@@ -2,7 +2,7 @@
 
 ## Status
 
-**GIT PROMOTION COMPLETE / DISPOSABLE REPLAY PENDING**
+**GIT PROMOTION COMPLETE / DISPOSABLE REPLAY FOUND AN UNTRACKED-SCHEMA GAP**
 
 ## Changes prepared
 
@@ -42,6 +42,33 @@ The 11 previously absent sources were promoted from the read-only recovery snaps
 - every active recovered Edge Function file exists canonically and is byte-identical;
 - recovery evidence contains no obvious committed secret-like credentials.
 
+## Disposable replay finding
+
+The first local Supabase replay progressed through the recovered migration chain until the Sales Execution migration tried to alter `public.crm_contacts`.
+
+That table did not exist in the recorded 25 migrations.
+
+A live catalog cross-check then identified **8 public tables that exist remotely but have no CREATE TABLE statement in the recorded Supabase migration history**:
+
+- `crm_activities`
+- `crm_contacts`
+- `crm_conversations`
+- `crm_insights`
+- `crm_messages`
+- `crm_processor_runs`
+- `integration_events`
+- `sales_opportunities`
+
+This proves the drift was not limited to missing migration files in Git. Part of the live CRM schema was created outside the migration history currently stored in `supabase_migrations.schema_migrations`.
+
+A non-production recovery supplement was added at:
+
+`supabase/recovery/20261003/untracked-live-baseline.sql`
+
+It reconstructs those eight tables from live catalog metadata so the disposable replay can test the full recovered history without falsely inserting invented versions into the canonical 25-migration history.
+
+The replay workflow remains rollback-only and runs against a local disposable database.
+
 ## No remote mutation
 
 This branch does not:
@@ -55,7 +82,7 @@ This branch does not:
 
 ## Remaining gate
 
-A fresh replay must still be performed in a disposable Supabase-compatible environment before this history can be declared fully reproducible.
+A fresh replay must now pass with the untracked live baseline supplement plus the exact 25 recorded migrations before this history can be declared fully reproducible.
 
 Because a managed Supabase development branch may have account-specific cost, creating one requires an explicit cost check/confirmation first.
 
