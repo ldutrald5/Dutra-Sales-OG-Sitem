@@ -134,6 +134,12 @@ jobs:
 
           sleep 2
 
+      - name: Lint isolated database
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase db lint --level warning
+
       - name: Provision private local Storage bucket through API
         shell: bash
         run: |
