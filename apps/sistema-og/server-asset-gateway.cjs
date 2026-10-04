@@ -554,8 +554,15 @@ async function signAsset(assetId, options = {}, env = process.env) {
   if(asset.data.status!=='ACTIVE') return {configured:true,status:404,data:null,error:'Asset indisponível'};
   if(!asset.data.current_version_id) return {configured:true,status:409,data:null,error:'Asset sem versão pronta'};
 
+  let targetVersionId=asset.data.current_version_id;
+  if(options.versionId){
+    try{targetVersionId=safeUuid(options.versionId,'versionId')}
+    catch(error){return {configured:true,status:400,data:null,error:error.message}}
+  }
+
   const version=await rest(
-    'asset_versions?id=eq.'+encodeURIComponent(asset.data.current_version_id)
+    'asset_versions?id=eq.'+encodeURIComponent(targetVersionId)
+    +'&asset_id=eq.'+encodeURIComponent(asset.data.id)
     +'&processing_status=eq.READY&select=id,asset_id,storage_bucket,storage_path,original_filename,mime_type,file_size_bytes,version_number&limit=1',
     {},env
   );
