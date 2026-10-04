@@ -567,7 +567,9 @@ async function signAsset(assetId, options = {}, env = process.env) {
   if(signed.error) return signed;
   const relative=signed.data?.signedURL||signed.data?.signedUrl||signed.data?.url;
   if(!relative) return {configured:true,status:502,data:null,error:'Storage não retornou signed URL'};
-  const url=/^https?:\/\//i.test(relative)?relative:cfg(env).base+(relative.startsWith('/')?'':'/')+relative;
+  const url=/^https?:\/\//i.test(relative)
+    ? relative
+    : cfg(env).base+'/storage/v1'+(relative.startsWith('/')?'':'/')+relative;
   return {configured:true,status:200,data:{url,expiresIn:ttl,assetId:asset.data.id,versionId:v.id,mimeType:v.mime_type,filename:v.original_filename},error:null};
 }
 
