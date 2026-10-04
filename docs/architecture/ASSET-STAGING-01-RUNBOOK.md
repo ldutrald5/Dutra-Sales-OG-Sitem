@@ -1,6 +1,28 @@
 # ASSET-STAGING-01 — Runbook de validação isolada da Memória Visual
 
-Status: **preparado; não executar em produção**
+Status: **automatizado e validado localmente; não executar em produção**
+
+## Evidência já executada
+
+O workflow gratuito `Asset Local E2E (Free)` já concluiu com sucesso o ciclo completo em Supabase local descartável.
+
+Evidência de referência: run **36** (`37209722334`).
+
+O smoke comprovou:
+
+- `ok=true`;
+- versão 2 preservada;
+- assinatura de versão histórica pinada;
+- signed URL privada com TTL;
+- quatro vínculos contextuais;
+- acesso anônimo ao banco bloqueado;
+- acesso anônimo ao Storage bloqueado;
+- gate de uso em proposta ativo;
+- vínculo com entidade de outra Company bloqueado;
+- soft delete final;
+- invariantes SQL de banco/Storage em PASS.
+
+O workflow também destrói o stack local ao final.
 
 ## Objetivo
 
