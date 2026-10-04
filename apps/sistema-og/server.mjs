@@ -454,6 +454,7 @@ const server = http.createServer(async (req, res) => {
   if (assetAccessMatch && req.method === 'GET') {
     const result = await assetGateway.signAsset(assetAccessMatch[1], {
       ttl:url.searchParams.get('ttl'),
+      versionId:url.searchParams.get('versionId'),
       download:url.searchParams.get('download') === '1'
     }, process.env);
     return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
