@@ -32,7 +32,7 @@ Serão criadas duas tabelas canônicas:
 - `public.assets`: identidade e contexto comercial do material;
 - `public.asset_versions`: versões físicas do arquivo, hash, MIME, tamanho e caminho no Storage.
 
-Editar título, categoria ou descrição não cria uma nova versão binária. Substituir o arquivo cria uma nova `asset_versions.version_number` para o mesmo `asset_id`.
+Editar título, categoria ou descrição não cria uma nova versão binária. Substituir o arquivo cria uma nova `asset_versions.version_number` para o mesmo `asset_id`. `assets.current_version_id` aponta para a versão vigente; propostas futuras devem poder fixar a versão exata usada.
 
 ### 3. `company_brand_assets` permanece especializado
 
@@ -85,16 +85,24 @@ Quando o pacote de Auth/Organization for ativado de ponta a ponta, uma migration
 3. criar policies de membership;
 4. liberar acesso browser somente após testes de RLS e Storage.
 
-### 7. Classificação do Asset
+### 7. Taxonomia não mistura natureza, conteúdo, origem e permissão
 
-O MVP usa dois eixos simples:
+O MVP preserva dimensões distintas:
 
-- `asset_type`: natureza física (`IMAGE`, `DOCUMENT`, `VIDEO`, `OTHER`);
-- `category`: uso comercial (`LOGO`, `COVER`, `FLEET`, `VEHICLE`, `INSTALLATION`, `VISIT`, `WHATSAPP`, `PROPOSAL_INPUT`, `DOCUMENT`, `OTHER`).
+- `media_kind`: `IMAGE`, `DOCUMENT`, `VIDEO`, `AUDIO`, `ARCHIVE`, `OTHER`;
+- `business_category`: `LOGO`, `COVER`, `FLEET`, `VEHICLE`, `TIRE`, `EQUIPMENT`, `FACILITY`, `VISIT`, `BUSINESS_CARD`, `CONVERSATION`, `COMMERCIAL_DOCUMENT`, `PROPOSAL_MATERIAL`, `MAP`, `MARKETING`, `REFERENCE`, `SOCIAL_PROOF`, `OTHER`;
+- `source_type`: origem como `CAMERA`, `WHATSAPP`, `WEBSITE`, `PUBLIC_WEB` etc.;
+- `visibility_class`: contexto de acesso/referência;
+- `sensitivity_level`: risco do conteúdo;
+- `usage_policy`: `INTERNAL_REFERENCE`, `PROPOSAL_ALLOWED`, `MARKETING_ALLOWED`, `RESTRICTED`.
 
-`is_primary=true` significa "principal dentro da categoria". Haverá no máximo um Asset ativo principal por `(company_id, category)`.
+WhatsApp é origem, não categoria comercial. Um print do WhatsApp é normalmente `business_category=CONVERSATION` e `source_type=WHATSAPP`.
 
-Isso permite ter, por exemplo, logo principal e foto de frota principal ao mesmo tempo sem criar uma tabela de pins prematuramente.
+`PUBLIC_SOURCE` nunca significa autorização automática para proposta ou marketing.
+
+`is_primary=true` significa "principal dentro da categoria". Haverá no máximo um Asset ativo principal por `(company_id, business_category)`.
+
+Isso permite ter logo principal e foto de frota principal simultaneamente sem criar pins específicos prematuramente.
 
 ### 8. Histórico é preservado; deleção física é explícita
 
