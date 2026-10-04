@@ -450,6 +450,29 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
   }
 
+  const assetLinksMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/links$/i);
+  if (assetLinksMatch && req.method === 'GET') {
+    const result = await assetGateway.listAssetLinks(assetLinksMatch[1], process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : { items:result.data });
+  }
+  if (assetLinksMatch && req.method === 'POST') {
+    try {
+      if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+      const body = await readBody(req, 100_000);
+      const result = await assetGateway.createAssetLink(assetLinksMatch[1], body, process.env);
+      return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+    } catch (error) {
+      return sendJson(res, 400, { error:error.message });
+    }
+  }
+
+  const assetLinkDeleteMatch = url.pathname.match(/^\/api\/assets\/links\/([0-9a-f-]{36})$/i);
+  if (assetLinkDeleteMatch && req.method === 'DELETE') {
+    if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
+    const result = await assetGateway.deleteAssetLink(assetLinkDeleteMatch[1], process.env);
+    return sendJson(res, result.status || 500, result.error ? { error:result.error } : result.data);
+  }
+
   const assetPrimaryMatch = url.pathname.match(/^\/api\/assets\/([0-9a-f-]{36})\/primary$/i);
   if (assetPrimaryMatch && req.method === 'POST') {
     if (!allowWrite(req)) return sendJson(res, 429, { error:'Muitas gravações. Aguarde um minuto.' });
