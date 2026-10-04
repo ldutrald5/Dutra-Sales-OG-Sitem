@@ -29,13 +29,33 @@ for(const fn of manifest.edge_functions){
   }
 }
 
+const migrationRoot=path.join(root,'migrations-original');
+const recoveredMigrationFiles=fs.readdirSync(migrationRoot).filter(name=>name.endsWith('.sql')).sort();
+assert.equal(recoveredMigrationFiles.length,25,'all 25 live migration SQL payloads must be recovered');
+for(const migration of migrations.migrations){
+  const expected=`${migration.version}_${migration.name}.sql`;
+  assert.ok(recoveredMigrationFiles.includes(expected),`missing recovered migration SQL: ${expected}`);
+  assert.ok(fs.readFileSync(path.join(migrationRoot,expected),'utf8').trim().length>0,`empty migration SQL: ${expected}`);
+}
+assert.equal(migrations.migrations.some(item=>item.version==='20260926233000'),false,'Auth pilot must not be represented as applied live history');
+
 for(const slug of ['sales-execution-gateway','call-intelligence']){
   const canonical=fs.readFileSync(path.resolve('supabase/functions',slug,'index.ts'),'utf8');
   const recovered=fs.readFileSync(path.join(root,'edge-functions',slug,'index.ts'),'utf8');
   assert.equal(recovered,canonical,`${slug} recovered source drifted from canonical main source`);
 }
 
-assert.match(readme,/not an executable migration chain/i);
+for(const [canonicalPath,recoveredName] of [
+  ['supabase/migrations/20260930024500_record_sales_execution_result_v1.sql','20260930023756_record_sales_execution_result_v1.sql'],
+  ['supabase/migrations/20260930031500_harden_sales_execution_result_v1.sql','20260930030530_harden_sales_execution_result_v1.sql'],
+  ['supabase/migrations/20260930104500_call_intelligence_v1.sql','20260930103929_call_intelligence_v1.sql']
+]){
+  const canonical=fs.readFileSync(path.resolve(canonicalPath),'utf8').replace(/\r\n/g,'\n').trim();
+  const recovered=fs.readFileSync(path.join(migrationRoot,recoveredName),'utf8').replace(/\r\n/g,'\n').trim();
+  assert.equal(recovered,canonical,`recovered migration differs from current Git SQL: ${recoveredName}`);
+}
+
+assert.match(readme,/original SQL statements stored by Supabase/i);
 assert.match(readme,/Never use .*db reset --linked.*production/i);
 
 const risky=[
