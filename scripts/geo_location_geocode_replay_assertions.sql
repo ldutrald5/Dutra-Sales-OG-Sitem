@@ -10,7 +10,6 @@ declare
   v_job uuid;
   v_claim jsonb;
   v_result jsonb;
-  v_before geography;
   v_status text;
 begin
   insert into public.companies(id,name)
