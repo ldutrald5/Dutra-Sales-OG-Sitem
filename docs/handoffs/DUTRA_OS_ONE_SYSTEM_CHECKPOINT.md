@@ -5,7 +5,7 @@ CURRENT_STAGE: 0 — PREFLIGHT E BASELINE
 STATUS: COMPLETE — Stage 0 baseline fully validated
 UPDATED_AT: 2026-10-05 UTC
 NEXT_STAGE: STOP — Stage 1 NOT STARTED
-SAFE_TO_CONTINUE: YES for Stage 1 readiness only; Stage 1 NOT STARTED
+SAFE_TO_CONTINUE: NO — local closure is validated but publication is blocked; Stage 1 NOT STARTED
 
 ## Current environment and repository evidence
 
@@ -13,11 +13,13 @@ CHECKOUT: YES — real Git worktree, obtained with one successful clone
 REPOSITORY_PATH: /workspace/Dutra-Sales-OG-Sitem
 BRANCH: integration/dutra-os-one-system
 ENTRY_HEAD: d8c31f0fd24a969a11d400bdd2031de78b79371b
-CLOSURE_HEAD: commit containing this checkpoint (resolve with git log -1)
+CLOSURE_HEAD: c385e7f33cfa8f52dc84004a9ca4ac2cfec20ecb
+PUBLICATION_BLOCKER_HEAD: commit containing this update (resolve with git log -1)
 WORKING_TREE_INITIAL: CLEAN (git status --porcelain=v1 empty)
 WORKING_TREE_AFTER_BASELINE: CLEAN
 WORKING_TREE_PRECOMMIT: six understood documentation/Brain files only
-WORKING_TREE_FINAL_EXPECTATION: CLEAN after the Stage 0 closure commit
+WORKING_TREE_AFTER_CLOSURE_COMMIT: CLEAN
+WORKING_TREE_FINAL: CLEAN after local documentation commits
 REMOTE: https://github.com/ldutrald5/Dutra-Sales-OG-Sitem.git (origin fetch/push)
 LOCAL_GIT_TRANSPORT: PASS — clone, ls-remote and fetch succeeded; no transport retries
 PROXY: inherited platform route preserved; GitHub and npm transport succeeded
@@ -155,8 +157,8 @@ The V3 audit is not a new runtime or current-head certification.
 - MAIN / V3 / SUPABASE / TARGET matrix: completed above.
 - Stage 0 acceptance: COMPLETE — og:check, npm test (64/64), Brain all PASS.
 - Disposable Supabase rerun capability: limited by missing CLI/psql.
-- BLOCKERS: NONE for Stage 0. Supabase local tooling limitation is explicitly classified and accepted for Stage 0 only.
-- Stage 1: NOT STARTED; SAFE_TO_CONTINUE_TO_STAGE_1: YES (readiness only). Stop here.
+- BLOCKERS: Stage 0 baseline has no test blocker; publishing its closure is blocked by Git HTTPS username unavailable. Supabase local tooling limitation is explicitly classified and accepted for Stage 0 only.
+- Stage 1: NOT STARTED; SAFE_TO_CONTINUE_TO_STAGE_1: NO until the validated closure is published. Stop here.
 
 PRODUCTION_CHANGED: NO
 MAIN_CHANGED: NO
@@ -167,7 +169,25 @@ PR_110_CHANGED: NO
 MERGE: NONE
 REBASE: NONE
 DEPLOY: NONE
-PUSH_SCOPE: ONLY integration/dutra-os-one-system, after verified closure commit
+PUSH_SCOPE: ONLY integration/dutra-os-one-system
+PUSH: FAIL — one explicit push attempt; no retries or further remote probes
+REMOTE_WRITES_SUCCEEDED: NONE
+
+The local closure commit c385e7f33cfa8f52dc84004a9ca4ac2cfec20ecb was created
+with the pre-commit check passing. The explicit integration-only push ran the
+pre-push validation suite successfully, then failed with this exact error:
+
+```text
+fatal: could not read Username for 'https://github.com': No such device or address
+send-pack: unexpected disconnect while reading sideband packet
+fatal: the remote end hung up unexpectedly
+error: failed to push some refs to 'https://github.com/ldutrald5/Dutra-Sales-OG-Sitem.git'
+```
+
+The push failure does not invalidate the green local Stage 0 baseline. Publication
+requires restoration of Git HTTPS credentials/transport before a separately
+authorized retry. No credential or proxy settings were changed. This blocker is
+persisted in a local documentation-only followup commit; no second push occurred.
 
 ## Historical checkpoint (prior workspace; superseded environment finding)
 
