@@ -2,7 +2,7 @@
 
 ## Status
 
-**IMPLEMENTED / ROLLBACK-ONLY REPLAY PENDING**
+**PASS — SAFE GEOCODE WORKER + ROLLBACK-ONLY REPLAY GREEN**
 
 ## Delivered
 
@@ -50,6 +50,25 @@ The disposable replay verifies:
 5. human-verified existing coordinate protection;
 6. high-confidence geocode augmentation for a verified address with no coordinates;
 7. preservation of human verification status.
+
+## Test evidence
+
+Validated branch head before this report update: `efc7d8df2a6da760f44284dd68835e1912e1c54b`.
+
+- GEO Location Geocode Replay run `37362561337`: **PASS**
+  - static worker contract: PASS;
+  - GEO-04 quality contract: PASS;
+  - disposable Supabase startup: PASS;
+  - canonical + GEO-02 + GEO-03 + GEO-05 tail: PASS;
+  - PostGIS application/stale/protection assertions: PASS;
+  - rollback/shutdown: PASS.
+- Package 00R:
+  - npm ci: PASS;
+  - lockfile integrity: PASS;
+  - npm run validate: PASS;
+  - Builder Brain: PASS;
+  - security test: PASS;
+  - overall legacy workflow remains red only on the known upstream AIOX/`braces` npm-audit advisory.
 
 ## Next step after green replay
 
