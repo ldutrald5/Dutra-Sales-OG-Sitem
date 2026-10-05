@@ -1,14 +1,84 @@
 # DUTRA OS ONE SYSTEM — CHECKPOINT
 
 MISSION: CONVERGENCE-01 — DUTRA OS ONE SYSTEM
-CURRENT_STAGE: 1 — GIT + SUPABASE RECONCILIATION
-STATUS: COMPLETE — Stage 1 merge, local regression and current-SHA Supabase CI verified
+CURRENT_STAGE: 2 — UNIFIED PREMIUM SHELL
+STATUS: COMPLETE — unified shell, local/browser regression and implementation publication verified
 UPDATED_AT: 2026-10-05 UTC
-NEXT_STAGE: STOP after Stage 1; Stage 2 NOT STARTED
-SAFE_TO_CONTINUE_TO_STAGE_2: YES (readiness only; Stage 2 NOT STARTED)
+NEXT_STAGE: STOP after Stage 2; Stage 3 NOT STARTED
+SAFE_TO_CONTINUE_TO_STAGE_3: YES (readiness only; Stage 3 NOT STARTED)
 
 
-## Stage 1 authoritative closure
+## Stage 2 authoritative closure
+
+PRE_STAGE2_SHA: 331fca8984f85cb420de313f9a3e513366c45c44
+POST_STAGE2_SHA: be4b46ce4829ff18d193b6f8dfc34e671b52b8c4 (implementation + regression boundary; documentation closure is subsequent)
+ROLLBACK_SHA: 331fca8984f85cb420de313f9a3e513366c45c44
+FINAL_CHECKPOINT_HEAD: commit containing this closure; verify local/remote equality after final documentation publication
+IMPLEMENTATION_COMMITS: 748f800f5448f40fd03e3f2e428d0937f2e239e4 / be4b46ce4829ff18d193b6f8dfc34e671b52b8c4
+IMPLEMENTATION_PUSH: PASS — authenticated real push + fetch, local/remote equality at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4
+WORKING_TREE_AT_IMPLEMENTATION_PUBLICATION: CLEAN
+ENVIRONMENT_GUARDIAN: PASS — checkout/branch/entry equality, dry-run and verified real publication; GH_TOKEN/GITHUB_TOKEN temporarily empty, hooks enabled
+SHELL / DESKTOP / MOBILE / TABLET / FIRST_PAINT / NAVIGATION / GLOBAL_STATES: PASS
+QA: PASS — independent scoped code/visual review and executed browser/race regressions
+
+### Shell ownership / components
+
+Target remains apps/sistema-og/. Static header/sidebar/bottom navigation/status in index.html; components/app-shell.css projects canonical OG tokens and responsive layout; components/app-shell.js handles presentation, localized startup/renderer feedback and retry only. Existing switchTab/hash/history/state.currentTab remain the single router/state owner. Existing auth/outbox/conflict/recovery contracts remain canonical. No new domain, store, router or sync engine.
+
+Desktop: persistent 238px sidebar above 1024px, available-width workspace. Mobile/tablet: existing bottom navigation and More drawer, header/status, safe-area offsets, 44px targets. One canonical route per workspace: CRM includes Clientes/Pós-venda; cotacao includes Multi-Veículos/Propostas. No user-facing V3/Legacy/new/old product choices.
+
+PWA changes: v67 -> v68 plus only app-shell.css/js precache. DB v2, cache strategies and API network-only behavior unchanged. Bootstrap adopts static navigation/status; initial route no longer waits for remote sync; optional renderer errors are local; SW update maintenance does not block recovery. A local bootstrap promise orders reconnect after the existing restore/import/pull and checks navigator.onLine after awaiting it. This is lifecycle coordination, not additional sync state.
+
+### TEMPORARY_INTERNAL_BRIDGES
+
+| module | reason | owner | planned migration stage |
+|---|---|---|---|
+| Meu Dia | existing dashboard/prioritization retained | app.js / command services | 3 |
+| CRM / Clientes / Cliente 360 | preserve canonical entities and client sheet | CRM/company services | 4 |
+| Prospecção / Sales Execution | preserve current launchers and workflows | prospecting / execution services | 5 |
+| Call Intelligence | preserve current recorder/context/dashboard | Call services | 6 |
+| Aplicação Técnica | retain validated mature engine | consultant/technical owner | 7 |
+| Multi-Veículos | retain fleet/vehicle calculation | quote owner | 8 |
+| Propostas / ROI | retain generation/print/tracking | proposal owner | 9 |
+| Comunicação | retain existing templates/actions | communication services | 10 |
+| Pós-venda / Performance / Biblioteca / operational support | retain existing CRM journey and operational views | customer journey/performance/material services | 11 |
+
+### QA / test evidence
+
+VIEWPORTS_TESTED: 320x568; 360x800; 390x844; 430x932; 768x1024; 1280x720; 1440x900; 1920x1080
+13 canonical routes traversed at each size. No document horizontal overflow; current route visibility, active navigation, history/back, refresh, drawer bounds/Escape/focus, quick-lead modal, touch targets, offline/reconnect checked. Independent visual inspection: 320/768/1440. Desktop keyboard Enter navigation and visible OG focus passed.
+
+TEST_RESULTS:
+- npm ci: PASS (243 packages; lock/dependencies unchanged).
+- og:check: PASS, including new shell and browser gate syntax.
+- npm test: PASS 75/75 after final bootstrap changes; no partial result counted.
+- og:brain:check: PASS; regenerated again for this structural closeout.
+- og:shell:test: PASS — all eight viewports, first paint with domain scripts blocked, localized renderer exception/retry, PWA cached offline reload/CRM and real reconnect acknowledgement.
+- PWA release / final candidate UX / sync conflict UI: PASS.
+- Sales Execution adapter/gateway and Call Intelligence gateway/contract/local Whisper: PASS.
+- Existing full suite also covers auth state, sync bridge/resilience, technical/quote/proposal, startup/performance and retained preview parity.
+- Independent adversarial test: hold bootstrap import, reconnect then disconnect before recovery finishes; remain offline; subsequent reconnect receives real mode ok: PASS.
+
+Corrections discovered: PDF selector and vehicle header overflow at 320px; mobile navigation overlapping dialogs; startup network listeners registered too late; reconnect ordering during recovery. Static markup accessibility assertions were moved to their new owner, without dropping gates. No module redesign occurred.
+
+BROWSER_NETWORK_LIMITATION: Chromium 151 / Playwright 1.62.1 did not emit online after a service-worker offline reload when setOffline(false) restored transport. Direct page and server /api/state both returned 200; navigator.onLine was true, but the event was absent. The committed gate proves real transport, explicitly emits the online contract event and requires the app's own real API acknowledgement/mode ok. It does not mock sync state. Ordinary offline/reconnect events passed in all eight non-SW contexts. Physical-device network switching is not claimed.
+
+Evidence: reproducible npm run og:shell:test; local logs/captures /workspace/scratch/dutra-stage2/browser-final.log and final-viewports/. These developer artifacts are outside Git and contain no committed browser profile or private data. Optional developer test requires installed Playwright/Chromium; no runtime dependency was added.
+
+FUNCTIONALITY_PRESERVED: mature services/modules/server/auth/persistence untouched; current CRM, Sales Execution, Call Intelligence, application, proposal and sync/PWA gates green.
+V3_UX_PRESERVED: premium dark/graphite/OG yellow, industrial identity, clear actions/active navigation; preview-v2 unchanged as reference.
+SUPABASE_DIFF: EMPTY against PRE_STAGE2_SHA; no migration/function/recovery/replay/workflow changes. Stage 1 replay/parity evidence remains applicable to unchanged Supabase. No new replay or production validation claimed.
+PRODUCTION / MAIN / V2 / V3 / PR109 / PR110 MODIFIED: NO
+Protected remote heads after publication: main 5255dc5d432850dfeebe0a523402a1902b1d3a52; V3 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f; #109 c7585ba688ecca8e01b1ff8044cbef52aa5ac477;  #110 6031e04462340847c8bcff3d5d698427db444918. V2 preview snapshot 6b4bf7937aee8b236ce28701f9d149a69e0bdd7e, unchanged by this work.
+
+KNOWN_RISKS: internal module UI bridges intentionally remain for subsequent stages. Existing caught syncRecoveryReady TDZ in empty-storage first-run lead loading was observed; that code path is unchanged from entry, did not produce an uncaught error or prevent verified scenarios, and remains separate baseline debt. Browser event-emulation limitation above is explicit. Existing braces/AIOX audit advisory remains unchanged dependency debt; no audit fix/deploy used.
+BLOCKERS: NONE for Stage 2
+SAFE_TO_START_STAGE3: YES (readiness only)
+STAGE3: NOT STARTED — stop after final checkpoint publication.
+
+FILES_CHANGED: runtime/test paths and closure file list are maintained in the Stage 2 story and audit.
+
+## Stage 1 authoritative closure (historical)
 
 PRE_STAGE1_SHA: bcf36206b820861f1e41981a92003864b9cec2ea
 POST_STAGE1_SHA: fd99210ca81a4374377f4353e7a402b45679a23c

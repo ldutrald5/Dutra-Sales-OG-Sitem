@@ -128,3 +128,7 @@ O Supabase contém a trilha de integração, entidades normalizadas auxiliares e
 O DUTRA OS possui `npm run og:whatsapp:e2e` para validar o pipeline server-side com dados sintéticos: ingestão, CRM auxiliar, processador comercial, follow-up, proposta/ROI, idempotência e auditoria.
 
 O teste nunca envia mensagens ao WhatsApp e não altera estágio comercial. Empresas de teste usam prefixo `[E2E]`; dados não confirmados permanecem revisão. O modo E2E pula somente enriquecimento externo e cancela o job sintético correspondente; cálculo e persistência continuam reais. Cleanup é automático por padrão e limitado aos IDs do run.
+
+## CONVERGENCE-01 current shell checkpoint
+
+Stage 2 is complete on integration/dutra-os-one-system: apps/sistema-og is the single responsive premium shell; mature module UI remains internal until its planned stage. Existing canonical data, route/history and sync owners are preserved. Production was not deployed. Current evidence/bridges/rollback: docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. Stage 3 has not started.

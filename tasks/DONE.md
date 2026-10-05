@@ -252,3 +252,7 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 ## CONVERGENCE-01 — Stage 1 closeout
 
 Stage 1 COMPLETE: merge V3 com baseline/Supabase preservados, 75/75 local, replay/paridade CI PASS e push verificado. Rollback bcf36206b820861f1e41981a92003864b9cec2ea.
+
+## CONVERGENCE-01 — Stage 2 (2026-10-05)
+
+Unified static premium shell, wide desktop sidebar/workspace, mobile/tablet bottom navigation and compatible status/route ownership delivered. Full 75 gates, eight viewport browser gate and independent QA PASS; implementation push verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Checkpoint lists bridges, rollback and honest browser network limitation. No Supabase/production/Stage 3 changes.

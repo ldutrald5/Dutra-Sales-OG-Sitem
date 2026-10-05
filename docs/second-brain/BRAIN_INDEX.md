@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 127 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 131 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 12 |
-| decision | 18 |
+| cycle | 13 |
+| decision | 19 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 10 |
 | knowledge | 13 |
 | open_question | 7 |
-| pattern | 22 |
-| source | 24 |
+| pattern | 23 |
+| source | 25 |
 
 ## Active decisions
 
@@ -55,6 +55,8 @@ Generated from 127 records. Do not edit by hand; run `npm run og:brain:refresh`.
   A conversion rate may only combine numerator and denominator from the same attributed population/filter; close rate must not be inflated by unrelated historical CRM sales.
 - **DEC-PROMPT-ARCH-001 — Prompt Architect owns intent-to-mission compilation** (active/high)
   Use a dedicated Prompt Architect to convert human intent into scoped L0-L3 execution missions; Builder Brain remains decision/learning governance, Context Router remains retrieval authority, and SubagentPromptBuilder remains AIOX static task/agent packaging.
+- **DEC-CONVERGENCE-SHELL-001 — Static presentation shell retains canonical navigation and sync owners** (active/high)
+  apps/sistema-og is the unified target shell; preview-v2 remains UX reference. Reuse switchTab/hash/history and existing state/services. Static nav/status, localized feedback and scoped canonical tokens may adapt presentation; an ephemeral bootstrap promise coordinates recovery/reconnect without a new sync model.
 
 ## Open questions
 
@@ -148,11 +150,15 @@ Generated from 127 records. Do not edit by hand; run `npm run og:brain:refresh`.
   When a new UX is approved but the legacy system owns mature domain logic, keep one user-facing shell and progressively extract/reuse legacy engines behind it until transitional bridges can be removed.
 - **PAT-PROMPT-MINCTX-001 — Mission prompts use minimal decision-changing context** (active/high)
   Execution prompts should reference bounded required context, conditional context and explicit do-not-load areas, scaling prompt depth with risk instead of copying the whole project history into each delegation.
+- **PAT-CONVERGENCE-SHELL-QA-001 — Prove shell independence and reconnect with real acknowledgement** (active/high)
+  Block domain scripts to verify static shell/error recovery, inject renderer faults to prove other routes remain usable, traverse mobile/tablet/desktop sizes, and require real API acknowledgement after reconnect. When a browser emulator omits the network event, prove transport separately and label explicit event simulation; never mock sync success.
 
 ## Recent sources
 
 - **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
   Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
+- **SRC-CONVERGENCE-SHELL-20261005-001 — Stage 2 audited shell implementation and execution evidence** (validated/high)
+  Pre-edit current/V3 matrix and architect/QA reviews support the single apps/sistema-og shell. Full75 gates, eight viewport/13 route browser acceptance and real API sync acknowledgement passed; implementation publication verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Browser missing online event is explicitly simulated only after real transport proof.
 - **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
   CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
@@ -169,8 +175,6 @@ Generated from 127 records. Do not edit by hand; run `npm run og:brain:refresh`.
   User-reviewed recovery audit consolidating the long-running DUTRA OS conversation into decisions, implemented work, failures, commercial context, technical mappings and pending work before chat archival.
 - **SRC-TECH-HANDOFF-20261001 — DUTRA OS technical handoff 2026-10-01** (validated/high)
   Technical handoff reconciled the recovery report with live GitHub/Railway evidence, distinguishing core main from the V3 shell and identifying current architecture, migrations, runtime state, bugs and technical debt.
-- **SRC-INT-COMPILER-20261001 — DUTRA Intelligence Compiler specification** (active/high)
-  User specification requiring project history to be compiled into the existing Second Brain, Skills, context routing, playbooks, incident prevention, prompts and tests instead of being left as chat-only documentation.
 
 ## Retrieval workflow
 

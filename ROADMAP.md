@@ -87,3 +87,7 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 - Fallback automático após falha/quota do provider principal.
 - Download temporário por URL assinada; sem credencial Supabase no worker.
 - Próximo gate: áudio de teste real autorizado → fallback → transcript `faster-whisper` → métricas → revisão.
+
+## CONVERGENCE-01 execution boundary
+
+Stage 2 unified responsive shell completed only on integration/dutra-os-one-system. Stage 3 / Meu Dia is ready but NOT STARTED. Subsequent domain migrations remain in the CONVERGENCE-01 story; no new feature scope or release/deploy commitment is added.

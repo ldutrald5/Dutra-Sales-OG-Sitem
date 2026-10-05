@@ -1,5 +1,7 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
+Current execution status: Stage 2 COMPLETE on the integration branch; Stage 3 NOT STARTED. Current authoritative evidence: docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. Earlier stop/status entries below are historical.
+
 ## Mission
 
 Converge the current functional main line, the approved V3 Premium experience and the recovered/canonical Supabase history into one operational DUTRA OS without losing mature code, data, UX or rollback capability.
@@ -60,7 +62,7 @@ main -> #109 -> #110
 - Current persisted facts outrank recovered historical assumptions.
 - Manual override remains available for operational workflows.
 
-## Current Stage 0 environment finding
+## Historical Stage 0 environment finding
 
 The Codex execution workspace used during preflight had:
 
@@ -78,7 +80,7 @@ Mitigation established on this branch:
 - incident INC-EXEC-ENV-001;
 - convergence branch created remotely from exact #110 head.
 
-Local merge conflict resolution, build and integration tests remain blocked until a valid worktree is available.
+At that initial preflight, local merge/build/tests were blocked; the valid checkout and completed subsequent stages below supersede this historical environment condition.
 
 ## Stages
 
@@ -113,7 +115,7 @@ Stage 0 is complete only when:
 - baseline matrix MAIN / V3 / SUPABASE / TARGET exists;
 - no protected branch or production environment was modified.
 
-Current status: Stage 0 preflight and baseline recorded on 2026-10-05; COMPLETE after incident provenance correction and fully green 64/64 baseline. Valid local checkout and baseline matrix now exist. Stage 1 NOT STARTED. See docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md for current evidence; the prior environment finding above is historical.
+Historical Stage 0 closure: Stage 0 preflight and baseline recorded on 2026-10-05; COMPLETE after incident provenance correction and fully green 64/64 baseline. Valid local checkout and baseline matrix now exist. Stage 1 NOT STARTED. See docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md for current evidence; the prior environment finding above is historical.
 
 ## Non-goals until convergence closes
 
@@ -170,3 +172,51 @@ File List: all incoming and manually reconciled paths are enumerated in the link
 
 
 Stage 1 CI: Sales Execution and Call Intelligence SUCCESS. Package 00R fails only known braces/AIOX advisory (6 high), recorded separately without audit fix. Final evidence, hotspots and rollback remain in checkpoint/audit. Final closure file list adds Stage 1 source/cycle, generated index/metrics, changelog and TODO/DONE status; executable tree unchanged after tested merge.
+
+## Stage 2 — unified premium shell closure (2026-10-05)
+
+- [x] Clean entry and authenticated remote write gate.
+- [x] Pre-edit shell audit/matrix closed; architect-approved strangler migration.
+- [x] Static single shell; desktop sidebar/wide workspace; mobile/tablet bottom navigation.
+- [x] Existing canonical route/state/sync/auth contracts preserved; no user-facing duplicate application.
+- [x] Loading/local error/offline/reconnect states and first paint regression passed.
+- [x] Eight requested viewports / 13 routes / history / refresh / modal / keyboard / drawer tested.
+- [x] npm ci, check, 75/75 test, Brain, PWA/sync and explicit Sales/Call gates PASS.
+- [x] Implementation committed in two coherent packages; real push and equality verified.
+- [x] Independent QA PASS; network-emulation limitation and preexisting caught bootstrap debt documented honestly.
+- [x] Checkpoint/Brain/documentation closeout persisted; Stage 3 NOT STARTED.
+
+PRE_STAGE2_SHA: 331fca8984f85cb420de313f9a3e513366c45c44
+POST_STAGE2_SHA (implementation/test): be4b46ce4829ff18d193b6f8dfc34e671b52b8c4
+
+Audit/ownership and temporary bridge stage mapping: checkpoint + docs/audits/CONVERGENCE_01_STAGE2_SHELL_AUDIT.md. No Supabase/preview/business-service/lockfile difference, no production/deploy/merge/protected reference changes.
+
+Stage 2 File List:
+
+- `apps/sistema-og/app.js`
+- `apps/sistema-og/index.html`
+- `apps/sistema-og/components/app-shell.js`
+- `apps/sistema-og/components/app-shell.css`
+- `apps/sistema-og/service-worker.js`
+- `package.json`
+- `scripts/test_unified_shell_browser.mjs`
+- `scripts/test_final_candidate_ux.mjs`
+- `scripts/test_pwa_release_experience.mjs`
+- `scripts/test_spreadsheet_import.mjs`
+- `scripts/test_sync_conflict_ui.mjs`
+- `docs/audits/CONVERGENCE_01_STAGE2_SHELL_AUDIT.md`
+- `docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md`
+- `docs/stories/CONVERGENCE-01-dutra-os-one-system.md`
+- `docs/01-ARQUITETURA.md`
+- `DUTRA_OS_CONTEXT.md`
+- `AI_HANDOFF.md`
+- `ROADMAP.md`
+- `CHANGELOG.md`
+- `tasks/TODO.md`
+- `tasks/DONE.md`
+- `docs/second-brain/sources.jsonl`
+- `docs/second-brain/decisions.jsonl`
+- `docs/second-brain/patterns.jsonl`
+- `docs/second-brain/cycles.jsonl`
+- `docs/second-brain/BRAIN_INDEX.md`
+- `docs/second-brain/BRAIN_METRICS.md`

@@ -137,3 +137,10 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Áudio continua canônico no Storage privado; worker recebe apenas URL assinada temporária.
 - Call AI aciona o fallback automaticamente após falha do provider principal.
 - Resultado local volta ao mesmo pipeline de métricas e revisão, sem alterar fatos do CRM automaticamente.
+
+## [Unreleased] — CONVERGENCE-01 Stage 2
+
+- Established one static premium shell in apps/sistema-og, with desktop sidebar, mobile/tablet bottom navigation and existing route/state compatibility.
+- Localized startup/renderer feedback, preserved sync/PWA/data contracts and coordinated reconnect with initial recovery.
+- Passed 75/75 regression gates and eight-viewport browser acceptance, including cached offline PWA with real API acknowledgement. Browser online-event emulation and existing caught bootstrap debt are recorded.
+- Supabase/preview/domain services unchanged; integration publication only, no production deploy or Stage 3.

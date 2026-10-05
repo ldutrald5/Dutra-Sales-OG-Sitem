@@ -446,4 +446,8 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 
 ## CONVERGENCE-01 — Stage 1 closeout
 
-Stage 2 permanece NÃO INICIADA; aguardar autorização específica. Não ampliar GEO/CNPJ/Assets nesta trilha.
+Historical Stage 1 stop was followed by explicit Stage 2 authorization. Stage 2 now COMPLETE; Stage 3 remains NOT STARTED. No GEO/CNPJ/Assets expansion in this track.
+
+## CONVERGENCE-01 — Stage 2 closeout
+
+Completed; evidence/bridges in checkpoint and story. STOP before Stage 3; readiness does not execute it. Existing caught bootstrap TDZ and physical-device network acceptance are recorded as separate follow-up debt, not silently fixed in shell work.

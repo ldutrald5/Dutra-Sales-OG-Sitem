@@ -31,3 +31,15 @@ Use static shell markup, a small scoped shell CSS/component and the existing nav
 TEMPORARY_INTERNAL_BRIDGE: CRM/Clientes/Pós-venda (existing CRM/client sheet/journey; CRM owner; subsequent CRM/Client 360/post-sale stages); Multi-Veículos/Propostas (existing quote/proposal; quote owner; subsequent technical/proposal stages); Sales Execution and Call Intelligence (existing launchers/services; respective owners; subsequent module stages). Meu Dia remains unchanged for Stage 3.
 
 No Supabase, production, original V3/V2 or protected reference changes. Test all eight requested viewports and offline/reconnect/history/refresh/keyboard/startup failures before completion. Quality conclusions are recorded after execution, not inferred from this matrix.
+
+## Executed closure
+
+Architect APPROVED; QA PASS. Two coherent implementation/regression commits: 748f800f5448f40fd03e3f2e428d0937f2e239e4 and be4b46ce4829ff18d193b6f8dfc34e671b52b8c4, published and verified. Full 75-gate suite plus eight-viewport browser gate, first-paint dependency failure, renderer recovery and cached PWA offline/real API reconnect passed. Overflow at 320px was corrected specifically in quote PDF selector/vehicle header; mobile nav hidden while dialog controller is active. Existing route ownership, local storage, IndexedDB/outbox and business services remain unchanged.
+
+Bootstrap coordination decision: existing route restoration precedes remote sync; listeners and initial network status precede awaited recovery; SW update maintenance is independent; an ephemeral local startup promise orders online pull after initial recovery/import/pull. No second sync store, domain or router was introduced. Independent delayed-import online/offline race test passed.
+
+Browser limitation: Chromium151/Playwright1.62.1 failed to emit online after cached offline reload despite real restored API transport. Gate explicitly simulates that event AFTER navigator.onLine=true and real /api/state200, then requires app's own acknowledgement. Non-SW contexts exercise ordinary network events. Do not report physical mobile network acceptance from this developer emulation.
+
+Baseline debt: caught first-run syncRecoveryReady TDZ on empty lead storage remains identical to entry; no uncaught browser error in normal eight-viewport gate. Deep module UI and hardware/auth-hosted acceptance remain subsequent work; no Stage 3 execution performed.
+
+Complete per-stage bridges, test evidence, protected refs, risk/rollback and File List: checkpoint/story.

@@ -116,3 +116,7 @@ Alternativa CLI:
 A tarefa se chama `DUTRA-OS-WhatsApp-Bridge`, inicia no logon do usuário atual e tenta reiniciar após falha. O launcher resolve o caminho do repositório dinamicamente, usa o `.env` local e grava logs em `apps/sistema-og/.data/logs/`.
 
 Nunca colocar segredo no Task Scheduler, arquivo .cmd ou scripts versionados. O segredo continua somente no `.env` local.
+
+## CONVERGENCE-01 Stage 2 handoff
+
+Single shell is published on the integration branch, not production/main. Consult the current checkpoint before continuing. Preserve app-shell presentation-only boundary, existing switchTab/hash/history and durable sync/recovery. Browser regression command og:shell:test needs installed developer Playwright/Chromium; its SW reconnect emulation limitation is explicit. Stage 3 is NOT STARTED; no deep Meu Dia redesign was performed.
