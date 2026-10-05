@@ -1,0 +1,32 @@
+name: GEO Geocoding Contract
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/functions/_shared/geocoding.mjs'
+      - 'scripts/run_geocoder_benchmark.mjs'
+      - 'scripts/test_geocoding_contract.mjs'
+      - 'scripts/geocoding/**'
+      - 'docs/architecture/GEO-GEOCODING.md'
+      - '.github/workflows/geo-geocoding-contract-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Geocoding quality and benchmark contract
+        run: node scripts/test_geocoding_contract.mjs
+
+      - name: Benchmark fixture dry-run
+        run: node scripts/run_geocoder_benchmark.mjs --dry-run --fixture=scripts/geocoding/benchmark-br.template.json

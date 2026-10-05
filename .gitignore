@@ -44,3 +44,7 @@ Thumbs.db
 *.bak
 *.orig
 *~
+
+# GEO benchmark fixtures containing customer/private address ground truth
+scripts/geocoding/benchmark-br.private*.json
+scripts/geocoding/results-private/
