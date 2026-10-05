@@ -200,7 +200,7 @@ returns jsonb
 language plpgsql
 security invoker
 set search_path = ''
-as $
+as $$
 declare
   v_status text;
 begin
@@ -233,7 +233,7 @@ begin
   if v_status is null then raise exception 'enrichment job not found: %', p_job_id; end if;
   return jsonb_build_object('job_id',p_job_id,'status',v_status,'retryable',coalesce(p_retryable,true));
 end;
-$;
+$$;
 
 create or replace function public.apply_company_registry_v1(
   p_job_id uuid,
