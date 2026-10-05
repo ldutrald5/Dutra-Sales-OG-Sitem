@@ -26,6 +26,7 @@
 .dutra-shell .shell-feedback[data-state="error"] { border-left-color: var(--og-red); }
 .dutra-shell .shell-feedback button { min-height: 44px; padding: 10px 16px; background: var(--og-brand); color: var(--og-bg); border-radius: 10px; font-weight: 800; }
 .dutra-shell .og-mobile-nav { display: none; }
+.dutra-shell.og-dialog-open .og-mobile-nav { visibility: hidden; }
 @media (max-width: 1023px) {
   .dutra-shell { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
   .dutra-shell #nav-tabs-container { display: none; }

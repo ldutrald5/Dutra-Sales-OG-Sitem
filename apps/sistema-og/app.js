@@ -8722,21 +8722,30 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       installPrompt = null;
       installButton.classList.add('hidden');
     });
-    await initServiceWorkerUpdates();
-    await restoreSyncRecovery();
+    // Order reconnection after the existing startup recovery/pull, so an older
+    // offline request cannot overwrite the status of a newer online request.
+    let startupSync = Promise.resolve();
     window.addEventListener('offline', () => setSyncStatus('Sem conexão · salvo neste aparelho', 'offline'));
-    window.addEventListener('online', () => {
+    window.addEventListener('online', async () => {
       setSyncStatus('Reconectando…', 'busy');
-      loadSharedState();
+      await startupSync.catch(() => {});
+      if (navigator.onLine) await loadSharedState();
     });
-    if (!pendingSyncConflict() && !pendingSyncReview()) {
-      const importedCount = await importLucas2026Leads();
-      if (importedCount) {
-        renderDayDashboard();
-        if (state.currentTab === 'crm') renderCrmModule();
+    setSyncStatus(navigator.onLine ? 'Conectando…' : 'Sem conexão · salvo neste aparelho', navigator.onLine ? 'busy' : 'offline');
+    // PWA update checks must not delay local recovery or offline/reconnect indicators.
+    void initServiceWorkerUpdates();
+    startupSync = (async () => {
+      await restoreSyncRecovery();
+      if (!pendingSyncConflict() && !pendingSyncReview()) {
+        const importedCount = await importLucas2026Leads();
+        if (importedCount) {
+          renderDayDashboard();
+          if (state.currentTab === 'crm') renderCrmModule();
+        }
       }
-    }
-    await loadSharedState();
+      await loadSharedState();
+    })();
+    await startupSync;
   }
 
   function downloadExportedWorkbook(buffer, filename) {
