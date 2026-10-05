@@ -28,6 +28,7 @@ Never freeze dynamic customer data inside a global Skill.
 |---|---|---|---|
 | project direction / cross-cutting | dutra-core | `DUTRA_OS_CONTEXT.md`, `EXECUTION_CONTEXT.md` | `docs/second-brain/BRAIN_INDEX.md` |
 | code / architecture / refactor | dutra-dev | `AGENTS.md`, scoped architecture docs | incidents + active decisions |
+| execution environment / checkout / Git transport / proxy / toolchain | dutra-environment-guardian + dutra-dev | `.codex/skills/dutra-environment-guardian/SKILL.md`, repository/provider state | relevant incident + active task checkpoint |
 | Railway / production / logs | dutra-dev + dutra-runtime-operator | runtime skill + live infrastructure | `docs/runtime/DUTRA_OS_RUNTIME.md` |
 | Supabase / schema / Edge Functions | dutra-dev | live Supabase inventory + `supabase/migrations/` + `supabase/functions/` | `INC-SUPABASE-DRIFT-001` + architecture docs |
 | client/account | dutra-crm + dutra-sales | current CRM record, Sales Execution contract | relevant playbook |
@@ -41,6 +42,8 @@ Never freeze dynamic customer data inside a global Skill.
 | external reference / new idea | dutra-builder-brain | source + scoped context | Second Brain protocol |
 
 ## Mandatory pre-flight for STANDARD / STRUCTURAL work
+
+First prove the execution route with `dutra-environment-guardian`: checkout/provider access, required toolchain, safe write target and test capability. If local transport fails, classify the layer and switch to an authorized fallback instead of retrying blindly.
 
 Before implementation answer internally:
 
