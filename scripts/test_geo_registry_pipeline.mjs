@@ -12,6 +12,7 @@ assert.match(migration,/claim_enrichment_job_v2/i);
 assert.match(migration,/enqueue_company_registry_job_v1/i);
 assert.match(migration,/apply_company_registry_v1/i);
 assert.match(migration,/fail_enrichment_job_v2/i);
+assert.match(migration,/fail_enrichment_job_v2[\s\S]*?set search_path = ''\s*as \$\$[\s\S]*?end;\s*\$\$;/i,'retry function must use valid PLpgSQL dollar delimiters');
 assert.match(migration,/proposal_side_effect',false/i);
 assert.match(migration,/verification_status not in \('VERIFIED_BY_SELLER','VERIFIED_BY_CUSTOMER','VERIFIED_BY_VISIT'\)/i);
 assert.match(migration,/geo=null/i,'registry address change must invalidate stale geocode');
