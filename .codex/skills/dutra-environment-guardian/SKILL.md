@@ -210,6 +210,34 @@ If a tool is optional and a provider/CI path is authoritative, do not block sole
 
 If a tool is required to prove the Definition of Done, block before modifying code.
 
+## Read transport and remote write gates
+
+For any STANDARD/STRUCTURAL task whose Definition of Done includes a remote push,
+prove TWO separate capabilities before accumulating local commits:
+
+- READ TRANSPORT GATE: repository checkout/fetch/read works.
+- REMOTE WRITE GATE: preferably `git push --dry-run origin HEAD:refs/heads/<safe-working-branch>` succeeds on the authorized safe working branch.
+
+A valid checkout and successful fetch/read do not prove push capability. Keep hooks
+and normal Git authentication enabled; never use force push for this gate.
+
+If reads work but push authentication does not, classify:
+
+`ENVIRONMENT_BLOCKER: GIT_WRITE_AUTH_UNAVAILABLE`
+
+First inspect `gh auth status`, then use `gh auth setup-git` when GitHub CLI is
+correctly authenticated. Never print tokens or credential values. A repaired
+credential helper is a concrete changed condition permitting one new dry run;
+do not repeat an unchanged failing push path.
+
+If interactive authentication is necessary, stop early before accumulating
+unpublished local work and report the safe login command:
+
+`gh auth login --hostname github.com --git-protocol https --web`
+
+A passing dry run proves current remote write readiness only; it does not authorize
+protected-branch writes, production actions or the next implementation stage.
+
 ## Remote-write safety
 
 When local checkout is unavailable but a connected Git provider can write, remote writes are allowed only with explicit task/user authorization and on a safe non-production branch.
