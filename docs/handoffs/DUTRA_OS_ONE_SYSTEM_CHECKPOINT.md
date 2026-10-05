@@ -1,11 +1,11 @@
 # DUTRA OS ONE SYSTEM — CHECKPOINT
 
 MISSION: CONVERGENCE-01 — DUTRA OS ONE SYSTEM
-CURRENT_STAGE: 0 — PREFLIGHT E BASELINE
-STATUS: COMPLETE — Stage 0 baseline fully validated
+CURRENT_STAGE: 1 — GIT + SUPABASE RECONCILIATION
+STATUS: IN PROGRESS — controlled reconciliation; Stage 0 remains COMPLETE
 UPDATED_AT: 2026-10-05 UTC
-NEXT_STAGE: STOP — Stage 1 NOT STARTED
-SAFE_TO_CONTINUE: YES — Stage 0 publication verified; Stage 1 NOT STARTED
+NEXT_STAGE: STOP after Stage 1; Stage 2 NOT STARTED
+SAFE_TO_CONTINUE_TO_STAGE_2: NO — Stage 1 validation pending
 
 ## Current environment and repository evidence
 
@@ -280,3 +280,29 @@ branch was published. Additional hardening requires real verified publication
 before marking REMOTE WRITE GATE PASS; all prior incident history is preserved.
 This hardening commit is published only after its green baseline, with final
 HEAD equality verified after fetch. Stage 1 remains NOT STARTED.
+
+
+## Stage 1 rollback and audit
+
+PRE_STAGE1_SHA: bcf36206b820861f1e41981a92003864b9cec2ea
+ROLLBACK_SHA: bcf36206b820861f1e41981a92003864b9cec2ea
+V3_SHA_TO_INTEGRATE: 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f
+PREMERGE_AUDIT: docs/audits/CONVERGENCE_01_STAGE1_RECONCILIATION.md
+Abort an inconsistent uncommitted merge with git merge --abort; never git reset --hard.
+
+
+## Stage 1 local reconciliation checkpoint
+
+CONFLICTS_FOUND: 28 files
+CONFLICTS_RESOLVED: 28 files
+CONFLICTS_PENDING: 0
+SUPABASE_DIFF: EMPTY versus PRE_STAGE1_SHA
+TEST_RESULTS: npm ci PASS; og:check PASS; npm test 75/75 PASS; Brain PASS (125 records, 0 warnings); explicit sync/PWA/Sales Execution/Call Intelligence/proposal/preview technical tests PASS
+CI_RESULTS: PENDING dedicated replay/parity and relevant workflows after merge commit/push
+STATUS_STAGE1: LOCAL RECONCILIATION VALIDATED — CI pending
+FILES_MANUALLY_RECONCILED / HOTSPOT_DECISIONS: docs/audits/CONVERGENCE_01_STAGE1_RECONCILIATION.md
+V3_UX: preview-v2 bytes preserved; no activation
+MAIN_FUNCTIONAL: app.js/service-worker/sync bytes preserved
+CANONICAL_SUPABASE: exact Stage 0 directory; duplicate V3 versions rejected
+MERGE_BOTH: package/validate/AGENTS/Skills/Second Brain/context; 75 gates retained/added
+SAFE_TO_START_STAGE2: NO

@@ -1,3 +1,6 @@
+> **STATUS: LEGACY COMPATIBILITY ENTRYPOINT**<br>
+> Para novas missões, use `.codex/skills/dutra-prompt-architect/SKILL.md`. O Prompt Architect classifica L0–L3, roteia contexto mínimo e gera o contrato de execução. Este documento é preservado como exemplo histórico/compatibilidade, não como fonte principal de geração de prompts.
+
 # Prompt Mestre — Gerador de Prompts do Sistema OG
 
 Use este texto para transformar uma ideia de Lucas em um prompt de implementação claro, testável e seguro.

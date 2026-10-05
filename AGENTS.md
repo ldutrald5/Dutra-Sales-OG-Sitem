@@ -148,3 +148,52 @@ Interprete os atalhos abaixo carregando o arquivo correspondente em `.aiox-core/
 - `@squad-creator`, `/squad-creator`, `/squad-creator.md` -> `.aiox-core/development/agents/squad-creator.md`
 - `@aiox-master`, `/aiox-master`, `/aiox-master.md` -> `.aiox-core/development/agents/aiox-master.md`
 <!-- AIOX-MANAGED-END: shortcuts -->
+
+
+
+## DUTRA Intelligence pre-flight
+
+Para trabalho STANDARD/STRUCTURAL do DUTRA OS, use a inteligência durável antes de criar solução nova:
+
+0. prove primeiro o Environment Guardian, incluindo autenticação de leitura/escrita e publicação verificada quando exigida; o roteamento de domínio abaixo complementa o Context Router canônico existente.
+
+1. leia `docs/intelligence/README.md`;
+2. roteie a tarefa por `docs/intelligence/CONTEXT_ROUTER.md`;
+3. consulte a Skill da área e somente os documentos indicados;
+4. consulte `docs/second-brain/BRAIN_INDEX.md` para decisões/perguntas relacionadas;
+5. procure incidente semelhante em `docs/incidents/BUGBOOK.md`;
+6. procure implementação e testes existentes antes de afirmar que algo não existe.
+
+Regras:
+- não criar uma segunda memória/knowledge base paralela ao Second Brain;
+- dados voláteis de cliente permanecem no CRM/banco, nunca em Skills globais;
+- conhecimento substituído deve ser marcado/superseded, não apagado silenciosamente;
+- bug relevante deve gerar regra/teste quando determinístico;
+- decisões, regras e aprendizados novos devem ser avaliados para incorporação ao Second Brain;
+- rode `npm run og:intelligence:test` quando alterar Skills, context router, BUGBOOK, playbooks, prompt library ou regras permanentes.
+
+## External Agent Skills — integration policy
+
+For third-party skills/tools surfaced during development, read `docs/AGENT-SKILLS-POLICY.md` before installing or coupling them to the product.
+
+Additional rules:
+- Apply YAGNI/minimal-change discipline: understand first, reuse existing modules, make the smallest reversible change, and do not add speculative abstractions.
+- Voice/video/browser-agent tools are optional developer capabilities, not core CRM dependencies.
+- Do not commit third-party API keys, model files, recordings, cookies, browser profiles, or customer data.
+- Public-web automation must respect access controls, terms, rate limits, and privacy; do not use stealth/anti-detection to bypass enforcement.
+- Any third-party runtime dependency requires a concrete DUTRA OS use case, license/security review, pinned version, smoke test, and rollback path.
+
+
+## DUTRA Prompt architecture
+
+Quando o usuário pedir para transformar uma ideia, bug ou planejamento em prompt/especificação para outro agente:
+
+1. carregue `.codex/skills/dutra-prompt-architect/SKILL.md`;
+2. roteie o contexto por `docs/intelligence/CONTEXT_ROUTER.md`;
+3. use L0/L1/L2/L3 de forma proporcional ao risco;
+4. para L2/L3, inclua `CONTEXT_MANIFEST` com `required`, `conditional` e `do_not_load`;
+5. não cole toda a Base Mestra, Second Brain, `docs/` ou `knowledge/` “por garantia”;
+6. Prompt Architect não substitui Builder Brain, QA Guardian, Skills de domínio nem `SubagentPromptBuilder`;
+7. prompts reutilizáveis podem entrar em `docs/prompts/PROMPT_LIBRARY.md`; prompts temporários não precisam virar memória permanente.
+
+Rode `npm run og:prompt:test` quando alterar Prompt Architect, seus contratos ou o lint.

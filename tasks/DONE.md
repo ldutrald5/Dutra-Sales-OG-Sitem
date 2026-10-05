@@ -221,3 +221,29 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Resultado rápido:** `interaction-service.recordResult()` grava somente resultado confirmado e mantém histórico.
 - **Próxima ação:** `interaction-service.setNextAction()` é o contrato compartilhado por Mesa, Prospecção, Next Best Action e Automation Engine; mudança material invalida contexto antigo e mudança só de data preserva contexto.
 - **Evidência:** `scripts/test_sales_desk.mjs`, `services/whatsapp-service.js`, `services/interaction-service.js` e suíte completa.
+
+## INT-01 — DUTRA Intelligence Compiler V1
+
+- **Data:** 2026-10-01.
+- **Objetivo:** converter o histórico recuperado do DUTRA OS em inteligência operacional durável sem criar uma segunda base de memória.
+- **Arquitetura:** `docs/second-brain/` permanece a memória canônica; Skills são procedimentos compactos; `docs/intelligence/CONTEXT_ROUTER.md` carrega somente contexto pertinente; dados dinâmicos continuam no CRM/runtime.
+- **Skills:** adicionadas DUTRA Core, Dev, Sales, CRM, OG Tech, Fleet, Product e QA Guardian; Quote, Prospect, Call Intelligence e Minimal Change foram ligados ao novo roteamento.
+- **Conhecimento:** criados BUGBOOK, playbooks Sales/Technical, Prompt Library, Technical Rules/Fleet Context e ADRs de inteligência/reintegração.
+- **Second Brain:** adicionados sources, knowledge, patterns, decisions, anti-patterns, open questions e o ciclo INT-01 com proveniência; índice e métricas regenerados.
+- **Proteção:** novo `og:intelligence:test` impede perda dos princípios, Skills, roteamento, bugs críticos, playbooks, ADRs e registros duráveis; entrou na suíte `validate`.
+- **Runtime/contexto:** Context Manifest, Execution Context e Runtime Manifest foram reconciliados com a existência simultânea do core `main` e do shell V3 `dutra-os-ui-v3-premium`.
+- **Validação:** GitHub Actions Package 00R CI run 398 passou a suíte completa, DUTRA Intelligence regression, Brain check (84 registros/0 warnings), Security e Release Gate em Node 24.21.0/npm 11.19.0.
+- **Limites:** não congelou clientes/propostas atuais nas Skills; não ativou Supabase; não alterou motores de negócio; não mesclou na `main`.
+
+
+
+## DPA-01 — DUTRA Prompt Architect V1
+
+- **Data:** 2026-10-01.
+- **Mudança observável:** o projeto passa a possuir uma camada dedicada que transforma uma intenção de Lucas em Execution Prompt L0–L3, com Context Manifest, estado atual/alvo, escopo, reuso, guardrails, aceite e testes.
+- **Arquitetura:** Prompt Architect compila a missão; Context Router escolhe contexto; Builder Brain governa evidência/aprendizado; Skills de domínio executam; QA Guardian valida; `SubagentPromptBuilder` continua empacotando agent/task/checklists AIOX.
+- **Economia de contexto:** referências por caminho/ID, `required/conditional/do_not_load`, progressive disclosure e proibição de carregar Base Mestra/docs inteiros sem necessidade.
+- **Proteção:** `scripts/prompt-lint.mjs` verifica estrutura por nível, possíveis secrets, placeholders, contexto excessivo e tamanho aproximado; `og:prompt:test` cobre L0/L1/L2/L3.
+- **Inteligência:** Prompt Library, ADR, Context Router, AGENTS, Knowledge Changelog e Second Brain foram atualizados sem criar outra memória.
+- **Validação:** GitHub Actions **Package 00R CI run 401 — success** no PR #103; suíte completa, Brain, Security, npm audit e Release Gate passaram.
+- **Limites:** não altera código de negócio do Sistema OG, não faz deploy e não realiza merge na `main`.

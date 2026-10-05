@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 125 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
-| anti_pattern | 12 |
-| cycle | 9 |
-| decision | 12 |
+| anti_pattern | 17 |
+| cycle | 11 |
+| decision | 18 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 10 |
-| knowledge | 9 |
-| open_question | 5 |
-| pattern | 17 |
-| source | 19 |
+| knowledge | 13 |
+| open_question | 7 |
+| pattern | 22 |
+| source | 23 |
 
 ## Active decisions
 
@@ -43,6 +43,18 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   All prioritization surfaces must delegate to the same deterministic score contract, and all next-action flows must use the same central mutation/normalization contracts instead of reimplementing weights, fallbacks or context rules per UI.
 - **DEC-INTEL-COMPILER-001 — Extend Builder Brain as the DUTRA operational knowledge layer** (active/high)
   The existing Builder Brain remains the canonical durable evidence/decision layer; domain Skills stay thin and route to scoped context, stable domain guidance lives in existing knowledge/docs, dynamic account facts stay in CRM/runtime, and material bugs enter an incident collection with regression linkage.
+- **DEC-V3-SHELL-001 — V3 is the single user experience during reintegration** (active/high)
+  The V3 shell is the user-facing experience; legacy screens/engines may run internally during migration but must not require the seller to alternate between independent systems.
+- **DEC-TECH-SINGLE-001 — One technical engine with VALIDAR/manual fallback** (active/high)
+  All application consumers should converge on one deterministic technical engine; uncovered/ambiguous combinations return VALIDAR and manual override remains available instead of inventing a support mapping.
+- **DEC-AI-REVIEW-001 — AI suggestions require review before becoming CRM truth** (active/high)
+  AI research and call analysis may propose structured updates, but inferred fields, notes and next actions require explicit review before persistence as customer truth.
+- **DEC-INT-COMPILER-001 — Compile history into existing Second Brain plus routed Skills** (active/high)
+  Conversation history is not a runtime dependency: durable knowledge is classified into the existing Second Brain and domain files, exposed through compact Skills and context routing, while volatile account data stays in CRM storage.
+- **DEC-METRIC-UNIVERSE-001 — Conversion metrics use consistent attribution populations** (active/high)
+  A conversion rate may only combine numerator and denominator from the same attributed population/filter; close rate must not be inflated by unrelated historical CRM sales.
+- **DEC-PROMPT-ARCH-001 — Prompt Architect owns intent-to-mission compilation** (active/high)
+  Use a dedicated Prompt Architect to convert human intent into scoped L0-L3 execution missions; Builder Brain remains decision/learning governance, Context Router remains retrieval authority, and SubagentPromptBuilder remains AIOX static task/agent packaging.
 
 ## Open questions
 
@@ -52,6 +64,10 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Current code contains operational support/equalizer/vehicle mappings, but the exact validated OG source set that certifies each mapping must be attached/indexed before those mappings can be promoted to Confirmada OG outside implementation behavior.
 - **OQ-INTEL-KCC-001 — Promote compiled domain knowledge into runtime Knowledge Command Center after review** (open/medium)
   The new agent-facing Skills/playbooks/context are available to repository agents immediately, while live Sales Brain/KCC uses its private imported knowledge index; decide which reviewed stable domain records should be ingested into that runtime index without importing volatile CRM facts or unvalidated OG claims.
+- **OQ-TECH-UNIFICATION-001 — When is the V3 technical engine fully single-source?** (open/high)
+  The shared technical engine and parity tests exist, but fallback/duplicated decision paths must be inventoried and removed before single-source status can be declared.
+- **OQ-V3-OFFLINE-ACCEPT-001 — Manual offline/reconnect acceptance on real authenticated browser** (open/high)
+  Automated sync/idempotency gates pass, but the real-browser flow of edit offline, close/reopen, reconnect, replay and reload still requires manual acceptance evidence.
 
 ## Open / active incidents
 
@@ -122,6 +138,16 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   When technical evidence is insufficient or conflicting, preserve uncertainty as Precisa validar/Não determinada and route to manual validation rather than filling the gap from plausibility, code history or model inference.
 - **PAT-AUTOMATION-ESCAPE-001 — Automation with manual escape** (active/high)
   Automation should accelerate common work while preserving review, edit, replace, add, remove, note and validate paths for real exceptions.
+- **PAT-AUTO-ESCAPE-001 — Automation with manual escape** (validated/high)
+  Use automation to produce a strong default, then preserve edit, override, add, remove, observe and validate paths whenever real commercial/technical exceptions exist.
+- **PAT-METRIC-POPULATION-001 — Metric numerator and denominator share one population** (validated/high)
+  Conversion metrics must derive numerator and denominator from compatible filters, attribution and time/population scope; historical totals cannot be divided by current-session denominators.
+- **PAT-CONTEXT-ROUTER-001 — Skill to context to source routing** (active/high)
+  Keep Skills procedural and compact, route each task to a bounded context set, and retain deeper evidence in canonical source files instead of copying the master context into every prompt.
+- **PAT-V3-INTERNAL-LEGACY-001 — New shell over extracted brownfield engines** (validated/high)
+  When a new UX is approved but the legacy system owns mature domain logic, keep one user-facing shell and progressively extract/reuse legacy engines behind it until transitional bridges can be removed.
+- **PAT-PROMPT-MINCTX-001 — Mission prompts use minimal decision-changing context** (active/high)
+  Execution prompts should reference bounded required context, conditional context and explicit do-not-load areas, scaling prompt depth with risk instead of copying the whole project history into each delegation.
 
 ## Recent sources
 
@@ -137,14 +163,14 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Live audit verified GitHub main and Railway production alignment before the Intelligence Compiler merge, persistent Railway volume /data, PWA cache v67, an active hybrid Supabase/Postgres backend, and a reproducibility gap: the remote Supabase project had 25 applied migrations and 13 active Edge Functions while the repository versioned only 4 migration files and 2 Edge Function sources.
 - **SRC-INTEL-CLOSEOUT-001 — DUTRA Intelligence Compiler V1 PR and CI closeout** (implemented/high)
   PR #104 merged the Intelligence Compiler V1 to main as commit 72354a1f04d6fdd5584fe876ec4b09bb050a312a after PR workflows Package 00R CI #404, Sales Execution P0 #24 and Call Intelligence V1 #22 passed; main Package 00R CI #405 also passed after merge.
-- **SRC-PKG04R-001 — Package 04R durable sync bridge and conflict review** (implemented/high)
-  Package 04R replaces silent conflict merge/resend with durable conflict recovery, explicit human review, authenticated foreground outbox delivery and serialized revision-aware writes while preserving local-first compatibility.
-- **SRC-PKG05R-001 — Package 05R controlled legacy reconciliation** (implemented/high)
-  Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
-- **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (implemented/high)
-  Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
-- **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
-  OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
+- **SRC-CHAT-RECOVERY-20261001 — DUTRA OS master conversation recovery audit** (validated/high)
+  User-reviewed recovery audit consolidating the long-running DUTRA OS conversation into decisions, implemented work, failures, commercial context, technical mappings and pending work before chat archival.
+- **SRC-TECH-HANDOFF-20261001 — DUTRA OS technical handoff 2026-10-01** (validated/high)
+  Technical handoff reconciled the recovery report with live GitHub/Railway evidence, distinguishing core main from the V3 shell and identifying current architecture, migrations, runtime state, bugs and technical debt.
+- **SRC-INT-COMPILER-20261001 — DUTRA Intelligence Compiler specification** (active/high)
+  User specification requiring project history to be compiled into the existing Second Brain, Skills, context routing, playbooks, incident prevention, prompts and tests instead of being left as chat-only documentation.
+- **SRC-PROMPT-ARCH-20261001 — DUTRA Prompt Architect specification and implementation** (implemented/high)
+  User-directed implementation adds a dedicated intent-to-mission layer that classifies prompt depth, routes minimal context and defines execution/acceptance contracts without duplicating Builder Brain or AIOX task packaging.
 
 ## Retrieval workflow
 

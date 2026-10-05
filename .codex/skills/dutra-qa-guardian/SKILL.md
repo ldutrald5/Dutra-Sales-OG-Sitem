@@ -32,3 +32,43 @@ BUG → symptom → context → root cause → fix → prevention rule → regre
 
 ## Output
 Incident ID, reproduced/not reproduced, root cause/evidence, prevention, regression coverage, residual risk and gate result.
+
+## V3 domain guidance retained for later convergence
+
+Current Environment Guardian, canonical data and tested baseline rules above take precedence.
+
+# DUTRA QA Guardian
+
+## Carregar
+
+- `docs/incidents/BUGBOOK.md`
+- `docs/second-brain/anti-patterns.jsonl`
+- testes do módulo;
+- decisão arquitetural relacionada.
+
+## Pre-flight
+
+Perguntar:
+- esse sintoma já ocorreu?
+- a causa foi realmente corrigida ou só mascarada?
+- existe caminho alternativo que pula o contrato?
+- o teste protege a regra, não somente uma string?
+- offline/conflito/manual escape foram considerados?
+- numerador/denominador usam a mesma população?
+- uma regra técnica foi duplicada?
+
+## Regressões prioritárias
+
+- tela preta/first paint;
+- OG_DATA ausente;
+- métricas > limites lógicos;
+- duplicação de Company/list;
+- perda offline;
+- conflict overwrite;
+- proposal handoff perdendo contexto;
+- aplicação técnica inventada/divergente;
+- cliente tratado como cold apesar de relacionamento existente.
+
+## Saída
+
+Bug reproduzido/entendido → causa → correção mínima → regression test → status/risco residual. Não declarar “resolvido” sem evidência.

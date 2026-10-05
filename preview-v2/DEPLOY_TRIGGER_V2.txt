@@ -1,0 +1,4 @@
+DUTRA OS V2 preview deployment trigger.
+Railway source: dutra-os-ui-v2-preview
+Root: /preview-v2
+Start: npm start

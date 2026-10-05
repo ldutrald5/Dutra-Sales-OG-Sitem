@@ -128,3 +128,101 @@ These playbooks are stage-aware guides. They do not replace current CRM facts or
 **Do not:** use a cold acquisition pitch or ask for referral before addressing experience/issues.
 
 **Flow:** installation → experience → issue → resolution → value → expansion → referral.
+
+## V3 reference retained during Stage 1
+
+The following preserves V3 branch guidance as reference for later stages; current integration safety and mature runtime remain authoritative. Historical runtime observations are not live certification.
+
+# DUTRA OS — Playbooks Comerciais
+
+Playbooks orientam a conversa; não substituem contexto real da conta. Antes de usar, verificar `relationship_status`, pessoa atual, histórico, próxima ação e oportunidade.
+
+## PROSPECTING — iniciar contato
+
+**CONTEXTO:** conta sem conversa útil recente.<br>
+**OBJETIVO:** obter conexão útil e descobrir estrutura de decisão sem transformar o primeiro contato em apresentação longa.<br>
+**ABORDAGEM:** curta, humana, focada na operação.<br>
+**PERGUNTAS:** quem cuida de frota/manutenção/pneus; tamanho/configuração relevante quando houver abertura; problema atual; como tratam pressão/desgaste.<br>
+**PRÓXIMO PASSO:** decisor, retorno datado ou reunião.<br>
+**EVITAR:** cadastrar empresa de novo, pitch genérico longo, tratar cliente existente como cold.<br>
+**REGISTRAR:** interlocutor, cargo, telefone útil, resultado, próxima ação.
+
+## GATEKEEPER
+
+**CONTEXTO:** recepção/atendente/interlocutor sem poder de decisão.<br>
+**OBJETIVO:** conquistar cooperação e identificar/chegar ao responsável.<br>
+**ABERTURA BASE:** “Oi, aqui é o Lucas, da Olho de Gato. Preciso falar com quem cuida da frota ou da manutenção dos pneus. Você consegue me orientar?”<br>
+**PERGUNTAS:**
+- Quem cuida dessa parte?
+- Normalmente fica com frota, manutenção ou proprietário?
+- Poderia me passar para essa pessoa?
+- Existe ramal ou WhatsApp comercial?
+
+**NÃO FAZER:** pitch técnico completo, pressionar o gatekeeper ou apagar o contato quando descobrir o decisor.<br>
+**REGISTRAR:** nome, cargo, ramal/telefone, pessoa indicada e qualidade da relação.
+
+## DECISION MAKER
+
+**CONTEXTO:** gestor de frota, manutenção, compras, diretor ou proprietário com influência real.<br>
+**OBJETIVO:** diagnóstico e qualificação.<br>
+**ABERTURA BASE:** explicar em uma frase por que a conversa é relevante e ir para a operação.<br>
+**PERGUNTAS BASE:**
+- Como vocês controlam hoje pressão e desgaste dos pneus?
+- O que mais pesa no custo/rotina de pneus hoje?
+- Qual parte da frota concentra mais atenção?
+- Quem além de você participa da decisão?
+- Faz sentido testar/simular em veículos reais?
+
+**GATILHO PARA MUDAR DE MODO:** quando houver dor + operação relevante + possibilidade de avanço, parar de explicar indefinidamente e migrar para MEETING.
+
+## MEETING
+
+**OBJETIVO:** converter conversa qualificada em reunião com propósito.<br>
+**ABERTURA BASE:** “Pelo tamanho da operação, vale mais eu montar uma simulação na frota real do que ficar só na explicação por telefone.”<br>
+**PERGUNTAS:** participantes, período, online/presencial, veículo/frota a usar na simulação.<br>
+**CTA:** oferecer opções concretas de horário, adaptadas ao contexto.<br>
+**REGISTRAR:** decisor, participantes, data/hora, objetivo, modo, follow-up pré-reunião.<br>
+**EVITAR:** continuar fazendo pitch quando o próximo passo correto já é reunião.
+
+## FOLLOW-UP
+
+**CONTEXTO:** conversa existente, retorno prometido ou oportunidade aberta.<br>
+**OBJETIVO:** continuar exatamente do ponto anterior.<br>
+**ABERTURA BASE:** “Estou retomando exatamente do ponto que combinamos.”<br>
+**PERGUNTAS:** o que mudou, o que foi validado, bloqueio novo, quem falta envolver.<br>
+**EVITAR:** reiniciar a venda como lead frio.
+
+## PROPOSAL
+
+**CONTEXTO:** proposta/orçamento já existe.<br>
+**OBJETIVO:** entender bloqueio e avançar decisão.<br>
+**ABERTURA BASE:** “Quero revisar o que ficou pendente na proposta e entender o que precisa acontecer para a decisão avançar.”<br>
+**PERGUNTAS:** bloqueio técnico/financeiro/timing; quem aprova; condição necessária para avançar.<br>
+**EVITAR:** assumir que proposta aberta = enviada, lida ou aprovada.
+
+## CUSTOMER / EXPANSION
+
+**CONTEXTO:** `relationship_status=CUSTOMER` ou compra confirmada.<br>
+**OBJETIVO:** experiência, reposição, expansão, nova unidade/frota e indicação.<br>
+**ABERTURA BASE:** “Quero entender como está a experiência com o que já foi instalado e se mudou algo na frota.”<br>
+**PERGUNTAS:** performance observada, veículos novos, reposição pendente, outra operação/gestor relevante.<br>
+**EVITAR:** abordagem de prospecção fria.
+
+## POST-SALE / INDICAÇÃO
+
+**OBJETIVO:** proteger relacionamento antes de pedir indicação.<br>
+**SEQUÊNCIA:** uso/instalação → problema/ajuste → resultado percebido → necessidade futura → expansão → indicação quando houver confiança.<br>
+**EVITAR:** pedir indicação automaticamente sem confirmar experiência.
+
+## Regra comum de Call AI
+
+Saída durante ligação deve ser curta:
+
+- objetivo;
+- abertura;
+- 3–5 perguntas;
+- gancho;
+- objeções prováveis;
+- CTA.
+
+Toda inferência de IA permanece sugestão até revisão humana.

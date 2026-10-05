@@ -28,3 +28,40 @@ Inspect canonical owner → identify mutation contract → validate identity →
 
 ## Output
 Canonical entities affected, confirmed facts, state transition, next action, dedupe/provenance considerations and tests.
+
+## V3 domain guidance retained for later convergence
+
+Current Environment Guardian, canonical data and tested baseline rules above take precedence.
+
+# DUTRA CRM
+
+## Carregar
+
+- `docs/04-CRM.md`
+- `docs/05-MESA-DE-VENDAS.md`
+- serviços/entidades realmente envolvidos;
+- `docs/architecture/DUTRA_INTELLIGENCE_DECISIONS.md`.
+
+## Modelo mental
+
+- Company/Account = raiz;
+- Contacts = pessoas da conta;
+- lista = membership operacional, não cópia da empresa;
+- pipeline comercial != relationship status;
+- gatekeeper não é apagado quando decisor aparece;
+- atividade registra fato;
+- Next Action orienta trabalho;
+- session organiza execução, não cria outro CRM.
+
+## Guardrails
+
+- deduplicar antes de cadastrar;
+- não alterar estágio por abrir WhatsApp/cotação;
+- não inferir contato realizado;
+- não congelar dados de cliente em Skills;
+- IA propõe mudanças, Review Gate aprova;
+- preservar `legacyLeadId/external_id` durante reconciliação.
+
+## Saída
+
+Atualização mínima da conta central + histórico/next action apropriados, sem duplicar identidade.
