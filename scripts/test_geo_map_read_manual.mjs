@@ -13,6 +13,8 @@ assert.match(migration,/forked_from_location_id/i,'editing automatic provenance 
 assert.match(migration,/address_source in \('CNPJ_REGISTRY','COMPANY_WEBSITE','AI_SUGGESTED','IMPORT'\)/i);
 assert.match(migration,/geocode_precision=v_precision/i);
 assert.match(migration,/v_precision := 'MANUAL'/i);
+assert.match(migration,/v_address_changed/i,'manual location updates must distinguish address edits from label\/metadata edits');
+assert.match(migration,/v_geo := v_existing\.geo/i,'non-address edit must preserve an existing valid point');
 assert.match(migration,/operator\(extensions\.&&\)/i,'viewport query must use spatial bounding operator');
 assert.match(migration,/left join lateral[\s\S]*?sales_opportunities/i);
 assert.match(migration,/last_activity_at/i);
