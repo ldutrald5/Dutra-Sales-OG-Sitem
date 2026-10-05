@@ -2,7 +2,7 @@
 
 ## Status
 
-**IMPLEMENTED / DISPOSABLE REPLAY GATE RUNNING**
+**PASS — REGISTRY PIPELINE + DISPOSABLE REPLAY GREEN**
 
 ## Delivered
 
@@ -51,15 +51,28 @@ No secret created.
 No external registry request executed.
 No customer record changed.
 
-## Acceptance gate
+## Test evidence
 
-GEO-03R is ready only when:
+Final validated head: `4664dc260498f2c47ee14ea5a695dc01a498c7c6`.
 
-- provider contract test is green;
-- static typed-pipeline test is green;
-- canonical backend replay remains green;
-- GEO-02R + GEO-03R rollback-only replay is green;
-- normal project validation remains green except the already-known upstream npm-audit advisory.
+- GEO Registry Replay run `37360877965`: **PASS**
+  - provider contract: PASS;
+  - typed-pipeline static contract: PASS;
+  - disposable Supabase startup: PASS;
+  - canonical backend + GEO-02R + GEO-03R replay: PASS;
+  - registry application assertions: PASS;
+  - verified-location overwrite protection: PASS;
+  - rollback and shutdown: PASS.
+- Supabase Canonical Replay run `37360877979`: **PASS**.
+- Package 00R:
+  - npm ci: PASS;
+  - lockfile integrity: PASS;
+  - npm run validate: PASS;
+  - Builder Brain: PASS;
+  - security test: PASS;
+  - overall workflow remains red only at the pre-existing upstream AIOX/`braces` npm-audit advisory.
+
+A regression test now also guards the PL/pgSQL retry-function dollar delimiters that caused the first disposable replay failure.
 
 ## Next package after green replay
 
