@@ -4,7 +4,7 @@
 
 | Metric | Current |
 |---|---:|
-| Tracked STANDARD/STRUCTURAL cycles (brain available) | 10 |
+| Tracked STANDARD/STRUCTURAL cycles (brain available) | 11 |
 | Brain consultation rate | 100% |
 | Brain update completion rate | 100% |
 | Ideas rejected/deferred before code (tracked signal) | 9 |
@@ -14,8 +14,8 @@
 | Incidents resolved | 9/10 |
 | Open/active incidents | 1 |
 | Correctly blocked cycles/releases recorded | 6 |
-| Median tracked cycle time | 0.6 h |
-| Sources in brain | 23 |
+| Median tracked cycle time | 0.5 h |
+| Sources in brain | 24 |
 
 ## Interpretation
 

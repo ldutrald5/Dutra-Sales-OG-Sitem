@@ -162,8 +162,11 @@ V3_SHA: 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f
 - [x] Mature app/service-worker/sync preserved, V3 preview preserved, canonical Supabase diff empty.
 - [x] Tooling/governance/Second Brain reconciled without gate or dependency downgrade.
 - [x] npm ci, og:check, 75/75 npm test and Brain PASS; relevant explicit tests PASS.
-- [ ] Merge commit and push verified.
-- [ ] Current-merge Canonical Replay/Structural Parity PASS; drift 0; not-verifiable 0.
-- [ ] Stage 1 COMPLETE / safe to start Stage 2.
+- [x] Merge commit fd99210ca81a4374377f4353e7a402b45679a23c and push/fetch equality verified.
+- [x] Current-merge Canonical Replay/Structural Parity PASS (run 37252679945); drift 0; not-verifiable 0.
+- [x] Stage 1 COMPLETE / ready for Stage 2; Stage 2 NOT STARTED.
 
 File List: all incoming and manually reconciled paths are enumerated in the linked audit; checkpoint, story, audit, package files, validate, workflow_dispatch and scoped mirror test also changed. No Stage 2 visual transformation occurred.
+
+
+Stage 1 CI: Sales Execution and Call Intelligence SUCCESS. Package 00R fails only known braces/AIOX advisory (6 high), recorded separately without audit fix. Final evidence, hotspots and rollback remain in checkpoint/audit. Final closure file list adds Stage 1 source/cycle, generated index/metrics, changelog and TODO/DONE status; executable tree unchanged after tested merge.

@@ -247,3 +247,8 @@ Ao concluir uma TASK, registrar ID, data, mudança observável, arquivos princip
 - **Inteligência:** Prompt Library, ADR, Context Router, AGENTS, Knowledge Changelog e Second Brain foram atualizados sem criar outra memória.
 - **Validação:** GitHub Actions **Package 00R CI run 401 — success** no PR #103; suíte completa, Brain, Security, npm audit e Release Gate passaram.
 - **Limites:** não altera código de negócio do Sistema OG, não faz deploy e não realiza merge na `main`.
+
+
+## CONVERGENCE-01 — Stage 1 closeout
+
+Stage 1 COMPLETE: merge V3 com baseline/Supabase preservados, 75/75 local, replay/paridade CI PASS e push verificado. Rollback bcf36206b820861f1e41981a92003864b9cec2ea.

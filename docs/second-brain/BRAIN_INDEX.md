@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 125 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 127 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 11 |
+| cycle | 12 |
 | decision | 18 |
 | experiment | 1 |
 | idea | 3 |
@@ -15,7 +15,7 @@ Generated from 125 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 22 |
-| source | 23 |
+| source | 24 |
 
 ## Active decisions
 
@@ -151,6 +151,8 @@ Generated from 125 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
+  Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
 - **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
   CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
@@ -169,8 +171,6 @@ Generated from 125 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Technical handoff reconciled the recovery report with live GitHub/Railway evidence, distinguishing core main from the V3 shell and identifying current architecture, migrations, runtime state, bugs and technical debt.
 - **SRC-INT-COMPILER-20261001 — DUTRA Intelligence Compiler specification** (active/high)
   User specification requiring project history to be compiled into the existing Second Brain, Skills, context routing, playbooks, incident prevention, prompts and tests instead of being left as chat-only documentation.
-- **SRC-PROMPT-ARCH-20261001 — DUTRA Prompt Architect specification and implementation** (implemented/high)
-  User-directed implementation adds a dedicated intent-to-mission layer that classifies prompt depth, routes minimal context and defines execution/acceptance contracts without duplicating Builder Brain or AIOX task packaging.
 
 ## Retrieval workflow
 

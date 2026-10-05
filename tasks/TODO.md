@@ -442,3 +442,8 @@ TASK-003 a TASK-006 continuam válidas como refinamentos de velocidade operacion
 - **Critério de aceite:** prompt proporcional ao risco, contexto seletivo, ausência de secrets, integração com roteamento existente e gates verdes.
 - **Dependências:** INT-01 / Builder Brain / Context Router.
 - **Status:** concluída em 2026-10-01; evidência em `tasks/DONE.md`, story DPA-01 e PR #103.
+
+
+## CONVERGENCE-01 — Stage 1 closeout
+
+Stage 2 permanece NÃO INICIADA; aguardar autorização específica. Não ampliar GEO/CNPJ/Assets nesta trilha.

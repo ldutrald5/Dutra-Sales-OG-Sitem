@@ -2,6 +2,12 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — CONVERGENCE-01 Stage 1
+
+- Integrada ancestralidade V3 à branch de integração por merge controlado, preservando app/PWA/sync maduros e Supabase canônico.
+- Retidos 36 arquivos preview V3; reconciliados tooling/governança/Second Brain com 75 gates locais verdes e replay/paridade atuais em CI.
+- Sem migração visual, Stage 2, deploy ou alteração de produção/referências protegidas. Advisory Package 00R braces/AIOX permanece dívida separada.
+
 ## [Unreleased] — DUTRA Intelligence Compiler V1
 
 - Estendido o Builder Brain existente em vez de criar uma segunda memória paralela.

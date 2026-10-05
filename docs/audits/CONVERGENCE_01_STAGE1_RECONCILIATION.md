@@ -365,3 +365,20 @@ CONFLICTS_PENDING: 0
 - Disposable canonical replay and structural parity: PENDING dedicated CI after safe merge commit/push. No local Supabase CLI/psql installed.
 
 First local suite exposed only the original V3 mirror assumption; it was reconciled as documented above and the entire suite rerun green. No npm audit fix performed.
+
+
+## Current-merge remote evidence and final result
+
+POST_STAGE1_SHA: fd99210ca81a4374377f4353e7a402b45679a23c
+V3 ancestry PASS; merge parents Stage 0 and exact V3 SHA. Merge push/fetch equality PASS.
+
+- Supabase Canonical Replay run 37252679945: SUCCESS, two clean replay/parity executions, drift 0, not-verifiable 0, determinism PASS.
+- Schema fingerprint: 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9
+- Sales Execution P0 run 37252682099: SUCCESS.
+- Call Intelligence V1 run 37252684333: SUCCESS.
+- Package 00R CI run 37252686691: only npm audit FAILED, GHSA-vfj7-8cjw-p6xm braces/AIOX chain (6 high). Every earlier installation/lock/validation/Brain/security step PASS. No audit fix or dependency mutation. Release step skipped after audit; local release gate PASS.
+- Artifact ZIP fetch blocked once by storage Forbidden; no repeated request. GitHub run logs successfully obtained and verified both printed structural parity results and deterministic equality. This is evidence retrieval friction, not a failed replay.
+- Generated Brain index/metrics conflicts: MERGE_BOTH; rebuilt from canonical union rather than hand edited.
+- Imported Markdown hard-break whitespace normalized in 8 files using <br>; content/line-break semantics preserved.
+
+STATUS: COMPLETE after local/CI/push gates; Stage 2 NOT STARTED. Final closure only changes documentation/Brain records, so executable/Supabase/workflow tree remains exactly the tested merge.

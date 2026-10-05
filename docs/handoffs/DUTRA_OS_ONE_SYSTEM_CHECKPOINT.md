@@ -2,10 +2,66 @@
 
 MISSION: CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 CURRENT_STAGE: 1 — GIT + SUPABASE RECONCILIATION
-STATUS: IN PROGRESS — controlled reconciliation; Stage 0 remains COMPLETE
+STATUS: COMPLETE — Stage 1 merge, local regression and current-SHA Supabase CI verified
 UPDATED_AT: 2026-10-05 UTC
 NEXT_STAGE: STOP after Stage 1; Stage 2 NOT STARTED
-SAFE_TO_CONTINUE_TO_STAGE_2: NO — Stage 1 validation pending
+SAFE_TO_CONTINUE_TO_STAGE_2: YES (readiness only; Stage 2 NOT STARTED)
+
+
+## Stage 1 authoritative closure
+
+PRE_STAGE1_SHA: bcf36206b820861f1e41981a92003864b9cec2ea
+POST_STAGE1_SHA: fd99210ca81a4374377f4353e7a402b45679a23c
+V3_SHA_INTEGRATED: 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f
+ROLLBACK_SHA: bcf36206b820861f1e41981a92003864b9cec2ea
+FINAL_CHECKPOINT_HEAD: commit containing this closure; verify local/remote equality after publication
+MERGE: PASS — two parents bcf36206b820861f1e41981a92003864b9cec2ea and 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f
+CONFLICTS_FOUND: 28 files
+CONFLICTS_RESOLVED: 28 files
+CONFLICTS_PENDING: 0
+FILES_MANUALLY_RECONCILED: enumerated and classified in docs/audits/CONVERGENCE_01_STAGE1_RECONCILIATION.md
+SUPABASE_DIFF: EMPTY against bcf36206b820861f1e41981a92003864b9cec2ea; three V3 duplicates not reintroduced
+TEST_RESULTS: npm ci PASS; og:check PASS; npm test 75/75 PASS; Brain PASS; explicit sync/PWA/Sales Execution/Call Intelligence/proposal/11 preview tests PASS
+PUSH: PASS — merge LOCAL=REMOTE=fd99210ca81a4374377f4353e7a402b45679a23c; final documentation publication verified separately
+
+Hotspots:
+
+| Hotspot | Decision |
+|---|---|
+| app.js | MAIN_FUNCTIONAL — byte-identical Stage 0 |
+| service-worker.js | MAIN_FUNCTIONAL — byte-identical Stage 0 |
+| sync-bridge | MAIN_FUNCTIONAL — core v2 intact; V3 v3 candidate isolated in preview |
+| preview-v2 | V3_UX — all 36 files exact V3, no activation/deploy |
+| package.json | MERGE_BOTH — union scripts and syntax checks; dependencies/engines/overrides unchanged |
+| package-lock.json | MERGE_BOTH audit — retained exact Stage 0 lock after equal-dependency comparison |
+| scripts/validate.mjs | MERGE_BOTH — all baseline gates plus V3, 75 gates |
+| AGENTS/Skills/Context/architecture/knowledge/TODO | MERGE_BOTH — current safety preserved; useful V3 content retained as scoped reference |
+| Second Brain | MERGE_BOTH — stable-ID union; no shared record divergence; generated surfaces refreshed |
+| Supabase | CANONICAL_SUPABASE — exact Stage 0/#110 directory; no SQL/function drift |
+
+CI_RESULTS on fd99210ca81a4374377f4353e7a402b45679a23c:
+
+| Workflow | Result / evidence |
+|---|---|
+| [Supabase Canonical Replay](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/37252679945) | SUCCESS; two clean replays; Structural Parity PASS twice; drift 0; not-verifiable 0; deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9 |
+| [Sales Execution P0](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/37252682099) | SUCCESS |
+| [Call Intelligence V1](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/37252684333) | SUCCESS |
+| [Package 00R CI](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/37252686691) | FAILURE solely known npm audit braces/AIOX GHSA-vfj7-8cjw-p6xm (6 high); install/lock/75-gate validate/Brain/security PASS; release step skipped after audit; local release PASS |
+
+CANONICAL_REPLAY: PASS (current merge, not historical #110 substitution)
+STRUCTURAL_PARITY: PASS
+UNEXPLAINED_DRIFT: 0
+NOT_VERIFIABLE: 0
+QA: PASS — controlled merge audit and independent final current-SHA CI evidence review
+BLOCKERS: NONE for Stage 1; known Package 00R audit advisory is separate dependency debt explicitly allowed by the task
+ARTIFACT_DOWNLOAD: NOT AVAILABLE — one storage transport Forbidden; no retry. Authoritative GitHub run logs retrieved successfully and contain both parity reports' printed results/fingerprints plus byte-comparison determinism PASS. No local downloaded artifact is claimed.
+SAFE_TO_START_STAGE2: YES (readiness only)
+STAGE2: NOT STARTED
+PRODUCTION / MAIN / V2 / V3 / PR109 / PR110 MODIFIED: NO
+
+Final documentation/Brain closure changes no runtime/Supabase/replay/workflow code after fd99210ca81a4374377f4353e7a402b45679a23c. Current-merge CI therefore covers the unchanged executable/schema tree; final Brain/validation is rerun for the documentation closure.
+
+## Previous Stage 0 and interim Stage 1 checkpoints (historical)
 
 ## Current environment and repository evidence
 
