@@ -189,6 +189,52 @@ begin
 end;
 $$;
 
+
+create or replace function public.fail_enrichment_job_v2(
+  p_job_id uuid,
+  p_error text,
+  p_retryable boolean default true,
+  p_retry_minutes integer default 15
+)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = ''
+as $
+declare
+  v_status text;
+begin
+  if p_retry_minutes < 0 or p_retry_minutes > 10080 then
+    raise exception 'retry minutes must be between 0 and 10080';
+  end if;
+
+  update public.enrichment_jobs
+  set
+    status = case
+      when not coalesce(p_retryable,true) then 'failed'
+      when attempts >= 3 then 'failed'
+      else 'pending'
+    end,
+    error_message = left(coalesce(p_error,'unknown error'),4000),
+    next_attempt_at = case
+      when not coalesce(p_retryable,true) or attempts >= 3 then null
+      else now() + make_interval(mins => p_retry_minutes)
+    end,
+    locked_by = null,
+    locked_until = null,
+    completed_at = case
+      when not coalesce(p_retryable,true) or attempts >= 3 then now()
+      else completed_at
+    end,
+    updated_at = now()
+  where id = p_job_id
+  returning status into v_status;
+
+  if v_status is null then raise exception 'enrichment job not found: %', p_job_id; end if;
+  return jsonb_build_object('job_id',p_job_id,'status',v_status,'retryable',coalesce(p_retryable,true));
+end;
+$;
+
 create or replace function public.apply_company_registry_v1(
   p_job_id uuid,
   p_payload jsonb
@@ -409,7 +455,9 @@ $$;
 revoke all on function public.claim_enrichment_job_v2(text,text,integer) from public,anon,authenticated;
 revoke all on function public.enqueue_company_registry_job_v1(uuid,text,boolean) from public,anon,authenticated;
 revoke all on function public.apply_company_registry_v1(uuid,jsonb) from public,anon,authenticated;
+revoke all on function public.fail_enrichment_job_v2(uuid,text,boolean,integer) from public,anon,authenticated;
 
 grant execute on function public.claim_enrichment_job_v2(text,text,integer) to service_role;
 grant execute on function public.enqueue_company_registry_job_v1(uuid,text,boolean) to service_role;
 grant execute on function public.apply_company_registry_v1(uuid,jsonb) to service_role;
+grant execute on function public.fail_enrichment_job_v2(uuid,text,boolean,integer) to service_role;
