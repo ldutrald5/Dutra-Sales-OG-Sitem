@@ -84,6 +84,40 @@ begin
 
   if v_audit_count<>1 then raise exception 'manual location insert audit missing'; end if;
 
+  -- A non-address edit must preserve an already valid point instead of erasing it.
+  perform public.upsert_manual_company_location_v1(
+    p_company_id=>v_company,
+    p_location_id=>v_manual,
+    p_purpose=>'GARAGE',
+    p_label=>'Garagem confirmada · principal',
+    p_address_raw=>'Avenida Manual, 200, Maringá - PR',
+    p_street=>'Avenida Manual',
+    p_street_number=>'200',
+    p_complement=>null,
+    p_district=>'Industrial',
+    p_postal_code=>'87000000',
+    p_city=>'Maringá',
+    p_city_ibge_code=>null,
+    p_state=>'PR',
+    p_country_code=>'BR',
+    p_formatted_address=>'Avenida Manual, 200, Industrial, Maringá - PR, 87000000',
+    p_address_source=>'SELLER',
+    p_verification_status=>'VERIFIED_BY_SELLER',
+    p_is_primary=>true,
+    p_actor_id=>'seller-replay'
+  );
+
+  if not exists (
+    select 1 from public.company_locations
+    where id=v_manual
+      and geo is not null
+      and geocode_provider='manual'
+      and geocode_precision='MANUAL'
+      and geocode_confidence=1
+  ) then
+    raise exception 'non-address manual edit erased valid coordinates';
+  end if;
+
   insert into public.sales_opportunities(
     id,company_id,source,stage,fleet_size,next_action,next_action_due_at,pipeline_stage,
     relationship_status,next_action_priority
