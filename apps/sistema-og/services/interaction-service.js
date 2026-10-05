@@ -13,7 +13,7 @@
     enviar_apresentacao: { label: 'Enviar apresentação', status: 'contatado', nextAction: 'Enviar apresentação' },
     enviar_orcamento: { label: 'Enviar orçamento', status: 'proposta_enviada', nextAction: 'Preparar orçamento' },
     negociacao: { label: 'Negociação', status: 'negociacao', nextAction: 'Retomar negociação' },
-    venda: { label: 'Venda', status: 'fechado' },
+    venda: { label: 'Venda', status: 'fechado', clearNextAction: true },
     outro: { label: 'Outro' }
   });
 

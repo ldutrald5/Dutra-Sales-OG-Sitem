@@ -1,0 +1,53 @@
+/* Stage 3 presentation only. Reuse OG tokens and Stage 2 shell/navigation. */
+.dutra-shell #tab-dia { overflow-wrap: anywhere; }
+.dutra-shell #tab-dia .og-command-hero { min-height: 0; padding: 16px; background: var(--og-surface); display: flex; flex-wrap: wrap; gap: 12px; }
+.dutra-shell #tab-dia .og-command-hero::before, .dutra-shell #tab-dia .og-command-hero::after { display: none; }
+.dutra-shell #tab-dia .og-command-copy h1 { font-size: 24px; margin: 0; }
+.dutra-shell #tab-dia .og-command-copy p { font-size: 13px; margin: 6px 0; }
+.dutra-shell #tab-dia .og-hero-actions { margin-top: 10px; flex-wrap: wrap; }
+.dutra-shell #tab-dia .og-command-clock { margin-left: auto; padding: 0; min-width: 0; }
+.dutra-shell .mission-now { padding: 18px; border-left: 3px solid var(--og-brand); }
+.mission-now h2 { font-size: 22px; line-height: 1.25; margin: 8px 0; }
+.mission-action { font-size: 16px; font-weight: 800; color: var(--og-brand); }
+.mission-context, .mission-hint, .mission-empty { color: var(--og-text-secondary); font-size: 12px; }
+.mission-reason { font-size: 13px; margin: 6px 0; }
+.mission-quick-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.mission-quick-actions button, .mission-facts button, .mission-section button { min-height: 44px; white-space: normal; max-width: 100%; }
+.mission-commitments { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.mission-commitments > div { min-width: 0; padding: 14px; }
+.mission-commitments h2 { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+.mission-commitments li { display: grid; gap: 4px; margin: 6px 0; font-size: 12px; }
+.mission-section summary, .mission-reference summary, .dutra-shell #tab-dia .sales-desk-side > summary { cursor: pointer; min-height: 44px; padding: 12px 4px; font-weight: 700; }
+.mission-section ul { max-height: 260px; overflow-y: auto; }
+.mission-facts { max-height: 230px; overflow-y: auto; }
+.mission-row-reason { color: var(--og-brand); }
+.dutra-shell #tab-dia .og-kpi-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.dutra-shell #tab-dia .og-kpi { flex: 1 1 130px; min-height: 60px; padding: 10px; }
+.dutra-shell #tab-dia .og-kpi strong { font-size: 20px; }
+.dutra-shell #tab-dia .og-kpi small { display: none; }
+.dutra-shell #tab-dia .sales-desk-layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.dutra-shell #tab-dia .sales-desk-side { display: block; grid-column: 1 / -1; }
+.dutra-shell #tab-dia .sales-desk-client { position: static; }
+.dutra-shell #tab-dia .sales-desk-row { min-width: 0; }
+.dutra-shell #tab-dia .sales-desk-select { display: grid; grid-template-columns: minmax(0,1fr); gap: 6px; min-width: 0; }
+.dutra-shell #tab-dia .sales-desk-primary-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.dutra-shell #tab-dia .sales-desk-primary-actions :is(button,a) { flex: 1 1 100px; min-height: 44px; white-space: normal; }
+.dutra-shell #tab-dia .sales-desk-next { grid-template-columns: minmax(0,1fr); }
+.dutra-shell #tab-dia :is(.sales-desk-result-quick button,.sales-desk-save-row button,.sales-desk-whatsapp,.og-chip,summary,.og-field input,.og-field select) { min-height: 44px; }
+.dutra-shell #tab-dia .sales-desk-primary-actions :is(button,a):focus-visible,
+.dutra-shell #tab-dia .mission-quick-actions button:focus-visible { outline: 2px solid var(--og-brand); outline-offset: 3px; }
+.mission-reference { color: var(--og-text-secondary); font-size: 12px; }
+.dutra-shell #tab-dia .mission-reference .og-product-proof { margin-top: 8px; }
+@media (max-width: 1023px) {
+  .dutra-shell #tab-dia .sales-desk-layout { grid-template-columns: minmax(0,1fr); }
+  .dutra-shell #tab-dia .sales-desk-queue { order: 1; }
+  .dutra-shell #tab-dia .sales-desk-client { order: 0; }
+  .dutra-shell #tab-dia .sales-desk-side { order: 2; }
+  .dutra-shell #tab-dia .og-opportunity-list { max-height: none; }
+}
+@media (max-width: 600px) {
+  .mission-commitments { grid-template-columns: minmax(0,1fr); }
+  .dutra-shell #tab-dia .og-command-clock { display: none; }
+  .dutra-shell #tab-dia .sales-desk-client { padding: 14px; }
+  .dutra-shell #tab-dia .og-hero-actions .og-button { font-size: 11px; min-height: 44px; padding: 8px; }
+}

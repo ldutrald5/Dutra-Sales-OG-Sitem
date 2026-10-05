@@ -3874,16 +3874,62 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function getDayGroups() {
-    const now = new Date();
-    const today = toLocalDateKey(now);
-    const active = state.leads.filter(lead => !['fechado'].includes(lead.status));
-    return {
-      all: active,
-      overdue: active.filter(lead => lead.followUpAt && new Date(lead.followUpAt) < now && toLocalDateKey(lead.followUpAt) !== today),
-      today: active.filter(lead => toLocalDateKey(lead.followUpAt) === today),
-      priority: active.filter(lead => lead.priority === 'alta'),
-      'no-action': active.filter(lead => !lead.nextAction.trim())
-    };
+    return dayOperationalView().groups;
+  }
+
+  function dayOperationalView() {
+    return OG_MISSION_CONTROL.project(state.leads, state.operations, {
+      salesDesk: OG_SALES_DESK, intelligence: OG_LEAD_INTELLIGENCE, proposal: OG_PROPOSAL_INTELLIGENCE
+    });
+  }
+
+  function openDeskQuote(lead) {
+    // Adopt the existing quote owner and client fields; opening is not delivery.
+    for (const [field, id] of Object.entries({ nome:'client-name', empresa:'client-company', cnpj:'client-cnpj', telefone:'client-phone', cidadeUf:'client-city' })) {
+      state.client[field] = lead[field] || '';
+      const input = document.getElementById(id);
+      if (input) input.value = state.client[field];
+    }
+    state.client.segmentId = lead.segmentId || 'transportadora';
+    switchTab('cotacao');
+    recalculateQuote();
+  }
+
+  function renderDayMission(view) {
+    const root = document.getElementById('mission-control');
+    if (!root) return;
+    root.innerHTML = OG_MISSION_CONTROL.render(view);
+    root.dataset.state = view.queue.length ? 'ready' : 'empty';
+    root.querySelectorAll('[data-mission-select],[data-mission-act],[data-mission-sheet],[data-mission-whatsapp],[data-mission-proposal]').forEach(button => button.addEventListener('click', () => {
+      const kind = ['select','act','sheet','whatsapp','proposal'].find(key => button.hasAttribute(`data-mission-${key}`));
+      const lead = OG_CRM_SERVICE.getLeadById(state.leads, button.getAttribute(`data-mission-${kind}`));
+      if (!lead) return;
+      if (kind === 'sheet') return openClientSheet(lead.id);
+      if (kind === 'whatsapp') return openDeskWhatsApp(lead);
+      if (kind === 'proposal') {
+        const fact = view.proposals.find(item => item.proposalId === button.dataset.missionProposalId && item.lead.id === lead.id);
+        const index = state.history.findIndex(item => item.id === fact?.quoteId && item.clientId === lead.id);
+        if (index < 0) {
+          showNotification(`Proposta ${fact?.proposalId || ''}: cotação original não disponível neste aparelho.`, 'warning');
+          return openClientSheet(lead.id);
+        }
+        switchTab('historico');
+        // The current history owner loads its original immutable saved payload.
+        document.querySelector(`#history-container [data-load="${index}"]`)?.click();
+        return;
+      }
+      state.selectedLeadId = lead.id;
+      dayFilter = 'all';
+      state.salesDeskSearch = '';
+      const search = document.getElementById('sales-desk-search');
+      if (search) search.value = '';
+      renderDayDashboard();
+      if (kind === 'act') document.querySelector('[data-client-register]')?.click();
+      document.getElementById('sales-desk-client')?.scrollIntoView({behavior:'smooth', block:'start'});
+    }));
+    // Keep the action and working queue before supporting commitments.
+    const commitments = root.querySelector('.mission-commitments');
+    if (commitments) document.getElementById('day-commitments')?.replaceChildren(commitments);
   }
 
   function getOpportunityScore(lead) {
@@ -4149,13 +4195,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function renderDayDashboard() {
     const list = document.getElementById('day-opportunity-list');
     if (!list) return;
-    const groups = getDayGroups();
+    const view = dayOperationalView();
+    const groups = view.groups;
     document.getElementById('kpi-overdue').textContent = groups.overdue.length;
     document.getElementById('kpi-today').textContent = groups.today.length;
     document.getElementById('kpi-priority').textContent = groups.priority.length;
     document.getElementById('kpi-no-action').textContent = groups['no-action'].length;
 
-    const selected = OG_SALES_DESK.selectQueue(state.leads, dayFilter, state.salesDeskSearch);
+    const selected = OG_SALES_DESK.selectQueue(view.population, dayFilter, state.salesDeskSearch);
+    if (!selected.some(lead => lead.id === state.selectedLeadId)) state.selectedLeadId = selected[0]?.id || null;
+    renderDayMission(view);
     document.querySelectorAll('.og-chip[data-day-filter]').forEach(button => {
       button.classList.toggle('active', button.dataset.dayFilter === dayFilter);
     });
@@ -4172,7 +4221,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       list.innerHTML = selected.slice(0, 30).map(lead => OG_UI_COMPONENTS.clientRow(lead, {
         selectedId: state.selectedLeadId,
         lastInteraction: OG_SALES_DESK.lastInteraction(lead),
-        followUpLabel: formatFollowUp(lead.followUpAt)
+        followUpLabel: formatFollowUp(lead.followUpAt),
+        operational: view.describe(lead)
       })).join('');
       list.querySelectorAll('[data-desk-select]').forEach(button => button.addEventListener('click', () => {
         state.selectedLeadId = button.dataset.deskSelect;
@@ -4701,6 +4751,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       return;
     }
     const recent = OG_SALES_DESK.lastInteraction(lead);
+    const nba = OG_LEAD_INTELLIGENCE.nextBestAction(lead);
     const resumeRegister = sessionStorage.getItem('og_sales_desk_register_open') === lead.id;
     root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
       <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
@@ -4715,7 +4766,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       </div>
       <section class="sales-desk-now">
         <span>AGORA</span>
-        <strong>${escapeHtml(lead.nextAction || 'Definir próximo passo')}</strong>
+        <strong>${escapeHtml(nba.explicitAction ? nba.action : 'REVISAR / COMPLETAR CONTEXTO')}</strong>
+        <small>Por que agora: ${escapeHtml(nba.reason)}</small>
         <small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small>
       </section>
       <details class="sales-desk-register" ${resumeRegister ? 'open' : ''}>
@@ -4743,7 +4795,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <details class="sales-desk-actions"><summary>Mensagens e outras ações</summary><div><button type="button" data-desk-template="nao_atendeu">Não atendeu</button><button type="button" data-desk-template="pos_ligacao">Pós-ligação</button><button type="button" data-desk-template="apresentacao">Enviar apresentação</button><button type="button" data-desk-template="orcamento">Enviar orçamento</button><button type="button" data-desk-template="follow_up">Follow-up</button><button type="button" data-future-action="Retomar negociação">Retomar negociação</button><button type="button" data-future-action="Pedir indicação">Pedir indicação</button><button type="button" data-future-action="E-mail">E-mail</button><button type="button" data-future-action="Proposta Premium">Proposta Premium</button></div></details>
       <details class="sales-desk-history"><summary>Histórico recente</summary><div class="sales-desk-history-body">${OG_UI_COMPONENTS.timeline(lead.interactions)}</div></details>`
     const registerDetails = root.querySelector('.sales-desk-register');
+    let outcomeSubmitted = false;
     function openDeskRegister() {
+      if (lead.salesExecution?.companyId) {
+        // Normalized results belong to the existing reviewed atomic execution path.
+        root.querySelector('[data-client-call-ai]')?.click();
+        if (String(callLead()?.id) !== String(lead.id)) return;
+        if (!state.callAI.sessionId) state.callAI.sessionId = `CALL-${Date.now()}`;
+        openCallAIReview();
+        showNotification('Registre o resultado pela revisão de Sales Execution / Call Intelligence.', 'info');
+        return;
+      }
       sessionStorage.setItem('og_sales_desk_register_open', lead.id);
       registerDetails.open = true;
       requestAnimationFrame(() => root.querySelector('#desk-result')?.focus());
@@ -4756,13 +4818,21 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       else if (sessionStorage.getItem('og_sales_desk_register_open') === lead.id) sessionStorage.removeItem('og_sales_desk_register_open');
     });
     root.querySelector('[data-client-call-ai]').addEventListener('click', () => {
-      state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
-      state.callAI.returnTab = 'dia';
-      state.callAI.selectedLeadId = lead.id;
       switchTab('call-ai');
       selectCallClient(lead.id);
+      if (String(callLead()?.id) !== String(lead.id)) return;
+      state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
+      state.callAI.returnTab = 'dia';
     });
     root.querySelector('[data-client-crm]').addEventListener('click', () => openClientSheet(lead.id));
+    const extras = root.querySelector('.sales-desk-primary-actions');
+    extras.insertAdjacentHTML('beforeend', '<button type="button" data-client-proposal>Proposta</button><button type="button" data-client-technical>Aplicação técnica</button>');
+    root.querySelector('[data-client-proposal]').addEventListener('click', () => openDeskQuote(lead));
+    root.querySelector('[data-client-technical]').addEventListener('click', () => switchTab('guia'));
+    if (lead.salesExecution?.companyId) {
+      registerDetails.hidden = true;
+      root.querySelector('[data-client-register]').textContent = 'Registrar resultado';
+    }
     root.querySelectorAll('[data-desk-template]').forEach(button => button.addEventListener('click', () => openDeskMessageComposer(lead, button.dataset.deskTemplate)));
     root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => {
       if (button.dataset.futureAction === 'E-mail') return openCommunicationForLead(lead);
@@ -4796,7 +4866,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       root.querySelector('#desk-note')?.focus();
     }));
 
-    function saveDeskOutcome(advance = false) {
+    async function saveDeskOutcome(advance = false) {
+      if (outcomeSubmitted || !root.contains(resultSelect) || lead.salesExecution?.companyId) return;
       const result = resultSelect.value;
       if (!result) return showNotification('Escolha o resultado da conversa.', 'info');
 
@@ -4810,6 +4881,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (mode !== 'none' && !action) return showNotification('Defina a próxima ação ou escolha "Sem próxima ação".', 'info');
       if (mode === 'specific' && !dueAt) return showNotification('Informe a data específica.', 'info');
 
+      outcomeSubmitted = true;
       root.querySelectorAll('#desk-save-stay,#desk-save-advance').forEach(button => { button.disabled = true; });
       sessionStorage.removeItem('og_sales_desk_register_open');
 
@@ -4819,6 +4891,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (!definition.clearNextAction) {
         const taskInteraction = OG_INTERACTION_SERVICE.setNextAction(lead, action, dueAt);
         persistSalesDeskActivity(lead, taskInteraction, 'task.next_action_set');
+      }
+
+      try {
+        // Acknowledging the outcome requires durable recovery in the existing outbox,
+        // before the debounce timer or an immediate refresh can lose the operation.
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+      } catch (error) {
+        showNotification('Resultado salvo neste aparelho; não foi possível preparar a recuperação de sync. Aguarde a sincronização antes de recarregar.', 'warning');
+        return;
       }
 
       if (!advance) {
@@ -7028,7 +7109,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (switchingAccount && state.callAI.recording?.blob) {
       if (!window.confirm('Existe uma gravação local desta chamada. Trocar de cliente vai descartá-la deste navegador. Deseja continuar?')) return;
     }
-    if (switchingAccount) resetCallRecordingState();
+    if (switchingAccount) {
+      resetCallRecordingState();
+      // Clear the previous account's DOM draft only after both discard checks.
+      const notes = document.getElementById('call-ai-notes');
+      if (notes) notes.value = '';
+    }
     state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
     resetCallAICentralForLead(lead);
     const objective = document.getElementById('call-ai-objective');
@@ -7271,7 +7357,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (lead.salesExecution?.companyId && !CALL_AI_SALES_RESULT[result]) {
       return showNotification('Para Sales Execution, escolha um resultado específico da ligação em vez de um resultado genérico.', 'warning');
     }
-    if (lead.salesExecution?.companyId && result === 'reuniao_agendada') {
+    if (result === 'reuniao_agendada') {
       if (!document.getElementById('call-ai-follow-up').value) return showNotification('Informe a data e hora da reunião.', 'warning');
       if (!document.getElementById('call-ai-meeting-mode')?.value) return showNotification('Selecione o modo da reunião.', 'warning');
     }
@@ -7301,7 +7387,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       else if (result === 'negociacao') lead.status = 'negociacao';
       else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
     }
-    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result });
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+      id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result,
+      ...(result === 'reuniao_agendada' ? { meeting: {
+        scheduledAt: reviewedFollowUp, mode: document.getElementById('call-ai-meeting-mode').value,
+        durationMinutes: Number(document.getElementById('call-ai-meeting-duration')?.value) || 30,
+        objective: reviewedNextAction || summary, source: 'user_confirmed'
+      } } : {})
+    });
     if (lead.status !== previousStatus) state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'client.stage_changed', at: now, clientId: lead.id, fromStage: previousStatus, toStage: lead.status });
     if (state.callAI.returnTab === 'prospeccao') lead.operationalStatus = 'WORKED_LEAD';
     saveLeadsToStorage();
@@ -7341,9 +7434,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           : 'Sessão salva no CRM + Sales Execution';
         showNotification('Ligação confirmada e sincronizada com Sales Execution.', 'success');
         if (state.callAI.returnTab === 'prospeccao') await advanceSalesExecutionAfterCall(nextMemberId);
+        if (state.callAI.returnTab === 'dia') switchTab('dia');
         return;
       }
       showNotification('Ligação registrada no CRM. Esta conta ainda usa o modo local/legado.', 'success');
+      if (state.callAI.returnTab === 'dia') switchTab('dia');
       if (state.callAI.returnTab === 'prospeccao') {
         state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null;
         state.prospecting.view = 'focus';

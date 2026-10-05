@@ -174,6 +174,7 @@
       </div>
   </nav>
   <aside id="shell-startup" class="shell-feedback" role="status" aria-live="polite"><strong>Preparando seu workspace</strong><span>Carregando ferramentas e dados locais…</span></aside>
+  <link rel="stylesheet" href="components/mission-control.css">
   <script src="components/app-shell.js"></script>
 
   <!-- ========================================================================= -->
@@ -188,13 +189,9 @@
       <section class="og-command-hero" aria-labelledby="day-title">
         <div class="og-command-copy">
           <span class="og-kicker">CENTRAL COMERCIAL · OLHO DE GATO</span>
-          <h1 id="day-title">Seu dia, com cada próximo passo no lugar.</h1>
+          <h1 id="day-title">Meu Dia</h1>
           <p id="day-guidance">Comece pelos retornos vencidos e termine cada conversa com uma ação e uma data.</p>
-          <div class="og-hero-actions" aria-label="Ações rápidas do dia">
-            <button id="btn-morning-command" type="button" class="og-button og-button-primary">DUTRA, COMEÇA MEU DIA</button>
-            <button id="btn-hero-start" type="button" class="og-button og-button-secondary">INICIAR PRÓXIMA MISSÃO</button>
-            <button id="btn-hero-quote" type="button" class="og-button og-button-ghost">Criar cotação</button>
-          </div>
+
         </div>
         <div class="og-command-clock" aria-label="Horário e bloco comercial atual">
           <strong id="day-clock">--:--</strong>
@@ -204,30 +201,7 @@
 
       <section id="morning-command-panel" class="morning-command-panel clean-card hidden" aria-live="polite"></section>
 
-      <section class="og-product-proof" aria-labelledby="product-proof-title">
-        <div class="og-product-proof-copy">
-          <span class="og-kicker">TECNOLOGIA OLHO DE GATO</span>
-          <h2 id="product-proof-title">Pressão equilibrada. Menos desgaste. Mais estrada.</h2>
-          <p>O equalizador conecta os pneus do rodado duplo, facilita a inspeção visual e ajuda a manter a pressão uniforme durante a operação.</p>
-          <ul class="og-benefit-list">
-            <li><span aria-hidden="true">✓</span> Equalização contínua no rodado duplo</li>
-            <li><span aria-hidden="true">✓</span> Indicador visual para conferência rápida</li>
-            <li><span aria-hidden="true">✓</span> Aplicação orientada por veículo e eixo</li>
-          </ul>
-          <button id="btn-product-application" type="button" class="og-button og-button-secondary">Ver produto e aplicação</button>
-        </div>
-        <picture class="og-product-proof-media">
-          <source srcset="assets/premium/optimized/produto-og-768.webp" media="(max-width: 767px)">
-          <img src="assets/premium/optimized/produto-og-1280.webp" loading="lazy" width="1280" height="720" alt="Equalizador Olho de Gato instalado em uma roda de caminhão">
-        </picture>
-      </section>
-
-      <section class="og-routine" aria-label="Rotina comercial recomendada">
-        <div data-routine="morning"><small>09:00–11:00</small><strong>Prospecção</strong><span>Ligar e abrir conversas</span></div>
-        <div data-routine="midday"><small>11:00–12:00</small><strong>Organização</strong><span>Registrar e agendar</span></div>
-        <div data-routine="afternoon"><small>13:00–17:00</small><strong>Avanço</strong><span>Diagnóstico e propostas</span></div>
-        <div data-routine="closing"><small>17:00–17:30</small><strong>Fechamento</strong><span>CRM e plano de amanhã</span></div>
-      </section>
+      <section id="mission-control" aria-live="polite" aria-label="Mission Control"><div class="clean-card mission-loading" role="status">Carregando prioridades do CRM…</div></section>
 
       <section class="og-kpi-grid" aria-label="Indicadores do dia">
         <button class="og-kpi" data-day-filter="overdue"><span>Vencidos</span><strong id="kpi-overdue">0</strong><small>Precisam de decisão agora</small></button>
@@ -254,12 +228,47 @@
 
         <aside id="sales-desk-client" class="clean-card sales-desk-client" aria-live="polite"></aside>
 
-        <aside class="sales-desk-side space-y-4">
+        <details class="sales-desk-side space-y-4"><summary>Alertas e apoio operacional</summary>
           <div class="clean-card p-5 og-coach-card"><span class="og-kicker">PRÓXIMA MELHOR AÇÃO</span><h2 id="coach-title">Seu foco de hoje</h2><p id="coach-message">Selecione uma conta para trabalhar.</p><div id="coach-prompts" class="og-coach-prompts"></div></div>
           <div id="signal-center" class="clean-card p-5 signal-center" aria-live="polite"></div>
           <div id="automation-center" class="clean-card p-5 automation-center" aria-live="polite"></div>
-        </aside>
+        </details>
       </section>
+      <section id="day-commitments" aria-label="Follow-ups, reuniões, propostas e tarefas"></section>
+      <details class="mission-reference"><summary>Briefing e ações de apoio</summary>
+          <div class="og-hero-actions" aria-label="Ações rápidas do dia">
+            <button id="btn-morning-command" type="button" class="og-button og-button-primary">Resumo operacional</button>
+            <button id="btn-hero-start" type="button" class="og-button og-button-secondary">INICIAR PRÓXIMA MISSÃO</button>
+            <button id="btn-hero-quote" type="button" class="og-button og-button-ghost">Criar cotação</button>
+          </div>
+      </details>
+      <details class="mission-reference"><summary>Produto e rotina de apoio</summary>
+      <section class="og-product-proof" aria-labelledby="product-proof-title">
+        <div class="og-product-proof-copy">
+          <span class="og-kicker">TECNOLOGIA OLHO DE GATO</span>
+          <h2 id="product-proof-title">Pressão equilibrada. Menos desgaste. Mais estrada.</h2>
+          <p>O equalizador conecta os pneus do rodado duplo, facilita a inspeção visual e ajuda a manter a pressão uniforme durante a operação.</p>
+          <ul class="og-benefit-list">
+            <li><span aria-hidden="true">✓</span> Equalização contínua no rodado duplo</li>
+            <li><span aria-hidden="true">✓</span> Indicador visual para conferência rápida</li>
+            <li><span aria-hidden="true">✓</span> Aplicação orientada por veículo e eixo</li>
+          </ul>
+          <button id="btn-product-application" type="button" class="og-button og-button-secondary">Ver produto e aplicação</button>
+        </div>
+        <picture class="og-product-proof-media">
+          <source srcset="assets/premium/optimized/produto-og-768.webp" media="(max-width: 767px)">
+          <img src="assets/premium/optimized/produto-og-1280.webp" loading="lazy" width="1280" height="720" alt="Equalizador Olho de Gato instalado em uma roda de caminhão">
+        </picture>
+      </section>
+
+      <section class="og-routine" aria-label="Rotina comercial recomendada">
+        <div data-routine="morning"><small>09:00–11:00</small><strong>Prospecção</strong><span>Ligar e abrir conversas</span></div>
+        <div data-routine="midday"><small>11:00–12:00</small><strong>Organização</strong><span>Registrar e agendar</span></div>
+        <div data-routine="afternoon"><small>13:00–17:00</small><strong>Avanço</strong><span>Diagnóstico e propostas</span></div>
+        <div data-routine="closing"><small>17:00–17:30</small><strong>Fechamento</strong><span>CRM e plano de amanhã</span></div>
+      </section>
+
+      </details>
     </div>
 
     <div id="tab-prospeccao" class="tab-content hidden space-y-5">
@@ -1439,6 +1448,7 @@
   <script src="services/command-core-service.js"></script>
   <script src="services/command-execution-service.js"></script>
   <script src="services/morning-command-service.js"></script>
+  <script src="components/mission-control.js"></script>
   <script src="services/customer-revenue-service.js"></script>
   <script src="services/customer-journey-service.js"></script>
   <script src="services/sales-brief-service.js"></script>
