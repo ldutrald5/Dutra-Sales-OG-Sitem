@@ -256,3 +256,7 @@ Stage 1 COMPLETE: merge V3 com baseline/Supabase preservados, 75/75 local, repla
 ## CONVERGENCE-01 — Stage 2 (2026-10-05)
 
 Unified static premium shell, wide desktop sidebar/workspace, mobile/tablet bottom navigation and compatible status/route ownership delivered. Full 75 gates, eight viewport browser gate and independent QA PASS; implementation push verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Checkpoint lists bridges, rollback and honest browser network limitation. No Supabase/production/Stage 3 changes.
+
+## CONVERGENCE-01 — Stage3 (2026-10-05)
+
+Meu Dia operational home consumes canonical CRM/SalesDesk/LeadIntelligence and factual commitments; no second store, score, agenda or execution engine. Full76, eight viewport browser flow, immediate refresh/offline/reconnect/real409 and independent QA PASS. Implementation publication verified at 3be251834a67cca5b4ad13a31bcb6df1903535cb. Final checkpoint documents bridges/risks and rollback7527c4df5c9ea3e8bbf459227f665a1abb33fb91. Stage4 and production untouched.

@@ -4,7 +4,7 @@
 
 | Metric | Current |
 |---|---:|
-| Tracked STANDARD/STRUCTURAL cycles (brain available) | 12 |
+| Tracked STANDARD/STRUCTURAL cycles (brain available) | 13 |
 | Brain consultation rate | 100% |
 | Brain update completion rate | 100% |
 | Ideas rejected/deferred before code (tracked signal) | 9 |
