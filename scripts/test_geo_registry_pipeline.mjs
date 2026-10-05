@@ -11,6 +11,7 @@ assert.match(migration,/LOCATION_GEOCODE/);
 assert.match(migration,/claim_enrichment_job_v2/i);
 assert.match(migration,/enqueue_company_registry_job_v1/i);
 assert.match(migration,/apply_company_registry_v1/i);
+assert.match(migration,/fail_enrichment_job_v2/i);
 assert.match(migration,/proposal_side_effect',false/i);
 assert.match(migration,/verification_status not in \('VERIFIED_BY_SELLER','VERIFIED_BY_CUSTOMER','VERIFIED_BY_VISIT'\)/i);
 assert.match(migration,/geo=null/i,'registry address change must invalidate stale geocode');
@@ -20,6 +21,8 @@ assert.match(edge,/claim_enrichment_job_v2/);
 assert.match(edge,/COMPANY_REGISTRY/);
 assert.match(edge,/CNPJWS_API_TOKEN/);
 assert.match(edge,/COMPANY_REGISTRY_PROVIDER/);
+assert.match(edge,/fail_enrichment_job_v2/);
+assert.match(edge,/p_retryable: retryable/);
 assert.doesNotMatch(edge,/proposal-pdf|proposal-engine|continuePipeline/i,'registry worker must not trigger proposal side effects');
 
 assert.match(discovery,/claim_enrichment_job_v1/,'existing discovery worker should remain compatible through filtered v1 wrapper');
