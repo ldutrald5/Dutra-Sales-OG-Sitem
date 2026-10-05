@@ -278,3 +278,7 @@ O CI run 334 passou suíte completa, Brain, Security, npm audit e Release Gate. 
 ## CONVERGENCE-01 Stage 2 — canonical shell boundary
 
 The architect-approved single shell lives in apps/sistema-og and projects existing switchTab/hash/state and sync contracts. Static HTML/scoped CSS/feedback component use no new domain/router/store. Bootstrap promise coordinates existing recovery with reconnect; SW maintenance is nonblocking. See [Stage 2 audit](audits/CONVERGENCE_01_STAGE2_SHELL_AUDIT.md) and [checkpoint](handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md); older preview hosting/mirror documentation above is historical and does not make preview-v2 a second target application.
+
+## Meu Dia operational projection — CONVERGENCE-01 Stage3
+
+[Owner audit and bounded decisions](audits/CONVERGENCE_01_STAGE3_MEU_DIA_AUDIT.md): presentation consumes SalesDesk/LeadIntelligence, explicit existing activities and quote history. Local outcomes await the existing durable outbox before success; normalized outcomes retain reviewed recordCallResult. No additional commercial store, score, agenda or execution engine.

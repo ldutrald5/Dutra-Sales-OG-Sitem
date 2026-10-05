@@ -132,3 +132,7 @@ O teste nunca envia mensagens ao WhatsApp e não altera estágio comercial. Empr
 ## CONVERGENCE-01 current shell checkpoint
 
 Stage 2 is complete on integration/dutra-os-one-system: apps/sistema-og is the single responsive premium shell; mature module UI remains internal until its planned stage. Existing canonical data, route/history and sync owners are preserved. Production was not deployed. Current evidence/bridges/rollback: docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. Stage 3 has not started.
+
+## CONVERGENCE-01 Stage3 continuation boundary
+
+Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outcomes preserve canonical owners. Current status/publication/rollback is recorded in docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. No Stage4 execution or deployment is authorized by this note.

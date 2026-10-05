@@ -120,3 +120,7 @@ Nunca colocar segredo no Task Scheduler, arquivo .cmd ou scripts versionados. O 
 ## CONVERGENCE-01 Stage 2 handoff
 
 Single shell is published on the integration branch, not production/main. Consult the current checkpoint before continuing. Preserve app-shell presentation-only boundary, existing switchTab/hash/history and durable sync/recovery. Browser regression command og:shell:test needs installed developer Playwright/Chromium; its SW reconnect emulation limitation is explicit. Stage 3 is NOT STARTED; no deep Meu Dia redesign was performed.
+
+## CONVERGENCE-01 Stage3 continuation boundary
+
+Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outcomes preserve canonical owners. Current status/publication/rollback is recorded in docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. No Stage4 execution or deployment is authorized by this note.

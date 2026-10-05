@@ -451,3 +451,7 @@ Historical Stage 1 stop was followed by explicit Stage 2 authorization. Stage 2 
 ## CONVERGENCE-01 — Stage 2 closeout
 
 Completed; evidence/bridges in checkpoint and story. STOP before Stage 3; readiness does not execute it. Existing caught bootstrap TDZ and physical-device network acceptance are recorded as separate follow-up debt, not silently fixed in shell work.
+
+## CONVERGENCE-01 — Stage3
+
+Local implementation/QA validated; publication verification pending in authoritative checkpoint. Stage4 remains prohibited until QG authorization. Old Stage2 stop notes above are historical.

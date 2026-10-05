@@ -1,12 +1,85 @@
 # DUTRA OS ONE SYSTEM — CHECKPOINT
 
 MISSION: CONVERGENCE-01 — DUTRA OS ONE SYSTEM
-CURRENT_STAGE: 2 — UNIFIED PREMIUM SHELL
-STATUS: COMPLETE — unified shell, local/browser regression and implementation publication verified
+CURRENT_STAGE: 3 — MEU DIA / MISSION CONTROL
+STATUS: LOCAL VALIDATED — publication verification pending
 UPDATED_AT: 2026-10-05 UTC
-NEXT_STAGE: STOP after Stage 2; Stage 3 NOT STARTED
-SAFE_TO_CONTINUE_TO_STAGE_3: YES (readiness only; Stage 3 NOT STARTED)
+NEXT_STAGE: STOP after Stage 3; Stage 4 NOT STARTED
+SAFE_TO_CONTINUE_TO_STAGE_4: NO until publication verified
 
+## Stage 3 authoritative checkpoint
+
+PRE_STAGE3_SHA: 7527c4df5c9ea3e8bbf459227f665a1abb33fb91
+POST_STAGE3_SHA: 39a2b4100d0c9ce7a738cc2b6e1903b5b0313d83 (runtime + regression boundary; documentation closure follows)
+STAGE2_PUBLISHED_BOUNDARY: d948c355df11b236e48c7345c2f042ff93d879b4
+ROLLBACK_SHA: 7527c4df5c9ea3e8bbf459227f665a1abb33fb91
+FINAL_CHECKPOINT_HEAD: commit containing the final closure; verify LOCAL == REMOTE after publication
+STAGE3_COMMITS: 553a4d5 audit / 0db6bcb runtime / 39a2b41 regressions
+ENVIRONMENT: clean entry, audited governance fast-forward, all three governance gates PASS and write dry-run Everything up-to-date; stored gh route with GH_TOKEN/GITHUB_TOKEN temporarily empty; Node24.19.0/npm11.9.0.
+MISSION_CONTROL / DAILY_QUEUE / PRIORITY / NEXT_BEST_ACTION / FOLLOW_UP / MEETINGS / PROPOSALS_CONTEXT / QUICK_ACTIONS / RESULT_TO_NEXT_ACTION: local PASS
+MOBILE / DESKTOP / TABLET / OFFLINE / SYNC: local PASS
+ARCHITECT: APPROVED bounded canonical presentation and durable outbox acknowledgement
+QA: PASS — independent code, visual and execution review
+PUSH: pending — do not infer publication from dry-run
+
+### Canonical owners / projection
+
+CANONICAL_DATA_SOURCES: state.leads (og_leads_crm), state.operations.activityEvents/tasks, state.history, explicit existing salesExecution references. No new commercial store, schema, agenda, score or persistence namespace.
+CRM_OWNER: OG_CRM_SERVICE / state.leads / lead.id
+QUEUE_OWNER: OG_SALES_DESK.selectQueue — same eligible, deduplicated population drives counters and rows; canonical sort unchanged.
+PRIORITY_OWNER: OG_LEAD_INTELLIGENCE.score / scoreBreakdown — no independent score or percentage.
+NBA_OWNER: OG_LEAD_INTELLIGENCE.nextBestAction — explicit action/reason; missing context asks REVIEW/COMPLETE; terminal queue entries excluded.
+FOLLOWUP_OWNER: lead.nextAction/followUpAt + OG_INTERACTION_SERVICE.setNextAction.
+SALES_EXECUTION_OWNER: local Mesa recordResult/setNextAction; normalized Review CallAI → syncApprovedCallToSalesExecution → atomic recordCallResult, IDs/idempotency preserved.
+PROPOSAL_OWNER: OG_PROPOSAL_INTELLIGENCE factual events; prepared/saved != sent; WhatsApp-open and proposal_enviada status do not prove delivery. Exact proposal uses its quoteId through history; missing payload warns without replacing current draft.
+MEETING_OWNER: explicit user-reviewed booking metadata in existing call.saved activity; never infer a meeting/date from generic followUp or text. Calendar externally disconnected; historical booking date unavailable explicitly. This is confirmation by the user, not a claim of remote calendar/Supabase acknowledgement.
+
+### Packages / files
+
+3A owner audit closed before runtime changes. 3B Agora / canonical reasons. 3C queue and context. 3D follow-ups/confirmed meetings/factual proposal/open task projection. 3E existing quick actions. 3F result loop/outbox acknowledgement. 3G responsive/44px/primary action before bottom nav. 3H deterministic and browser regressions.
+
+FILES_CHANGED:
+- apps/sistema-og/app.js (small owner adapters, selection guard, canonical local result loop, reviewed metadata, approved-account DOM draft isolation).
+- apps/sistema-og/components/mission-control.js/css (readonly projection / scoped premium presentation).
+- apps/sistema-og/components/ui-components.js (canonical reason and next action in existing client rows).
+- apps/sistema-og/index.html (operational home; support/decorative content folded).
+- apps/sistema-og/services/interaction-service.js (Venda clears next action/follow-up through existing definition).
+- apps/sistema-og/service-worker.js (v68→v69 and two projection assets only; outbox/recovery DBv2 and strategies unchanged).
+- package.json / scripts/validate.mjs (meaningful projection gate added; no dependency/lock change).
+- scripts/test_meu_dia_projection.mjs / scripts/test_meu_dia_browser.mjs / scripts/test_unified_shell_browser.mjs.
+- scoped audit, story/checkpoint, architecture link, task/context/handoff/changelog notes, Brain source/incident/cycle and generated index/metrics.
+
+TEMPORARY_INTERNAL_BRIDGES:
+| module | reason | owner | planned migration stage |
+|---|---|---|---|
+| Meu Dia → CRM / quick client sheet | consume mature identity/context without a parallel360 | CRM/current client sheet | 4 |
+| Meu Dia → normalized outcomes | retain reviewed atomic execution owner | Sales Execution / CallAI review | 5/6 |
+| Proposal fact → original history | preserve existing quote engine and payload | history / proposal owner | 9 |
+| Meeting projection → confirmed call.saved | canonical account-context reader lacks meeting/calendar read integration | existing CallAI activity metadata | later dedicated calendar/read integration; no second agenda |
+
+### Executed tests / acceptance
+
+VIEWPORTS_TESTED: 320x568; 360x800; 390x844; 430x932; 768x1024; 1280x720; 1440x900; 1920x1080.
+TEST_RESULTS:
+- npm ci: PASS (243 packages; lock/dependencies unchanged).
+- npm run lint / og:check: PASS.
+- npm test: PASS integral 76/76 (75 baseline + new readonly projection regression).
+- og:brain:check: PASS; refresh regenerated after durable incident/source updates.
+- og:meu-dia:test: PASS identity/population/canonical queue and NBA, terminal exclusions, follow-up/meeting/proposal/task facts and result/refresh.
+- og:meu-dia:browser:test: PASS real isolated local outcome→next action→queue, duplicate captured click, immediate refresh before debounce, supported offline action and real reconnect, actual HTTP409 conflict survival after refresh, normalized cancel/accept identity without external mutation, eight viewports/primary action/focus/touch/overflow.
+- og:shell:test: PASS eight viewports/13 routes, drawer/history/refresh, first paint with unavailable domain scripts, local renderer fault, precached offline Meu Dia + CRM and real reconnect acknowledgement.
+- og:sales-execution:test / og:call-intelligence:test: PASS adapters/gateways/auth boundary/disabled-mode contracts; not production writes.
+- Full76 includes existing CRM, score/NBA, morning briefing, proposals, follow-up, sync/bridge/conflict/reliability, PWA, auth, technical, performance and preview gates.
+
+BROWSER_NETWORK_LIMITATION: retained from Stage2 — after SW offline reload Chromium151/Playwright1.62.1 may miss native online; shell test proves transport200/navigator.onLine, emits explicit online contract event and requires the app's real acknowledgement. Regular native offline/reconnect passes. Physical hardware and live external booking mutation not claimed.
+REGRESSIONS_FOUND_AND_FIXED: inconsistent terminal population in counts; selected terminal client; Venda stale commitments; immediate-refresh operation loss; normalized cancelled selection identity; accepted selection leaking prior notes DOM; incorrect proposal/draft destination; tablet42px action targets; decorative header pushing mobile CTA below first viewport.
+FUNCTIONALITY_PRESERVED: auth, existing CRM/entities, execution/CallIntelligence contracts, technical/proposal engines, navigation, persistence, offline/outbox/conflict/PWA; no production mutation.
+V3_UX_PRESERVED: OG black/graphite/yellow operational shell, compact context/next action, mobile bottom nav/desktop sidebar. preview-v2 remains untouched reference.
+KNOWN_RISKS: external calendar disconnected; historical confirmed meeting without structured date explicitly unavailable; physical-device acceptance not executed; known braces/AIOX advisory unchanged. No blocker to this bounded Stage3; future domain convergence awaits authorization.
+SUPABASE_DIFF: EMPTY against PRE_STAGE3_SHA; no replay gate triggered or remote/schema mutation claimed.
+PROTECTED_REFERENCES: no direct changes to main/V2/V3/#109/#110; remote recheck required at publication.
+BLOCKERS: publication verification only.
+SAFE_TO_START_STAGE_4: NO until Stage3 publication verified; then readiness only, QG authorization required.
 
 ## Stage 2 authoritative closure
 

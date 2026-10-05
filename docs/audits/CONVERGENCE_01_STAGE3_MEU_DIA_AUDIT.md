@@ -41,3 +41,13 @@ Architect boundary approved: readonly projection consumes existing queue/NBA, sa
 ## Packages / QA
 
 3A audit; 3B–3D readonly Agora/queue/commitments; 3E–3F canonical actions/result loop; 3G responsive presentation; 3H deterministic and browser regressions. Test each coherent package. Eight requested viewports; real local persistence and sync; proposal/terminal/dedup/meeting semantic fixtures. All fixture data artificial and isolated from production. Stage 4 remains prohibited.
+
+## Executed regression findings / bounded corrections
+
+- Immediate refresh during Mesa's 450ms PUT debounce reproduced loss of next action. Mesa now waits for existing OG_SYNC_BRIDGE.queueState(currentSyncPayload()) before success/advance. No second outbox. Real browser refresh and offline/reconnect passed. Failure retains local result with recovery warning and does not advance/repeat the outcome.
+- Normalized review now validates callLead.id after accepted/cancelled selection. The existing selectCallClient owner clears the prior account's notes DOM only after both discard confirmations; browser cancel/accept protects context isolation.
+- Proposal fact buttons carry proposalId and resolve quoteId to the existing history owner; missing payload warns and opens the client sheet without replacing the current quote.
+- Removed decorative/product/routine and briefing actions from the primary flow into closed support details; action/queue/context precede commitments. Tablet action targets corrected from42 to44px.
+- Canonical intelligence treats historical closed accounts differently in some relationship views; Stage3 does not change that contract. The daily queue owner excludes terminal clients, so MissionControl does not recommend actions to them.
+
+QA independent verdict PASS. Eight viewport browser test includes actual local HTTP409, conflict survival across refresh, local-first outcome and real reconnect acknowledgement. Normalized identity tests use isolated read fixtures, no external/Supabase mutations. Calendar remains disconnected; historical confirmed meeting records without structured dates explicitly display unavailable dates. No Supabase/preview changes.

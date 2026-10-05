@@ -2,6 +2,12 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — CONVERGENCE-01 Stage3
+
+- Meu Dia operacional reúne Agora, fila canônica, contexto e compromissos factuais no shell único.
+- Resultado local aguarda outbox existente; Venda limpa compromissos; troca aprovada de cliente isola notas de Call Intelligence.
+- Gates76 e browser/responsividade/refresh/offline/conflito verdes; publicação/status no checkpoint. Sem Stage4, Supabase ou produção.
+
 ## [Unreleased] — CONVERGENCE-01 Stage 1
 
 - Integrada ancestralidade V3 à branch de integração por merge controlado, preservando app/PWA/sync maduros e Supabase canônico.
