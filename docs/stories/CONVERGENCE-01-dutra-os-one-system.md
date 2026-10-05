@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage 4 technical acceptance/QA PASS; integration publication pending. Latest authoritative Stage 4 evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Historical BLOCKED/stop entries below were resolved by explicitly authorized recoveries. Stage 5 NOT STARTED.
+Current execution status: Stage 4 COMPLETE; technical acceptance/QA and integration publication verified. Final documentation-only closure follows. Latest authoritative Stage 4 evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Historical BLOCKED/stop entries below were resolved by explicitly authorized recoveries. Stage 5 NOT STARTED.
 
 ## Mission
 
@@ -250,7 +250,7 @@ PRE_STAGE4_SHA / rollback: fe1760d78865d85ecb84d8ae4a244094968bb4ca. This author
 - [x] Research provenance and truthful external action states preserved.
 - [x] Mission Control consequences, online/offline/reconnect/conflict and PWA preserved.
 - [x] Eight required viewports and six functional flows approved by @qa.
-- [ ] Full tests/Brain green, checkpoint updated, integration-only push verified, protected refs intact.
+- [x] Full tests/Brain green, checkpoint updated, integration-only push verified, protected refs intact.
 
 Audit matrix (closed before code):
 
@@ -272,3 +272,5 @@ Stage 4 STOP / 2026-10-05: @qa new browser gate failed at scripts/test_prospecti
 Stage 4 RECOVERY / 2026-10-05: QG authorized preserved-WIP empty-focus correction. @architect APPROVE, new Stage4 browser exit0: filtered selection derives canonical membership/null and obsolete DOM actions are inert; eight viewports/many/long/empty PASS. Full76/Brain and shell/PWA PASS. Mandatory Meu Dia reconnect timed out at scripts/test_meu_dia_browser.mjs:72:45 (`page.waitForFunction: Timeout 30000ms exceeded` waiting for mode=ok). Stopped under Recovery STOP CONDITIONS; no retry, broader sync fix, commit or push. Latest checkpoint records original blocker fixed and new gate failure; HEAD remains original fe1760d.
 
 Stage4 RECOVERY2 / 2026-10-05: optional serviceWorker.ready was proven to hold foreground write lock after failed offline debounced PUT; detached best-effort registration now follows durable outbox persistence and does not block finally/reconnect. Original day test unchanged PASS. New deterministic sync browser proves failed offline PUT before reconnect, real ACK/outboxclear/OK, 503notOK/no loop, 409explicitreviewresolution and boundedlisteners. Full76/Brain138/Stage4/day/shell/SalesExecution gates PASS; @architect APPROVE and @qa final PASS. Publication pending; prior recovery stop history retained. New file list additionally includes scripts/test_sync_reconnect_browser.mjs and generated Brain artifacts; full list in checkpoint. No Stage5/main/production.
+
+Stage4 COMPLETE: implementation/test/Brain/checkpoint published and verified at 6379c4f81007b78582444e0aeeaab26c96aa4dc7; protected refs unchanged and working tree clean. Final doc-only closure preserves tested runtime. STOP before Stage5; new QG authorization required.

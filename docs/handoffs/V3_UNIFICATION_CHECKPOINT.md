@@ -1,12 +1,12 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
 STAGE: 4 — PROSPECÇÃO + SALES EXECUTION PREMIUM
-STATUS: READY_TO_PUBLISH — technical acceptance and independent QA PASS; publication still requires verification
+STATUS: COMPLETE — technical acceptance, independent QA and implementation publication verified; final documentation closure follows
 UPDATED_AT: 2026-10-05
 BRANCH: integration/dutra-os-one-system
 PRE_STAGE4_SHA / ROLLBACK: fe1760d78865d85ecb84d8ae4a244094968bb4ca
-POST_STAGE4_SHA: pending verified implementation publication
-FINAL_CLOSURE_HEAD: verify containing closure commit against origin/integration/dutra-os-one-system
+POST_STAGE4_SHA: 6379c4f81007b78582444e0aeeaab26c96aa4dc7 (verified implementation + validation publication boundary; final closure is documentation only)
+FINAL_CLOSURE_HEAD: containing final closure commit; obtain with git log -1 --format=%H -- docs/handoffs/V3_UNIFICATION_CHECKPOINT.md and verify LOCAL == REMOTE after publication
 AUTHORIZATION: QG Stage4 and two bounded recoveries only. STOP; no Stage5/main merge/production deploy.
 
 Prior stages: [CONVERGENCE-01 checkpoint](DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md). Original WIP preserved throughout; no reset/stash/discard or data cleanup.
@@ -42,7 +42,7 @@ SYNC_FLOW: native offline/online → single existing network listener → ordere
 ## Validation
 
 @architect: APPROVE Stage4 bounded canonical adapters and both recoveries.
-@qa: PASS final independent review of actual code and execution evidence; publication gate pending.
+@qa: PASS final independent review of actual code and execution evidence. @devops: real implementation push PASS; authenticated fetch verifies exact equality and protected references.
 
 - npm ci: not repeated; installed entry dependencies/lock unchanged. Playwright/Chromium are already-installed optional developer tools, no new product dependency.
 - npm run og:check / lint equivalent: PASS, syntax includes both new browser scripts.
@@ -65,6 +65,9 @@ EVIDENCE: /workspace/scratch/recovery2/{probe,day-fixed,stage4-browser-final,she
 
 KNOWN_RISKS / GAPS: browser tests use artificial isolated local data and fixtures, never claim live hosted Supabase/provider/customer validation. Existing caught empty-storage bootstrap TDZ and physical-device network acceptance remain separate recorded debt. Historical result status proposal_enviada is retained for compatibility and is not proof of sending; factual proposal/Mission Control contracts remain unchanged. Deep Client360 and full V3 engine migration deferred; not required for this stage. Optional browser tooling remains a developer prerequisite outside product dependencies.
 
-PUSH: pending @devops verified integration-only publication
+PUSH: PASS — normal hooks and authenticated push/fetch verified LOCAL == REMOTE == 6379c4f81007b78582444e0aeeaab26c96aa4dc7; clean tree. Final documentation-only closure must also verify exact equality.
+COMMITS: aa21cc200154957ffc1439a8d714a09f58e9ec57 runtime; 6379c4f81007b78582444e0aeeaab26c96aa4dc7 regression/Brain/checkpoint; containing closure commit documents publication.
+BLOCKERS: NONE
+PROTECTED_REFS: main 5255dc5d432850dfeebe0a523402a1902b1d3a52; V3 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f; V2 dutra-os-ui-v2-preview 6b4bf7937aee8b236ce28701f9d149a69e0bdd7e; #109 c7585ba688ecca8e01b1ff8044cbef52aa5ac477; #110 6031e04462340847c8bcff3d5d698427db444918 — unchanged after publication.
 MAIN / V2 / V3 / #109 / #110 / PRODUCTION MODIFIED: NO
 SAFE_TO_START_STAGE_5: NO — fresh QG authorization required, even after technical readiness.
