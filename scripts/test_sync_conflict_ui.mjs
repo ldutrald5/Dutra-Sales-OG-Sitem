@@ -19,7 +19,7 @@ assert.ok(app.includes('serverSyncInFlight'),'escritas devem ser serializadas');
 assert.ok(app.includes('serverSyncGeneration'),'edições durante request devem gerar novo envio');
 assert.ok(app.includes("setTimeout(runScheduledServerSync, 120)"),'alteração concorrente deve ser reenfileirada sem auto-conflito');
 assert.ok(app.includes("window.addEventListener('storage'"),'outras abas devem disparar recovery');
-assert.ok(app.includes("status.setAttribute('role', 'status')"),'status de sincronização deve ser anunciado de forma acessível');
+assert.ok(html.includes('id="og-sync-status" class="og-sync-status" role="status" aria-live="polite" aria-atomic="true"'),'status de sincronização deve ser anunciado de forma acessível');
 assert.ok(app.includes("window.addEventListener('offline'"),'offline explícito deve atualizar o estado visível');
 assert.ok(app.includes("setSyncStatus('Reconectando…', 'busy')"),'retorno da conexão deve ter estado de reconexão');
 assert.ok(app.includes("badge.dataset.updatedAt"),'status deve registrar quando foi atualizado');

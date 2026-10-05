@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v67';
+const SW_VERSION = 'v68';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -19,6 +19,8 @@ const SHELL_URLS = [
   '/',
   '/index.html',
   '/styles.css',
+  '/components/app-shell.css',
+  '/components/app-shell.js',
   '/app.js',
   '/data.js',
   '/operations-model.js',

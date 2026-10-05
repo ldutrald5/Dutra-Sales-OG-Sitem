@@ -848,18 +848,25 @@ document.addEventListener('DOMContentLoaded', () => {
       else panel.classList.add('hidden');
     });
 
-    if (safeTabId === 'dia') renderDayDashboard();
-    else if (safeTabId === 'cotacao') refreshQuoteClientSheetAccess();
-    else if (safeTabId === 'prospeccao') renderProspecting();
-    else if (safeTabId === 'historico') renderHistory();
-    else if (safeTabId === 'catalogo') renderCatalog();
-    else if (safeTabId === 'transportadoras') renderTransporters();
-    else if (safeTabId === 'scripts') renderSalesKnowledge();
-    else if (safeTabId === 'crm') renderCrmModule();
-    else if (safeTabId === 'guia') renderConsultantEngine();
-    else if (safeTabId === 'call-ai') { renderCallAIContext(); renderCallIntelligenceDashboard(); }
-    else if (safeTabId === 'biblioteca') renderMaterialLibrary();
-    else if (safeTabId === 'operacoes') renderOperationsFoundation();
+    try {
+      if (safeTabId === 'dia') renderDayDashboard();
+      else if (safeTabId === 'cotacao') refreshQuoteClientSheetAccess();
+      else if (safeTabId === 'prospeccao') renderProspecting();
+      else if (safeTabId === 'historico') renderHistory();
+      else if (safeTabId === 'catalogo') renderCatalog();
+      else if (safeTabId === 'transportadoras') renderTransporters();
+      else if (safeTabId === 'scripts') renderSalesKnowledge();
+      else if (safeTabId === 'crm') renderCrmModule();
+      else if (safeTabId === 'guia') renderConsultantEngine();
+      else if (safeTabId === 'call-ai') { renderCallAIContext(); renderCallIntelligenceDashboard(); }
+      else if (safeTabId === 'biblioteca') renderMaterialLibrary();
+      else if (safeTabId === 'operacoes') renderOperationsFoundation();
+      window.OG_APP_SHELL?.clearError(safeTabId);
+    } catch (error) {
+      console.error(`Falha ao abrir módulo ${safeTabId}.`, error);
+      window.OG_APP_SHELL?.showError(safeTabId);
+    }
+    window.OG_APP_SHELL?.select(safeTabId);
 
     document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === safeTabId));
     document.querySelector('.og-mobile-more-sheet')?.classList.add('hidden');
@@ -882,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function initDesktopNavigation() {
     const container = document.getElementById('nav-tabs-container');
-    if (!container || document.getElementById('desktop-nav-more')) return;
+    if (!container || document.body.classList.contains('dutra-shell') || document.getElementById('desktop-nav-more')) return;
     const details = document.createElement('details');
     details.id = 'desktop-nav-more';
     details.className = 'desktop-nav-more';
@@ -8677,28 +8684,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   async function initUnifiedExperience() {
-    const nav = document.createElement('nav');
-    nav.className = 'og-mobile-nav';
-    nav.setAttribute('aria-label', 'Navegação principal no celular');
-    nav.innerHTML = `
-      <button type="button" data-mobile-tab="dia" class="active"><span>◉</span><small>Meu Dia</small></button>
-      <button type="button" data-mobile-tab="crm"><span>◎</span><small>Clientes</small></button>
-      <button type="button" data-mobile-tab="call-ai"><span aria-hidden="true">🎧</span><small>Call AI</small></button>
-      <button type="button" data-mobile-more aria-expanded="false" aria-haspopup="menu" aria-controls="og-mobile-more-sheet"><span aria-hidden="true">＋</span><small>Mais</small></button>
-      <div id="og-mobile-more-sheet" class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
-        <div class="og-mobile-more-head"><strong>Mais ferramentas</strong><small>Abra só quando precisar.</small></div>
-        <button type="button" data-mobile-tab="cotacao" role="menuitem"><span>⚡</span><small>Cotação</small></button>
-        <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
-        <button type="button" data-mobile-tab="guia" role="menuitem"><span>🚛</span><small>Suportes</small></button>
-        <button type="button" data-mobile-tab="scripts" role="menuitem"><span>💬</span><small>Vendas</small></button>
-        <button type="button" data-mobile-tab="comunicacao" role="menuitem"><span>✉</span><small>Comunicação</small></button>
-        <button type="button" data-mobile-tab="catalogo" role="menuitem"><span>📦</span><small>Peças</small></button>
-        <button type="button" data-mobile-tab="transportadoras" role="menuitem"><span>🚚</span><small>Transportadoras</small></button>
-        <button type="button" data-mobile-tab="biblioteca" role="menuitem"><span>🎞️</span><small>Biblioteca</small></button>
-        <button type="button" data-mobile-tab="operacoes" role="menuitem"><span>📊</span><small>Operações</small></button>
-        <button type="button" data-mobile-tab="historico" role="menuitem"><span>≡</span><small>Histórico</small></button>
-      </div>`;
-    document.body.appendChild(nav);
+    const nav = document.querySelector('.og-mobile-nav');
     nav.querySelectorAll('[data-mobile-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.mobileTab)));
     const moreButton = nav.querySelector('[data-mobile-more]');
     const moreSheet = nav.querySelector('.og-mobile-more-sheet');
@@ -8722,15 +8708,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.addEventListener('pointerdown', event => {
       if (!moreSheet?.classList.contains('hidden') && !nav.contains(event.target)) closeMoreSheet(false);
     });
-
-    const status = document.createElement('div');
-    status.id = 'og-sync-status';
-    status.className = 'og-sync-status';
-    status.setAttribute('role', 'status');
-    status.setAttribute('aria-live', 'polite');
-    status.setAttribute('aria-atomic', 'true');
-    status.textContent = 'Conectando…';
-    document.body.appendChild(status);
 
     let installPrompt = null;
     const installButton = document.getElementById('btn-install-app');
@@ -8863,6 +8840,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }, 3500);
   }
 
+  function initializeModule(task, tab) {
+    try { task(); } catch (error) {
+      console.error(`Inicialização indisponível em ${tab}.`, error);
+      window.OG_APP_SHELL?.showError(tab);
+    }
+  }
+
   // Inicializações
   initUniversalClientSheetAccess();
   initClientInputs();
@@ -8875,10 +8859,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initQuickLead();
   initCrmExcelPreview();
   initLeadExport();
-  initCommunication();
-  initCallAI();
-  initMaterialLibrary();
-  initPerformanceDashboard();
+  initializeModule(initCommunication, 'comunicacao');
+  initializeModule(initCallAI, 'call-ai');
+  initializeModule(initMaterialLibrary, 'biblioteca');
+  initializeModule(initPerformanceDashboard, 'operacoes');
   initDataSafety();
   initPremiumExperience();
   initCrmEvents();
@@ -8886,11 +8870,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initFreightQuoteInfoCard();
   initDoresGanchosModal();
   initDesktopNavigation();
-  initUnifiedExperience().finally(restoreInitialTabRoute);
-  renderCatalog();
-  renderTransporters();
-  renderSalesKnowledge();
-  renderOperationsFoundation();
+  restoreInitialTabRoute();
+  window.OG_APP_SHELL?.ready();
+  initUnifiedExperience().catch(error => {
+    console.error('Inicialização da sincronização indisponível.', error);
+    setSyncStatus('Sincronização indisponível · dados locais preservados', 'offline');
+  });
+  initializeModule(renderCatalog, 'catalogo');
+  initializeModule(renderTransporters, 'transportadoras');
+  initializeModule(renderSalesKnowledge, 'scripts');
+  initializeModule(renderOperationsFoundation, 'operacoes');
   renderDayDashboard();
   recalculateQuote();
 });

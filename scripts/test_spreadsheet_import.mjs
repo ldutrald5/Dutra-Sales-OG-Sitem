@@ -150,7 +150,7 @@ assert.match(htmlSource,/crm-import-auto-note/);
 assert.match(htmlSource,/crm-import-toggle-advanced/);
 assert.match(htmlSource,/crm-import-recognized/);
 assert.match(appSource,/data-mobile-more/);
-assert.match(appSource,/Abra só quando precisar/);
+assert.match(htmlSource,/Abra só quando precisar/);
 assert.match(appSource,/reconhecido\(s\) com segurança/i);
 assert.match(appSource,/Cliente OG/,'cliente histórico não deve parecer uma venda recém-fechada na fila');
 assert.match(appSource,/item\.count > 0/,'filtros sem clientes devem sair da primeira camada');

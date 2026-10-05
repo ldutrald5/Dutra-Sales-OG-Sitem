@@ -1,0 +1,61 @@
+/* Unified shell: canonical OG tokens, existing route/module contracts. */
+.dutra-shell { --shell-sidebar: 238px; --shell-header: 100px; background: var(--og-bg); color: var(--og-text-primary); margin: 0; }
+.dutra-shell .hidden, .dutra-shell [hidden] { display: none !important; }
+.dutra-shell .shell-skip { position: fixed; top: -100px; left: 1rem; z-index: 200; background: var(--og-brand); color: var(--og-bg); padding: 1rem; border-radius: 12px; }
+.dutra-shell .shell-skip:focus { top: 1rem; }
+.dutra-shell :is(button,a,input,select,textarea,summary):focus-visible { outline: 2px solid var(--og-brand); outline-offset: 3px; }
+.dutra-shell .brand-header { background: var(--og-surface); border-bottom: 1px solid var(--og-border-dark); position: sticky; top: 0; z-index: 40; }
+.dutra-shell .brand-header > div { max-width: none; margin: 0; padding: 0 24px; }
+.dutra-shell .brand-header > div > div:first-child { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 12px; }
+.dutra-shell .brand-header .brand-logo-plate { flex-shrink: 0; }
+.dutra-shell .shell-header-status { display: flex; align-items: center; justify-content: space-between; min-height: 36px; gap: 12px; border-top: 1px solid var(--og-border-dark); }
+.dutra-shell #shell-area { font-size: 12px; font-weight: 800; letter-spacing: .03em; color: var(--og-brand); }
+.dutra-shell .og-sync-status { position: static; max-width: 65%; border: none; box-shadow: none; background: transparent; padding: 6px 0; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dutra-shell .og-sync-status::before { content: '●'; margin-right: 6px; }
+.dutra-shell #nav-tabs-container { display: grid; position: fixed; top: var(--shell-header); bottom: 0; left: 0; width: var(--shell-sidebar); overflow: auto; align-content: start; gap: 6px; padding: 20px 12px; background: var(--og-surface); border-right: 1px solid var(--og-border-dark); border-top: 0; }
+.dutra-shell #nav-tabs-container::before { content: 'WORKSPACE'; font-size: 10px; font-weight: 800; letter-spacing: .14em; color: var(--og-text-secondary); padding: 0 12px 12px; }
+.dutra-shell #nav-tabs-container .nav-tab { display: flex; width: 100%; min-height: 44px; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; text-align: left; white-space: normal; font-size: 12px; color: var(--og-text-secondary); }
+.dutra-shell #nav-tabs-container .nav-tab:hover { background: var(--og-card); color: var(--og-text-primary); }
+.dutra-shell #nav-tabs-container .nav-tab[aria-current="page"] { background: var(--og-brand); color: var(--og-bg); font-weight: 800; }
+.dutra-shell #nav-tabs-container svg { width: 18px; height: 18px; flex-shrink: 0; }
+.dutra-shell #dutra-workspace { margin: 0 0 0 var(--shell-sidebar); width: calc(100% - var(--shell-sidebar)); max-width: none; min-width: 0; padding: 24px !important; flex: 1; }
+.dutra-shell .tab-content { min-width: 0; }
+.dutra-shell .shell-feedback { margin: 16px 24px 16px calc(var(--shell-sidebar) + 24px); padding: 16px; background: var(--og-surface); border: 1px solid var(--og-border-dark); border-left: 3px solid var(--og-brand); border-radius: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.dutra-shell .tab-content .shell-feedback { margin: 0 0 16px; }
+.dutra-shell .shell-feedback span { color: var(--og-text-secondary); }
+.dutra-shell .shell-feedback[data-state="error"] { border-left-color: var(--og-red); }
+.dutra-shell .shell-feedback button { min-height: 44px; padding: 10px 16px; background: var(--og-brand); color: var(--og-bg); border-radius: 10px; font-weight: 800; }
+.dutra-shell .og-mobile-nav { display: none; }
+@media (max-width: 1023px) {
+  .dutra-shell { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .dutra-shell #nav-tabs-container { display: none; }
+  .dutra-shell #dutra-workspace { margin: 0; width: 100%; padding: 16px !important; }
+  .dutra-shell .brand-header > div { padding: 0 16px; }
+  .dutra-shell .shell-feedback { margin: 12px 16px; }
+  .dutra-shell .og-mobile-nav { display: grid; position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px; padding: 6px; border-radius: 18px; border: 1px solid var(--og-border-dark); background: var(--og-surface); z-index: 60; box-shadow: 0 12px 32px #0008; }
+  .dutra-shell .og-mobile-nav > button { display: flex; min-height: 52px; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 12px; color: var(--og-text-secondary); }
+  .dutra-shell .og-mobile-nav > button small { font-size: 11px; font-weight: 800; }
+  .dutra-shell .og-mobile-nav button.active { background: var(--og-brand); color: var(--og-bg); }
+  .dutra-shell .og-mobile-more-sheet { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; max-height: min(68dvh,560px); overflow-y: auto; overscroll-behavior: contain; padding: 12px; background: var(--og-surface); border: 1px solid var(--og-border-dark); border-radius: 18px; box-shadow: 0 18px 45px #0009; }
+  .dutra-shell .og-mobile-more-head { display: grid; grid-column: 1 / -1; padding: 4px 6px 8px; gap: 4px; }
+  .dutra-shell .og-mobile-more-head small { color: var(--og-text-secondary); }
+  .dutra-shell .og-mobile-more-sheet button { min-height: 48px; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--og-card); border: 1px solid var(--og-border-dark); border-radius: 12px; text-align: left; }
+  .dutra-shell .og-mobile-more-sheet button small { font-size: 12px; font-weight: 700; }
+  .dutra-shell .og-toast { bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .dutra-shell #tab-cotacao :is(.flex-1, .flex-initial) { min-width: 0; }
+  .dutra-shell #tab-cotacao .flex-1 > .flex { flex-wrap: wrap; }
+  .dutra-shell #tab-cotacao div:has(> #pdf-template-selector) { width: 100%; min-width: 0; flex-wrap: wrap; }
+  .dutra-shell #pdf-template-selector { width: 100%; min-width: 0; max-width: 100%; }
+}
+@media (max-width: 430px) {
+  .dutra-shell .brand-header > div { padding: 0 12px; }
+  .dutra-shell .brand-header > div > div:first-child { height: 56px; }
+  .dutra-shell #dutra-workspace { padding: 12px !important; }
+  .dutra-shell #btn-install-app { padding: 8px; min-height: 44px; }
+  .dutra-shell #btn-install-app span:last-child { display: none; }
+  .dutra-shell #shell-area { max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dutra-shell .og-sync-status { max-width: 58%; font-size: 10px; }
+}
+@media print {
+  .dutra-shell #nav-tabs-container, .dutra-shell .og-mobile-nav, .dutra-shell .shell-feedback, .dutra-shell .shell-skip { display: none !important; }
+}

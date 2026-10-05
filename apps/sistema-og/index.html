@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/logo-olho-de-gato.jpg">
   <link rel="preload" as="image" href="assets/premium/optimized/hero-desktop-1280.webp" media="(min-width: 768px)" fetchpriority="high">
   <link rel="preload" as="image" href="assets/premium/optimized/hero-mobile-640.webp" media="(max-width: 767px)" fetchpriority="high">
-  <title>Olho de Gato (OG) — Sistema Especialista de Cotação, Multi-Veículos & Vendas</title>
+  <title>DUTRA OS — One System</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="assets/vendor/tailwindcss.js"></script>
@@ -36,8 +36,9 @@
 
   <!-- Estilos Customizados Ultra Clean & Print Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components/app-shell.css">
 </head>
-<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="dutra-shell bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
 
   <!-- ========================================================================= -->
   <!-- DOCUMENTO OFICIAL DE PROPOSTA OLHO DE GATO (IMPRESSÃO / PDF EXATO)        -->
@@ -49,6 +50,7 @@
   <!-- ========================================================================= -->
   <!-- TOPBAR CLEAN & NAVEGAÇÃO                                                  -->
   <!-- ========================================================================= -->
+  <a class="shell-skip" href="#dutra-workspace">Ir para o conteúdo</a>
   <header class="brand-header sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
@@ -60,10 +62,10 @@
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-base tracking-tight text-slate-100">OLHO DE GATO</span>
-              <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold px-1.5 py-0.5 rounded">SISTEMA MULTI-VEÍCULOS</span>
+              <span class="font-bold text-base tracking-tight text-slate-100">DUTRA OS</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold px-1.5 py-0.5 rounded">ONE SYSTEM</span>
             </div>
-            <p class="text-[11px] text-slate-400 hidden sm:block">Equalização contínua para uma frota que não pode parar</p>
+            <p class="text-[11px] text-slate-400 hidden sm:block">Seu workspace comercial Olho de Gato</p>
           </div>
         </div>
 
@@ -88,8 +90,9 @@
 
       </div>
 
+      <div class="shell-header-status"><span id="shell-area">Meu Dia</span><div id="og-sync-status" class="og-sync-status" role="status" aria-live="polite" aria-atomic="true">Carregando…</div></div>
       <!-- Barra de Abas / Menu de Navegação -->
-      <div id="nav-tabs-container" class="flex overflow-x-auto gap-1 sm:gap-2 py-2 border-t border-slate-800/80 scrollbar-none text-xs sm:text-sm">
+      <div id="nav-tabs-container" role="navigation" aria-label="Áreas do DUTRA OS" class="flex overflow-x-auto gap-1 sm:gap-2 py-2 border-t border-slate-800/80 scrollbar-none text-xs sm:text-sm">
         <button data-tab="dia" class="nav-tab px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold shadow-md transition flex items-center gap-2 flex-shrink-0">
           <span aria-hidden="true">◉</span>
           <span>Meu Dia</span>
@@ -100,22 +103,22 @@
 
         <button data-tab="cotacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-          <span>⚡ Cotação Multi-Veículos (Frota)</span>
+          <span>⚡ Multi-Veículos / Propostas</span>
         </button>
 
         <button data-tab="guia" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-          <span>🚛 Consultor de Suportes (Árvore)</span>
+          <span>🚛 Aplicação Técnica</span>
         </button>
 
         <button data-tab="crm" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          <span>🎯 Leads & Transcrição OCR</span>
+          <span>🎯 CRM / Clientes</span>
         </button>
 
         <button data-tab="call-ai" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <span aria-hidden="true">🎧</span>
-          <span>Call AI</span>
+          <span>Call Intelligence</span>
         </button>
         <button data-tab="comunicacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium"><span>✉ Central de Comunicação</span></button>
 
@@ -136,12 +139,12 @@
 
         <button data-tab="biblioteca" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <span aria-hidden="true">🎞️</span>
-          <span>Biblioteca Comercial</span>
+          <span>Biblioteca / Suporte</span>
         </button>
 
         <button data-tab="operacoes" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <span aria-hidden="true">📊</span>
-          <span>Performance & Operações</span>
+          <span>Performance</span>
         </button>
 
         <button data-tab="historico" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
@@ -151,11 +154,32 @@
       </div>
     </div>
   </header>
+  <nav class="og-mobile-nav" aria-label="Navegação principal no celular">
+      <button type="button" data-mobile-tab="dia" class="active"><span>◉</span><small>Meu Dia</small></button>
+      <button type="button" data-mobile-tab="crm"><span>◎</span><small>CRM</small></button>
+      <button type="button" data-mobile-tab="call-ai"><span aria-hidden="true">🎧</span><small>Calls</small></button>
+      <button type="button" data-mobile-more aria-expanded="false" aria-haspopup="menu" aria-controls="og-mobile-more-sheet"><span aria-hidden="true">＋</span><small>Mais</small></button>
+      <div id="og-mobile-more-sheet" class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
+        <div class="og-mobile-more-head"><strong>Mais ferramentas</strong><small>Abra só quando precisar.</small></div>
+        <button type="button" data-mobile-tab="cotacao" role="menuitem"><span>⚡</span><small>Multi-Veículos / Propostas</small></button>
+        <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
+        <button type="button" data-mobile-tab="guia" role="menuitem"><span>🚛</span><small>Aplicação Técnica</small></button>
+        <button type="button" data-mobile-tab="scripts" role="menuitem"><span>💬</span><small>Vendas</small></button>
+        <button type="button" data-mobile-tab="comunicacao" role="menuitem"><span>✉</span><small>Comunicação</small></button>
+        <button type="button" data-mobile-tab="catalogo" role="menuitem"><span>📦</span><small>Peças</small></button>
+        <button type="button" data-mobile-tab="transportadoras" role="menuitem"><span>🚚</span><small>Transportadoras</small></button>
+        <button type="button" data-mobile-tab="biblioteca" role="menuitem"><span>🎞️</span><small>Biblioteca</small></button>
+        <button type="button" data-mobile-tab="operacoes" role="menuitem"><span>📊</span><small>Performance</small></button>
+        <button type="button" data-mobile-tab="historico" role="menuitem"><span>≡</span><small>Histórico</small></button>
+      </div>
+  </nav>
+  <aside id="shell-startup" class="shell-feedback" role="status" aria-live="polite"><strong>Preparando seu workspace</strong><span>Carregando ferramentas e dados locais…</span></aside>
+  <script src="components/app-shell.js"></script>
 
   <!-- ========================================================================= -->
   <!-- CONTEÚDO PRINCIPAL                                                        -->
   <!-- ========================================================================= -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+  <main id="dutra-workspace" tabindex="-1" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
 
     <!-- ======================================================================= -->
     <!-- MEU DIA: SECRETÁRIO, ASSISTENTE E TREINADOR COMERCIAL                  -->

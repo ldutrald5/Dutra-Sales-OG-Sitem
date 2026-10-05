@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const app = fs.readFileSync(new URL('../apps/sistema-og/app.js', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../apps/sistema-og/index.html', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('../apps/sistema-og/styles.css', import.meta.url), 'utf8');
 const sw = fs.readFileSync(new URL('../apps/sistema-og/service-worker.js', import.meta.url), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(new URL('../apps/sistema-og/manifest.webmanifest', import.meta.url), 'utf8'));
@@ -13,8 +14,8 @@ assert.match(app, /data-pwa-update-now/, 'atualização deve exigir ação expl�
 assert.match(app, /data-pwa-update-later/, 'usuário deve poder adiar atualização');
 assert.match(app, /pwaReloadRequested = true;\s*location\.reload\(\)/, 'reload deve acontecer somente após confirmação');
 assert.doesNotMatch(app, /controllerchange[\s\S]{0,220}location\.reload\(\)/, 'controllerchange não pode recarregar a tela silenciosamente');
-assert.match(app, /aria-controls="og-mobile-more-sheet"/, 'menu Mais precisa apontar para a folha controlada');
-assert.match(app, /aria-haspopup="menu"/, 'menu Mais precisa declarar popup');
+assert.match(html, /aria-controls="og-mobile-more-sheet"/, 'menu Mais precisa apontar para a folha controlada');
+assert.match(html, /aria-haspopup="menu"/, 'menu Mais precisa declarar popup');
 assert.match(app, /event\.key === 'Escape'/, 'menu Mais deve fechar com Escape');
 assert.match(app, /moreButton\?\.focus\(\)/, 'fechamento por teclado deve devolver foco ao acionador');
 assert.match(app, /document\.addEventListener\('pointerdown'/, 'toque fora deve fechar a folha Mais');
