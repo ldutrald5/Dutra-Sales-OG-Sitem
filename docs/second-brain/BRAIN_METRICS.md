@@ -10,12 +10,12 @@
 | Ideas rejected/deferred before code (tracked signal) | 5 |
 | Decisions superseded/deprecated | 0 |
 | Experiments completed/implemented | 1/1 |
-| Open questions resolved | 1/5 |
-| Incidents resolved | 7/9 |
-| Open/active incidents | 2 |
+| Open questions resolved | 2/5 |
+| Incidents resolved | 9/10 |
+| Open/active incidents | 1 |
 | Correctly blocked cycles/releases recorded | 6 |
 | Median tracked cycle time | 0.5 h |
-| Sources in brain | 18 |
+| Sources in brain | 19 |
 
 ## Interpretation
 

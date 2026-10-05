@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -11,11 +11,11 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | decision | 12 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 9 |
+| incident | 10 |
 | knowledge | 9 |
 | open_question | 5 |
 | pattern | 17 |
-| source | 18 |
+| source | 19 |
 
 ## Active decisions
 
@@ -61,8 +61,9 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 ## Recent resolved incidents
 
 - **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (resolved/high)
-  SUPABASE-00S recovered the exact recorded migration SQL, all deployed Edge Function source and the historically untracked CRM bootstrap; the rollback-only disposable Supabase Canonical Replay now reconstructs the backend successfully.
-
+  The live Supabase backend is now reconstructable from reviewed Git evidence: the exact 25 recorded migrations, all 13 deployed Edge Function sources, and a catalog-derived bootstrap supplement for eight CRM tables that had existed outside recorded migration history.
+- **INC-EXEC-ENV-001 — Structural convergence blocked by missing checkout and unreachable proxy** (resolved/high)
+  Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
 - **INC-V3-BLACK-001 — Historical V3 black screen and delayed first paint** (resolved/medium)
   The earlier V3 preview could render a black screen or delay the shell; the durable lesson is that the primary interface must render before optional/heavy modules.
 - **INC-TECH-DATA-LOAD-001 — Historical technical configurator returned zero OG configurations** (resolved/medium)
@@ -75,8 +76,6 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Revision conflicts require preserved local/remote state and explicit review; silent merge/resend is prohibited.
 - **INC-CALLINT-AUDIO-001 — Call Intelligence real validation exposed audio and metric contract defects** (resolved/high)
   Real Call Intelligence validation required signed audio uploads to use raw binary, truck quantities to be recognized correctly, duplicate objection inflation to be prevented and synthetic TEST sessions to be excluded from production dashboards.
-- **INC-WHISPER-DEPS-001 — Embedded faster-whisper fallback missed runtime dependency** (resolved/high)
-  The embedded local faster-whisper fallback required an explicit runtime dependency that was missing from the first deployment path.
 
 ## Candidate / planned ideas
 
@@ -126,6 +125,8 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
+  CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
   Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
 - **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
@@ -144,8 +145,6 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
 - **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
   OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
-- **SRC-CIC01-001 — CIC-01 Next Best Action + Score Explicável closeout** (implemented/high)
-  CIC-01 consolidated explainable prioritization and next-action context around shared deterministic contracts, then passed final audit before closeout on PR #23 without introducing a second score, queue or agenda.
 
 ## Retrieval workflow
 
