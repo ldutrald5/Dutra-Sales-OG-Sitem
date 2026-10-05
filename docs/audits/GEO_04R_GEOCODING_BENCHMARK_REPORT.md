@@ -73,6 +73,22 @@ A 100-address comparison is designed to be very cheap:
 
 Provider calls are never part of normal CI.
 
+## Test evidence
+
+Validated head before this report update: `391a3c3664c0bfd6bff2add0c7ece766950b8d20`.
+
+- GEO Geocoding Contract run `37361835512`: **PASS**
+  - quality/normalization contract: PASS;
+  - benchmark fixture dry-run: PASS;
+  - no external geocoding call executed.
+- Package 00R for the same head:
+  - npm ci: PASS;
+  - lockfile integrity: PASS;
+  - npm run validate: PASS;
+  - Builder Brain: PASS;
+  - security test: PASS;
+  - overall workflow remains red only at the existing upstream AIOX/`braces` npm-audit advisory.
+
 ## Production impact
 
 None.
