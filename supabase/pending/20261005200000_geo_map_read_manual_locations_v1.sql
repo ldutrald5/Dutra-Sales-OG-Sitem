@@ -118,8 +118,10 @@ declare
   v_precision text;
   v_confidence numeric;
   v_geocode_provider text;
+  v_geocode_provider_ref text;
   v_geocoded_at timestamptz;
   v_verified boolean;
+  v_address_changed boolean := true;
 begin
   if not exists (select 1 from public.companies where id=p_company_id) then
     raise exception 'company not found: %',p_company_id;
@@ -164,6 +166,19 @@ begin
     if v_existing.address_source in ('CNPJ_REGISTRY','COMPANY_WEBSITE','AI_SUGGESTED','IMPORT') then
       v_forked_from := v_existing.id;
       v_id := null;
+    else
+      v_address_changed :=
+        nullif(trim(p_address_raw),'') is distinct from v_existing.address_raw
+        or nullif(trim(p_street),'') is distinct from v_existing.street
+        or nullif(trim(p_street_number),'') is distinct from v_existing.street_number
+        or nullif(trim(p_complement),'') is distinct from v_existing.complement
+        or nullif(trim(p_district),'') is distinct from v_existing.district
+        or nullif(trim(p_postal_code),'') is distinct from v_existing.postal_code
+        or nullif(trim(p_city),'') is distinct from v_existing.city
+        or nullif(trim(p_city_ibge_code),'') is distinct from v_existing.city_ibge_code
+        or upper(nullif(trim(p_state),'')) is distinct from v_existing.state
+        or upper(coalesce(nullif(trim(p_country_code),''),'BR')) is distinct from v_existing.country_code
+        or nullif(trim(p_formatted_address),'') is distinct from v_existing.formatted_address;
     end if;
   end if;
 
@@ -183,11 +198,19 @@ begin
     v_confidence := 1;
     v_geocode_provider := 'manual';
     v_geocoded_at := now();
+  elsif v_id is not null and not v_address_changed then
+    v_geo := v_existing.geo;
+    v_precision := v_existing.geocode_precision;
+    v_confidence := v_existing.geocode_confidence;
+    v_geocode_provider := v_existing.geocode_provider;
+    v_geocode_provider_ref := v_existing.geocode_provider_ref;
+    v_geocoded_at := v_existing.geocoded_at;
   else
     v_geo := null;
     v_precision := 'UNKNOWN';
     v_confidence := null;
     v_geocode_provider := null;
+    v_geocode_provider_ref := null;
     v_geocoded_at := null;
   end if;
 
@@ -208,7 +231,7 @@ begin
       nullif(trim(p_city_ibge_code),''),upper(nullif(trim(p_state),'')),
       upper(coalesce(nullif(trim(p_country_code),''),'BR')),nullif(trim(p_formatted_address),''),
       v_geo,p_address_source,'manual',null,null,
-      v_geocode_provider,null,v_geocoded_at,v_precision,v_confidence,
+      v_geocode_provider,v_geocode_provider_ref,v_geocoded_at,v_precision,v_confidence,
       p_verification_status,case when v_verified then p_actor_id else null end,
       case when v_verified then now() else null end,p_is_primary,true,
       case when v_forked_from is null then '{}'::jsonb
@@ -239,7 +262,7 @@ begin
       source_reference=null,
       source_observed_at=now(),
       geocode_provider=v_geocode_provider,
-      geocode_provider_ref=null,
+      geocode_provider_ref=v_geocode_provider_ref,
       geocoded_at=v_geocoded_at,
       geocode_precision=v_precision,
       geocode_confidence=v_confidence,
