@@ -261,3 +261,8 @@ The approved pending database projection uses:
 - backend-only radius/nearest and viewport RPCs until an authenticated browser boundary is deliberately rolled out.
 
 The pending migration is validated by the rollback-only `GEO PostGIS Replay` workflow and remains unapplied to production.
+
+
+## GEO-03R registry boundary
+
+CNPJ enrichment now has a provider-neutral contract in `services/company-registry-provider.js` and deterministic address normalization in `services/address-normalizer.js`. Vendor responses must be normalized before they reach CompanyEstablishment/CompanyLocation. Registry lookup creates a registered-address candidate only; it does not establish that the address is an operational base, garage or visit point, and it does not generate coordinates.
