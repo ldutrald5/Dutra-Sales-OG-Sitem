@@ -11,12 +11,26 @@ const task = domain.createTask({ id: 'TASK-1', companyId: company.id, opportunit
 
 assert.equal(company.legacyLeadId, 'LEAD-1');
 assert.equal(company.cnpj, '12345678000190');
+const alphaCompany = domain.createCompany({ id: 'COMP-ALPHA', name: 'Alpha Transportes', cnpj: '12.ABC.345/01DE-35' }, { now });
+assert.equal(alphaCompany.cnpj, '12ABC34501DE35');
 assert.equal(contact.phone, '44999990000');
 assert.equal(opportunity.valueCents, 150000);
 assert.equal(activity.occurredAt, now);
 assert.equal(task.dueAt, '2026-09-27T18:00:00.000Z');
 
-const graph = { ...domain.createEmptyGraph(), companies: [company], contacts: [contact], opportunities: [opportunity], activities: [activity], tasks: [task] };
+const establishment = domain.createCompanyEstablishment({
+  id: 'EST-1', companyId: company.id, cnpj: '12.345.678/0001-95', legalName: 'Transportadora Exemplo LTDA', role: 'HEADQUARTERS'
+}, { now });
+const location = domain.createCompanyLocation({
+  id: 'LOC-1', companyId: company.id, establishmentId: establishment.id, purpose: 'REGISTERED_ADDRESS',
+  addressRaw: 'Av. Exemplo, 100 - Maringá/PR', city: 'Maringá', state: 'PR',
+  addressSource: 'CNPJ_REGISTRY', verificationStatus: 'AUTO_ACCEPTED',
+  position: { latitude: -23.420999, longitude: -51.933056 }, geocodePrecision: 'ADDRESS', geocodeConfidence: 0.91
+}, { now });
+assert.equal(establishment.cnpj, '12345678000195');
+assert.equal(establishment.cnpjRoot, '12345678');
+assert.deepEqual(location.position, { latitude: -23.420999, longitude: -51.933056 });
+const graph = { ...domain.createEmptyGraph(), companies: [company], establishments: [establishment], locations: [location], contacts: [contact], opportunities: [opportunity], activities: [activity], tasks: [task] };
 assert.deepEqual(domain.validateGraph(graph), { valid: true, errors: [] });
 
 const orphan = { ...graph, contacts: [{ ...contact, id: 'CONT-2', companyId: 'MISSING' }] };
@@ -31,6 +45,16 @@ assert.throws(() => domain.createCompany({ id: 'COMP-X' }, { now }), /name/);
 assert.throws(() => domain.createContact({ id: 'CONT-X', name: 'Sem empresa' }, { now }), /companyId/);
 assert.throws(() => domain.createOpportunity({ id: 'OPP-X' }, { now }), /companyId/);
 assert.throws(() => domain.createTask({ id: 'TASK-X', companyId: 'COMP-1' }, { now }), /title/);
+assert.throws(() => domain.createCompanyEstablishment({ id: 'EST-BAD', companyId: 'COMP-1', cnpj: '12.ABC.345/01DE-34' }, { now }), /CNPJ válido/);
+assert.throws(() => domain.createCompanyLocation({ id: 'LOC-BAD', companyId: 'COMP-1', purpose: 'GARAGE', position: { latitude: -91, longitude: 0 } }, { now }), /latitude inválida/);
+
+const wrongEstablishmentLink = { ...graph, companies: [company, alphaCompany], locations: [{ ...location, id: 'LOC-2', companyId: alphaCompany.id }] };
+assert.equal(domain.validateGraph(wrongEstablishmentLink).valid, false);
+assert.match(domain.validateGraph(wrongEstablishmentLink).errors.join('\n'), /outra Company/);
+
+const duplicateEstablishmentCnpj = { ...graph, establishments: [establishment, { ...establishment, id: 'EST-2' }] };
+assert.equal(domain.validateGraph(duplicateEstablishmentCnpj).valid, false);
+assert.match(domain.validateGraph(duplicateEstablishmentCnpj).errors.join('\n'), /CNPJ duplicado/);
 
 const operationsV2 = operationsModel.migrateOperations({
   schemaVersion: 1,

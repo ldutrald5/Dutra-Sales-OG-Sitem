@@ -1,7 +1,9 @@
-(function attachLegacyReconciliation(root,factory){const api=factory();if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_LEGACY_RECONCILIATION=api;}(typeof globalThis!=='undefined'?globalThis:this,function createLegacyReconciliation(){
+(function attachLegacyReconciliation(root,factory){const cnpjDomain=typeof module!=='undefined'&&module.exports?require('../domain/cnpj.js'):root.OG_CNPJ;const api=factory(cnpjDomain);if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_LEGACY_RECONCILIATION=api;}(typeof globalThis!=='undefined'?globalThis:this,function createLegacyReconciliation(cnpjDomain){
   'use strict';
   const clean=v=>String(v??'').trim();
   const digits=v=>clean(v).replace(/\D/g,'');
+  const normalizeCnpj=v=>cnpjDomain?.normalize?cnpjDomain.normalize(v):clean(v).toUpperCase().replace(/[.\/\-\s]/g,'');
+  const cnpjShape=v=>cnpjDomain?.isShape?cnpjDomain.isShape(v):/^[A-Z0-9]{12}\d{2}$/.test(normalizeCnpj(v));
   const comparable=v=>clean(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
   const list=v=>Array.isArray(v)?v:[];
   const clone=v=>JSON.parse(JSON.stringify(v??null));
@@ -10,8 +12,8 @@
   function canonicalContacts(graph){return list(graph?.contacts).filter(x=>x?.entityType==='contact'&&clean(x.id));}
   function companySignals(lead,company){
     const matches=[];
-    const leadCnpj=digits(lead?.cnpj),companyCnpj=digits(company?.cnpj);
-    if(leadCnpj.length===14&&companyCnpj.length===14&&leadCnpj===companyCnpj)matches.push('cnpj');
+    const leadCnpj=normalizeCnpj(lead?.cnpj),companyCnpj=normalizeCnpj(company?.cnpj);
+    if(cnpjShape(leadCnpj)&&cnpjShape(companyCnpj)&&leadCnpj===companyCnpj)matches.push('cnpj');
     if(comparable(lead?.empresa||lead?.nome)&&comparable(lead?.empresa||lead?.nome)===comparable(company?.name))matches.push('name');
     return matches;
   }
@@ -39,7 +41,7 @@
     if(candidates.length===1)return {leadId:id,status:'review',reason:'name_match_requires_confirmation',candidates,proposal:null};
     const companyName=clean(lead?.empresa||lead?.nome);
     if(!companyName)return {leadId:id,status:'blocked',reason:'company_name_missing',candidates:[],proposal:null};
-    const legacyCnpj=digits(lead?.cnpj),promotableCnpj=legacyCnpj.length===14?legacyCnpj:null;
+    const legacyCnpj=normalizeCnpj(lead?.cnpj),promotableCnpj=cnpjShape(legacyCnpj)?legacyCnpj:null;
     return {leadId:id,status:'proposed',reason:'new_company_candidate',candidates:[],warnings:legacyCnpj&&!promotableCnpj?['invalid_cnpj_not_promoted']:[],proposal:{company:{name:companyName,cnpj:promotableCnpj,legacyLeadId:id,segment:clean(lead?.segmentId)||null,status:'prospect',source:'legacy_lead'},contact:contactProposal(lead)}};
   }
   function buildPlan(leads=[],graph={}){

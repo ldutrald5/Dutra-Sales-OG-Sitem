@@ -141,3 +141,8 @@ A chave usada pelo harness é server-side. Preferir chave Supabase moderna `sb_s
 ## ADRs relacionados — Inteligência operacional
 
 - `docs/architecture/ADR-INTELLIGENCE-COMPILER-001.md` — estende o Builder Brain existente como camada durável de evidência/decisão, usa Skills finas + Context Router e mantém dados voláteis no CRM/runtime.
+
+
+## GEO-01R — contrato geográfico canônico
+
+O domínio passou a distinguir explicitamente `Company`, `CompanyEstablishment` e `CompanyLocation`. CNPJ alfanumérico 2026 é suportado por um módulo compartilhado, sem conversão para número. `Company` continua sendo a conta comercial; `CompanyEstablishment` representa identidade jurídica; `CompanyLocation` representa lugar físico e pode existir sem vínculo a estabelecimento. A persistência futura deve usar PostGIS `geography(Point,4326)`; o objeto `position` do domínio JavaScript é apenas DTO de aplicação. Ver `docs/architecture/GEO-LOCATION-DOMAIN.md`.

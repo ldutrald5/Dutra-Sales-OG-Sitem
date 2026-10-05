@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
+import cnpjDomain from '../apps/sistema-og/domain/cnpj.js';
 
 const clean = value => String(value ?? '').trim();
 const digits = value => clean(value).replace(/\D/g, '');
@@ -117,9 +118,9 @@ function leadKeys(lead = {}) {
   const keys = [];
   const code = codeKey(lead.internalCode || lead.codigo);
   if (code) keys.push(`code:${code}`);
-  const cnpj = digits(lead.cnpj);
+  const cnpj = cnpjDomain.normalize(lead.cnpj);
   const cpf = digits(lead.cpf);
-  if (cnpj) keys.push(`doc:${cnpj}`);
+  if (cnpjDomain.isShape(cnpj)) keys.push(`doc:${cnpj}`);
   if (cpf) keys.push(`doc:${cpf}`);
   const phones = [lead.telefone, ...(Array.isArray(lead.additionalPhones) ? lead.additionalPhones.map(item => typeof item === 'string' ? item : item?.phone) : [])];
   for (const phone of phones) {

@@ -1,21 +1,27 @@
 (function attachProspectParser(root, factory) {
-  const api = factory();
+  const cnpjDomain = typeof module !== 'undefined' && module.exports ? require('../domain/cnpj.js') : root.OG_CNPJ;
+  const api = factory(cnpjDomain);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.OG_PROSPECT_PARSER = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createProspectParser() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createProspectParser(cnpjDomain) {
   'use strict';
   const digits = value => String(value || '').replace(/\D/g, '');
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
-  const cnpjFormat = value => { const d = digits(value); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : ''; };
+  const cnpjNormalize = value => cnpjDomain?.normalize ? cnpjDomain.normalize(value) : String(value || '').trim().toUpperCase().replace(/[.\/\-\s]/g, '');
+  const cnpjShape = value => cnpjDomain?.isShape ? cnpjDomain.isShape(value) : /^[A-Z0-9]{12}\d{2}$/.test(cnpjNormalize(value));
+  const cnpjValid = value => cnpjDomain?.isValid ? cnpjDomain.isValid(value) : cnpjShape(value);
+  const cnpjFormat = value => cnpjDomain?.format ? cnpjDomain.format(value) : cnpjNormalize(value);
   const cpfFormat = value => { const d = digits(value); return d.length === 11 ? d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : ''; };
 
   function extractDocuments(text) {
-    const labeledCnpj = text.match(/cnpj\s*[:#-]?\s*([\d.\/-]{14,18})/i);
+    const labeledCnpj = text.match(/cnpj\s*[:#-]?\s*([a-z0-9.\/-]{14,18})/i);
+    const genericCnpj = text.match(/(?<![a-z0-9])([a-z0-9]{2}\.?[a-z0-9]{3}\.?[a-z0-9]{3}\/?[a-z0-9]{4}-?\d{2})(?![a-z0-9])/i);
     const labeledCpf = text.match(/cpf\s*[:#-]?\s*([\d.-]{11,14})/i);
-    const groups = [...text.matchAll(/(?<!\d)(\d[\d.\/-]{9,17}\d)(?!\d)/g)].map(match => ({ raw: match[0], d: digits(match[0]) }));
-    const cnpj = digits(labeledCnpj?.[1] || groups.find(item => item.d.length === 14)?.raw);
+    const cnpjRaw = labeledCnpj?.[1] || genericCnpj?.[1] || '';
+    const normalizedCnpj = cnpjNormalize(cnpjRaw);
     const cpf = digits(labeledCpf?.[1] || '');
-    return { cnpj: cnpj.length === 14 ? cnpj : '', cpf: cpf.length === 11 ? cpf : '' };
+    const cnpj = cnpjShape(normalizedCnpj) ? normalizedCnpj : '';
+    return { cnpj, cnpjRaw, cnpjValid: cnpj ? cnpjValid(cnpj) : false, cpf: cpf.length === 11 ? cpf : '' };
   }
 
   function parseLine(raw, index = 0) {
@@ -30,7 +36,7 @@
     let parts = delimiter ? raw.split(delimiter).map(clean).filter(Boolean) : [];
     const isData = part => {
       const d = digits(part);
-      return (phone && d === phone) || (documents.cnpj && d === documents.cnpj) || (documents.cpf && d === documents.cpf) || /(?:cnpj|cpf|c[oó]d(?:igo)?)/i.test(part);
+      return (phone && d === phone) || (documents.cnpj && cnpjNormalize(part) === documents.cnpj) || (documents.cpf && d === documents.cpf) || /(?:cnpj|cpf|c[oó]d(?:igo)?)/i.test(part);
     };
     let code = labeledCode;
     if (!code && parts.length > 1 && /^\d{4,9}$/.test(parts[0]) && digits(parts[0]) !== phone) code = parts.shift();
@@ -42,10 +48,10 @@
     let contato = clean(textParts[1] || '');
     let observacao = clean(textParts.slice(2).join(' · '));
     if (!delimiter && empresa === source) {
-      empresa = clean(source.replace(phoneCandidates[0]?.raw || /$^/, '').replace(documents.cnpj || /$^/, '').replace(documents.cpf || /$^/, '').replace(labeledCode || /$^/, ''));
+      empresa = clean(source.replace(phoneCandidates[0]?.raw || /$^/, '').replace(documents.cnpjRaw || /$^/, '').replace(documents.cpf || /$^/, '').replace(labeledCode || /$^/, ''));
     }
     empresa = empresa.replace(/^[|,;\s-]+|[|,;\s-]+$/g, '');
-    const uncertain = !empresa || (!delimiter && !/(?:cnpj|cpf|c[oó]d(?:igo)?)/i.test(source)) || (textParts.length > 1 && !contato);
+    const uncertain = !empresa || (!delimiter && !/(?:cnpj|cpf|c[oó]d(?:igo)?)/i.test(source)) || (textParts.length > 1 && !contato) || (documents.cnpj && !documents.cnpjValid);
     return { id: `preview-${index}`, raw: source, empresa, contato, telefone: phone, cnpj: documents.cnpj, cpf: documents.cpf, codigo: clean(code), observacao, confidence: uncertain ? 'review' : 'ready', duplicateStatus: 'NEW', duplicateId: '' };
   }
 

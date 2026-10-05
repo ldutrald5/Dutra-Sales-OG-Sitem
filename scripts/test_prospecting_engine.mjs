@@ -10,6 +10,8 @@ const tab = parser.parseLine('014508\tAJBAM SOLUÇÕES\tBeatriz\t5544991426479')
 assert.equal(tab.codigo, '014508'); assert.equal(tab.empresa, 'AJBAM SOLUÇÕES'); assert.equal(tab.contato, 'Beatriz'); assert.equal(tab.telefone, '5544991426479');
 const comma = parser.parseLine('Lucas Transportes, CNPJ 12.345.678/0001-90, João, 44999999999, falou com recepção');
 assert.equal(comma.cnpj, '12345678000190'); assert.equal(comma.telefone, '44999999999'); assert.equal(comma.empresa, 'Lucas Transportes');
+const alpha = parser.parseLine('Alpha Transportes, CNPJ 12.ABC.345/01DE-35, Maria, 44988886666');
+assert.equal(alpha.cnpj, '12ABC34501DE35'); assert.equal(parser.cnpjFormat(alpha.cnpj), '12.ABC.345/01DE-35');
 const pipe = parser.parseLine('Transportadora XPTO | cód 12877 | Marcos | 11999999999');
 assert.equal(pipe.codigo, '12877'); assert.equal(pipe.telefone, '11999999999');
 const incomplete = parser.parseLine('014508 AJBAM 5544991426479');
@@ -20,6 +22,9 @@ const p1 = crm.createProspect({ empresa: 'A', telefone: '44999999999', cnpj: '12
 const p2 = crm.createProspect({ empresa: 'B', telefone: '11999999999', priority: 'alta', operationalStatus: 'NEW_PROSPECT' }, { id: 'B', now: '2026-09-21T12:00:00Z' });
 assert.equal(crm.findPossibleDuplicates([p1], { cnpj: '12.345.678/0001-90' }).length, 1);
 assert.equal(crm.findPossibleDuplicates([p1], { codigo: '014508' }).length, 1);
+const alphaProspect = crm.createProspect({ empresa: 'Alpha', cnpj: '12.ABC.345/01DE-35' }, { id: 'ALPHA', now: '2026-09-21T12:00:00Z' });
+assert.equal(alphaProspect.cnpj, '12ABC34501DE35');
+assert.equal(crm.findPossibleDuplicates([alphaProspect], { cnpj: '12.ABC.345/01DE-35' }).length, 1);
 assert.equal(engine.prospectQueue([p1, p2])[0].id, 'B');
 assert.equal(engine.nextProspect([p1, p2], 'B', []).id, 'A');
 assert.equal(engine.nextProspect([p1, p2], 'B', ['A']).id, 'B');

@@ -37,6 +37,12 @@ const occupiedRow=svc.inspectLead(occupiedLead,occupiedGraph);
 assert.equal(occupiedRow.status,'blocked');
 assert.equal(occupiedRow.candidates[0].occupiedByLeadId,'L-OUTRO');
 
+const alphaGraph={companies:[{id:'C-ALPHA',entityType:'company',name:'Alpha',legacyLeadId:null,cnpj:'12ABC34501DE35'}],contacts:[]};
+const alphaLead={id:'L-ALPHA',empresa:'Outro nome',cnpj:'12.ABC.345/01DE-35'};
+const alphaReview=svc.inspectLead(alphaLead,alphaGraph);
+assert.equal(alphaReview.status,'review');
+assert.ok(alphaReview.candidates[0].signals.includes('cnpj'));
+
 const invalidCnpjLead={id:'L-INVALID-CNPJ',empresa:'Sem Correspondência',cnpj:'123'};
 const invalidCnpjGraph={companies:[{id:'C-INVALID',entityType:'company',name:'Outro Nome',legacyLeadId:null,cnpj:'123'}],contacts:[]};
 assert.equal(svc.inspectLead(invalidCnpjLead,invalidCnpjGraph).status,'proposed','CNPJ incompleto não pode ser sinal forte');

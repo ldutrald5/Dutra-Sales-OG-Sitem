@@ -1,12 +1,14 @@
 (function attachCrmService(root, factory) {
-  const api = factory();
+  const cnpjDomain = typeof module !== 'undefined' && module.exports ? require('../domain/cnpj.js') : root.OG_CNPJ;
+  const api = factory(cnpjDomain);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.OG_CRM_SERVICE = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createCrmService() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createCrmService(cnpjDomain) {
   'use strict';
 
   const clean = value => String(value || '').trim();
   const digits = value => clean(value).replace(/\D/g, '');
+  const normalizeCnpj = value => cnpjDomain?.normalize ? cnpjDomain.normalize(value) : clean(value).toUpperCase().replace(/[.\/\-\s]/g, '');
   const comparable = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const categoryKey = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   const normalizePriorityBand = value => {
@@ -50,7 +52,7 @@
       empresa: clean(lead.empresa || lead.nome),
       nome: clean(lead.nome),
       telefone: digits(lead.telefone),
-      cnpj: digits(lead.cnpj),
+      cnpj: normalizeCnpj(lead.cnpj),
       cpf: digits(lead.cpf),
       internalCode: clean(lead.internalCode || lead.codigo),
       email: clean(lead.email),
@@ -91,12 +93,12 @@
   function findPossibleDuplicates(leads, prospect) {
     const companyKey = comparable(prospect.empresa);
     const phoneKey = digits(prospect.telefone);
-    const cnpjKey = digits(prospect.cnpj);
+    const cnpjKey = normalizeCnpj(prospect.cnpj);
     const codeKey = comparable(prospect.internalCode || prospect.codigo);
     return (leads || []).filter(item => {
       const lead = normalizeLead(item);
       return (phoneKey && digits(lead.telefone) === phoneKey) ||
-        (cnpjKey && digits(lead.cnpj) === cnpjKey) ||
+        (cnpjKey && normalizeCnpj(lead.cnpj) === cnpjKey) ||
         (codeKey && comparable(lead.internalCode) === codeKey) ||
         (companyKey && comparable(lead.empresa) === companyKey);
     });
@@ -111,7 +113,7 @@
       empresa,
       nome: clean(input.nome),
       telefone: digits(input.telefone),
-      cnpj: digits(input.cnpj),
+      cnpj: normalizeCnpj(input.cnpj),
       cpf: digits(input.cpf),
       internalCode: clean(input.internalCode || input.codigo),
       cidadeUf: clean(input.cidadeUf),

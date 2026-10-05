@@ -41,7 +41,8 @@ assert.ok(html.includes('id="tab-operacoes"'), 'Tela de operações ausente');
 assert.ok(app.includes("localStorage.getItem('og_operations_state')"), 'Migração local ausente');
 assert.ok(server.includes('operations:'), 'Servidor não persiste operações');
 assert.ok(sw.includes("'/operations-model.js'"), 'Modelo não está no shell offline');
-for (const asset of ["'/domain/canonical-domain.js'", "'/services/company-360-service.js'", "'/services/canonical-editor-service.js'", "'/services/auth-pilot-service.js'", "'/services/auth-state-service.js'", "'/services/sync-conflict-service.js'"]) {
+assert.ok(html.includes('<script src="domain/cnpj.js"></script>'), 'Contrato CNPJ precisa carregar antes dos serviços de CRM');
+for (const asset of ["'/domain/cnpj.js'", "'/domain/canonical-domain.js'", "'/services/company-360-service.js'", "'/services/canonical-editor-service.js'", "'/services/auth-pilot-service.js'", "'/services/auth-state-service.js'", "'/services/sync-conflict-service.js'"]) {
   assert.ok(sw.includes(asset), `${asset} não está no shell offline`);
 }
 

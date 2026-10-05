@@ -1,4 +1,4 @@
-(function attach(root,factory){const api=factory(root);if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_SPREADSHEET_IMPORT=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root){
+(function attach(root,factory){const cnpjDomain=typeof module!=='undefined'&&module.exports?require('../domain/cnpj.js'):root.OG_CNPJ;const api=factory(root,cnpjDomain);if(typeof module!=='undefined'&&module.exports)module.exports=api;root.OG_SPREADSHEET_IMPORT=api;})(typeof globalThis!=='undefined'?globalThis:this,function(root,cnpjDomain){
   'use strict';
 
   const CRM_SHEETS=['🚀 HOJE','📋 CRM','📥 LISTA','👥 CONTATOS'];
@@ -6,6 +6,10 @@
   const IMPORT_LIMITS=Object.freeze({maxFileBytes:5_000_000,maxSheets:16,maxRowsPerSheet:5_000,maxCells:100_000,maxCellChars:10_000,timeoutMs:8_000});
 
   const digits=value=>String(value??'').replace(/\D/g,'');
+  const normalizeCnpj=value=>cnpjDomain?.normalize?cnpjDomain.normalize(value):String(value??'').trim().toUpperCase().replace(/[.\/\-\s]/g,'');
+  const cnpjShape=value=>cnpjDomain?.isShape?cnpjDomain.isShape(value):/^[A-Z0-9]{12}\d{2}$/.test(normalizeCnpj(value));
+  const documentParts=value=>{const cnpj=normalizeCnpj(value);if(cnpjShape(cnpj))return{cnpj,cpf:''};const cpf=digits(value);return{cnpj:'',cpf:cpf.length===11?cpf:''};};
+  const documentKey=value=>{const parts=documentParts(value);return parts.cnpj?'cnpj:'+parts.cnpj:parts.cpf?'cpf:'+parts.cpf:'';};
   const norm=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const compact=value=>norm(value).replace(/\s+/g,'');
   const codeKey=value=>{const raw=String(value??'').trim().replace(/\s+/g,'');if(!raw)return'';if(/^\d+$/.test(raw))return String(Number.parseInt(raw,10));return compact(raw);};
@@ -214,12 +218,12 @@
 
   function leadPhones(lead){return[lead?.telefone,...(Array.isArray(lead?.additionalPhones)?lead.additionalPhones.map(item=>typeof item==='string'?item:item?.phone):[])].map(digits).filter(Boolean);}
   function candidateMatches(row,leads=[]){
-    const code=codeKey(row.externalCode),doc=digits(row.document),phone=digits(row.phone),email=norm(row.email),company=norm(row.company||row.legalName),city=norm(row.city);
+    const code=codeKey(row.externalCode),doc=documentKey(row.document),phone=digits(row.phone),email=norm(row.email),company=norm(row.company||row.legalName),city=norm(row.city);
     const candidates=[];
     for(const lead of leads){
       const reasons=[];
       if(code&&codeKey(lead.internalCode||lead.externalCode)===code)reasons.push('Código OG');
-      if(doc&&digits(lead.cnpj||lead.cpf)===doc)reasons.push('CNPJ/CPF');
+      if(doc&&documentKey(lead.cnpj||lead.cpf)===doc)reasons.push('CNPJ/CPF');
       if(phone&&leadPhones(lead).includes(phone))reasons.push('Telefone');
       if(email&&norm(lead.email)===email)reasons.push('E-mail');
       const strong=reasons.length>0;
@@ -238,7 +242,7 @@
 
   function incomingIdentityKeys(row){
     const keys=[];
-    const code=codeKey(row.externalCode),doc=digits(row.document),phone=digits(row.phone),email=norm(row.email);
+    const code=codeKey(row.externalCode),doc=documentKey(row.document),phone=digits(row.phone),email=norm(row.email);
     if(code)keys.push('code:'+code);if(doc)keys.push('doc:'+doc);if(phone)keys.push('phone:'+phone);if(email)keys.push('email:'+email);
     return keys;
   }
@@ -247,7 +251,8 @@
     const changes=[];
     for(const def of FIELD_DEFS){
       const currentValue=def.current(lead)||'',incomingValue=def.incoming(row)||'';
-      if(String(incomingValue).trim()&&norm(currentValue)!==norm(incomingValue))changes.push({field:def.key,label:def.label,current:currentValue,incoming:incomingValue,protected:Boolean(def.protected)});
+      const same=def.key==='document'?(documentKey(currentValue)&&documentKey(currentValue)===documentKey(incomingValue)):norm(currentValue)===norm(incomingValue);
+      if(String(incomingValue).trim()&&!same)changes.push({field:def.key,label:def.label,current:currentValue,incoming:incomingValue,protected:Boolean(def.protected)});
     }
     return changes;
   }
@@ -258,7 +263,7 @@
     return rows.map(row=>{
       const repeatedKeys=incomingIdentityKeys(row).filter(key=>(keyCounts.get(key)||0)>1);
       const candidates=candidateMatches(row,leads);
-      const hasIdentity=Boolean(clean(row.company)||clean(row.externalCode)||digits(row.document)||digits(row.phone)||norm(row.email));
+      const hasIdentity=Boolean(clean(row.company)||clean(row.externalCode)||documentKey(row.document)||digits(row.phone)||norm(row.email));
       if(!hasIdentity)return{row,status:'INVALID',reason:'Sem empresa, código, documento, telefone ou e-mail',changes:[],candidates:[]};
       if(repeatedKeys.length)return{row,status:'POSSIBLE_DUPLICATE',reason:'Identificador repetido dentro da própria planilha',changes:[],candidates:candidates.map(c=>({leadId:c.leadId,company:c.lead.empresa||c.lead.nome||'',reasons:c.reasons}))};
       if(candidates.length===0)return{row,status:'NEW',reason:'Nenhum cliente atual corresponde aos identificadores',changes:FIELD_DEFS.map(def=>({field:def.key,label:def.label,current:'',incoming:def.incoming(row)||'',protected:Boolean(def.protected)})).filter(item=>String(item.incoming).trim()),candidates:[]};
@@ -335,14 +340,14 @@
   function normalizeStatus(value){const key=norm(value);if(key.includes('proposta'))return'proposta_enviada';if(key.includes('negoci'))return'negociacao';if(key.includes('fechad')||key==='cliente')return'fechado';if(key.includes('perdid')||key.includes('standby'))return'perdido';if(key.includes('contat')||key.includes('conversa'))return'contatado';return'novo';}
 
   function newLeadFromRow(row,id,now){
-    const doc=digits(row.document),priorityBand=normalizePriority(row.priority);
+    const doc=documentParts(row.document),priorityBand=normalizePriority(row.priority);
     const referral=clean(row.referral);
-    return{id,empresa:clean(row.company||row.legalName||row.primaryContact),nome:clean(row.primaryContact),telefone:digits(row.phone),cnpj:doc.length===14?doc:'',cpf:doc.length===11?doc:'',internalCode:clean(row.externalCode),email:clean(row.email),cidadeUf:clean(row.city),segmentId:clean(row.segment)||'transportadora',status:normalizeStatus(row.status),priority:priorityBand==='urgente'?'alta':priorityBand,priorityBand,conversationStage:normalizeConversationStage(row.conversationStage||row.status),temperature:norm(row.temperature),potential:norm(row.potential),decisionMaker:clean(row.decisionMaker),fleetSize:Number.parseInt(digits(row.fleetSize)||'0',10)||0,pain:clean(row.pain),objections:clean(row.objections)?clean(row.objections).split(/[|;,]/).map(v=>v.trim()).filter(Boolean):[],nextAction:clean(row.nextAction),followUpAt:row.nextActionAt||'',accountSummary:clean(row.summary),observacoes:clean(row.notes),source:'spreadsheet_confirmed',sourceChannel:'spreadsheet',sourceLabel:clean(row.origin)||'Importação de planilha',sourceList:clean(row.origin)||'Planilha importada',createdDate:now.slice(0,10),createdAt:now,updatedAt:now,interactions:[],contacts:[],opportunities:[],tasks:[],additionalPhones:[],referrals:referral?[{name:referral,company:'',phone:'',note:'Importado da planilha'}]:[]};
+    return{id,empresa:clean(row.company||row.legalName||row.primaryContact),nome:clean(row.primaryContact),telefone:digits(row.phone),cnpj:doc.cnpj,cpf:doc.cpf,internalCode:clean(row.externalCode),email:clean(row.email),cidadeUf:clean(row.city),segmentId:clean(row.segment)||'transportadora',status:normalizeStatus(row.status),priority:priorityBand==='urgente'?'alta':priorityBand,priorityBand,conversationStage:normalizeConversationStage(row.conversationStage||row.status),temperature:norm(row.temperature),potential:norm(row.potential),decisionMaker:clean(row.decisionMaker),fleetSize:Number.parseInt(digits(row.fleetSize)||'0',10)||0,pain:clean(row.pain),objections:clean(row.objections)?clean(row.objections).split(/[|;,]/).map(v=>v.trim()).filter(Boolean):[],nextAction:clean(row.nextAction),followUpAt:row.nextActionAt||'',accountSummary:clean(row.summary),observacoes:clean(row.notes),source:'spreadsheet_confirmed',sourceChannel:'spreadsheet',sourceLabel:clean(row.origin)||'Importação de planilha',sourceList:clean(row.origin)||'Planilha importada',createdDate:now.slice(0,10),createdAt:now,updatedAt:now,interactions:[],contacts:[],opportunities:[],tasks:[],additionalPhones:[],referrals:referral?[{name:referral,company:'',phone:'',note:'Importado da planilha'}]:[]};
   }
 
   function applyValue(lead,field,value){
     const map={company:'empresa',contact:'nome',phone:'telefone',email:'email',externalCode:'internalCode',city:'cidadeUf',segment:'segmentId',status:'status',conversationStage:'conversationStage',priority:'priorityBand',temperature:'temperature',potential:'potential',decisionMaker:'decisionMaker',fleetSize:'fleetSize',pain:'pain',nextAction:'nextAction',nextActionAt:'followUpAt',summary:'accountSummary',notes:'observacoes',sourceLabel:'sourceLabel'},key=map[field];
-    if(field==='document'){const doc=digits(value);if(doc.length===11){lead.cpf=doc;lead.cnpj='';}else if(doc.length===14){lead.cnpj=doc;lead.cpf='';}return;}
+    if(field==='document'){const doc=documentParts(value);if(doc.cpf){lead.cpf=doc.cpf;lead.cnpj='';}else if(doc.cnpj){lead.cnpj=doc.cnpj;lead.cpf='';}return;}
     if(field==='phone'){lead.telefone=digits(value);return;}
     if(field==='status'){lead.status=normalizeStatus(value);return;}
     if(field==='conversationStage'){lead.conversationStage=normalizeConversationStage(value);return;}
@@ -400,5 +405,5 @@
 
   function protectedContract(){return{formula:['📋 CRM!Q:Q','🚀 HOJE!A:W'],manual:['📋 CRM!P:P','👥 CONTATOS!H:H'],derived:['📋 CRM!I:I','📋 CRM!W:W'],structure:['tables','merges','validations','conditionalFormatting'],writable:CRM_HEADERS.filter(item=>!['Score','Nº contatos'].includes(item))};}
 
-  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSources,sourceForSheet,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,inferConversationStageFromNotes,digits,norm};
+  return{CRM_SHEETS,CRM_HEADERS,IMPORT_LIMITS,FIELD_DEFS,FIELD_MAP,validateWorkbook,validateSanitizedWorkbook,preflightFile,readCrmRows,parseCsvText,csvToWorkbook,suggestMapping,detectTabularSources,sourceForSheet,detectTabularSource,rowsFromSource,candidateMatches,matchLead,preview,summarizePreview,recommendDecision,recommendedDecisionMap,summarizeRecommendations,applyPreview,readArrayBuffer,readFile,protectedContract,inferConversationStageFromNotes,digits,normalizeCnpj,documentKey,norm};
 });

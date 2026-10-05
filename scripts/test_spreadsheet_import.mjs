@@ -61,6 +61,13 @@ assert.equal(riskyMapping.nextActionAt,undefined,'campo de data genérico não p
 assert.equal(riskyMapping.company,undefined,'título de negócio não pode virar empresa automaticamente');
 
 
+const alphaRows=[{sourceRow:31,externalCode:'',company:'Alpha Log',phone:'',document:'12.ABC.345/01DE-35',email:'',city:'Maringá / PR'}];
+const alphaPreview=service.preview(alphaRows,[]);
+assert.equal(alphaPreview[0].status,'NEW');
+const alphaCreated=service.applyPreview(alphaPreview,[],{'31':{action:'create'}},{now:'2026-09-27T12:00:00.000Z',idFactory:()=> 'ALPHA1'});
+assert.equal(alphaCreated.leads[0].cnpj,'12ABC34501DE35');
+assert.equal(service.preview([{...alphaRows[0],document:'12ABC34501DE35'}],alphaCreated.leads)[0].status,'UNCHANGED');
+
 const genericPreview=service.preview(genericRows,[]);
 assert.equal(genericPreview[0].status,'NEW');
 const genericCreated=service.applyPreview(genericPreview,[],{'2':{action:'create'}},{now:'2026-09-27T12:00:00.000Z',idFactory:()=> 'CSV1'});
