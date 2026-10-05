@@ -30,6 +30,7 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 - Testes e gates: `scripts/test_*.mjs`, `scripts/validate.mjs`, `scripts/release-gate.mjs`
 - Builder Brain: `.codex/skills/dutra-builder-brain/`, `docs/second-brain/`
 - Runtime Operator: `.codex/skills/dutra-runtime-operator/`, `docs/runtime/DUTRA_OS_RUNTIME.md`
+- Environment Guardian: `.codex/skills/dutra-environment-guardian/`
 - Framework AIOX: `.aiox-core/`
 - Documentação: `docs/`
 <!-- AIOX-MANAGED-END: codebase -->
@@ -84,6 +85,7 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 | Custos e contexto de IA | `docs/09-CUSTOS-IA.md` |
 | Execução | `tasks/TODO.md` e a story específica em `docs/stories/` |
 | Produção, Railway, deploy, domínio, logs e acesso no celular | `.codex/skills/dutra-runtime-operator/SKILL.md`, `docs/runtime/DUTRA_OS_RUNTIME.md` |
+| Checkout, Git, proxy, auth de transporte, workspace, toolchain | `.codex/skills/dutra-environment-guardian/SKILL.md`, depois `dutra-dev` |
 | Planilhas, Excel, backup/exportação CRM e vendas | `docs/11-INTEGRACAO-EXCEL.md`, `docs/spreadsheets/CANONICAL_TEMPLATES.md`, `docs/spreadsheets/canonical-templates.json` |
 | Conhecimento transversal / roteamento | `docs/second-brain/CONTEXT_ROUTER.md` + Skill DUTRA da área |
 | Aplicação técnica OG | `.codex/skills/dutra-og-tech/SKILL.md`, `knowledge/OG-TECH-RULES.md` |
@@ -94,6 +96,7 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 
 Para mudança STANDARD/STRUCTURAL ou tarefa que dependa de histórico do projeto:
 
+0. prove primeiro a rota de execução com `.codex/skills/dutra-environment-guardian/SKILL.md`: checkout/provider, transporte Git, toolchain, branch segura e capacidade real de testes. Não repita transporte falho sem mudança de condição;
 1. consulte `docs/second-brain/CONTEXT_ROUTER.md`;
 2. carregue apenas a Skill DUTRA e os documentos do domínio relevante;
 3. procure decisão ativa, incidente/anti-pattern relacionado e testes existentes;
