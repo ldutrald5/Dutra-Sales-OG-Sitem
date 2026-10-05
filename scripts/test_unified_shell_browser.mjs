@@ -142,6 +142,7 @@ try {
   await pwaPage.waitForFunction(() => document.body.dataset.shellReady === 'true');
   assert.ok(await pwaPage.locator('.brand-header').isVisible());
   assert.ok(await pwaPage.locator('.og-mobile-nav').isVisible());
+  assert.ok(await pwaPage.locator('#mission-control .mission-now').isVisible(), 'Meu Dia projection must render from precached owners offline');
   await pwaPage.locator('[data-mobile-tab="crm"]').click();
   assert.ok(await pwaPage.locator('#tab-crm').isVisible());
   await pwaPage.waitForFunction(() => document.querySelector('#og-sync-status').dataset.mode === 'offline');
