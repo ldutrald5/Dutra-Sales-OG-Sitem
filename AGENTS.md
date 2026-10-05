@@ -31,6 +31,7 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 - Builder Brain: `.codex/skills/dutra-builder-brain/`, `docs/second-brain/`
 - Runtime Operator: `.codex/skills/dutra-runtime-operator/`, `docs/runtime/DUTRA_OS_RUNTIME.md`
 - Environment Guardian: `.codex/skills/dutra-environment-guardian/`
+- Collaboration Orchestrator: `.codex/skills/dutra-collaboration-orchestrator/`, `docs/handoffs/DUTRA_COLLABORATION_PROTOCOL.md`
 - Framework AIOX: `.aiox-core/`
 - Documentação: `docs/`
 <!-- AIOX-MANAGED-END: codebase -->
@@ -86,6 +87,7 @@ Estas regras complementam os blocos gerenciados pelo AIOX e prevalecem para tare
 | Execução | `tasks/TODO.md` e a story específica em `docs/stories/` |
 | Produção, Railway, deploy, domínio, logs e acesso no celular | `.codex/skills/dutra-runtime-operator/SKILL.md`, `docs/runtime/DUTRA_OS_RUNTIME.md` |
 | Checkout, Git, proxy, auth de transporte, workspace, toolchain | `.codex/skills/dutra-environment-guardian/SKILL.md`, depois `dutra-dev` |
+| Planejamento futuro, handoff, créditos Codex, passo a passo e Action Packs | `.codex/skills/dutra-collaboration-orchestrator/SKILL.md`, `docs/handoffs/DUTRA_COLLABORATION_PROTOCOL.md` |
 | Planilhas, Excel, backup/exportação CRM e vendas | `docs/11-INTEGRACAO-EXCEL.md`, `docs/spreadsheets/CANONICAL_TEMPLATES.md`, `docs/spreadsheets/canonical-templates.json` |
 | Conhecimento transversal / roteamento | `docs/second-brain/CONTEXT_ROUTER.md` + Skill DUTRA da área |
 | Aplicação técnica OG | `.codex/skills/dutra-og-tech/SKILL.md`, `knowledge/OG-TECH-RULES.md` |
@@ -156,6 +158,7 @@ Interprete os atalhos abaixo carregando o arquivo correspondente em `.aiox-core/
 Para trabalho STANDARD/STRUCTURAL do DUTRA OS, use a inteligência durável antes de criar solução nova:
 
 0. prove primeiro o Environment Guardian, incluindo autenticação de leitura/escrita e publicação verificada quando exigida; o roteamento de domínio abaixo complementa o Context Router canônico existente.
+0.1. quando houver handoff entre ChatGPT/Codex, ação manual futura, limite de créditos, necessidade de passo a passo ou material para usar depois, use o Collaboration Orchestrator e deixe um Action Pack/checkpoint reutilizável quando isso reduzir trabalho futuro.
 
 1. leia `docs/intelligence/README.md`;
 2. roteie a tarefa por `docs/intelligence/CONTEXT_ROUTER.md`;
