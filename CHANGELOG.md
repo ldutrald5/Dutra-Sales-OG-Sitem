@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage4
+
+- Prospecção Premium no shell único, importação/vínculo CRM revisados e resultado canônico com recuperação durável.
+- Corrigidos foco fora da fila e reconexão bloqueada pela espera opcional de Service Worker; regressões reais de outbox/ACK/503/409.
+- Gates completos/QA verdes; publicação e rollback no checkpoint Stage4. Sem nova persistência/engine, Supabase ou produção.
+
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
 ## [Unreleased] — CONVERGENCE-01 Stage3

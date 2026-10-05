@@ -1,11 +1,13 @@
 # DUTRA OS ONE SYSTEM — CHECKPOINT
 
 MISSION: CONVERGENCE-01 — DUTRA OS ONE SYSTEM
-CURRENT_STAGE: 3 — MEU DIA / MISSION CONTROL
-STATUS: COMPLETE — implementation publication verified; final documentation closure follows
+CURRENT_STAGE: 4 — PROSPECÇÃO + SALES EXECUTION PREMIUM
+STATUS: Stage4 technical acceptance PASS; publication/status authoritative in V3_UNIFICATION_CHECKPOINT.md
 UPDATED_AT: 2026-10-05 UTC
-NEXT_STAGE: STOP after Stage 3; Stage 4 NOT STARTED
-SAFE_TO_CONTINUE_TO_STAGE_4: YES (readiness only; QG authorization still required; Stage4 NOT STARTED)
+NEXT_STAGE: STOP after Stage4; Stage5 requires new QG authorization
+SAFE_TO_CONTINUE_TO_STAGE_5: NO — not authorized
+
+Current Stage4 authoritative checkpoint: [V3_UNIFICATION_CHECKPOINT.md](V3_UNIFICATION_CHECKPOINT.md). Stage3 evidence below is historical and remains valid.
 
 ## Stage 3 authoritative checkpoint
 

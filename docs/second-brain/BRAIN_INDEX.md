@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 134 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 14 |
+| cycle | 15 |
 | decision | 19 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 11 |
+| incident | 13 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 26 |
+| source | 27 |
 
 ## Active decisions
 
@@ -82,6 +82,10 @@ Generated from 134 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
 - **INC-MEU-DIA-REFRESH-001 — Confirmed Mesa outcome lost on immediate refresh during sync debounce** (resolved/high)
   A local-first outcome must be recoverable before the UI confirms success or advances. Reuse the canonical outbox instead of waiting for debounced transport.
+- **INC-PROSPECT-FOCUS-001 — Empty filtered prospect queue retained stale actionable focus** (resolved/high)
+  Focused prospect identity must belong to its active canonical queue. A valid normalized session additionally requires exact session/member/company membership; zero local eligible items cannot leave an old local focus actionable.
+- **INC-SYNC-SW-READY-001 — Optional Service Worker readiness blocked foreground reconnect** (resolved/high)
+  Optional Background Sync registration must not hold the foreground sync write lock or delay visible pending-state delivery after a durable outbox write.
 - **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (resolved/high)
   The live Supabase backend is now reconstructable from reviewed Git evidence: the exact 25 recorded migrations, all 13 deployed Edge Function sources, and a catalog-derived bootstrap supplement for eight CRM tables that had existed outside recorded migration history.
 - **INC-V3-BLACK-001 — Historical V3 black screen and delayed first paint** (resolved/medium)
@@ -90,10 +94,6 @@ Generated from 134 records. Do not edit by hand; run `npm run og:brain:refresh`.
   A technical configurator showed zero configurations when its OG data dependency had not been loaded before initialization.
 - **INC-METRIC-CLOSE-001 — Historical close rate reached 48400 percent** (resolved/medium)
   A historical close-rate calculation mixed sales from a broad CRM population with proposals from a narrower prospecting population, producing an impossible 48400 percent result.
-- **INC-PROSPECT-LIST-001 — Historical prospecting showed zero lists despite usable CRM views** (resolved/medium)
-  Prospecting became operationally empty when lists were treated as an isolated module instead of projections/collections over the CRM base.
-- **INC-SYNC-CONFLICT-001 — Silent revision conflict could overwrite local or remote work** (resolved/high)
-  Revision conflicts require preserved local/remote state and explicit review; silent merge/resend is prohibited.
 
 ## Candidate / planned ideas
 
@@ -161,6 +161,8 @@ Generated from 134 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Pre-edit current/V3 matrix and architect/QA reviews support the single apps/sistema-og shell. Full75 gates, eight viewport/13 route browser acceptance and real API sync acknowledgement passed; implementation publication verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Browser missing online event is explicitly simulated only after real transport proof.
 - **SRC-CONVERGENCE-MEU-DIA-20261005-001 — Stage 3 canonical projection and executed regression evidence** (validated/high)
   Audited canonical queue/NBA/outcome owners before edits. Deterministic projection and eight viewport browser gates passed, including immediate refresh, supported offline outcome, real local reconnect and HTTP409 conflict recovery. Independent architecture and QA approved. Normalized account selection is tested with isolated read fixtures; no external mutation is claimed.
+- **SRC-CONVERGENCE-PROSPECTING-20261005-001 — Canonical prospecting workspace and deterministic recovery evidence** (validated/high)
+  Stage 4 audit and isolated regression execution adapted the current app to premium prospecting without porting V3 engines. Browser evidence exposed stale filtered focus and then an offline reconnect race caused by unresolved optional Service Worker readiness holding the foreground write lock. Both causes were reproduced and protected by actual canonical mutation, remote acknowledgement and conflict review tests.
 - **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
   CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
@@ -173,8 +175,6 @@ Generated from 134 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Live audit verified GitHub main and Railway production alignment before the Intelligence Compiler merge, persistent Railway volume /data, PWA cache v67, an active hybrid Supabase/Postgres backend, and a reproducibility gap: the remote Supabase project had 25 applied migrations and 13 active Edge Functions while the repository versioned only 4 migration files and 2 Edge Function sources.
 - **SRC-INTEL-CLOSEOUT-001 — DUTRA Intelligence Compiler V1 PR and CI closeout** (implemented/high)
   PR #104 merged the Intelligence Compiler V1 to main as commit 72354a1f04d6fdd5584fe876ec4b09bb050a312a after PR workflows Package 00R CI #404, Sales Execution P0 #24 and Call Intelligence V1 #22 passed; main Package 00R CI #405 also passed after merge.
-- **SRC-CHAT-RECOVERY-20261001 — DUTRA OS master conversation recovery audit** (validated/high)
-  User-reviewed recovery audit consolidating the long-running DUTRA OS conversation into decisions, implemented work, failures, commercial context, technical mappings and pending work before chat archival.
 
 ## Retrieval workflow
 

@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage 3 COMPLETE; implementation publication verified; final documentation closure follows. Stage 4 NOT STARTED. Current authoritative evidence: docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. Earlier stop/status entries below are historical.
+Current execution status: Stage 4 technical acceptance/QA PASS; integration publication pending. Latest authoritative Stage 4 evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Historical BLOCKED/stop entries below were resolved by explicitly authorized recoveries. Stage 5 NOT STARTED.
 
 ## Mission
 
@@ -238,3 +238,37 @@ Entry7527c4df5c9ea3e8bbf459227f665a1abb33fb91 follows audited governance fast-fo
 File List: apps/sistema-og/{app.js,index.html,service-worker.js,components/mission-control.js,components/mission-control.css,components/ui-components.js,services/interaction-service.js}; package.json; scripts/{validate.mjs,test_meu_dia_projection.mjs,test_meu_dia_browser.mjs,test_unified_shell_browser.mjs}; docs/audits/CONVERGENCE_01_STAGE3_MEU_DIA_AUDIT.md; this story; handoff checkpoint; docs/01-ARQUITETURA.md; tasks/TODO.md; tasks/DONE.md; DUTRA_OS_CONTEXT.md; AI_HANDOFF.md; CHANGELOG.md; docs/second-brain/{sources.jsonl,incidents.jsonl,cycles.jsonl,BRAIN_INDEX.md,BRAIN_METRICS.md}.
 
 No Supabase, preview-v2, protected branch or production change. Calendar integration and full Cliente360 remain deferred.
+
+## Stage 4 — Prospecção + Sales Execution Premium (QG authorized 2026-10-05)
+
+PRE_STAGE4_SHA / rollback: fe1760d78865d85ecb84d8ae4a244094968bb4ca. This authorization replaces the earlier Stage 4 CRM/360 scope; deep 360 and Stage 5 remain deferred.
+
+- [x] Clean authorized entry / remote equality / write preflight; existing implementations audited; @architect bounded APPROVE.
+- [x] Premium prospecting in the single shell; canonical queue/score/NBA.
+- [x] Safe commit-time/intra-batch dedup, explicit existing identity, no silent overwrite.
+- [x] Canonical result/follow-up, durable current outbox, normalized CallAI Review.
+- [x] Research provenance and truthful external action states preserved.
+- [x] Mission Control consequences, online/offline/reconnect/conflict and PWA preserved.
+- [x] Eight required viewports and six functional flows approved by @qa.
+- [ ] Full tests/Brain green, checkpoint updated, integration-only push verified, protected refs intact.
+
+Audit matrix (closed before code):
+
+| Capability | Current owner/source | V3 reference | Target/decision |
+|---|---|---|---|
+| Identity / dedup / conversion | OG_CRM_SERVICE / state.leads | operational-crm-v3 | KEEP owner; safe deterministic matching and explicit ambiguous identity |
+| Prospect selection | OG_PROSPECTING eligibility + territory | prospecting-execution-v3 | ADAPT as subset of OG_SALES_DESK canonical queue |
+| Priority / NBA | OG_LEAD_INTELLIGENCE | sales-action-center-v3 | KEEP; do not consume prospecting-engine alternate score/NBA |
+| Results / follow-up | OG_INTERACTION_SERVICE; current Mesa command | execution focus UX | MERGE thin presentations into same protected command |
+| Normalized execution | existing client/adapter + Review CallAI / recordCallResult | sales-execution-service | KEEP current engine; DO NOT PORT V3 mutations/agenda |
+| Research staging / provenance | current Intake / Research / Review | feature-loader-v3 | KEEP; temporary discoveries are not CRM facts |
+| Persist / recovery | current stores + OG_SYNC_BRIDGE | V3 local operations | DO NOT DUPLICATE; await existing durable outbox before success |
+| Client context | current client sheet | V3 360 | KEEP internal bridge; deep 360 DEFER |
+
+File list: Stage 4 implementation/QA list is maintained in docs/handoffs/V3_UNIFICATION_CHECKPOINT.md.
+
+Stage 4 STOP / 2026-10-05: @qa new browser gate failed at scripts/test_prospecting_workspace_browser.mjs:89: `AssertionError: input did not match /Fila concluída/`. Empty priority filter keeps stale focused currentId (`1 / 0`) and permits action outside queue. Existing76/Brain/shell/day regressions passed, but they do not override this critical failure. Implementation stopped under QG STOP CONDITIONS; expected WIP preserved, HEAD unchanged, no commit/push. Full evidence and file list in Stage 4 checkpoint; acceptance boxes remain open.
+
+Stage 4 RECOVERY / 2026-10-05: QG authorized preserved-WIP empty-focus correction. @architect APPROVE, new Stage4 browser exit0: filtered selection derives canonical membership/null and obsolete DOM actions are inert; eight viewports/many/long/empty PASS. Full76/Brain and shell/PWA PASS. Mandatory Meu Dia reconnect timed out at scripts/test_meu_dia_browser.mjs:72:45 (`page.waitForFunction: Timeout 30000ms exceeded` waiting for mode=ok). Stopped under Recovery STOP CONDITIONS; no retry, broader sync fix, commit or push. Latest checkpoint records original blocker fixed and new gate failure; HEAD remains original fe1760d.
+
+Stage4 RECOVERY2 / 2026-10-05: optional serviceWorker.ready was proven to hold foreground write lock after failed offline debounced PUT; detached best-effort registration now follows durable outbox persistence and does not block finally/reconnect. Original day test unchanged PASS. New deterministic sync browser proves failed offline PUT before reconnect, real ACK/outboxclear/OK, 503notOK/no loop, 409explicitreviewresolution and boundedlisteners. Full76/Brain138/Stage4/day/shell/SalesExecution gates PASS; @architect APPROVE and @qa final PASS. Publication pending; prior recovery stop history retained. New file list additionally includes scripts/test_sync_reconnect_browser.mjs and generated Brain artifacts; full list in checkpoint. No Stage5/main/production.
