@@ -81,20 +81,21 @@ When the task comes from recovered history, a prior incident, a new durable comm
 
 ## Activation protocol
 
-1. Read local instructions (`AGENTS.md`, project context and scoped docs).
-2. Classify scope as MICRO / STANDARD / STRUCTURAL using `reference/00-method-map.md`.
-3. Detect the earliest unresolved maturity stage.
-4. Load only the references and brain entries needed for that stage.
-5. Inspect existing code/data/contracts before proposing structural change.
-6. If a new external source exists, run `reference/01-evidence-and-research.md`.
-7. Generate ideas with `reference/03-idea-engine.md`; ideas do not become scope automatically.
-8. Persist durable learnings using `reference/02-second-brain.md`.
-9. For architecture/planning use `reference/04-architecture-and-planning.md`.
-10. For implementation use `reference/05-implementation-package.md` and `reference/06-quality-gates.md`.
-11. For possible code reuse, apply `reference/08-license-and-reuse.md` before recommending reuse.
-12. For live access, hosted runtime, deployment, domains, logs, environment variables, service health or mobile access, route to `.codex/skills/dutra-runtime-operator/SKILL.md` and use live infrastructure tools instead of relying on remembered deployment state.
-13. STANDARD/STRUCTURAL closeout must refresh the human index and metrics, then run the brain checker.
-14. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
+1. For STANDARD/STRUCTURAL work, load `.codex/skills/dutra-environment-guardian/SKILL.md` first and prove the required execution route (checkout/provider/toolchain) before assuming local execution is possible.
+2. Read local instructions (`AGENTS.md`, project context and scoped docs) from the best verified repository source available.
+3. Classify scope as MICRO / STANDARD / STRUCTURAL using `reference/00-method-map.md`.
+4. Detect the earliest unresolved maturity stage.
+5. Load only the references and brain entries needed for that stage.
+6. Inspect existing code/data/contracts before proposing structural change.
+7. If a new external source exists, run `reference/01-evidence-and-research.md`.
+8. Generate ideas with `reference/03-idea-engine.md`; ideas do not become scope automatically.
+9. Persist durable learnings using `reference/02-second-brain.md`.
+10. For architecture/planning use `reference/04-architecture-and-planning.md`.
+11. For implementation use `reference/05-implementation-package.md` and `reference/06-quality-gates.md`.
+12. For possible code reuse, apply `reference/08-license-and-reuse.md` before recommending reuse.
+13. For live access, hosted runtime, deployment, domains, logs, environment variables, service health or mobile access, route to `.codex/skills/dutra-runtime-operator/SKILL.md` and use live infrastructure tools instead of relying on remembered deployment state.
+14. STANDARD/STRUCTURAL closeout must refresh the human index and metrics, then run the brain checker.
+15. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
 
 ## The professional loop
 
@@ -118,6 +119,8 @@ Turn architecture into small reversible packages across Foundation and Product t
 
 ### Stage 6 — Safety baseline
 Before touching important behavior/data: `PLAN → BACKUP/CHECKPOINT → ENVIRONMENT GATE → TEST BASELINE`.
+
+The Environment Gate is executable, not ceremonial: prove checkout/provider access, required toolchain and test capability using `dutra-environment-guardian`. If local Git is blocked but a connected provider works, switch routes instead of repeating the same failed transport. An environment blocker is not a project/test failure.
 
 ### Stage 7 — Implement one package
 Use the smallest vertical slice that proves the architecture. Preserve old behavior behind adapters/flags when needed.
