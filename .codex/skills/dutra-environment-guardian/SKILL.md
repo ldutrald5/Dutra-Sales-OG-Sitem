@@ -216,7 +216,8 @@ For any STANDARD/STRUCTURAL task whose Definition of Done includes a remote push
 prove TWO separate capabilities before accumulating local commits:
 
 - READ TRANSPORT GATE: repository checkout/fetch/read works.
-- REMOTE WRITE GATE: preferably `git push --dry-run origin HEAD:refs/heads/<safe-working-branch>` succeeds on the authorized safe working branch.
+- REMOTE WRITE PREFLIGHT: preferably `git push --dry-run origin HEAD:refs/heads/<safe-working-branch>` succeeds on the authorized safe working branch.
+- REMOTE WRITE GATE: for structural tasks requiring publication, PASS only after an authorized real push is verified against the remote HEAD.
 
 A valid checkout and successful fetch/read do not prove push capability. Keep hooks
 and normal Git authentication enabled; never use force push for this gate.
@@ -235,8 +236,37 @@ unpublished local work and report the safe login command:
 
 `gh auth login --hostname github.com --git-protocol https --web`
 
-A passing dry run proves current remote write readiness only; it does not authorize
-protected-branch writes, production actions or the next implementation stage.
+A passing dry run is preliminary evidence and does not replace real push
+verification. Read authentication and write authentication are different
+capabilities. It does not authorize protected-branch writes, production actions
+or the next implementation stage.
+
+### Injected GitHub token precedence
+
+Environment-injected `GH_TOKEN` / `GITHUB_TOKEN` may override persisted GitHub CLI
+credentials, including when Git invokes `gh auth git-credential` as its helper.
+After HTTP 401, also test the stored login with variables temporarily empty:
+
+```bash
+GH_TOKEN= GITHUB_TOKEN= gh auth status --hostname github.com
+GH_TOKEN= GITHUB_TOKEN= gh api repos/<owner>/<repo> --jq '.permissions'
+```
+
+Never print token values and never automatically delete user credentials.
+If the injected credential fails but the persisted login is valid with
+`permissions.push=true`, configure the helper and run authentication, push and
+fetch commands with `GH_TOKEN= GITHUB_TOKEN=` to avoid the override:
+
+```bash
+GH_TOKEN= GITHUB_TOKEN= gh auth setup-git
+GH_TOKEN= GITHUB_TOKEN= git push --dry-run origin HEAD:refs/heads/<safe-working-branch>
+GH_TOKEN= GITHUB_TOKEN= git push origin <safe-working-branch>
+GH_TOKEN= GITHUB_TOKEN= git fetch origin
+```
+
+Verify local HEAD equals the safe remote-tracking branch HEAD after fetch. Only
+then mark the publication REMOTE WRITE GATE PASS. If no valid stored login exists,
+stop for manual login; do not fall back to the failing injected token.
 
 ## Remote-write safety
 

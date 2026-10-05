@@ -5,7 +5,7 @@ CURRENT_STAGE: 0 — PREFLIGHT E BASELINE
 STATUS: COMPLETE — Stage 0 baseline fully validated
 UPDATED_AT: 2026-10-05 UTC
 NEXT_STAGE: STOP — Stage 1 NOT STARTED
-SAFE_TO_CONTINUE: NO — local closure is validated but publication is blocked; Stage 1 NOT STARTED
+SAFE_TO_CONTINUE: YES — Stage 0 publication verified; Stage 1 NOT STARTED
 
 ## Current environment and repository evidence
 
@@ -14,7 +14,7 @@ REPOSITORY_PATH: /workspace/Dutra-Sales-OG-Sitem
 BRANCH: integration/dutra-os-one-system
 ENTRY_HEAD: d8c31f0fd24a969a11d400bdd2031de78b79371b
 CLOSURE_HEAD: c385e7f33cfa8f52dc84004a9ca4ac2cfec20ecb
-PUBLICATION_BLOCKER_HEAD: commit containing this update (resolve with git log -1)
+PUBLICATION_BLOCKER_HEAD: 715e99aa699310199cebcf1178338ef38a57bf53 (historical)
 WORKING_TREE_INITIAL: CLEAN (git status --porcelain=v1 empty)
 WORKING_TREE_AFTER_BASELINE: CLEAN
 WORKING_TREE_PRECOMMIT: six understood documentation/Brain files only
@@ -157,8 +157,8 @@ The V3 audit is not a new runtime or current-head certification.
 - MAIN / V3 / SUPABASE / TARGET matrix: completed above.
 - Stage 0 acceptance: COMPLETE — og:check, npm test (64/64), Brain all PASS.
 - Disposable Supabase rerun capability: limited by missing CLI/psql.
-- BLOCKERS: Stage 0 baseline has no test blocker; publishing its closure is blocked by Git HTTPS username unavailable. Supabase local tooling limitation is explicitly classified and accepted for Stage 0 only.
-- Stage 1: NOT STARTED; SAFE_TO_CONTINUE_TO_STAGE_1: NO until the validated closure is published. Stop here.
+- BLOCKERS: NONE for Stage 0; Git write authentication recovered through valid stored login with injected variables temporarily empty. Supabase local tooling limitation remains explicitly accepted for Stage 0 only.
+- Stage 1: NOT STARTED; SAFE_TO_CONTINUE_TO_STAGE_1: YES (readiness only). Stop here.
 
 PRODUCTION_CHANGED: NO
 MAIN_CHANGED: NO
@@ -170,10 +170,11 @@ MERGE: NONE
 REBASE: NONE
 DEPLOY: NONE
 PUSH_SCOPE: ONLY integration/dutra-os-one-system
-PUSH: FAIL — one explicit push attempt; no retries or further remote probes
-REMOTE_WRITES_SUCCEEDED: NONE
+PUSH: PASS — stored authentication recovery published 0bf317200c93ce73b81e4ff0d0e8e9ae5ad38a7c; fetched local/remote HEAD equality verified.
+Earlier failed push attempts below are preserved as history; no unchanged failing path was retried.
+REMOTE_WRITES_SUCCEEDED: integration/dutra-os-one-system only; initial recovery push verified
 
-The local closure commit c385e7f33cfa8f52dc84004a9ca4ac2cfec20ecb was created
+Historical initial publication attempt: the local closure commit c385e7f33cfa8f52dc84004a9ca4ac2cfec20ecb was created
 with the pre-commit check passing. The explicit integration-only push ran the
 pre-push validation suite successfully, then failed with this exact error:
 
@@ -184,10 +185,10 @@ fatal: the remote end hung up unexpectedly
 error: failed to push some refs to 'https://github.com/ldutrald5/Dutra-Sales-OG-Sitem.git'
 ```
 
-The push failure does not invalidate the green local Stage 0 baseline. Publication
-requires restoration of Git HTTPS credentials/transport before a separately
-authorized retry. No credential or proxy settings were changed. This blocker is
-persisted in a local documentation-only followup commit; no second push occurred.
+The historical push failure did not invalidate the green local Stage 0 baseline.
+It was persisted in local followup commit 715e99aa before manual login restored
+write authentication. Current publication success is recorded above and in the
+stored authentication recovery section; the original error remains historical.
 
 ## Historical checkpoint (prior workspace; superseded environment finding)
 
@@ -266,3 +267,16 @@ Preferred order:
 NEXT_STAGE: Finish Stage 0, not Stage 1.
 BLOCKER: no executable local worktree in the prior Codex environment.
 SAFE_TO_CONTINUE: NO for Stage 1 until a valid worktree/test route exists.
+
+
+## Stored GitHub authentication recovery — 2026-10-05
+
+Manual GitHub login completed. With GH_TOKEN/GITHUB_TOKEN temporarily empty,
+stored auth PASS and repository permissions.push=true. Dry run PASS; real push
+PASS; fetch verified LOCAL=REMOTE=0bf317200c93ce73b81e4ff0d0e8e9ae5ad38a7c.
+The injected token had overridden the stored credential helper path; no token
+value was printed and no user credentials were deleted. Only the integration
+branch was published. Additional hardening requires real verified publication
+before marking REMOTE WRITE GATE PASS; all prior incident history is preserved.
+This hardening commit is published only after its green baseline, with final
+HEAD equality verified after fetch. Stage 1 remains NOT STARTED.
