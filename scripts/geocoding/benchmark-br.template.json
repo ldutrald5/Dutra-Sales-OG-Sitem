@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "description": "Template for a Brazil-focused commercial geocoding benchmark. Add manually verified ground-truth coordinates; do not use provider output as its own truth.",
+  "requiredBuckets": [
+    "CAPITAL",
+    "INTERIOR",
+    "INDUSTRIAL",
+    "HIGHWAY",
+    "RURAL",
+    "NO_NUMBER",
+    "COMPLEMENT"
+  ],
+  "cases": [
+    {
+      "id": "EXAMPLE-REMOVE-BEFORE-BENCHMARK",
+      "bucket": "INTERIOR",
+      "input": {
+        "street": "Rua Exemplo",
+        "number": "100",
+        "complement": "Galpão 2",
+        "district": "Industrial",
+        "postalCode": "00000000",
+        "city": "Cidade Exemplo",
+        "state": "PR",
+        "countryCode": "BR"
+      },
+      "reference": null,
+      "notes": "Schema example only. Replace with a real, manually verified public/business address before running a benchmark."
+    }
+  ]
+}
