@@ -171,10 +171,13 @@ Deno.serve(async (req: Request) => {
     if (jobId) {
       try {
         const status = Number((error as any)?.status ?? 0);
-        const retryMinutes = status === 429 ? 60 : status >= 500 ? 30 : 0;
-        await supabase.rpc("fail_enrichment_job_v1", {
+        const message = error instanceof Error ? error.message : String(error);
+        const retryable = status === 429 || status >= 500 || (status === 0 && /fetch|network|timeout|connection/i.test(message));
+        const retryMinutes = status === 429 ? 60 : retryable ? 30 : 0;
+        await supabase.rpc("fail_enrichment_job_v2", {
           p_job_id: jobId,
-          p_error: error instanceof Error ? error.message : String(error),
+          p_error: message,
+          p_retryable: retryable,
           p_retry_minutes: retryMinutes,
         });
       } catch (failError) {
