@@ -36,3 +36,14 @@ assert.ok(appSource.includes('startSalesExecutionSession'), 'Prospecção deve i
 assert.ok(appSource.includes('materializeSalesExecutionMember'), 'Fila normalizada deve materializar contexto para o Call AI');
 assert.ok(appSource.includes("state.callAI.returnTab = 'prospeccao'"), 'Call AI deve preservar origem na prospecção');
 console.log('Prospecting engine critical flows: PASS');
+
+// Stage 4 deterministic identity safety: presentation must never own another matcher.
+const identity = crm.normalizeLead({id:'IDENTITY',empresa:'Frota Ágil Ltda',telefone:'5544999999999',cnpj:'12345678000190',email:'Vendas@Example.com',website:'https://www.example.com/contato',additionalPhones:[{phone:'5511999998888'}]});
+for (const candidate of [{telefone:'(44) 99999-9999'}, {telefone:'11999998888'}, {email:' vendas@example.com '}, {site:'example.com/outro'}, {empresa:'Frota Agil Ltda'}, {id:'IDENTITY'}]) assert.deepEqual(crm.findPossibleDuplicates([identity],candidate).map(x=>x.id),['IDENTITY']);
+assert.equal(crm.findPossibleDuplicates([identity],{}).length,0,'missing identity must never match everyone');
+assert.equal(crm.findPossibleDuplicates([identity],{email:'other@example.com',site:'notexample.com',telefone:'11911111111',empresa:'Outra conta'}).length,0);
+const ambiguous=crm.normalizeLead({...identity,id:'OTHER'});
+assert.equal(crm.findPossibleDuplicates([identity,ambiguous],{cnpj:'12.345.678/0001-90'}).length,2,'matcher returns all possibilities, never picks first');
+const discovery=crm.createProspect({empresa:'Descoberta',email:'found@example.com',website:'https://example.com',observacoes:'Trecho não confirmado',importMeta:{verification:'imported_not_independently_confirmed'}},{id:'DISCOVERY'});
+assert.equal(discovery.importMeta.verification,'imported_not_independently_confirmed');assert.equal(discovery.observacoes,'Trecho não confirmado');assert.equal(discovery.email,'found@example.com');
+console.log('Stage 4 canonical deterministic identity/provenance: PASS');

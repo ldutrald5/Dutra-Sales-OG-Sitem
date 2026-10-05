@@ -88,14 +88,28 @@
     };
   }
 
+  // Deterministic identity comparison only; a match requires user review, never overwrite.
+  const phoneIdentity = value => { const key = digits(value); return key.length > 11 && key.startsWith('55') ? key.slice(2) : key; };
+  const domainIdentity = value => {
+    if (!clean(value)) return '';
+    try { return new URL(/^https?:\/\//i.test(clean(value)) ? clean(value) : 'https://' + clean(value)).hostname.toLowerCase().replace(/^www\./, ''); }
+    catch (_) { return ''; }
+  };
+
   function findPossibleDuplicates(leads, prospect) {
     const companyKey = comparable(prospect.empresa);
-    const phoneKey = digits(prospect.telefone);
+    const phoneKey = phoneIdentity(prospect.telefone);
+    const emailKey = clean(prospect.email).toLowerCase();
+    const domainKey = domainIdentity(prospect.website || prospect.site);
+    const idKey = clean(prospect.id);
     const cnpjKey = digits(prospect.cnpj);
     const codeKey = comparable(prospect.internalCode || prospect.codigo);
     return (leads || []).filter(item => {
       const lead = normalizeLead(item);
-      return (phoneKey && digits(lead.telefone) === phoneKey) ||
+      return (idKey && clean(lead.id) === idKey) ||
+        (phoneKey && [lead.telefone, ...lead.additionalPhones.map(item => item.phone)].some(value => phoneIdentity(value) === phoneKey)) ||
+        (emailKey && clean(lead.email).toLowerCase() === emailKey) ||
+        (domainKey && domainIdentity(lead.website || lead.site) === domainKey) ||
         (cnpjKey && digits(lead.cnpj) === cnpjKey) ||
         (codeKey && comparable(lead.internalCode) === codeKey) ||
         (companyKey && comparable(lead.empresa) === companyKey);
@@ -114,6 +128,9 @@
       cnpj: digits(input.cnpj),
       cpf: digits(input.cpf),
       internalCode: clean(input.internalCode || input.codigo),
+      email: clean(input.email),
+      website: clean(input.website || input.site),
+      importMeta: input.importMeta || null,
       cidadeUf: clean(input.cidadeUf),
       segmentId: input.segmentId || 'transportadora',
       status: 'novo',
@@ -133,7 +150,7 @@
       sourceChannel: input.sourceChannel || 'sistema_og',
       batchTag: clean(input.batchTag),
       enteredAt: input.enteredAt || now,
-      observacoes: `Cadastro rápido em ${new Date(now).toLocaleDateString('pt-BR')}`,
+      observacoes: clean(input.observacoes) || `Cadastro rápido em ${new Date(now).toLocaleDateString('pt-BR')}`,
       createdDate: now,
       createdBy: input.createdBy || null,
       assignedTo: input.assignedTo || null,

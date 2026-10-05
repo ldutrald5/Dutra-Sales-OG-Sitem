@@ -1,0 +1,73 @@
+/* Stage 4: scoped presentation over canonical CRM/execution, using unified OG tokens. */
+.dutra-shell #tab-prospeccao { overflow-wrap: anywhere; }
+.dutra-shell #tab-prospeccao .clean-card { min-width: 0; padding: 18px; background: var(--og-surface); border-color: var(--og-border-dark); }
+.dutra-shell .prospecting-hero { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; min-height: 0; }
+.dutra-shell .prospecting-hero h1 { font-size: 24px; line-height: 1.2; }
+.dutra-shell .prospecting-hero p { font-size: 13px; color: var(--og-text-secondary); }
+.dutra-shell .prospecting-tabs { flex-wrap: wrap; align-self: center; }
+.dutra-shell #tab-prospeccao :is(button,a,input,select,summary) { min-height: 44px; max-width: 100%; white-space: normal; }
+.dutra-shell #tab-prospeccao :is(input,select,textarea) { width: 100%; min-width: 0; font-size: 14px; }
+.dutra-shell #tab-prospeccao :is(button,a) { border-radius: 10px; }
+.dutra-shell #prospecting-root { display: grid; gap: 16px; min-width: 0; }
+.prospect-status-strip { grid-column: 1 / -1; font-size: 12px; color: var(--og-text-secondary); padding: 8px 0; }
+.dutra-shell .prospect-inbox-grid { grid-template-columns: minmax(0,2fr) minmax(220px,1fr); gap: 16px; }
+.dutra-shell .prospect-capture textarea { min-height: 130px; }
+.dutra-shell .prospect-table-wrap { overflow: visible; }
+.dutra-shell .prospect-preview table, .dutra-shell .prospect-preview tbody { display: grid; width: 100%; }
+.dutra-shell .prospect-preview thead { display: none; }
+.dutra-shell .prospect-preview tr { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--og-border-dark); }
+.dutra-shell .prospect-preview td { padding: 0; min-width: 0; }
+.dutra-shell .prospect-preview td:last-child { grid-column: 1 / -1; display: grid; gap: 8px; }
+.prospect-review-state { color: var(--og-brand); font-size: 12px; }
+.dutra-shell .prospect-queue-list article { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; border: 1px solid var(--og-border-dark); border-radius: 12px; }
+.dutra-shell .prospect-queue-list [data-prospect-open] { flex: 1 1 100%; text-align: left; min-width: 0; }
+.dutra-shell .prospect-queue-list :is(b,span,small) { white-space: normal; overflow-wrap: anywhere; }
+.dutra-shell .prospect-queue-list :is(a,button):not([data-prospect-open]) { flex: 1 1 70px; text-align: center; padding: 12px 8px; border: 1px solid var(--og-border-dark); }
+.dutra-shell .prospect-filters, .dutra-shell .prospect-batch-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.dutra-shell .prospect-session-metrics { display: flex; flex-wrap: wrap; gap: 8px; }
+.dutra-shell .prospect-session-metrics > div { flex: 1 1 85px; padding: 10px; background: var(--og-card); border-radius: 10px; }
+.dutra-shell .prospect-session-metrics small { font-size: 11px; }
+.dutra-shell .prospect-focus h1 { font-size: 24px; line-height: 1.2; }
+.dutra-shell .prospect-focus header { display: flex; flex-wrap: wrap; gap: 10px; }
+.dutra-shell .prospect-focus header > div { flex: 1; min-width: 0; }
+.dutra-shell .prospect-identity { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--og-text-secondary); }
+.dutra-shell .prospect-next-best { display: grid; gap: 6px; padding: 14px; border-left: 3px solid var(--og-brand); margin: 14px 0; background: var(--og-card); }
+.dutra-shell .prospect-next-best b { color: var(--og-brand); }
+.dutra-shell .prospect-focus-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dutra-shell .prospect-focus-actions :is(button,a) { flex: 1 1 100px; padding: 12px 8px; border: 1px solid var(--og-border-dark); text-align: center; }
+.dutra-shell .prospect-result-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 18px; }
+.dutra-shell .prospect-result-grid label { min-width: 0; display: grid; gap: 6px; font-size: 12px; }
+.dutra-shell .prospect-save-next { width: 100%; margin-top: 16px; position: sticky; bottom: 16px; z-index: 2; }
+.prospect-context-queue { align-self: start; }
+.prospect-context-queue h2 { font-size: 18px; margin: 8px 0; }
+.prospect-context-queue button { width: 100%; text-align: left; display: grid; gap: 5px; padding: 12px; margin: 8px 0; background: var(--og-card); }
+.prospect-context-queue small { color: var(--og-text-secondary); }
+@media (min-width: 1100px) {
+  #prospecting-root[data-prospect-view="queue"] { grid-template-columns: minmax(0,1fr) 320px; }
+  #prospecting-root[data-prospect-view="queue"] .prospect-queue { grid-column: 1; grid-row: 2 / 4; }
+  #prospecting-root[data-prospect-view="queue"] .prospect-sales-execution { grid-column: 2; grid-row: 2; }
+  #prospecting-root[data-prospect-view="queue"] .territory-readiness { grid-column: 2; grid-row: 3; }
+  #prospecting-root.prospect-workspace-focus { grid-template-columns: minmax(0,1fr) 300px; }
+  .prospect-workspace-focus .prospect-session-metrics { grid-column: 1 / -1; }
+  .prospect-workspace-focus .prospect-focus { grid-column: 1; }
+  .prospect-workspace-focus .prospect-context-queue { grid-column: 2; }
+}
+@media (max-width: 1023px) { .dutra-shell .prospect-save-next { bottom: calc(76px + env(safe-area-inset-bottom,0px)); } }
+@media (max-width: 600px) {
+  .dutra-shell #tab-prospeccao .clean-card { padding: 14px; }
+  .dutra-shell .prospect-inbox-grid, .dutra-shell .prospect-result-grid { grid-template-columns: minmax(0,1fr); }
+  .dutra-shell .prospect-preview tr { grid-template-columns: minmax(0,1fr); }
+  .dutra-shell .prospect-preview header { flex-wrap: wrap; gap: 12px; }
+  .dutra-shell .prospect-filters { grid-template-columns: minmax(0,1fr); }
+  .dutra-shell .prospecting-tabs { width: 100%; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .dutra-shell .prospecting-tabs button { padding: 8px 4px; font-size: 12px; }
+}
+
+/* Keep the active client ahead of session decoration, especially on a phone. */
+.prospect-last-context { font-size: 12px; color: var(--og-text-secondary); margin: 10px 0; }
+@media (max-width: 600px) {
+  .dutra-shell #tab-prospeccao[data-prospect-view="focus"] .prospecting-hero :is(h1,p),
+  .dutra-shell #tab-prospeccao[data-prospect-view="focus"] .prospect-session-metrics { display: none; }
+  .dutra-shell #tab-prospeccao[data-prospect-view="focus"] .prospecting-hero { gap: 6px; }
+  .dutra-shell #tab-prospeccao[data-prospect-view="focus"] .prospect-focus header [data-prospect-feedback] { display: none; }
+}
