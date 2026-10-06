@@ -461,10 +461,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const pending = pendingSyncReview();
       if (!pending) return;
       try {
-        const response = await apiFetch('/api/state', {
-          method: 'PUT',
-          body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })
-        });
+        const generationAtReviewSend = serverSyncGeneration;
+        const reviewPayload = JSON.parse(JSON.stringify({ leads:state.leads, history:state.history, operations:state.operations, revision:pending.baseRevision }));
+        await OG_SYNC_BRIDGE.queueState(reviewPayload);
+        if (serverSyncGeneration !== generationAtReviewSend) {
+          await OG_SYNC_BRIDGE.queueState(currentSyncPayload(pending.baseRevision));
+          setSyncStatus('Revisão alterada · confirmar envio novamente', 'conflict');
+          return;
+        }
+        const response = await apiFetch('/api/state', {method:'PUT', body:JSON.stringify(reviewPayload)});
         if (response.status === 409) {
           const remote = await response.json();
           const conflict = OG_SYNC_CONFLICT.createConflict(
@@ -482,9 +487,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const saved = await response.json();
         serverRevision = Number(saved.revision || pending.baseRevision);
         await clearSyncReview();
-        try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
-        setSyncStatus('Sincronizado', 'ok');
-        showNotification('Revisão conciliada sincronizada.', 'success');
+        let acknowledged = false;
+        if (serverSyncGeneration !== generationAtReviewSend) await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+        else { try { acknowledged = await OG_SYNC_BRIDGE.clearQueuedState(reviewPayload); } catch {} }
+        if (acknowledged && serverSyncGeneration === generationAtReviewSend) {
+          setSyncStatus('Sincronizado', 'ok');
+          showNotification('Revisão conciliada sincronizada.', 'success');
+        } else scheduleServerSync();
       } catch {
         setSyncStatus('Revisão aguardando envio', 'offline');
       }
@@ -522,7 +531,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!queued?.body) return true;
 
     const generationAtStart = serverSyncGeneration;
-    const payload = currentSyncPayload(queued.body.revision);
+    const payload = JSON.parse(JSON.stringify(currentSyncPayload(queued.body.revision)));
+    const expectedQueuedBody = JSON.parse(JSON.stringify(queued.body));
     serverSyncInFlight = true;
     try {
       const response = await apiFetch(queued.url || '/api/state', {
@@ -545,8 +555,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Servidor indisponível');
       const saved = await response.json();
       serverRevision = Number(saved.revision || payload.revision || serverRevision);
-      await OG_SYNC_BRIDGE.clearQueuedState();
       if (serverSyncGeneration !== generationAtStart) {
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+        setSyncStatus('Alterações locais aguardando envio', 'busy');
+        clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(runScheduledServerSync, 120);
+        return false;
+      }
+      const acknowledged = await OG_SYNC_BRIDGE.clearQueuedState(expectedQueuedBody);
+      if (!acknowledged || serverSyncGeneration !== generationAtStart) {
         setSyncStatus('Alterações locais aguardando envio', 'busy');
         clearTimeout(serverSyncTimer);
         serverSyncTimer = setTimeout(runScheduledServerSync, 120);
@@ -574,9 +591,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const generationAtStart = serverSyncGeneration;
-    const payload = currentSyncPayload();
+    const payload = JSON.parse(JSON.stringify(currentSyncPayload()));
+    let retryAfterAck = false;
     serverSyncInFlight = true;
     try {
+      // The current payload may include newer local data than the recovery
+      // record. Only retire the exact outbox intention captured under this lock.
+      const queuedAtSend = await OG_SYNC_BRIDGE.readQueuedState();
+      const expectedQueuedBody = queuedAtSend?.body ? JSON.parse(JSON.stringify(queuedAtSend.body)) : null;
+      if (serverSyncGeneration !== generationAtStart || pendingSyncConflict() || pendingSyncReview()
+        || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return;
       const response = await apiFetch('/api/state', { method: 'PUT', body: JSON.stringify(payload) });
       if (response.status === 409) {
         const remote = await response.json();
@@ -594,8 +618,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Servidor indisponível');
       const saved = await response.json();
       serverRevision = Number(saved.revision || serverRevision);
-      try { await OG_SYNC_BRIDGE.clearQueuedState(); } catch {}
-      setSyncStatus(serverSyncGeneration === generationAtStart ? 'Sincronizado' : 'Salvando alterações recentes…', serverSyncGeneration === generationAtStart ? 'ok' : 'busy');
+      let acknowledged = false;
+      if (serverSyncGeneration !== generationAtStart) await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+      else acknowledged = await OG_SYNC_BRIDGE.clearQueuedState(expectedQueuedBody);
+      const currentAcknowledged = acknowledged && serverSyncGeneration === generationAtStart;
+      retryAfterAck = !currentAcknowledged;
+      setSyncStatus(currentAcknowledged ? 'Sincronizado' : 'Salvando alterações recentes…', currentAcknowledged ? 'ok' : 'busy');
     } catch {
       try {
         await OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision));
@@ -610,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } finally {
       serverSyncInFlight = false;
-      if (serverSyncGeneration !== generationAtStart && !pendingSyncConflict() && !pendingSyncReview() && !readSmallMarker(SYNC_CONFLICT_MARKER) && !readSmallMarker(SYNC_REVIEW_MARKER)) {
+      if ((retryAfterAck || serverSyncGeneration !== generationAtStart) && !pendingSyncConflict() && !pendingSyncReview() && !readSmallMarker(SYNC_CONFLICT_MARKER) && !readSmallMarker(SYNC_REVIEW_MARKER)) {
         clearTimeout(serverSyncTimer);
         serverSyncTimer = setTimeout(runScheduledServerSync, 120);
       }
@@ -739,16 +767,24 @@ document.addEventListener('DOMContentLoaded', () => {
       showSyncReviewBanner();
       return;
     }
+    const generationAtReadStart = serverSyncGeneration;
     if (!(await flushQueuedState({ reconnect }))) return;
+    if (serverSyncGeneration !== generationAtReadStart) return;
     try {
       const response = await apiFetch('/api/state', { cache: 'no-store' });
       if (!response.ok) throw new Error('Sem sincronização');
       const shared = await response.json();
+      const queuedDuringRead = await OG_SYNC_BRIDGE.readQueuedState();
+      // A response belongs to the generation that requested it. New local work,
+      // a foreground writer or active review must never be replaced by a stale GET.
+      if (!navigator.onLine || serverSyncGeneration !== generationAtReadStart || serverSyncInFlight || queuedDuringRead
+        || pendingSyncConflict() || pendingSyncReview() || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return;
       serverRevision = Number(shared.revision || 0);
-      const serverHasData = (shared.leads?.length || 0) + (shared.history?.length || 0) + (shared.operations?.activityEvents?.length || 0) > 0;
-      const browserHasData = state.leads.length + state.history.length > 0;
+      const hasOperations = operations => Object.values(OG_OPERATIONS_MODEL.summarizeOperations(operations).counts).some(count => count > 0);
+      const serverHasData = Boolean(shared.leads?.length || shared.history?.length || hasOperations(shared.operations));
+      const browserHasData = Boolean(state.leads.length || state.history.length || hasOperations(state.operations));
       if (serverHasData) applySharedState(shared);
-      else if (browserHasData) scheduleServerSync();
+      else if (browserHasData) { scheduleServerSync(); return; }
       setSyncStatus('Sincronizado', 'ok');
     } catch {
       setSyncStatus('Salvo neste aparelho', 'offline');

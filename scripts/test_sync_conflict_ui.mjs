@@ -36,7 +36,10 @@ assert.ok(app.includes('Enviar revisão'),'envio conciliado deve exigir ação e
 assert.ok(app.includes("if (pendingSyncReview())"),'sync normal deve parar enquanto revisão aguarda confirmação');
 assert.ok(app.includes("navigator.serviceWorker.addEventListener('message'"),'app deve receber handoff do service worker');
 assert.ok(app.includes("event.data?.type === 'OG_SYNC_OUTBOX_READY'"),'service worker deve delegar flush ao app autenticado');
-assert.ok(app.includes("body: JSON.stringify({ leads: state.leads, history: state.history, operations: state.operations, revision: pending.baseRevision })"),'envio conciliado deve usar revisão-base');
+assert.match(app,/const reviewPayload = JSON\.parse\(JSON\.stringify\(\{ leads:state\.leads, history:state\.history, operations:state\.operations, revision:pending\.baseRevision \}\)\)/,'revisão deve capturar um snapshot imutável com a revisão-base');
+assert.ok(app.includes("body:JSON.stringify(reviewPayload)"),'envio conciliado deve usar exatamente o snapshot revisado');
+assert.ok(app.includes("clearQueuedState(reviewPayload)"),'ACK de revisão só pode limpar o snapshot confirmado');
+assert.ok(app.includes("serverSyncGeneration === generationAtReviewSend"),'mudança durante revisão não pode ser marcada como sincronizada pelo ACK antigo');
 assert.ok(app.includes("if (response.status === 409)"),'novo 409 durante envio conciliado deve ser tratado');
 assert.ok(!app.includes("sessionStorage.setItem('og_sync_conflict'"),'snapshot completo não deve depender de quota do sessionStorage');
 assert.ok(!app.includes("sessionStorage.setItem('og_sync_review_pending'"),'recovery não deve depender do sessionStorage');

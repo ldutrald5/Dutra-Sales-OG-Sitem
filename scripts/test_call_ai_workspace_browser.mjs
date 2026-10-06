@@ -376,19 +376,18 @@ try {
   await page.locator('#call-ai-summary').fill('QA canonical ACK before storage retry');
   await page.locator('#call-ai-next-action').fill('QA ACK then durable outbox retry');
   await page.evaluate(() => {
-    // Abort actual IndexedDB write transactions to model unavailable durable
-    // storage without replacing Sync Bridge or the /api/state transport.
-    window.__qaDbTransaction = IDBDatabase.prototype.transaction;
+    // Abort actual outbox puts, not the compare/delete transaction of an
+    // unrelated state ACK. The assertion guards this result's durable write.
+    window.__qaOutboxPut = IDBObjectStore.prototype.put;
     __callQA.abortOutbox = true;
     __callQA.outboxAborts = 0;
-    IDBDatabase.prototype.transaction = function (stores, mode, ...args) {
-      const transaction = window.__qaDbTransaction.call(this, stores, mode, ...args);
-      const names = typeof stores === 'string' ? [stores] : Array.from(stores);
-      if (__callQA.abortOutbox && mode === 'readwrite' && names.includes('outbox')) {
+    IDBObjectStore.prototype.put = function (...args) {
+      const request = window.__qaOutboxPut.apply(this, args);
+      if (__callQA.abortOutbox && this.name === 'outbox') {
         __callQA.outboxAborts++;
-        transaction.abort();
+        this.transaction.abort();
       }
-      return transaction;
+      return request;
     };
   });
   await plan('sales', { hold: 'ack-before-outbox' });
@@ -408,7 +407,7 @@ try {
   assert.equal(await page.locator('#call-ai-summary').inputValue(), 'QA canonical ACK before storage retry');
   assert.equal(await page.locator('#call-ai-next-action').inputValue(), 'QA ACK then durable outbox retry');
   assert.equal((await currentLead('QA-CALL-N')).interactions.filter(item => item.sessionId === storageRetryCommand.externalId).length, 1);
-  await page.evaluate(() => { __callQA.abortOutbox = false; IDBDatabase.prototype.transaction = window.__qaDbTransaction; });
+  await page.evaluate(() => { __callQA.abortOutbox = false; IDBObjectStore.prototype.put = window.__qaOutboxPut; });
   await plan('sales', { body: { ...canonicalReply, duplicate: true } });
   await saveReview();
   assert.equal(await page.evaluate(() => __callQA.sales.at(-1).body.externalId), storageRetryCommand.externalId);

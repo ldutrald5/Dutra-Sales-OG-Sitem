@@ -56,19 +56,30 @@
       request.onerror=()=>reject(request.error||new Error('Falha ao ler Sync Bridge.'));
     });}finally{db.close();}
   }
-  async function remove(store,key){
+  async function remove(store,key,expectedBody){
     const db=await openDb();
-    try{await new Promise((resolve,reject)=>{
+    try{return await new Promise((resolve,reject)=>{
       const tx=db.transaction(store,'readwrite');
-      tx.objectStore(store).delete(key);
-      tx.oncomplete=()=>resolve();
+      const objectStore=tx.objectStore(store);
+      let cleared=true;
+      if(expectedBody === undefined) objectStore.delete(key);
+      else {
+        const request=objectStore.get(key);
+        request.onsuccess=()=>{
+          const record=request.result;
+          if(!record || JSON.stringify(record.body) === JSON.stringify(expectedBody)) objectStore.delete(key);
+          else cleared=false;
+        };
+      }
+      tx.oncomplete=()=>resolve(cleared);
       tx.onerror=()=>reject(tx.error||new Error('Falha ao limpar Sync Bridge.'));
+      tx.onabort=()=>reject(tx.error||new Error('Limpeza do Sync Bridge abortada.'));
     });}finally{db.close();}
   }
 
   async function queueState(body,options={}){const record=createQueuedRecord(body,options);await write(OUTBOX_STORE,OUTBOX_KEY,record);return record;}
   const readQueuedState=()=>read(OUTBOX_STORE,OUTBOX_KEY);
-  const clearQueuedState=()=>remove(OUTBOX_STORE,OUTBOX_KEY);
+  const clearQueuedState=expectedBody=>remove(OUTBOX_STORE,OUTBOX_KEY,expectedBody);
   const saveConflict=conflict=>write(RECOVERY_STORE,CONFLICT_KEY,conflict);
   const loadConflict=()=>read(RECOVERY_STORE,CONFLICT_KEY);
   const clearConflict=()=>remove(RECOVERY_STORE,CONFLICT_KEY);
