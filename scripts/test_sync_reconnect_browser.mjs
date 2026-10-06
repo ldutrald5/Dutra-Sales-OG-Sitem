@@ -29,7 +29,7 @@ try{
  // Wait for actual remote seed acknowledgement, not an optimistic initial label.
  await page.waitForFunction(async()=>{const remote=await(await fetch('/api/state')).json();return remote.leads.some(x=>x.id==='QA-RECONNECT');});
  await page.waitForFunction(async()=>!(await OG_SYNC_BRIDGE.readQueuedState()));
- await page.evaluate(()=>{window.__qaQueueCompleted=0;const original=OG_SYNC_BRIDGE.queueState;OG_SYNC_BRIDGE.queueState=async(...args)=>{const result=await original(...args);window.__qaQueueCompleted++;return result;};});
+ await page.evaluate(()=>{window.__qaQueueCompleted=0;const original=OG_SYNC_BRIDGE.queueState;OG_SYNC_BRIDGE.queueState=async(...args)=>{const result=await original(...args);window.__qaQueueCompleted++;if(window.__qaQueueCompleted===window.__qaHoldAfter){window.__qaQueueHeld=true;await new Promise(resolve=>{window.__qaReleaseQueue=resolve;});}return result;};});
  const listeners=await page.evaluate(()=>window.__qaListeners);
  const outcome=async(label)=>{await page.locator('[data-desk-select="QA-RECONNECT"]').click();await page.locator('[data-client-register]').click();await page.locator('#desk-result').selectOption('falar_depois');await page.locator('#desk-next-action').fill(label);await page.locator('#desk-follow-mode').selectOption('tomorrow');await page.locator('#desk-save-stay').click();};
  const queued=()=>page.evaluate(()=>OG_SYNC_BRIDGE.readQueuedState());
@@ -38,12 +38,14 @@ try{
  await context.setOffline(false);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');assert.equal(await queued(),null);
  console.log('Empty outbox offline/reconnect: genuine healthy GET, no manufactured pending PASS');
  await context.setOffline(true);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='offline');
- const queueBaseline=await page.evaluate(()=>window.__qaQueueCompleted);await outcome('QA deterministic offline result');
+ const queueBaseline=await page.evaluate(()=>{window.__qaHoldAfter=window.__qaQueueCompleted+2;return window.__qaQueueCompleted;});await outcome('QA deterministic offline result');
  // The second durable write comes from the failed debounced PUT catch, after
  // the command's first outbox write. It proves the historically hanging path.
- await page.waitForFunction(n=>window.__qaQueueCompleted>=n+2,queueBaseline);assert.ok(failedPuts>0,'offline scheduled PUT must actually fail');assert.ok(await queued());
- await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='offline');
- await context.setOffline(false);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');
+ await page.waitForFunction(()=>window.__qaQueueHeld===true);assert.ok(failedPuts>0,'offline scheduled PUT must actually fail');assert.ok(await queued());
+ // Reconnect while the failed sender still holds its lock after durable queueing.
+ await context.setOffline(false);await page.waitForFunction(()=>navigator.onLine && document.querySelector('#og-sync-status').dataset.mode==='busy');
+ await page.evaluate(()=>{window.__qaReleaseQueue();window.__qaHoldAfter=null;});
+ await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');
  assert.equal(await queued(),null);assert.equal((await remote()).leads.find(x=>x.id==='QA-RECONNECT').nextAction,'QA deterministic offline result');
  console.log('Unregistered Service Worker: failed scheduled PUT durably queued; real reconnect ACK clears outbox and reaches OK PASS');
  rejectPut=true;const beforeFailure=puts;const failedQueueBefore=await page.evaluate(()=>window.__qaQueueCompleted);await outcome('QA keep pending under503');

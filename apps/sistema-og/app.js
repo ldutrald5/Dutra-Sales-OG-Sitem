@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let serverRevision = 0;
   let legacyReconciliationPlan = null;
   let serverSyncInFlight = false;
+  let reconnectSyncRequested = false;
   let serverSyncGeneration = 0;
   let activeProposalContext = null;
   let proposalEventsSyncInFlight = false;
@@ -499,13 +500,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  async function flushQueuedState() {
+  function consumeReconnectIntent() {
+    const requested = reconnectSyncRequested;
+    reconnectSyncRequested = false;
+    if (!requested || !navigator.onLine || !syncRecoveryReady || serverSyncInFlight
+      || pendingSyncConflict() || pendingSyncReview()
+      || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return;
+    void loadSharedState({ reconnect:true }).catch(() => setSyncStatus('Sincronização pendente', 'offline'));
+  }
+
+  async function flushQueuedState({ reconnect = false } = {}) {
     if (!syncRecoveryReady || pendingSyncConflict() || pendingSyncReview()) return false;
     if (readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return false;
-    if (serverSyncInFlight) return false;
+    if (serverSyncInFlight) { if (reconnect) reconnectSyncRequested = true; return false; }
 
     let queued = null;
     try { queued = await OG_SYNC_BRIDGE.readQueuedState(); } catch {}
+    // Another foreground request may acquire the lock while IndexedDB is read.
+    if (serverSyncInFlight) { if (reconnect) reconnectSyncRequested = true; return false; }
+    if (pendingSyncConflict() || pendingSyncReview() || readSmallMarker(SYNC_CONFLICT_MARKER) || readSmallMarker(SYNC_REVIEW_MARKER)) return false;
     if (!queued?.body) return true;
 
     const generationAtStart = serverSyncGeneration;
@@ -547,6 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     } finally {
       serverSyncInFlight = false;
+      consumeReconnectIntent();
     }
   }
 
@@ -600,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(serverSyncTimer);
         serverSyncTimer = setTimeout(runScheduledServerSync, 120);
       }
+      consumeReconnectIntent();
     }
   }
 
@@ -695,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function loadSharedState() {
+  async function loadSharedState({ reconnect = false } = {}) {
     if (!syncRecoveryReady) {
       setSyncStatus('Preparando sincronização…', 'busy');
       return;
@@ -724,7 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showSyncReviewBanner();
       return;
     }
-    if (!(await flushQueuedState())) return;
+    if (!(await flushQueuedState({ reconnect }))) return;
     try {
       const response = await apiFetch('/api/state', { cache: 'no-store' });
       if (!response.ok) throw new Error('Sem sincronização');
@@ -4628,11 +4643,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     overlay.querySelector('[data-sheet-whatsapp]')?.addEventListener('click', () => openDeskWhatsApp(OG_CRM_SERVICE.getLeadById(state.leads, lead.id) || lead));
     overlay.querySelector('[data-sheet-call-ai]')?.addEventListener('click', () => {
       closeClientSheet();
-      state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
-      state.callAI.returnTab = state.currentTab || 'dia';
-      state.callAI.selectedLeadId = lead.id;
-      switchTab('call-ai');
+      const returnTab = state.currentTab || 'dia';
       selectCallClient(lead.id);
+      if (callLead()?.id !== lead.id) return;
+      state.callAI.returnTab = returnTab;
+      switchTab('call-ai');
     });
     overlay.querySelector('[data-sheet-quote]')?.addEventListener('click', () => {
       state.client.nome = lead.nome || '';
@@ -5587,10 +5602,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (action === 'call-ai') {
         closeCommandCenter();
         state.callAI.context = OG_CALL_AI_CONTEXT.build(lead);
-        state.callAI.returnTab = state.currentTab || 'dia';
-        state.callAI.selectedLeadId = lead.id;
+        const returnTab = state.currentTab || 'dia';
+        selectCallClient(lead.id);
+        if (callLead()?.id !== lead.id) return;
+        state.callAI.returnTab = returnTab;
         switchTab('call-ai');
-        return selectCallClient(lead.id);
       }
       if (action === 'quote') {
         state.client.nome = lead.nome || '';
@@ -7137,6 +7153,53 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     expansao: 'Expansão', indicacao: 'Pedido de indicação'
   };
 
+  // Ephemeral UI ownership only; CRM, execution and sync retain their existing owners.
+  function callContext() {
+    return { generation: state.callAI.generation || 0, lead: callLead(), sessionId: state.callAI.sessionId, recording: state.callAI.recording };
+  }
+
+  function isCurrentCall(context) {
+    return Boolean(ownsCallControls(context) && context.lead === callLead());
+  }
+
+  function ownsCallControls(context) {
+    return Boolean(context?.lead && String(context.lead.id) === String(callLead()?.id)
+      && context.generation === (state.callAI.generation || 0)
+      && context.sessionId === state.callAI.sessionId
+      && context.recording === state.callAI.recording);
+  }
+
+  function callReviewStatus(message, mode = 'idle') {
+    const target = document.getElementById('call-ai-review-status');
+    if (target) { target.textContent = message; target.dataset.state = mode; }
+  }
+
+  function clearCallSessionDraft() {
+    state.callAI.notes = ''; state.callAI.signals = []; state.callAI.inputOrigin = 'manual_notes';
+    state.callAI.reviewCommitted = null; state.callAI.script = []; state.callAI.sources = [];
+    state.callAI.completed = []; state.callAI.step = 0;
+    for (const id of ['call-ai-notes','call-ai-text-import','call-ai-summary']) document.getElementById(id).value = '';
+    document.getElementById('call-ai-sources').innerHTML = '';
+    const suggestion = document.getElementById('call-ai-suggestion-pending');
+    suggestion.classList.add('hidden'); suggestion.innerHTML = '';
+    lockCallReviewInputs(false);
+    document.getElementById('call-ai-save').textContent = 'Aprovar e registrar no CRM';
+  }
+
+  function lockCallReviewInputs(locked) {
+    document.querySelectorAll('#call-ai-review :is(input,select,textarea)').forEach(field => { field.disabled = locked; });
+  }
+
+  function validateCallPayload(payload, ownership) {
+    const session = payload?.recording?.call_session_id || payload?.transcript?.call_session_id;
+    const company = payload?.recording?.company_id;
+    if ((session && session !== ownership.sessionId)
+      || (company && String(company) !== String(ownership.lead.salesExecution?.companyId))) {
+      throw new Error('Resposta de outra sessão recusada. Consulte novamente esta conta.');
+    }
+    return payload;
+  }
+
   function resetCallAICentralForLead(lead) {
     state.callAI.intent = 'prepare_call';
     state.callAI.centralResponse = null;
@@ -7148,6 +7211,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (result) result.innerHTML = '';
     const status = document.getElementById('call-ai-central-state');
     if (status) { status.dataset.state = 'idle'; status.textContent = 'Escolha um modo. A IA só será acionada quando você pedir.'; }
+    document.getElementById('call-ai-generate').disabled = false;
   }
 
   function renderCallAICentral() {
@@ -7165,33 +7229,49 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const target = document.getElementById('call-ai-structured-result');
     if (!target) return;
     const block = (label, value, className = '') => value ? `<section class="${className}"><span>${label}</span><p>${escapeHtml(value).replace(/\n/g, '<br>')}</p></section>` : '';
-    target.innerHTML = `${block('RESUMO', response.summary)}${block('RESPONDA', response.recommendedResponse, 'primary')}${block('PERGUNTE', response.question)}${block('OBJETIVO', response.objective)}${block('PRÓXIMO MOVIMENTO', response.suggestedNextAction)}${response.crmSuggestion ? `<section class="call-ai-crm-preview"><span>PREVIEW DO CRM</span><p>${escapeHtml(response.crmSuggestion.summary || 'Revise os campos antes de salvar.')}</p></section>` : ''}<footer><button type="button" data-ai-copy>Copiar</button><button type="button" data-ai-save-note>Salvar como nota</button><button type="button" data-ai-next-action>Criar próxima ação</button><button type="button" data-ai-useful>👍 Útil</button><button type="button" data-ai-not-useful>👎 Não útil</button></footer><small>${response.source === 'safe_local_fallback' ? 'Modo seguro local · sem consumo de IA externa' : response.cached ? 'Resposta reutilizada do cache' : 'Resposta do provedor configurado'}</small>`;
+    target.innerHTML = `${block('RESUMO', response.summary)}${block('RESPONDA', response.recommendedResponse, 'primary')}${block('PERGUNTE', response.question)}${block('OBJETIVO', response.objective)}${block('PRÓXIMO MOVIMENTO', response.suggestedNextAction)}${response.crmSuggestion ? `<section class="call-ai-crm-preview"><span>PREVIEW DO CRM</span><p>${escapeHtml(response.crmSuggestion.summary || 'Revise os campos antes de salvar.')}</p></section>` : ''}<footer><button type="button" data-ai-copy>Copiar</button><button type="button" data-ai-save-note>Revisar sugestão</button><button type="button" data-ai-next-action>Criar próxima ação</button><button type="button" data-ai-useful>👍 Útil</button><button type="button" data-ai-not-useful>👎 Não útil</button></footer><small>${response.source === 'safe_local_fallback' ? 'Modo seguro local · sem consumo de IA externa' : response.cached ? 'Resposta reutilizada do cache' : 'Resposta do provedor configurado'}</small>`;
     target.classList.remove('hidden');
   }
 
   async function runCallAIIntent() {
     const lead = callLead();
     if (!lead) return showNotification('Selecione uma conta antes de usar o Call AI.', 'info');
+    if (state.callAI.generating) return;
+    if (!navigator.onLine) {
+      const status = document.getElementById('call-ai-central-state');
+      status.dataset.state = 'offline'; status.textContent = 'Offline · transcrição e IA remotas indisponíveis. Anotações e revisão local continuam disponíveis.';
+      return;
+    }
+    const ownership = callContext();
     const intent = state.callAI.intent;
     const input = document.getElementById('call-ai-live-input')?.value.trim() || '';
     const status = document.getElementById('call-ai-central-state');
     const button = document.getElementById('call-ai-generate');
     status.dataset.state = 'loading'; status.textContent = 'Preparando contexto mínimo e orientação…'; button.disabled = true;
-    const context = OG_CALL_AI_CONTEXT.build(lead, { intent });
-    state.callAI.context = context;
-    let knowledge = [];
+    state.callAI.generating = true;
     try {
-      const response = await apiFetch('/api/knowledge/search', { method:'POST', body:JSON.stringify({ query:OG_KNOWLEDGE_SELECTOR.query(intent, context, input), tags:OG_KNOWLEDGE_SELECTOR.select(intent), limit:OG_CALL_AI_CONTEXT.BUDGET.maxKnowledgeSections }) });
-      if (response.ok) knowledge = (await response.json()).results || [];
-    } catch (_) { /* modo seguro local continua disponível */ }
-    const request = OG_CALL_AI_PROMPTS.build(intent, context, input, knowledge.map(item => ({ id:item.id, title:item.title, text:item.text, status:item.status })));
-    const response = await OG_AI_SERVICE.generate(request, { cacheKey: intent === 'post_call' || input ? '' : OG_CALL_AI_CONTEXT.cacheKey(context, intent) });
-    if (callLead()?.id !== lead.id) return;
-    state.callAI.centralResponse = response;
-    renderCallAIStructuredResponse(response);
-    status.dataset.state = 'success'; status.textContent = `${OG_CALL_AI_PROMPTS.INTENTS[intent].label} pronta para revisão.`;
-    document.getElementById('call-ai-cost-hint').textContent = response.source === 'safe_local_fallback' ? 'Modo local · zero chamada externa' : `Nível ${request.modelTier} · contexto ${JSON.stringify(request).length} caracteres`;
-    button.disabled = false;
+      const context = OG_CALL_AI_CONTEXT.build(lead, { intent });
+      state.callAI.context = context;
+      let knowledge = [];
+      try {
+        const response = await apiFetch('/api/knowledge/search', { method:'POST', body:JSON.stringify({ query:OG_KNOWLEDGE_SELECTOR.query(intent, context, input), tags:OG_KNOWLEDGE_SELECTOR.select(intent), limit:OG_CALL_AI_CONTEXT.BUDGET.maxKnowledgeSections }) });
+        if (response.ok) knowledge = (await response.json()).results || [];
+      } catch (_) { /* modo seguro local continua disponível */ }
+      if (!isCurrentCall(ownership) || intent !== state.callAI.intent) return;
+      const request = OG_CALL_AI_PROMPTS.build(intent, context, input, knowledge.map(item => ({ id:item.id, title:item.title, text:item.text, status:item.status })));
+      const response = await OG_AI_SERVICE.generate(request, { cacheKey: intent === 'post_call' || input ? '' : OG_CALL_AI_CONTEXT.cacheKey(context, intent) });
+      if (!isCurrentCall(ownership) || intent !== state.callAI.intent) return;
+      state.callAI.centralResponse = response;
+      renderCallAIStructuredResponse(response);
+      const local = response.source === 'safe_local_fallback';
+      status.dataset.state = local ? (response.fallbackReason ? 'warning' : 'local') : 'success';
+      status.textContent = local ? (response.fallbackReason ? 'IA indisponível · orientação local, sem análise remota. Revise manualmente.' : 'Orientação local · nenhum provedor de IA conectado. Revise manualmente.') : `${OG_CALL_AI_PROMPTS.INTENTS[intent].label} pronta para revisão.`;
+      document.getElementById('call-ai-cost-hint').textContent = response.source === 'safe_local_fallback' ? 'Modo local · zero chamada externa' : `Nível ${request.modelTier} · contexto ${JSON.stringify(request).length} caracteres`;
+    } catch (error) {
+      if (isCurrentCall(ownership)) { status.dataset.state = 'error'; status.textContent = 'Não foi possível analisar. Seu texto foi preservado; tente novamente.'; }
+    } finally {
+      if (ownsCallControls(ownership)) { state.callAI.generating = false; button.disabled = false; }
+    }
   }
 
   function normalizeCallSearch(value) {
@@ -7238,14 +7318,17 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function selectCallClient(id) {
+    if (state.callAI.reviewSaving) return showNotification('Aguarde a conclusão do registro desta conta antes de trocar.', 'info');
+    if (String(state.callAI.selectedLeadId) === String(id) && callLead()) return;
     const currentNotes = document.getElementById('call-ai-notes')?.value.trim();
-    if (state.callAI.selectedLeadId && String(state.callAI.selectedLeadId) !== String(id) && currentNotes) {
+    const hasDraft = currentNotes || document.getElementById('call-ai-live-input')?.value.trim() || document.getElementById('call-ai-text-import')?.value.trim() || !document.getElementById('call-ai-review').classList.contains('hidden');
+    if (state.callAI.selectedLeadId && String(state.callAI.selectedLeadId) !== String(id) && hasDraft) {
       if (!window.confirm('Existem anotações não salvas desta conta. Deseja descartá-las e trocar de cliente?')) return;
     }
     const lead = state.leads.find(item => String(item.id) === String(id));
     if (!lead) return;
     const switchingAccount = Boolean(state.callAI.selectedLeadId && String(state.callAI.selectedLeadId) !== String(id));
-    if (switchingAccount && state.callAI.recording?.blob) {
+    if (switchingAccount && (state.callAI.recording?.blob || state.callAI.recording?.recorder?.state === 'recording' || state.callAI.recording?.recorder?.state === 'paused')) {
       if (!window.confirm('Existe uma gravação local desta chamada. Trocar de cliente vai descartá-la deste navegador. Deseja continuar?')) return;
     }
     if (switchingAccount) {
@@ -7254,7 +7337,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const notes = document.getElementById('call-ai-notes');
       if (notes) notes.value = '';
     }
-    state.callAI = { ...state.callAI, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: null };
+    state.callAI = { ...state.callAI, generation: (state.callAI.generation || 0) + 1, generating: false, preparing: false, reviewCommitted: null, inputOrigin: 'manual_notes', reviewContext: null, selectedLeadId: lead.id, objective: suggestCallObjective(lead), script: [], step: 0, completed: [], notes: '', signals: [], sources: [], sessionId: `CALL-${crypto.randomUUID()}` };
+    clearCallSessionDraft();
+    document.getElementById('call-ai-review').classList.add('hidden');
+    document.getElementById('call-ai-footer').classList.add('hidden');
+    document.getElementById('call-ai-workspace').classList.remove('hidden');
+    document.getElementById('call-ai-empty').classList.add('hidden');
+    document.getElementById('call-ai-review-open').disabled = false;
+    document.getElementById('call-ai-prepare').textContent = 'Preparar roteiro';
+    document.getElementById('call-ai-step-title').textContent = 'Conversa desta conta';
+    document.getElementById('call-ai-step-label').textContent = 'MODO MANUAL';
+    document.getElementById('call-ai-speech').textContent = 'Prepare um roteiro se precisar de orientação. Registre somente o que aconteceu na conversa.';
+    document.getElementById('call-ai-sources').innerHTML = '';
+    for (const id of ['call-ai-observe','call-ai-question','call-ai-branches']) { const node = document.getElementById(id); if (node) node.textContent = ''; }
+    const imported = document.getElementById('call-ai-text-import'); if (imported) imported.value = '';
     resetCallAICentralForLead(lead);
     const objective = document.getElementById('call-ai-objective');
     if (objective) objective.value = state.callAI.objective;
@@ -7337,6 +7433,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   async function prepareCallAIScript() {
     const lead = callLead();
     if (!lead) return showNotification('Selecione um cliente antes de preparar o roteiro.', 'info');
+    if (state.callAI.preparing || state.callAI.reviewSaving) return;
+    if (!state.callAI.sessionId) state.callAI.sessionId = `CALL-${crypto.randomUUID()}`;
+    const ownership = callContext();
+    state.callAI.preparing = true;
     state.callAI.objective = document.getElementById('call-ai-objective').value;
     const button = document.getElementById('call-ai-prepare');
     button.disabled = true;
@@ -7349,8 +7449,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       });
       if (response.ok) results = (await response.json()).results || [];
     } catch (error) {
-      console.warn('Sales Brain indisponível', error);
+      // CRM-only manual guidance remains available; no fabricated transcript.
     }
+    if (!isCurrentCall(ownership)) {
+      if (ownsCallControls(ownership)) { state.callAI.preparing = false; button.disabled = false; button.textContent = 'Preparar roteiro'; }
+      return;
+    }
+    state.callAI.preparing = false;
     state.callAI.sources = results;
     state.callAI.script = buildCallScript(lead, state.callAI.objective, results);
     state.callAI.step = 0;
@@ -7410,6 +7515,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   };
 
   function suggestCallAdaptation(signal) {
+    const ownership = callContext();
+    if (!isCurrentCall(ownership)) return;
     const response = callSignalResponses[signal];
     if (!response) return;
     state.callAI.signals.push({ signal, at: new Date().toISOString() });
@@ -7417,6 +7524,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     pending.innerHTML = `<strong>Sugestão para o próximo momento</strong><p>${escapeHtml(response[0])}</p><p><b>Pergunta:</b> ${escapeHtml(response[1])}</p><button type="button" id="call-ai-apply-suggestion">Aplicar ao próximo bloco</button>`;
     pending.classList.remove('hidden');
     document.getElementById('call-ai-apply-suggestion').addEventListener('click', () => {
+      if (!isCurrentCall(ownership) || !state.callAI.script.length) return;
       const next = Math.min(state.callAI.step + 1, state.callAI.script.length - 1);
       state.callAI.script[next] = { ...state.callAI.script[next], speech: response[0], question: response[1] };
       pending.classList.add('hidden');
@@ -7427,9 +7535,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   function openCallAIReview() {
     saveCurrentCallSpeech();
     const lead = callLead();
+    if (!lead || state.callAI.reviewSaving) return;
+    if (state.callAI.reviewCommitted === state.callAI.sessionId) {
+      document.getElementById('call-ai-review').classList.remove('hidden');
+      return;
+    }
+    lockCallReviewInputs(false);
+    if (!state.callAI.sessionId) state.callAI.sessionId = `CALL-${crypto.randomUUID()}`;
+    state.callAI.reviewContext = callContext();
+    document.getElementById('call-ai-review').dataset.leadId = lead.id;
     const notes = document.getElementById('call-ai-notes').value.trim();
     state.callAI.notes = notes;
-    document.getElementById('call-ai-summary').value = notes || `Ligação com ${lead?.empresa || lead?.nome || 'cliente'} sobre ${callObjectives[state.callAI.objective]}.`;
+    document.getElementById('call-ai-summary').value = notes;
+    document.getElementById('call-ai-review-account').textContent = `${lead.empresa || lead.nome} · ${state.callAI.sessionId}`;
+    callReviewStatus('Revise o texto e informe o resultado. Sugestões não são fatos confirmados.');
     const resultSelect = document.getElementById('call-ai-result');
     if (resultSelect) resultSelect.value = '';
     document.getElementById('call-ai-meeting-mode-wrap')?.classList.add('hidden');
@@ -7457,9 +7576,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   async function syncApprovedCallToSalesExecution(lead, input) {
     const refs = lead?.salesExecution || {};
-    if (!window.OG_SALES_EXECUTION_CLIENT || !refs.companyId) return { synced:false, reason:'not_normalized' };
+    if (!refs.companyId) return { synced:false, reason:'not_normalized' };
+    if (!window.OG_SALES_EXECUTION_CLIENT) throw new Error('Sales Execution indisponível. Preserve a revisão e tente novamente.');
     const canonicalResult = CALL_AI_SALES_RESULT[input.result];
-    if (!canonicalResult) return { synced:false, reason:'ambiguous_result' };
+    if (!canonicalResult) throw new Error('Escolha um resultado normalizado antes de registrar.');
     const nextActionType = input.nextAction
       ? (input.result === 'proposta' || input.result === 'negociacao' ? 'PROPOSAL_FOLLOW_UP' : input.result === 'enviar_material' ? 'SEND_MATERIAL' : input.result === 'reuniao_agendada' ? 'MEETING' : 'FOLLOW_UP')
       : '';
@@ -7482,117 +7602,114 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   async function saveCallAIReview() {
+    const ownership = state.callAI.reviewContext;
     const lead = callLead();
-    if (!lead) return;
+    if (!isCurrentCall(ownership) || !lead || state.callAI.reviewSaving) return;
     const result = document.getElementById('call-ai-result').value;
     const summary = document.getElementById('call-ai-summary').value.trim();
     if (!result || !summary) return showNotification('Informe o resultado e revise o resumo.', 'info');
-    const sessionId = state.callAI.sessionId;
-    if (lead.interactions.some(item => item.sessionId === sessionId)) return showNotification('Esta sessão já foi registrada.', 'info');
-    if (state.callAI.recording?.blob && !state.callAI.recording?.remote?.recording?.id) {
-      const continueWithoutAudio = window.confirm('Existe uma gravação local que ainda não foi salva no cofre privado. Registrar o resultado agora sem enviar o áudio?');
-      if (!continueWithoutAudio) return;
-    }
-    if (lead.salesExecution?.companyId && !CALL_AI_SALES_RESULT[result]) {
-      return showNotification('Para Sales Execution, escolha um resultado específico da ligação em vez de um resultado genérico.', 'warning');
-    }
-    if (result === 'reuniao_agendada') {
-      if (!document.getElementById('call-ai-follow-up').value) return showNotification('Informe a data e hora da reunião.', 'warning');
-      if (!document.getElementById('call-ai-meeting-mode')?.value) return showNotification('Selecione o modo da reunião.', 'warning');
-    }
-    const now = new Date().toISOString();
-    const previousStatus = lead.status;
-    const reviewedNextAction = document.getElementById('call-ai-next-action').value.trim();
-    const reviewedFollowUp = document.getElementById('call-ai-follow-up').value;
-    if (result === 'sem_interesse') {
-      OG_INTERACTION_SERVICE.recordResult(lead, result, summary, {
-        now,
-        interaction: {
-          id: `INT-${Date.now()}`,
-          type: 'call_ai',
-          sessionId,
-          objective: state.callAI.objective,
-          signals: state.callAI.signals.map(item => item.signal),
-          idempotencyKey: sessionId
-        }
-      });
-    } else {
-      lead.interactions.push({ id: `INT-${Date.now()}`, sessionId, at: now, type: 'call_ai', objective: state.callAI.objective, result, note: summary, signals: state.callAI.signals.map(item => item.signal) });
-      if (result !== 'sem_contato') lead.lastContactAt = now;
-      if (reviewedNextAction !== String(lead.nextAction || '').trim() || reviewedFollowUp !== String(lead.followUpAt || '').trim()) {
-        OG_INTERACTION_SERVICE.setNextAction(lead, reviewedNextAction, reviewedFollowUp, { now });
-      }
-      if (result === 'proposta') lead.status = 'proposta_enviada';
-      else if (result === 'negociacao') lead.status = 'negociacao';
-      else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
-    }
-    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
-      id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result,
-      ...(result === 'reuniao_agendada' ? { meeting: {
-        scheduledAt: reviewedFollowUp, mode: document.getElementById('call-ai-meeting-mode').value,
-        durationMinutes: Number(document.getElementById('call-ai-meeting-duration')?.value) || 30,
-        objective: reviewedNextAction || summary, source: 'user_confirmed'
-      } } : {})
-    });
-    if (lead.status !== previousStatus) state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'client.stage_changed', at: now, clientId: lead.id, fromStage: previousStatus, toStage: lead.status });
-    if (state.callAI.returnTab === 'prospeccao') lead.operationalStatus = 'WORKED_LEAD';
-    saveLeadsToStorage();
-    saveOperationsToStorage();
-    renderLeadsTable();
-    document.getElementById('call-ai-review').classList.add('hidden');
-    document.getElementById('call-ai-session-state').textContent = 'Sessão salva no CRM';
-    if (state.callAI.returnTab === 'prospeccao') state.prospecting.session.events.push({ type: 'processed', result, at: now, leadId: lead.id });
+    const sessionId = ownership.sessionId;
+    // A retry after a durable-storage error must not duplicate the local projection.
+    const alreadyProjected = lead.interactions.some(item => item.sessionId === sessionId);
+    if (alreadyProjected && state.callAI.reviewCommitted !== sessionId) return showNotification('Esta sessão já foi registrada.', 'info');
+    if (ownership.recording?.blob && !ownership.recording?.remote?.recording?.id && !window.confirm('Existe uma gravação local que ainda não foi salva no cofre privado. Registrar o resultado agora sem enviar o áudio?')) return;
+    if (lead.salesExecution?.companyId && !CALL_AI_SALES_RESULT[result]) return showNotification('Para Sales Execution, escolha um resultado específico da ligação em vez de um resultado genérico.', 'warning');
+    if (result === 'reuniao_agendada' && (!document.getElementById('call-ai-follow-up').value || !document.getElementById('call-ai-meeting-mode').value)) return showNotification('Informe data, hora e modo da reunião.', 'warning');
+    const objective = state.callAI.objective;
+    const signals = state.callAI.signals.map(item => item.signal);
+    const returnTab = state.callAI.returnTab;
+    const inputOrigin = state.callAI.inputOrigin || 'manual_notes';
+    const reviewedNextAction = result === 'sem_interesse' ? '' : document.getElementById('call-ai-next-action').value.trim();
+    const reviewedFollowUp = result === 'sem_interesse' ? '' : document.getElementById('call-ai-follow-up').value;
+    const meetingMode = document.getElementById('call-ai-meeting-mode').value;
+    const meetingDuration = document.getElementById('call-ai-meeting-duration').value;
+    const button = document.getElementById('call-ai-save');
+    state.callAI.reviewSaving = true;
+    lockCallReviewInputs(true);
+    button.disabled = true;
+    callReviewStatus('Registrando o resultado revisado…', 'loading');
+    let normalizedAcknowledged = false;
     try {
-      const canonical = await syncApprovedCallToSalesExecution(lead, {
-        sessionId, result, summary, nextAction:reviewedNextAction, followUp:reviewedFollowUp, meetingMode:document.getElementById('call-ai-meeting-mode')?.value || '', meetingDuration:document.getElementById('call-ai-meeting-duration')?.value || ''
-      });
-      if (canonical.synced) {
-        const nextMemberId = canonical.result?.nextMemberId || null;
-        if (state.callAI.recording?.remote?.recording?.id && window.OG_CALL_INTELLIGENCE_CLIENT) {
-          try {
-            await OG_CALL_INTELLIGENCE_CLIENT.linkResult({
-              callSessionId:sessionId,
-              callAttemptId:canonical.result?.callAttemptId || null,
-              opportunityId:canonical.result?.opportunityId || lead.salesExecution?.opportunityId || null
-            });
-          } catch (error) {
-            console.warn('Call Intelligence link pending', error);
-            state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
-              id:newLibraryId('evt'), type:'call_intelligence.link_pending', at:new Date().toISOString(),
-              clientId:lead.id, callSessionId:sessionId, error:String(error?.message || error).slice(0,300)
-            });
+      // Normalized command is atomic and idempotent. Failure preserves the draft for retry.
+      const canonical = await syncApprovedCallToSalesExecution(lead, { sessionId, result, summary, nextAction:reviewedNextAction, followUp:reviewedFollowUp, meetingMode, meetingDuration });
+      normalizedAcknowledged = canonical.synced;
+      if (!isCurrentCall(ownership)) return;
+      if (!alreadyProjected) {
+        const now = new Date().toISOString();
+        const previousStatus = lead.status;
+        if (result === 'sem_interesse') {
+          OG_INTERACTION_SERVICE.recordResult(lead, result, summary, {
+            now,
+            interaction: {
+              id: `INT-${Date.now()}`,
+              type: 'call_ai',
+              sessionId,
+              objective,
+              signals,
+              source: inputOrigin, reviewed: true, idempotencyKey: sessionId
+            }
+          });
+        } else {
+          lead.interactions.push({ id: `INT-${Date.now()}`, sessionId, at: now, type: 'call_ai', source: inputOrigin, reviewed: true, objective, result, note: summary, signals: signals });
+          if (result !== 'sem_contato') lead.lastContactAt = now;
+          if (reviewedNextAction !== String(lead.nextAction || '').trim() || reviewedFollowUp !== String(lead.followUpAt || '').trim()) {
+            OG_INTERACTION_SERVICE.setNextAction(lead, reviewedNextAction, reviewedFollowUp, { now });
           }
+          if (result === 'negociacao') lead.status = 'negociacao';
+          else if (result === 'contato_realizado' && lead.status === 'novo') lead.status = 'contatado';
         }
         state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
-          id:newLibraryId('evt'), type:'sales_execution.synced', at:new Date().toISOString(),
-          clientId:lead.id, callSessionId:sessionId, nextMemberId
+          id: newLibraryId('evt'), type: 'call.saved', at: now, clientId: lead.id, callSessionId: sessionId, result,
+          ...(result === 'reuniao_agendada' ? { meeting: {
+            scheduledAt: reviewedFollowUp, mode: meetingMode,
+            durationMinutes: Number(meetingDuration) || 30,
+            objective: reviewedNextAction || summary, source: 'user_confirmed'
+          } } : {})
+        });
+        if (lead.status !== previousStatus) state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id: newLibraryId('evt'), type: 'client.stage_changed', at: now, clientId: lead.id, fromStage: previousStatus, toStage: lead.status });
+        if (returnTab === 'prospeccao') lead.operationalStatus = 'WORKED_LEAD';
+
+        state.callAI.reviewCommitted = sessionId;
+      }
+      if (canonical.synced && ownership.recording.remote?.recording?.id && window.OG_CALL_INTELLIGENCE_CLIENT) {
+        try {
+          await OG_CALL_INTELLIGENCE_CLIENT.linkResult({ callSessionId:sessionId, callAttemptId:canonical.result?.callAttemptId || null, opportunityId:canonical.result?.opportunityId || lead.salesExecution?.opportunityId || null });
+        } catch (_) {
+          state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:newLibraryId('evt'), type:'call_intelligence.link_pending', at:new Date().toISOString(), clientId:lead.id, callSessionId:sessionId });
+          callReviewStatus('Resultado confirmado; vínculo do áudio pendente.', 'warning');
+        }
+      }
+      saveLeadsToStorage(); saveOperationsToStorage();
+      await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+      if (!isCurrentCall(ownership)) return;
+      renderLeadsTable(); renderCallAIContext(); renderCallAICentral();
+      document.getElementById('call-ai-review').classList.add('hidden');
+      document.getElementById('call-ai-session-state').textContent = canonical.synced ? 'Resultado confirmado no CRM + Sales Execution' : 'Resultado registrado localmente · status de sincronização no cabeçalho';
+      showNotification(canonical.synced ? 'Resultado revisado confirmado no Sales Execution.' : 'Resultado revisado salvo no aparelho.', 'success');
+      if (returnTab === 'prospeccao') {
+        state.prospecting.session.events.push({ type:'processed', result, at:new Date().toISOString(), leadId:lead.id });
+        if (canonical.synced) await advanceSalesExecutionAfterCall(canonical.result?.nextMemberId || null);
+        else { state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null; state.prospecting.view = 'focus'; switchTab('prospeccao'); renderProspecting(); }
+      } else if (returnTab === 'dia') switchTab('dia');
+    } catch (_) {
+      if (isCurrentCall(ownership)) {
+        state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
+          id:newLibraryId('evt'), type:'sales_execution.sync_failed', at:new Date().toISOString(),
+          clientId:lead.id, callSessionId:sessionId
         });
         saveOperationsToStorage();
-        document.getElementById('call-ai-session-state').textContent = nextMemberId
-          ? 'Sessão salva · próximo prospect pronto'
-          : 'Sessão salva no CRM + Sales Execution';
-        showNotification('Ligação confirmada e sincronizada com Sales Execution.', 'success');
-        if (state.callAI.returnTab === 'prospeccao') await advanceSalesExecutionAfterCall(nextMemberId);
-        if (state.callAI.returnTab === 'dia') switchTab('dia');
-        return;
+        const projected = state.callAI.reviewCommitted === sessionId;
+        callReviewStatus(projected
+          ? `${normalizedAcknowledged ? 'Sales Execution já confirmado' : 'Projeção local aplicada'} · persistência durável pendente. Conclua a gravação sem alterar o resultado confirmado.`
+          : 'Não foi possível concluir o registro. Sua revisão foi preservada; tente novamente. Nenhum sucesso foi confirmado.', 'error');
+        button.textContent = projected ? 'Concluir gravação local' : 'Aprovar e registrar no CRM';
+        showNotification('Registro não concluído. Sua revisão foi preservada.', 'warning');
       }
-      showNotification('Ligação registrada no CRM. Esta conta ainda usa o modo local/legado.', 'success');
-      if (state.callAI.returnTab === 'dia') switchTab('dia');
-      if (state.callAI.returnTab === 'prospeccao') {
-        state.prospecting.currentId = nextProspectInTerritory(lead.id)?.id || null;
-        state.prospecting.view = 'focus';
-        switchTab('prospeccao');
-        renderProspecting();
+    } finally {
+      if (ownsCallControls(ownership)) {
+        state.callAI.reviewSaving = false; button.disabled = false;
+        lockCallReviewInputs(state.callAI.reviewCommitted === sessionId);
       }
-    } catch (error) {
-      console.error('Sales Execution sync failed', error);
-      state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
-        id:newLibraryId('evt'), type:'sales_execution.sync_failed', at:new Date().toISOString(),
-        clientId:lead.id, callSessionId:sessionId, error:String(error?.message || error).slice(0,300)
-      });
-      saveOperationsToStorage();
-      document.getElementById('call-ai-session-state').textContent = 'Salvo localmente · sincronização pendente';
-      showNotification('Ligação salva localmente. Sales Execution ficou pendente para nova tentativa.', 'warning');
     }
   }
 
@@ -7626,8 +7743,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return { recorder:null, streams:[], chunks:[], audioContext:null, url:null, blob:null, startedAt:null, endedAt:null, pausedAt:null, pausedMs:0, captureMode:'MICROPHONE', meterTimer:null, sellerAnalyser:null, customerAnalyser:null, sellerActiveMs:0, customerActiveMs:0, overlapMs:0, durationMs:0, remote:null, pollTimer:null, providerReady:null, localFallbackReady:null, localFallbackStarted:false };
   }
 
-  function releaseCallRecordingStreams() {
-    const recording = state.callAI.recording;
+  function releaseCallRecordingStreams(recording = state.callAI.recording) {
     if (recording.meterTimer) clearInterval(recording.meterTimer);
     recording.meterTimer = null;
     recording.streams.forEach(stream => stream.getTracks().forEach(track => track.stop()));
@@ -7642,7 +7758,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
   function resetCallRecordingState() {
     const current = state.callAI.recording || {};
-    releaseCallRecordingStreams();
+    if (current.recorder && current.recorder.state !== 'inactive') current.recorder.stop();
+    releaseCallRecordingStreams(current);
     if (current.pollTimer) clearInterval(current.pollTimer);
     if (current.url) URL.revokeObjectURL(current.url);
     state.callAI.recording = emptyCallRecordingState();
@@ -7655,6 +7772,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     metrics?.classList.add('hidden');
     const manual = document.getElementById('call-ai-manual-transcript');
     if (manual) manual.value = '';
+    document.getElementById('call-ai-transcript-text').textContent = '';
+    document.getElementById('call-ai-transcript-source').textContent = '';
+    document.getElementById('call-ai-record-start').disabled = false;
+    document.getElementById('call-ai-record-start').classList.remove('hidden');
+    document.getElementById('call-ai-record-pause').classList.add('hidden');
+    document.getElementById('call-ai-record-stop').classList.add('hidden');
+    for (const id of ['call-ai-recording-save','call-ai-recording-transcribe','call-ai-manual-transcript-save']) document.getElementById(id).disabled = false;
     setCallRecordingStatus('Áudio desligado · modo manual', 'idle');
     setCallIntelligenceStatus('A gravação ainda não foi enviada ao cofre privado.', 'idle');
     setCallIntelligenceBadge('LOCAL', 'local');
@@ -7705,8 +7829,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       '<div><small>Áudio do cliente</small><b>' + escapeHtml(customerLabel) + '</b></div>';
   }
 
-  function renderCallIntelligencePayload(payload) {
-    if (!payload) return;
+  function renderCallIntelligencePayload(payload, ownership = callContext()) {
+    if (!payload || !isCurrentCall(ownership)) return;
+    validateCallPayload(payload, ownership);
     state.callAI.recording.remote = payload;
     state.callAI.recording.providerReady = Boolean(payload.providerReady);
     if (payload.localFallbackReady != null) state.callAI.recording.localFallbackReady = Boolean(payload.localFallbackReady);
@@ -7715,7 +7840,13 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const metrics = payload.metrics || null;
     const status = String(recording.transcription_status || '');
 
-    if (status === 'READY') {
+    if (status === 'UNAVAILABLE') {
+      setCallIntelligenceBadge('INDISPONÍVEL', 'error');
+      setCallIntelligenceStatus('Transcrição indisponível. O áudio foi preservado; use texto revisado ou tente novamente.', 'error');
+    } else if (status === 'READY' && !transcript?.transcript_text) {
+      setCallIntelligenceBadge('SEM TRANSCRIÇÃO', 'error');
+      setCallIntelligenceStatus('O processamento retornou sem transcrição. Nenhum texto foi inventado; tente novamente.', 'error');
+    } else if (status === 'READY') {
       setCallIntelligenceBadge('ANALISADO', 'saved');
       setCallIntelligenceStatus('Áudio salvo e análise disponível.', 'success');
     } else if (['QUEUED','PROCESSING'].includes(status)) {
@@ -7740,6 +7871,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const panel = document.getElementById('call-ai-transcript-panel');
     const text = document.getElementById('call-ai-transcript-text');
     const source = document.getElementById('call-ai-transcript-source');
+    panel?.classList.toggle('hidden', !transcript?.transcript_text);
+    if (text) text.textContent = transcript?.transcript_text || '';
+    if (source) source.textContent = '';
+    document.getElementById('call-ai-conversation-metrics')?.classList.toggle('hidden', !metrics);
     if (transcript?.transcript_text) {
       panel?.classList.remove('hidden');
       if (text) text.textContent = transcript.transcript_text;
@@ -7773,21 +7908,30 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
   }
 
-  async function refreshCallIntelligenceStatus() {
-    if (!window.OG_CALL_INTELLIGENCE_CLIENT || !state.callAI.sessionId) return null;
-    const payload = await OG_CALL_INTELLIGENCE_CLIENT.status(state.callAI.sessionId);
-    renderCallIntelligencePayload(payload);
+  async function refreshCallIntelligenceStatus(ownership = callContext()) {
+    if (!window.OG_CALL_INTELLIGENCE_CLIENT || !isCurrentCall(ownership) || !ownership.sessionId) return null;
+    const payload = await OG_CALL_INTELLIGENCE_CLIENT.status(ownership.sessionId);
+    if (!isCurrentCall(ownership)) return null;
+    validateCallPayload(payload, ownership);
+    renderCallIntelligencePayload(payload, ownership);
     return payload;
   }
 
   function startCallIntelligencePolling() {
-    const recording = state.callAI.recording;
+    const ownership = callContext();
+    const recording = ownership.recording;
     if (recording.pollTimer) clearInterval(recording.pollTimer);
     let checks = 0;
+    let inFlight = false;
+    const stop = () => { clearInterval(recording.pollTimer); recording.pollTimer = null; };
     const poll = async () => {
+      if (!isCurrentCall(ownership)) { stop(); return; }
+      if (inFlight) return;
+      inFlight = true;
       checks += 1;
       try {
-        const payload = await refreshCallIntelligenceStatus();
+        const payload = await refreshCallIntelligenceStatus(ownership);
+        if (!isCurrentCall(ownership)) { stop(); return; }
         const status = payload?.recording?.transcription_status;
         const provider = payload?.recording?.transcription_provider;
         if (
@@ -7800,31 +7944,39 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           setCallIntelligenceBadge('WHISPER LOCAL', 'processing');
           setCallIntelligenceStatus('OpenAI indisponível. Iniciando transcrição local sem cobrança por minuto da OpenAI…', 'processing');
           try {
-            const fallback = await OG_CALL_INTELLIGENCE_CLIENT.localTranscribe({ callSessionId:state.callAI.sessionId });
-            renderCallIntelligencePayload({ ...payload, ...fallback, localFallbackReady:true, recording:fallback.recording || payload.recording });
+            const fallback = await OG_CALL_INTELLIGENCE_CLIENT.localTranscribe({ callSessionId:ownership.sessionId });
+            if (!isCurrentCall(ownership)) { stop(); return; }
+            renderCallIntelligencePayload({ ...payload, ...fallback, localFallbackReady:true, recording:fallback.recording || payload.recording }, ownership);
             checks = 0;
             return;
           } catch (fallbackError) {
-            console.error('Local Whisper fallback failed', fallbackError);
+            if (!isCurrentCall(ownership)) return;
             setCallIntelligenceStatus('O fallback local também falhou. O áudio permanece salvo para nova tentativa.', 'error');
+            stop(); return;
           }
         }
         if (status === 'READY' || status === 'UNAVAILABLE' || (status === 'FAILED' && (provider === 'faster-whisper' || !payload?.localFallbackReady)) || checks >= 120) {
           clearInterval(recording.pollTimer);
           recording.pollTimer = null;
+          if (checks >= 120 && !['READY','FAILED','UNAVAILABLE'].includes(status)) setCallIntelligenceStatus('Processamento ainda não concluído. Tente consultar novamente.', 'error');
         }
       } catch (error) {
+        if (!isCurrentCall(ownership)) { stop(); return; }
         if (checks >= 5) {
           clearInterval(recording.pollTimer);
           recording.pollTimer = null;
+          setCallIntelligenceStatus('Não foi possível consultar a transcrição. O áudio foi preservado; tente novamente.', 'error');
         }
-      }
+      } finally { inFlight = false; }
     };
     poll();
     recording.pollTimer = setInterval(poll, 3000);
   }
 
   async function persistCallRecording(options = {}) {
+    const ownership = callContext();
+    if (!isCurrentCall(ownership) || ownership.recording.uploading) return;
+    if (!navigator.onLine) { setCallIntelligenceStatus('Offline · processamento remoto indisponível. O conteúdo local foi preservado.', 'offline'); return; }
     const lead = callLead();
     const recording = state.callAI.recording;
     if (!recording.blob) return showNotification('Finalize uma gravação antes de salvar.', 'info');
@@ -7836,9 +7988,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (button) button.disabled = true;
     setCallIntelligenceBadge('ENVIANDO', 'processing');
     setCallIntelligenceStatus('Criando upload privado e enviando o áudio…', 'processing');
+    ownership.recording.uploading = true;
     try {
       const init = await OG_CALL_INTELLIGENCE_CLIENT.initRecording({
-        callSessionId:state.callAI.sessionId,
+        callSessionId:ownership.sessionId,
         companyId:lead.salesExecution.companyId,
         contactId:lead.salesExecution.contactId || null,
         opportunityId:lead.salesExecution.opportunityId || null,
@@ -7847,9 +8000,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         captureMode:recording.captureMode,
         mimeType:recording.blob.type || 'audio/webm'
       });
+      if (!isCurrentCall(ownership)) return null;
+      validateCallPayload(init, ownership);
       await OG_CALL_INTELLIGENCE_CLIENT.uploadSigned(init.signedUploadUrl, recording.blob);
+      if (!isCurrentCall(ownership)) return null;
       const complete = await OG_CALL_INTELLIGENCE_CLIENT.completeRecording({
-        callSessionId:state.callAI.sessionId,
+        callSessionId:ownership.sessionId,
         sizeBytes:recording.blob.size,
         durationMs:recording.durationMs,
         sellerActiveMs:recording.sellerActiveMs,
@@ -7859,63 +8015,80 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         endedAt:recording.endedAt?.toISOString?.() || recording.endedAt || null,
         autoTranscribe:options.autoTranscribe !== false
       });
+      if (!isCurrentCall(ownership)) return null;
+      validateCallPayload(complete, ownership);
       recording.remote = complete;
       recording.providerReady = Boolean(complete.providerReady);
       state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, {
         id:newLibraryId('evt'), type:'call_intelligence.recording_saved', at:new Date().toISOString(),
-        clientId:lead.id, callSessionId:state.callAI.sessionId, recordingId:complete.recording?.id || null,
+        clientId:lead.id, callSessionId:ownership.sessionId, recordingId:complete.recording?.id || null,
         durationMs:recording.durationMs, captureMode:recording.captureMode
       });
       saveOperationsToStorage();
-      renderCallIntelligencePayload(complete);
+      renderCallIntelligencePayload(complete, ownership);
       if (complete.transcriptionQueued) startCallIntelligencePolling();
       return complete;
     } catch (error) {
-      console.error('Call Intelligence upload failed', error);
+      if (!isCurrentCall(ownership)) return null;
       setCallIntelligenceBadge('LOCAL', 'error');
       setCallIntelligenceStatus('O envio falhou; o áudio continua seguro neste aparelho para nova tentativa.', 'error');
       showNotification('Não foi possível salvar o áudio agora. O arquivo local foi preservado.', 'warning');
       return null;
     } finally {
-      if (button) button.disabled = false;
+      ownership.recording.uploading = false;
+      if (ownsCallControls(ownership) && button) button.disabled = false;
     }
   }
 
   async function saveManualCallTranscript() {
+    const ownership = callContext();
+    if (!isCurrentCall(ownership) || ownership.recording.manualBusy) return;
+    if (!navigator.onLine) { setCallIntelligenceStatus('Offline · processamento remoto indisponível. O conteúdo local foi preservado.', 'offline'); return; }
     const text = document.getElementById('call-ai-manual-transcript')?.value.trim() || '';
     if (text.length < 8) return showNotification('Cole uma transcrição antes de analisar.', 'info');
     if (!state.callAI.recording.remote?.recording?.id) {
       const saved = await persistCallRecording({ autoTranscribe:false });
-      if (!saved) return;
+      if (!saved || !isCurrentCall(ownership)) return;
     }
     const button = document.getElementById('call-ai-manual-transcript-save');
     if (button) button.disabled = true;
     setCallIntelligenceStatus('Analisando a transcrição colada…', 'processing');
+    ownership.recording.manualBusy = true;
     try {
-      const payload = await OG_CALL_INTELLIGENCE_CLIENT.manualTranscript({ callSessionId:state.callAI.sessionId, text });
-      renderCallIntelligencePayload(payload);
+      const payload = await OG_CALL_INTELLIGENCE_CLIENT.manualTranscript({ callSessionId:ownership.sessionId, text });
+      if (!isCurrentCall(ownership)) return;
+      renderCallIntelligencePayload(payload, ownership);
       showNotification('Transcrição analisada. Os sinais continuam revisáveis e não alteram o CRM sozinhos.', 'success');
     } catch (error) {
+      if (!isCurrentCall(ownership)) return;
       setCallIntelligenceStatus(error?.message || 'Falha ao analisar transcrição.', 'error');
       showNotification('Não foi possível analisar a transcrição.', 'warning');
     } finally {
-      if (button) button.disabled = false;
+      ownership.recording.manualBusy = false;
+      if (ownsCallControls(ownership) && button) button.disabled = false;
     }
   }
 
   async function retryAutomaticCallTranscription() {
+    const ownership = callContext();
+    if (!isCurrentCall(ownership) || ownership.recording.transcribing) return;
+    if (!navigator.onLine) { setCallIntelligenceStatus('Offline · processamento remoto indisponível. O conteúdo local foi preservado.', 'offline'); return; }
     if (!state.callAI.recording.remote?.recording?.id) return;
     const button = document.getElementById('call-ai-recording-transcribe');
     if (button) button.disabled = true;
+    ownership.recording.transcribing = true;
     try {
       state.callAI.recording.localFallbackStarted = false;
-      const payload = await OG_CALL_INTELLIGENCE_CLIENT.transcribe({ callSessionId:state.callAI.sessionId });
-      renderCallIntelligencePayload(payload);
+      const payload = await OG_CALL_INTELLIGENCE_CLIENT.transcribe({ callSessionId:ownership.sessionId });
+      if (!isCurrentCall(ownership)) return;
+      renderCallIntelligencePayload(payload, ownership);
       startCallIntelligencePolling();
     } catch (error) {
+      if (!isCurrentCall(ownership)) return;
       setCallIntelligenceStatus(error?.message || 'Transcrição automática indisponível.', 'error');
     } finally {
-      if (button) button.disabled = false;
+      ownership.recording.transcribing = false;
+      if (ownsCallControls(ownership) && button) button.disabled = false;
     }
   }
 
@@ -7930,6 +8103,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (state.callAI.recording.blob && !window.confirm('Descartar a gravação local anterior e começar outra?')) return;
     if (state.callAI.recording.blob) resetCallRecordingState();
 
+    const ownership = callContext();
+    const recording = ownership.recording;
+    if (!isCurrentCall(ownership) || recording.requesting) return;
+    recording.requesting = true;
+    const streams = [];
     const mode = document.getElementById('call-ai-audio-source').value;
     const startButton = document.getElementById('call-ai-record-start');
     const pauseButton = document.getElementById('call-ai-record-pause');
@@ -7939,8 +8117,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     try {
       let recordingStream;
-      const streams = [];
-      const recording = state.callAI.recording;
       recording.streams = streams;
       recording.captureMode = mode === 'computer' ? 'COMPUTER_MIX' : 'MICROPHONE';
       recording.sellerActiveMs = 0;
@@ -7956,12 +8132,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (mode === 'computer') {
         const displayStream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true });
         streams.push(displayStream);
+        if (!isCurrentCall(ownership)) { recording.streams = streams; releaseCallRecordingStreams(recording); return; }
         if (!displayStream.getAudioTracks().length) {
           displayStream.getTracks().forEach(track => track.stop());
           throw new Error('A janela foi compartilhada sem áudio. Marque “Compartilhar áudio” e tente novamente.');
         }
         const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true } });
         streams.push(microphoneStream);
+        if (!isCurrentCall(ownership)) { recording.streams = streams; releaseCallRecordingStreams(recording); return; }
         const context = new AudioContextClass();
         const destination = context.createMediaStreamDestination();
         const sellerAnalyser = context.createAnalyser();
@@ -7975,11 +8153,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         recording.customerAnalyser = customerAnalyser;
         recordingStream = destination.stream;
         displayStream.getVideoTracks()[0]?.addEventListener('ended', () => {
-          if (recording.recorder?.state !== 'inactive') stopCallRecording();
+          if (isCurrentCall(ownership) && recording.recorder?.state !== 'inactive') stopCallRecording();
         });
       } else {
         const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true } });
         streams.push(microphoneStream);
+        if (!isCurrentCall(ownership)) { recording.streams = streams; releaseCallRecordingStreams(recording); return; }
         recordingStream = microphoneStream;
         const context = new AudioContextClass();
         const sink = context.createMediaStreamDestination();
@@ -8000,6 +8179,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       recording.durationMs = 0;
       recorder.addEventListener('dataavailable', event => { if (event.data?.size) recording.chunks.push(event.data); });
       recorder.addEventListener('stop', () => {
+        if (!isCurrentCall(ownership)) { recording.streams = streams; releaseCallRecordingStreams(recording); return; }
         if (recording.pausedAt) {
           recording.pausedMs += Date.now() - recording.pausedAt.getTime();
           recording.pausedAt = null;
@@ -8038,11 +8218,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       stopButton.classList.remove('hidden');
       pauseButton.textContent = 'Pausar';
     } catch (error) {
-      releaseCallRecordingStreams();
+      releaseCallRecordingStreams(recording);
+      if (!isCurrentCall(ownership)) return;
       startButton.disabled = false;
       setCallRecordingStatus(error?.message || 'Permissão negada ou gravação cancelada.', 'error');
       showNotification(error?.message || 'Não foi possível iniciar a gravação.', 'info');
-    }
+    } finally { recording.requesting = false; }
   }
 
   function toggleCallRecordingPause() {
@@ -8134,6 +8315,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-intents')?.addEventListener('click', event => {
       const button = event.target.closest('[data-call-intent]');
       if (!button) return;
+      if (state.callAI.generating) return;
       state.callAI.intent = button.dataset.callIntent;
       renderCallAICentral();
       const input = document.getElementById('call-ai-live-input');
@@ -8152,14 +8334,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const lead = callLead(); const response = state.callAI.centralResponse; if (!lead || !response) return;
       if (event.target.closest('[data-ai-copy]')) { await navigator.clipboard.writeText(response.recommendedResponse || response.suggestedNextAction || response.summary); showNotification('Orientação copiada.', 'success'); }
       if (event.target.closest('[data-ai-save-note]')) {
-        if (response.crmSuggestion) {
-          document.getElementById('call-ai-notes').value = response.crmSuggestion.summary || '';
-          openCallAIReview();
-        } else {
-          const interaction = OG_INTERACTION_SERVICE.addInteraction(lead, { type:'nota', note:response.summary || response.recommendedResponse, source:'call_ai_confirmed' });
-          persistSalesDeskActivity(lead, interaction, 'call_ai.note_confirmed');
-          showNotification('Nota do Call AI salva após sua confirmação.', 'success');
-        }
+        state.callAI.inputOrigin = response.source === 'safe_local_fallback' ? 'local_guidance_reviewed' : 'ai_suggestion_reviewed';
+        document.getElementById('call-ai-notes').value = response.crmSuggestion?.summary || response.summary || response.recommendedResponse || '';
+        openCallAIReview();
+        document.getElementById('call-ai-next-action').value = response.crmSuggestion?.nextAction || response.suggestedNextAction || lead.nextAction || '';
+        callReviewStatus('Sugestões da IA/local copiadas para revisão. Edite, confirme ou descarte; nenhum fato foi salvo.');
       }
       if (event.target.closest('[data-ai-next-action]')) {
         const suggested = response.suggestedNextAction || lead.nextAction || '';
@@ -8167,6 +8346,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         if (!description) return;
         const interaction = OG_INTERACTION_SERVICE.setNextAction(lead, description, lead.followUpAt || '');
         persistSalesDeskActivity(lead, interaction, 'call_ai.next_action_confirmed');
+        await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
         renderCallAIContext(); renderCallAICentral(); showNotification('Próxima ação confirmada.', 'success');
       }
       if (event.target.closest('[data-ai-useful], [data-ai-not-useful]')) {
@@ -8188,6 +8368,27 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-ask-now')?.addEventListener('click', () => { const item = state.callAI.script[state.callAI.step]; if (item) showNotification(item.question, 'info'); });
     document.getElementById('call-ai-adapt-notes')?.addEventListener('click', () => { const notes = document.getElementById('call-ai-notes').value.trim(); if (!notes) return showNotification('Escreva uma anotação antes de adaptar.', 'info'); suggestCallAdaptation(notes.toLowerCase().includes('caro') ? 'caro' : notes.toLowerCase().includes('proposta') ? 'proposta' : 'outro_decisor'); });
     document.getElementById('call-ai-end')?.addEventListener('click', openCallAIReview);
+    document.getElementById('call-ai-review-open')?.addEventListener('click', openCallAIReview);
+    document.getElementById('call-ai-transcript-review')?.addEventListener('click', () => {
+      const transcript = state.callAI.recording.remote?.transcript;
+      if (!callLead() || !transcript?.transcript_text) return;
+      document.getElementById('call-ai-text-import').value = transcript.transcript_text;
+      document.getElementById('call-ai-text-use').click();
+      state.callAI.inputOrigin = `transcript_${transcript.provider || 'unknown'}`;
+      document.getElementById('call-ai-central-state').textContent = 'Transcrição transferida para revisão · valide as palavras e inferências antes do CRM.';
+    });
+    document.getElementById('call-ai-text-use')?.addEventListener('click', () => {
+      if (!callLead()) return showNotification('Selecione uma conta.', 'info');
+      if (state.callAI.generating) return showNotification('Aguarde a orientação atual ou troque de conta para descartá-la.', 'info');
+      const text = document.getElementById('call-ai-text-import').value.trim();
+      if (!text) return showNotification('Cole o texto real da conversa.', 'info');
+      document.getElementById('call-ai-live-input').value = text;
+      document.getElementById('call-ai-notes').value = text;
+      state.callAI.intent = 'post_call';
+      state.callAI.inputOrigin = 'manual_text';
+      renderCallAICentral();
+      document.getElementById('call-ai-central-state').textContent = 'Texto inserido manualmente · origem informada pelo usuário. Revise ou peça orientação; nenhum fato foi salvo.';
+    });
     document.getElementById('call-ai-review-close')?.addEventListener('click', () => document.getElementById('call-ai-review').classList.add('hidden'));
     document.getElementById('call-ai-save')?.addEventListener('click', saveCallAIReview);
     document.getElementById('call-ai-record-start')?.addEventListener('click', startCallRecording);
@@ -8197,10 +8398,29 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     document.getElementById('call-ai-recording-transcribe')?.addEventListener('click', retryAutomaticCallTranscription);
     document.getElementById('call-ai-manual-transcript-save')?.addEventListener('click', saveManualCallTranscript);
     document.getElementById('call-ai-return')?.addEventListener('click', () => { const target = state.callAI.returnTab || 'dia'; switchTab(target); if (target === 'prospeccao') renderProspecting(); });
-    document.getElementById('call-ai-discard')?.addEventListener('click', () => { if (window.confirm('Descartar esta sessão sem alterar o CRM?')) { document.getElementById('call-ai-review').classList.add('hidden'); state.callAI.script = []; document.getElementById('call-ai-workspace').classList.add('hidden'); document.getElementById('call-ai-footer').classList.add('hidden'); document.getElementById('call-ai-empty').classList.remove('hidden'); } });
+    document.getElementById('call-ai-discard')?.addEventListener('click', () => {
+      if (state.callAI.reviewSaving || !window.confirm('Descartar esta sessão sem alterar o CRM?')) return;
+      state.callAI.generation = (state.callAI.generation || 0) + 1;
+      state.callAI.generating = false; state.callAI.preparing = false; state.callAI.reviewContext = null;
+      state.callAI.sessionId = `CALL-${crypto.randomUUID()}`;
+      resetCallRecordingState(); resetCallAICentralForLead(callLead());
+      clearCallSessionDraft();
+      document.getElementById('call-ai-review').classList.add('hidden');
+      state.callAI.script = [];
+      document.getElementById('call-ai-workspace').classList.remove('hidden');
+      document.getElementById('call-ai-footer').classList.add('hidden');
+      document.getElementById('call-ai-empty').classList.add('hidden');
+      document.getElementById('call-ai-prepare').disabled = false;
+      document.getElementById('call-ai-session-state').textContent = 'Sessão descartada · nenhum resultado registrado';
+    });
     document.getElementById('call-ai-reset')?.addEventListener('click', () => {
+      if (state.callAI.reviewSaving) return;
       if (!window.confirm('Reiniciar o roteiro e iniciar uma nova sessão de chamada para esta conta?')) return;
-      resetCallRecordingState();
+      state.callAI.generation = (state.callAI.generation || 0) + 1;
+      state.callAI.generating = false; state.callAI.preparing = false; state.callAI.reviewContext = null;
+      resetCallRecordingState(); resetCallAICentralForLead(callLead());
+      clearCallSessionDraft();
+      document.getElementById('call-ai-review').classList.add('hidden');
       state.callAI.sessionId = null;
       prepareCallAIScript();
     });
@@ -8209,7 +8429,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       badge.dataset.mode = info.available ? 'ready' : 'missing';
       badge.textContent = info.available ? `Sales Brain v${info.version} · ${info.stats.indexedRecords} trechos privados` : 'Sales Brain ausente · modo CRM';
     }).catch(() => { const badge = document.getElementById('call-ai-knowledge-status'); badge.dataset.mode = 'missing'; badge.textContent = 'Sales Brain indisponível · modo CRM'; });
-    window.addEventListener('beforeunload', releaseCallRecordingStreams);
+    window.addEventListener('beforeunload', () => releaseCallRecordingStreams());
   }
 
   function saveLeadsToStorage() {
@@ -8959,11 +9179,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     // Order reconnection after the existing startup recovery/pull, so an older
     // offline request cannot overwrite the status of a newer online request.
     let startupSync = Promise.resolve();
-    window.addEventListener('offline', () => setSyncStatus('Sem conexão · salvo neste aparelho', 'offline'));
+    window.addEventListener('offline', () => { reconnectSyncRequested = false; setSyncStatus('Sem conexão · salvo neste aparelho', 'offline'); });
     window.addEventListener('online', async () => {
       setSyncStatus('Reconectando…', 'busy');
       await startupSync.catch(() => {});
-      if (navigator.onLine) await loadSharedState();
+      if (navigator.onLine) await loadSharedState({ reconnect:true });
     });
     setSyncStatus(navigator.onLine ? 'Conectando…' : 'Sem conexão · salvo neste aparelho', navigator.onLine ? 'busy' : 'offline');
     // PWA update checks must not delay local recovery or offline/reconnect indicators.

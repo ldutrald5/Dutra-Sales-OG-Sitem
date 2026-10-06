@@ -11,7 +11,7 @@ assert.ok(sw.includes("'/services/sync-bridge-service.js'"),'Sync Bridge fora do
 assert.ok(app.includes("OG_SYNC_CONFLICT.createConflict("),'409 deve criar snapshot de conflito');
 assert.ok(app.includes("OG_SYNC_BRIDGE.saveConflict(conflict)"),'conflito deve persistir fora de sessionStorage');
 assert.ok(app.includes("OG_SYNC_BRIDGE.queueState(currentSyncPayload(payload.revision))"),'falha de rede deve manter o estado local mais recente na outbox');
-assert.ok(app.includes("async function flushQueuedState()"),'outbox deve ter flush autenticado no foreground');
+assert.ok(/async function flushQueuedState\(/.test(app),'outbox deve ter flush autenticado no foreground');
 assert.ok(app.includes("await restoreSyncRecovery();"),'recovery deve acontecer antes do pull inicial');
 assert.ok(app.includes("readSmallMarker(SYNC_CONFLICT_MARKER) && !pendingSyncConflict()"),'marcador de conflito deve bloquear pull/sync');
 assert.ok(app.includes("readSmallMarker(SYNC_REVIEW_MARKER) && !pendingSyncReview()"),'marcador de revisão deve bloquear pull/sync');

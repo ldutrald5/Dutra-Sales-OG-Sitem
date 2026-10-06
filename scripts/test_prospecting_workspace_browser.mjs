@@ -119,7 +119,9 @@ try {
  await np.goto(base+'/#prospeccao');await np.locator('button[data-prospect-view="queue"]').click();await np.locator('[data-prospect-open="QA-N"]').click();
  np.once('dialog',dialog=>dialog.accept());await np.locator('#prospect-save-next').click();
  assert.ok(await np.locator('#call-ai-review').isVisible());
- assert.match(await np.locator('#call-ai-summary').inputValue(),/QA Normalized/);
+ assert.equal(await np.locator('#call-ai-review').getAttribute('data-lead-id'),'QA-N','review must target the exact canonical identity');
+ assert.match(await np.locator('#call-ai-review-account').textContent(),/QA Normalized/);
+ assert.equal(await np.locator('#call-ai-summary').inputValue(),'','account selection must not fabricate conversation facts');
  console.log('Normalized owner bridge: cancel preserves prior notes; accepted switch reviews exact canonical account, no external mutation PASS');
  await normalized.close();
 }finally{await browser?.close();server.kill('SIGTERM');await rm(dataDir,{recursive:true,force:true});}

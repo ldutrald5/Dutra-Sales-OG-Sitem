@@ -57,6 +57,8 @@ try {
  assert.equal(saved.interactions.filter(x=>x.type==='resultado_contato').length,1);
  assert.equal(saved.interactions.filter(x=>x.type==='proxima_acao').length,1);
  assert.equal(saved.nextAction,'QA confirmar diagnóstico amanhã');
+ // Command completion includes a real IndexedDB outbox write before re-render.
+ await page.waitForFunction(()=>document.querySelector('#kpi-overdue').textContent==='0');
  assert.equal(await page.locator('#kpi-overdue').textContent(),'0');
  await page.waitForFunction(()=>document.querySelector('#sales-desk-client h2')?.textContent.includes('QA Frota Hoje'));
  const order=await page.locator('#day-opportunity-list [data-desk-lead]').evaluateAll(nodes=>nodes.map(n=>n.dataset.deskLead));
@@ -131,7 +133,9 @@ try {
  await np.locator('.nav-tab[data-tab="dia"]').click();
  np.once('dialog',dialog=>dialog.accept());await np.locator('[data-client-register]').click();
  assert.ok(await np.locator('#call-ai-review').isVisible());
- assert.match(await np.locator('#call-ai-summary').inputValue(),/QA Normalized/);
+ assert.equal(await np.locator('#call-ai-review').getAttribute('data-lead-id'),'QA-N','review must target the exact canonical identity');
+ assert.match(await np.locator('#call-ai-review-account').textContent(),/QA Normalized/);
+ assert.equal(await np.locator('#call-ai-summary').inputValue(),'','account selection must not fabricate conversation facts');
  console.log('Normalized owner bridge: cancel preserves prior notes; accepted switch reviews exact canonical account, no external mutation PASS');
  await normalized.close();
 } finally {await browser?.close();server.kill('SIGTERM');await rm(dataDir,{recursive:true,force:true});}

@@ -1,0 +1,45 @@
+/* Stage 5: presentation over the existing Call AI/review contracts. */
+#tab-call-ai { min-width: 0; }
+#tab-call-ai :is(section,aside,article,details,div,label) { min-width: 0; }
+#tab-call-ai :is(p,span,strong,small,summary) { overflow-wrap: anywhere; }
+#tab-call-ai :is(button,input,select,summary) { min-height: 44px; }
+#tab-call-ai :is(input,textarea,select) { max-width: 100%; font-size: 1rem; }
+#tab-call-ai :is(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--og-brand); outline-offset: 3px; }
+#tab-call-ai button:disabled { opacity: .48; cursor: not-allowed; }
+#tab-call-ai .call-ai-top { border-left: 3px solid var(--og-brand); padding-left: 1rem; }
+#tab-call-ai .call-ai-top h1 { font-size: clamp(1.45rem,2vw,2rem); line-height: 1.2; }
+#tab-call-ai .call-ai-setup { grid-template-columns: minmax(220px,2fr) minmax(170px,1fr) auto auto; }
+#tab-call-ai .call-ai-setup [data-quick-lead] { grid-column: 1 / -1; justify-self: start; }
+#tab-call-ai .call-ai-workspace { grid-template-columns: minmax(200px,.8fr) minmax(0,1.5fr) minmax(230px,1fr); }
+#tab-call-ai .call-ai-context { max-height: none; }
+#tab-call-ai .call-ai-fact :is(span,small), #tab-call-ai .call-ai-copilot-head p { font-size: .78rem; }
+#tab-call-ai .call-ai-fact strong { font-size: .9rem; }
+#tab-call-ai .call-ai-text-entry { margin-bottom: 1rem; padding: .8rem; border: 1px solid var(--og-border); border-radius: .7rem; }
+#tab-call-ai .call-ai-text-entry label { display: block; margin-block: .5rem; font-size: .85rem; color: var(--og-muted); }
+#tab-call-ai .call-ai-text-entry textarea { width: 100%; padding: .75rem; border: 1px solid var(--og-border); border-radius: .6rem; background: var(--og-dark); color: #e5e7eb; line-height: 1.5; }
+#tab-call-ai .call-ai-text-entry button { width: 100%; margin-top: .5rem; }
+#tab-call-ai #call-ai-review-status { padding: .8rem; margin-block: 1rem; border-left: 3px solid var(--og-brand); background: var(--og-dark); font-size: .9rem; }
+#tab-call-ai [data-state="error"] { border-color: #ef4444; color: #fca5a5; }
+#tab-call-ai :is([data-state="offline"],[data-state="warning"],[data-state="local"]) { color: var(--og-brand); }
+#tab-call-ai #call-ai-review-account { color: var(--og-brand); margin-top: .5rem; font-size: .9rem; }
+#tab-call-ai .call-ai-transcript-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .95rem; line-height: 1.6; max-height: 32rem; overflow-y: auto; }
+#tab-call-ai #call-intelligence-dashboard > summary { cursor: pointer; font-size: .9rem; color: var(--og-muted); }
+#tab-call-ai .call-ai-footer { position: static; margin-top: 1rem; }
+#tab-call-ai .call-ai-review-actions { flex-wrap: wrap; }
+@media (max-width: 1199px) {
+  #tab-call-ai .call-ai-workspace { grid-template-columns: minmax(200px,1fr) minmax(0,2fr); }
+  #tab-call-ai .call-ai-assist { grid-column: 1 / -1; }
+  #tab-call-ai .call-ai-setup { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+}
+@media (max-width: 767px) {
+  #tab-call-ai .call-ai-setup, #tab-call-ai .call-ai-workspace { grid-template-columns: minmax(0,1fr); }
+  #tab-call-ai .call-ai-context { grid-row: 1; }
+  #tab-call-ai .call-ai-assist { grid-row: 2; }
+  #tab-call-ai .call-ai-prompter { grid-row: 3; }
+  #tab-call-ai .call-ai-setup [data-quick-lead] { justify-self: stretch; }
+  #tab-call-ai .call-ai-copilot-head { flex-wrap: wrap; }
+  #tab-call-ai .call-ai-recording-controls { flex-wrap: wrap; }
+  #tab-call-ai .call-ai-intents { flex-wrap: wrap; }
+  #tab-call-ai .call-ai-review-grid { grid-template-columns: minmax(0,1fr); }
+  #tab-call-ai .call-ai-review-actions > button { flex: 1 1 100%; }
+}

@@ -176,6 +176,7 @@
   <aside id="shell-startup" class="shell-feedback" role="status" aria-live="polite"><strong>Preparando seu workspace</strong><span>Carregando ferramentas e dados locais…</span></aside>
   <link rel="stylesheet" href="components/mission-control.css">
   <link rel="stylesheet" href="components/prospecting-workspace.css">
+  <link rel="stylesheet" href="components/call-ai-workspace.css">
   <script src="components/app-shell.js"></script>
 
   <!-- ========================================================================= -->
@@ -1068,15 +1069,15 @@
     <div id="tab-call-ai" class="tab-content hidden space-y-5">
       <section class="call-ai-top" aria-labelledby="call-ai-title">
         <div>
-          <span class="og-kicker">ASSISTENTE DE LIGAÇÕES B2B</span>
-          <h1 id="call-ai-title">Conduza a conversa com contexto e próximo passo.</h1>
-          <p>O sistema prepara e adapta o roteiro. Você controla a conversa e aprova cada registro no CRM.</p>
+          <span class="og-kicker">CALL INTELLIGENCE · REVISÃO HUMANA</span>
+          <h1 id="call-ai-title">Da conversa ao próximo movimento.</h1>
+          <p>Selecione a conta, registre a conversa e revise o resultado. Contexto, histórico e próxima ação no mesmo DUTRA OS.</p>
         </div>
         <div id="call-ai-knowledge-status" class="call-ai-status" data-mode="loading">Verificando Sales Brain…</div>
         <button id="call-ai-return" type="button" class="og-button og-button-ghost hidden">← Voltar à operação</button>
       </section>
 
-      <section id="call-intelligence-dashboard" class="call-intelligence-dashboard" aria-label="Métricas de ligações dos últimos 30 dias">
+      <details id="call-intelligence-dashboard" class="call-intelligence-dashboard" aria-label="Métricas de ligações dos últimos 30 dias"><summary>Histórico e métricas de ligações · últimos 30 dias</summary>
         <div class="call-intelligence-dashboard-head">
           <div><span class="og-kicker">CONVERSATION INTELLIGENCE · 30 DIAS</span><h2>Métricas reais das ligações gravadas</h2></div>
           <button id="call-intelligence-refresh" type="button" class="og-button og-button-ghost">Atualizar</button>
@@ -1090,7 +1091,7 @@
           <div><small>Cliente fala</small><b>—</b></div>
         </div>
         <div id="call-intelligence-dashboard-detail" class="call-intelligence-dashboard-detail">As métricas aparecem conforme as chamadas forem salvas e analisadas.</div>
-      </section>
+      </details>
 
       <section class="call-ai-setup" aria-label="Preparação da ligação">
         <div class="call-ai-search-wrap">
@@ -1114,6 +1115,7 @@
           </select>
         </div>
         <button id="call-ai-prepare" type="button" class="og-button og-button-primary" disabled>Preparar roteiro</button>
+        <button id="call-ai-review-open" type="button" class="og-button" disabled>Registrar resultado</button>
         <button type="button" data-quick-lead="call-ai" class="og-button og-button-ghost">＋ Cliente novo</button>
       </section>
 
@@ -1128,13 +1130,18 @@
           <textarea id="call-ai-live-input" rows="3" placeholder="Ex.: Cliente falou que está cortando custos."></textarea>
           <div><span id="call-ai-cost-hint">Nenhuma chamada feita</span><button id="call-ai-generate" type="button" class="og-button og-button-primary">Gerar orientação</button></div>
         </div>
+          <details class="call-ai-text-entry"><summary>Importar texto de conversa</summary>
+            <label for="call-ai-text-import">Texto real · origem informada por você</label>
+            <textarea id="call-ai-text-import" rows="5" placeholder="Cole uma transcrição ou nota. Nenhuma informação será confirmada automaticamente."></textarea>
+            <button id="call-ai-text-use" type="button" class="og-button">Usar texto na revisão / orientação</button>
+          </details>
         <div id="call-ai-central-state" class="call-ai-central-state" data-state="idle">Escolha um modo. A IA só será acionada quando você pedir.</div>
         <article id="call-ai-structured-result" class="call-ai-structured-result hidden" aria-live="polite"></article>
       </section>
 
       <div id="call-ai-empty" class="call-ai-empty">
         <strong>Selecione um cliente para começar</strong>
-        <span>Depois de escolher o cliente e clicar em “Preparar roteiro”, aparecem contexto, teleprompter em 8 etapas, objeções, anotações e gravação.</span>
+        <span>Escolha uma conta do CRM. Use texto real, anotações ou gravação explícita; a revisão funciona sem aguardar IA.</span>
       </div>
 
       <section id="call-ai-workspace" class="call-ai-workspace hidden" aria-live="polite">
@@ -1192,6 +1199,7 @@
           </div>
           <button id="call-ai-ask-now" type="button" class="call-ai-wide-action">O que perguntar agora?</button>
           <label for="call-ai-notes">Anotações da sessão</label>
+          <label for="call-ai-notes">Anotações factuais · revisão humana</label>
           <textarea id="call-ai-notes" rows="8" placeholder="Registre apenas o que o cliente realmente disse ou combinou."></textarea>
           <button id="call-ai-adapt-notes" type="button" class="call-ai-wide-action">Adaptar às minhas anotações</button>
           <div id="call-ai-sources" class="call-ai-sources"></div>
@@ -1211,6 +1219,7 @@
             <section id="call-ai-transcript-panel" class="call-ai-transcript-panel hidden">
               <div class="call-ai-panel-head"><span>TRANSCRIÇÃO</span><small id="call-ai-transcript-source"></small></div>
               <div id="call-ai-transcript-text" class="call-ai-transcript-text"></div>
+              <button id="call-ai-transcript-review" type="button" class="og-button">Usar na análise / revisão</button>
             </section>
             <section id="call-ai-conversation-metrics" class="call-ai-conversation-metrics hidden">
               <div class="call-ai-panel-head"><span>MÉTRICAS DA CONVERSA</span><small>Indicadores; não alteram o CRM automaticamente</small></div>
@@ -1234,7 +1243,8 @@
       </section>
 
       <section id="call-ai-review" class="call-ai-review hidden" aria-labelledby="call-ai-review-title">
-        <div class="call-ai-panel-head"><div><span>REVISÃO ANTES DO CRM</span><h2 id="call-ai-review-title">Confira exatamente o que será salvo</h2></div><button id="call-ai-review-close" type="button">Fechar</button></div>
+        <div class="call-ai-panel-head"><div><span>REVISÃO ANTES DO CRM</span><h2 id="call-ai-review-title">Confira exatamente o que será salvo</h2><p id="call-ai-review-account"></p></div><button id="call-ai-review-close" type="button">Fechar</button></div>
+        <div id="call-ai-review-status" role="status" data-state="idle"></div>
         <div class="call-ai-review-grid">
           <label>Resultado informado<select id="call-ai-result"><option value="">Selecione…</option><option value="sem_contato">Não consegui falar</option><option value="numero_invalido">Número inválido</option><option value="gatekeeper">Falei com recepção / gatekeeper</option><option value="decisor_identificado">Identifiquei o decisor</option><option value="decisor_contatado">Falei com o decisor</option><option value="retornar_depois">Retorno combinado</option><option value="qualificado">Oportunidade qualificada</option><option value="reuniao_agendada">Reunião agendada</option><option value="enviar_material">Pediu material</option><option value="proposta">Pediu proposta</option><option value="negociacao">Em negociação</option><option value="sem_interesse">Sem interesse agora</option><option value="contato_realizado">Contato realizado · genérico</option><option value="interesse">Demonstrou interesse · genérico</option></select></label>
           <label>Próxima ação<input id="call-ai-next-action" placeholder="Ex.: enviar proposta revisada"></label>
