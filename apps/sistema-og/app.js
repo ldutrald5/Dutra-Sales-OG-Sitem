@@ -78,22 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { code: 'EQ-700', qty: 1, customPrice: null } // Kit Ferramenta Profissional c/ Medidor
     ],
     // Estado do Consultor Interativo
-    consultant: {
-      selectedVehicleId: '3_4',
-      answers: {
-        wheel_size: '17',
-        has_truck_3_4: 'nao',
-        brand: 'mb',
-        mb_year: 'ge2017',
-        scania_suspension: 'mola',
-        has_reduction: 'nao',
-        traction_type: '6x4',
-        is_bitruck: '6x2'
-      },
-      libras: 110,
-      includeDianteira: true,
-      targetVehicleName: 'Mercedes-Benz Accelo'
-    },
+    consultant: emptyTechnicalDraft(),
     history: [],
     operations: OG_OPERATIONS_MODEL.createEmptyOperations(),
     library: { query: '', type: 'all', status: 'active', audience: 'all', favoritesOnly: false },
@@ -131,6 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const quoteClientDefaults = Object.freeze(JSON.parse(JSON.stringify(state.client)));
+  let technicalWorkspace = null;
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
@@ -391,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab === 'crm') renderCrmModule();
     if (state.currentTab === 'biblioteca') renderMaterialLibrary();
     if (state.currentTab === 'historico') renderHistory();
+    technicalWorkspace?.refresh();
   }
 
   function showSyncConflictBanner(conflict = pendingSyncConflict()) {
@@ -2741,78 +2729,94 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // CONSULTOR INTELIGENTE DE SUPORTES & ÁRVORE DE DECISÃO
   // =========================================================================
 
-  function initConsultantEngine() {
-    renderConsultantEngine();
-
-    const searchInput = document.getElementById('consultant-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        handleConsultantSearch(e.target.value.toLowerCase().trim());
-      });
-    }
-
-    const librasSelect = document.getElementById('consultant-libras-select');
-    if (librasSelect) {
-      librasSelect.addEventListener('change', (e) => {
-        state.consultant.libras = parseInt(e.target.value, 10);
-        renderConsultantEngine();
-      });
-    }
-
-    const includeDianteiraCheck = document.getElementById('consultant-include-dianteira');
-    if (includeDianteiraCheck) {
-      includeDianteiraCheck.addEventListener('change', (e) => {
-        state.consultant.includeDianteira = e.target.checked;
-        renderConsultantEngine();
-      });
-    }
-
-    const btnInjectToQuote = document.getElementById('btn-inject-consultant-to-quote');
-    if (btnInjectToQuote) {
-      btnInjectToQuote.addEventListener('click', () => {
-        injectConsultantVehicleIntoQuote();
-      });
-    }
+  function emptyTechnicalDraft(leadId = '') {
+    return { id: `TECH-DRAFT-${crypto.randomUUID()}`, leadId, selectedVehicleId:'', answers:{},
+      libras:'', includeDianteira:true, targetVehicleName:'', qty:1, notes:'', manualItems:null,
+      manualConfirmed:false, handoffId:`veh_${crypto.randomUUID()}` };
   }
 
-  function handleConsultantSearch(query) {
-    if (!query) return;
+  function initConsultantEngine() {
+    if (!window.OG_TECHNICAL_WORKSPACE) throw new Error('Interface técnica indisponível');
+    technicalWorkspace = OG_TECHNICAL_WORKSPACE.create({
+      data: () => OG_DATA,
+      draft: () => state.consultant,
+      leads: () => state.leads,
+      records: () => state.operations.quotes,
+      quoteClient: () => state.client,
+      empty: emptyTechnicalDraft,
+      replaceDraft: value => { state.consultant = value; },
+      build: buildConsolidatedVehiclePieces,
+      save: saveTechnicalDraft,
+      openQuote: openTechnicalQuote
+    });
+  }
 
-    for (const rule of OG_DATA.vehicleConsultantRules) {
-      if (rule.keywords.some(kw => query.includes(kw))) {
-        state.consultant.selectedVehicleId = rule.id;
-        break;
-      }
+  async function saveTechnicalDraft(draft, computed, handoff) {
+    const lead = draft.leadId ? OG_CRM_SERVICE.getLeadById(state.leads, draft.leadId) : null;
+    if (draft.leadId && !lead) throw new Error('O cliente não está disponível no CRM.');
+    if (handoff && !computed.ready) throw new Error('VALIDAR: aplicação ainda não determinada.');
+    const sameQuoteClient = lead && String(findLeadForClientData(state.client)?.id || '') === String(lead.id);
+    const client = JSON.parse(JSON.stringify(!lead || sameQuoteClient ? state.client : quoteClientDefaults));
+    if (lead) {
+      for (const field of ['nome','empresa','cnpj','ie','socioAdmin','telefone','cidadeUf','internalCode']) client[field] = lead[field] || '';
+      client.segmentId = lead.segmentId || quoteClientDefaults.segmentId;
+      if (!sameQuoteClient) { client.tier = quoteClientDefaults.tier; client.paymentMethod = quoteClientDefaults.paymentMethod; }
     }
+    const technicalContext = JSON.parse(JSON.stringify(draft));
+    const vehicle = computed.ready ? {
+      id:draft.handoffId || `veh_${draft.id}`, name:draft.targetVehicleName || computed.rule.name,
+      vehicleTypeId:computed.rule.id, libras:Number(draft.libras), includeDianteira:Boolean(draft.includeDianteira),
+      qty:Number(draft.qty), collapsed:false, items:JSON.parse(JSON.stringify(computed.items)),
+      technicalContext, clientId:lead?.id || null
+    } : null;
+    const previous = state.operations.quotes.find(item => item.id === draft.id && item.source === 'technical_workspace');
+    const now = new Date().toISOString();
+    const record = { id:draft.id, source:'technical_workspace', status:'technical_draft',
+      clientId:lead?.id || null, createdAt:previous?.createdAt || now, updatedAt:now,
+      payload:{client,vehicles:vehicle ? [vehicle] : []}, technicalContext };
+    const index = state.operations.quotes.findIndex(item => item.id === record.id);
+    if (index >= 0 && state.operations.quotes[index].source !== 'technical_workspace') throw new Error('Identificador de rascunho já pertence a outro registro.');
+    if (index >= 0) state.operations.quotes[index] = record;
+    else state.operations.quotes.push(record);
+    saveOperationsToStorage();
+    // The same durable outbox used by reviewed outcomes precedes UI success.
+    await OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+    return record;
+  }
 
-    if (query.includes('accelo')) {
-      state.consultant.selectedVehicleId = '3_4';
-      state.consultant.answers.wheel_size = '17';
-      state.consultant.answers.brand = 'mb';
-      state.consultant.targetVehicleName = 'Mercedes-Benz Accelo';
-    } else if (query.includes('delivery')) {
-      state.consultant.selectedVehicleId = '3_4';
-      state.consultant.answers.wheel_size = '19';
-      state.consultant.answers.brand = 'vw';
-      state.consultant.targetVehicleName = 'VW Delivery 3/4';
+  function openTechnicalQuote(record) {
+    if (record.id !== state.consultant.id || String(record.clientId || '') !== String(state.consultant.leadId || '')) return;
+    const vehicle = record.payload.vehicles[0];
+    if (!vehicle) return;
+    const lead = record.clientId ? OG_CRM_SERVICE.getLeadById(state.leads, record.clientId) : null;
+    if (record.clientId && !lead) return;
+    const currentLead = findLeadForClientData(state.client);
+    const identity = client => JSON.stringify(['internalCode','cnpj','telefone','empresa','nome'].map(key => String(client[key] || '').trim()));
+    const differentClient = record.clientId
+      ? String(currentLead?.id || '') !== String(record.clientId)
+      : identity(state.client) !== identity(record.payload.client);
+    if (differentClient && (state.vehicles.length || state.extraItems.length)
+      && !confirm('Abrir uma cotação para este contexto? A tela atual será substituída; cotações e rascunhos já salvos permanecem no histórico.')) return;
+    const existing = differentClient ? -1 : state.vehicles.findIndex(item => item.id === vehicle.id);
+    const vehicleSignature = item => JSON.stringify(['name','qty','vehicleTypeId','libras','includeDianteira','items'].map(key => item[key]));
+    if (existing >= 0 && vehicleSignature(state.vehicles[existing]) !== vehicleSignature(vehicle)
+      && !confirm('Atualizar este veículo com a composição revisada? Os ajustes atuais de nome, quantidade, configuração e peças serão substituídos.')) return;
+    if (differentClient) { state.vehicles = []; state.extraItems = []; }
+    // Identity is replaced as a whole; billing from a different customer is not inherited.
+    state.client = { ...quoteClientDefaults, ...record.payload.client };
+    if (lead) {
+      for (const field of ['nome','empresa','cnpj','ie','socioAdmin','telefone','cidadeUf','internalCode']) state.client[field] = lead[field] || '';
+      state.client.segmentId = lead.segmentId || quoteClientDefaults.segmentId;
     }
-
-    if (query.includes('19') || query.includes('aro 19')) state.consultant.answers.wheel_size = '19';
-    if (query.includes('17') || query.includes('aro 17')) state.consultant.answers.wheel_size = '17';
-    if (query.includes('scania')) state.consultant.answers.brand = 'scania';
-    if (query.includes('volvo')) state.consultant.answers.brand = 'volvo';
-    if (query.includes('mercedes') || query.includes('mb') || query.includes('atego') || query.includes('axor') || query.includes('actros')) state.consultant.answers.brand = 'mb';
-    if (query.includes('vw') || query.includes('volks')) state.consultant.answers.brand = 'vw';
-    if (query.includes('2016') || query.includes('antigo')) state.consultant.answers.mb_year = 'lt2017';
-    if (query.includes('2017') || query.includes('2018') || query.includes('2019') || query.includes('2020') || query.includes('2021') || query.includes('2022') || query.includes('2023') || query.includes('2024') || query.includes('2025')) state.consultant.answers.mb_year = 'ge2017';
-    if (query.includes('ar') || query.includes('pneumat')) state.consultant.answers.scania_suspension = 'ar';
-    if (query.includes('mola')) state.consultant.answers.scania_suspension = 'mola';
-    if (query.includes('redução') || query.includes('reducao')) state.consultant.answers.has_reduction = 'sim';
-    if (query.includes('6x4') || query.includes('tracado')) state.consultant.answers.traction_type = '6x4';
-    if (query.includes('6x2') || query.includes('trucado')) state.consultant.answers.traction_type = '6x2';
-    if (query.includes('bitruck') || query.includes('8x2')) state.consultant.answers.is_bitruck = '8x2';
-
-    renderConsultantEngine();
+    for (const [field,id] of Object.entries({nome:'client-name',empresa:'client-company',cnpj:'client-cnpj',ie:'client-ie',socioAdmin:'client-socio',telefone:'client-phone',cidadeUf:'client-city',tier:'client-tier',paymentMethod:'client-payment',precoPneu:'client-preco-pneu',parcelasCount:'client-parcelas',freteTexto:'client-frete-texto',prazoEntrega:'client-prazo-entrega'})) {
+      const input = document.getElementById(id); if (input) input.value = state.client[field] || '';
+    }
+    state.vehicles.forEach(item => { item.collapsed = true; });
+    if (existing >= 0) state.vehicles[existing] = JSON.parse(JSON.stringify(vehicle));
+    else state.vehicles.push(JSON.parse(JSON.stringify(vehicle)));
+    recalculateQuote();
+    switchTab('cotacao');
+    showNotification('Aplicação revisada aberta na cotação. Nenhuma proposta foi enviada.', 'success');
   }
 
   function resolveVehicleSupports(vId, answers) {
@@ -2982,212 +2986,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function renderConsultantEngine() {
-    const container = document.getElementById('consultant-questions-container');
-    const resultsContainer = document.getElementById('consultant-resolution-container');
-    const vehicleButtonsContainer = document.getElementById('consultant-vehicle-quick-buttons');
-    if (!container || !resultsContainer) return;
-
-    const currentRule = OG_DATA.vehicleConsultantRules.find(r => r.id === state.consultant.selectedVehicleId) || OG_DATA.vehicleConsultantRules[0];
-
-    if (vehicleButtonsContainer) {
-      vehicleButtonsContainer.innerHTML = '';
-      OG_DATA.vehicleConsultantRules.forEach(rule => {
-        const isSelected = rule.id === currentRule.id;
-        const btn = document.createElement('button');
-        btn.className = `px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${isSelected ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'}`;
-        btn.innerHTML = `<span>🚛</span> <span>${rule.name}</span>`;
-        btn.addEventListener('click', () => {
-          state.consultant.selectedVehicleId = rule.id;
-          state.consultant.targetVehicleName = rule.name;
-          renderConsultantEngine();
-        });
-        vehicleButtonsContainer.appendChild(btn);
-      });
-    }
-
-    container.innerHTML = '';
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 mb-3';
-    headerDiv.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">🚛</span>
-          <div>
-            <h4 class="font-bold text-sm text-slate-100">${currentRule.name}</h4>
-            <span class="text-[11px] text-slate-400">Aplicações: <b>${currentRule.applications.join(', ')}</b></span>
-          </div>
-        </div>
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase">${currentRule.category}</span>
-      </div>
-    `;
-    container.appendChild(headerDiv);
-
-    currentRule.questions.forEach(q => {
-      if (q.showIf) {
-        const [k, v] = Object.entries(q.showIf)[0];
-        if (state.consultant.answers[k] !== v) return;
-      }
-
-      const qDiv = document.createElement('div');
-      qDiv.className = 'bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2';
-      qDiv.innerHTML = `
-        <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-          <span class="text-amber-400">❓</span>
-          <span>${q.question}</span>
-        </div>
-        <div class="flex flex-wrap gap-2 pt-1">
-          ${q.options.map(opt => {
-            const isChecked = state.consultant.answers[q.id] === opt.value;
-            return `
-              <button type="button" data-qid="${q.id}" data-val="${opt.value}" class="btn-consultant-opt px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${isChecked ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-bold' : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border-slate-700'}">
-                ${opt.label}
-              </button>
-            `;
-          }).join('')}
-        </div>
-      `;
-      container.appendChild(qDiv);
-    });
-
-    container.querySelectorAll('.btn-consultant-opt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const qId = btn.getAttribute('data-qid');
-        const val = btn.getAttribute('data-val');
-        state.consultant.answers[qId] = val;
-        renderConsultantEngine();
-      });
-    });
-
-    const { resultList, resolution } = buildConsolidatedVehiclePieces(
-      currentRule.id,
-      state.consultant.answers,
-      state.consultant.libras,
-      state.consultant.includeDianteira
-    );
-
-    let supportsHtml = '';
-    if (resolution.suporteTracao) {
-      supportsHtml += `
-        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 font-bold block uppercase">Suporte Tração</span>
-            <span class="font-mono font-bold text-amber-400 text-xs">${resolution.suporteTracao.code}</span>
-            <span class="text-[11px] text-slate-300 ml-1.5">${resolution.suporteTracao.name}</span>
-          </div>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✅ Definido</span>
-        </div>
-      `;
-    }
-
-    if (resolution.suporteTruck) {
-      supportsHtml += `
-        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 font-bold block uppercase">Suporte Truck</span>
-            <span class="font-mono font-bold text-amber-400 text-xs">${resolution.suporteTruck.code}</span>
-            <span class="text-[11px] text-slate-300 ml-1.5">${resolution.suporteTruck.name}</span>
-          </div>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✅ Definido</span>
-        </div>
-      `;
-    }
-
-    if (resolution.suporteCarreta) {
-      supportsHtml += `
-        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 font-bold block uppercase">Suporte Carretas / Reboques</span>
-            <span class="font-mono font-bold text-amber-400 text-xs">${resolution.suporteCarreta.code}</span>
-            <span class="text-[11px] text-slate-300 ml-1.5">${resolution.suporteCarreta.name}</span>
-          </div>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✅ Definido</span>
-        </div>
-      `;
-    }
-
-    if (state.consultant.includeDianteira && resolution.suporteDianteiro) {
-      supportsHtml += `
-        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 font-bold block uppercase">Suporte Dianteiro</span>
-            <span class="font-mono font-bold text-amber-400 text-xs">${resolution.suporteDianteiro.code}</span>
-            <span class="text-[11px] text-slate-300 ml-1.5">${resolution.suporteDianteiro.name}</span>
-          </div>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✅ Definido</span>
-        </div>
-      `;
-    }
-
-    let piecesConsolidatedHtml = resultList.map(item => {
-      const catItem = OG_DATA.catalog.find(c => c.code === item.code) || { name: item.code };
-      return `
-        <div class="flex items-center justify-between text-xs py-1.5 border-b border-slate-800/60">
-          <div class="flex items-center gap-2">
-            <span class="font-mono font-bold text-amber-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-700">${item.code}</span>
-            <span class="text-slate-200">${catItem.name}</span>
-          </div>
-          <span class="font-bold text-slate-100 bg-slate-800 px-2 py-0.5 rounded">${item.qty} un</span>
-        </div>
-      `;
-    }).join('');
-
-    resultsContainer.innerHTML = `
-      <div class="space-y-3">
-        <div>
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Suportes Identificados com Precisão:</h4>
-          <div class="space-y-1.5">
-            ${supportsHtml}
-          </div>
-        </div>
-
-        <div class="pt-2">
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Peças Consolidadas para Este Veículo:</h4>
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 max-h-48 overflow-y-auto">
-            ${piecesConsolidatedHtml}
-          </div>
-        </div>
-      </div>
-    `;
-    syncVehicleGallerySelection();
-  }
-
-  function injectConsultantVehicleIntoQuote() {
-    const currentRule = OG_DATA.vehicleConsultantRules.find(r => r.id === state.consultant.selectedVehicleId) || OG_DATA.vehicleConsultantRules[0];
-    const { resultList } = buildConsolidatedVehiclePieces(
-      currentRule.id,
-      state.consultant.answers,
-      state.consultant.libras,
-      state.consultant.includeDianteira
-    );
-
-    // Recolhe os anteriores
-    state.vehicles.forEach(v => { v.collapsed = true; });
-
-    let vehName = state.consultant.targetVehicleName || currentRule.name;
-    if (currentRule.id === '3_4') {
-      if (state.consultant.answers.brand === 'mb') vehName = 'Mercedes-Benz Accelo (3/4)';
-      else if (state.consultant.answers.brand === 'vw') vehName = 'VW Delivery 3/4';
-    }
-
-    const newVeh = {
-      id: 'veh_' + Date.now(),
-      name: `${vehName} (${state.consultant.libras} LBS)`,
-      vehicleTypeId: currentRule.id,
-      libras: state.consultant.libras,
-      includeDianteira: state.consultant.includeDianteira,
-      qty: 1,
-      collapsed: false,
-      items: resultList
-    };
-
-    state.vehicles.push(newVeh);
-    recalculateQuote();
-
-    const assistContainer = document.getElementById('assist-vehicle-container');
-    if (assistContainer) assistContainer.classList.add('hidden');
-
-    switchTab('cotacao');
-    showNotification(`Veículo "${newVeh.name}" adicionado à cotação com sucesso!`, 'success');
+    technicalWorkspace?.render();
   }
 
   // =========================================================================
@@ -9114,9 +8913,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         const selectedId = button.dataset.ogVehicle;
         const rule = OG_DATA.vehicleConsultantRules.find(item => item.id === selectedId);
         if (!rule) return;
-        state.consultant.selectedVehicleId = rule.id;
-        state.consultant.targetVehicleName = rule.name;
-        renderConsultantEngine();
+        technicalWorkspace?.chooseVehicle(rule.id);
         document.getElementById('consultant-search-input')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
     });
@@ -9351,7 +9148,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   initClientInputs();
   initMultiVehicleEngine();
   initQuoteImport();
-  initConsultantEngine();
+  initializeModule(initConsultantEngine, 'guia');
   initDayDashboard();
   initProspecting();
   initCommandCenter();

@@ -1,8 +1,8 @@
 # DUTRA OS — Roadmap Vivo
 
-## CONVERGENCE-01 — Stage5
+## CONVERGENCE-01 — Stage6
 
-Call Intelligence Premium e recoveries de contexto/revisão/reconexão passaram nos gates locais. Estado exato de QA/publicação em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`. Stage6 não autorizada; nenhum merge em main ou deploy de produção.
+Aplicação Técnica Premium autorizada e implementada sobre motor/catalog/owners atuais, com rascunho durável e cotação nativa. Gates finais e QA independente PASS; concluir publicação somente na integração; [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) registra o estado exato. Stage7 não autorizada; nenhum merge em main ou deploy de produção.
 
 Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado permanece em `docs/10-ROADMAP.md`.
 

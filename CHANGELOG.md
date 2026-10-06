@@ -1,10 +1,17 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage6 (aceite local PASS; publicação pendente)
+
+- Aplicação Técnica Premium no shell único; input gate mostra VALIDAR sem chamar o motor com configuração incompleta/inválida. Motor técnico e `OG_DATA` preservados byte a byte.
+- Rascunho em `operations.quotes` aguarda outbox existente; edição manual revisada e handoff explícito preservam cliente, códigos, quantidades e cotação/preços atuais, sem criar fato de proposta.
+- GET antigo não substitui trabalho local novo; pull/seed reconhecem operações sem CRM/histórico. ACK compara a intenção capturada da outbox e limpa atomicamente somente a fila correspondente, preservando saves posteriores.
+- Evidência, limites de validação OG, viewports, rollback e publicação no checkpoint; Stage7/produção fora do escopo.
+
 ## [Unreleased] — CONVERGENCE-01 Stage5
 
 - Call Intelligence Premium no shell único; texto/conversa, transcrição literal e revisão editável preservam os engines atuais.
 - Respostas antigas e sessões descartadas não contaminam contas; comando normalizado antecede confirmação local, retry idempotente e outbox durável.
-- Reconexão durante lock preserva intenção no controller atual; erro503/conflito409 permanecem explícitos. Gates, viewports e publicação no checkpoint; Stage6 não autorizada.
+- Reconexão durante lock preserva intenção no controller atual; erro503/conflito409 permanecem explícitos. Gates, viewports e publicação no checkpoint histórico Stage5; a autorização posterior Stage6 está registrada acima.
 
 ## [Unreleased] — CONVERGENCE-01 Stage4
 

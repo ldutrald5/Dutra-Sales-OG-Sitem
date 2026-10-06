@@ -1,8 +1,8 @@
 # DUTRA OS — Contexto Canônico
 
-## CONVERGENCE-01 Stage5
+## CONVERGENCE-01 Stage6 — aceite local concluído
 
-Call Intelligence Premium consome os owners atuais, com revisão humana, identidade de sessão protegida e persistência durável antes de sucesso. Transcrição/Whisper mantidos; orientação local identificada quando não há provider remoto. Evidência/publicação em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`; Stage6 exige nova autorização.
+Aplicação Técnica Premium foi autorizada em 2026-10-06 e implementada no shell único sobre `OG_DATA` e as funções técnicas originais intactas de `app.js`. `state.consultant`, `operations.quotes` e `state.vehicles` continuam sendo os owners; o componente técnico apenas apresenta e valida entradas. Rascunho técnico não registra proposta, envio ou fato comercial. Gates finais e QA independente passaram; publicação ainda pendente no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md); Stage7 não está autorizada.
 
 > Fonte de verdade para humanos e IAs que trabalham neste repositório.
 > Antes de alterar o produto, leia também `AI_HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md` e `AGENTS.md`.

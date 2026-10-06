@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage 5 COMPLETE; local acceptance, independent QA and real integration publication verified. Current implementation boundary: 6eee22a4bf74960f40408a56cfb2aa9634a9e072; final documentation-only closure follows. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Earlier Stage3/4 stops are historical and resolved. Stage6 NOT AUTHORIZED.
+Current execution status: Stage6 local gates and independent QA PASS; publication pending on integration/dutra-os-one-system. Entry/rollback: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage5 COMPLETE and earlier stops are historical; QG authorized only Stage6 on 2026-10-06. Stage7 NOT AUTHORIZED.
 
 ## Mission
 
@@ -307,3 +307,63 @@ Stage5 local acceptance / 2026-10-06:
 - [x] Independent final QA PASS; release gate PASS.
 - [x] Committed/pushed clean integration and protected refs verified at 6eee22a4bf74960f40408a56cfb2aa9634a9e072; final documentation-only closure follows.
 File list / source IDs / evidence / rollback: current Stage5 checkpoint. Stage6 requires fresh QG authorization.
+
+
+## Stage 6 — Aplicação Técnica Premium (QG authorization 2026-10-06)
+
+PRE_STAGE6_SHA / ROLLBACK: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8.
+Scope: one Premium technical workspace in apps/sistema-og, no Stage7/8, no production or protected branch changes.
+
+### Audit / canonical owners (closed before implementation)
+
+| Capability | Current owner | Reference / decision |
+|---|---|---|
+| Data/catalog/configuration questions | OG_DATA, data.js | KEEP, no new mapping/catalog |
+| Support rules and part composition | app.js resolveVehicleSupports/buildConsolidatedVehiclePieces | KEEP intact; only call after valid explicit inputs |
+| Technical working context | state.consultant | ADAPT existing owner, no parallel vehicle store |
+| Premium presentation | technical-workspace component over current callbacks | ADAPT Stage2 tokens and V3 density; no V3 engine port |
+| Draft persistence | operations.quotes, source technical_workspace/status technical_draft | MERGE existing envelope/outbox; no history/proposal/send fact |
+| Quote handoff | state.vehicles/current quotation/history payload | KEEP codes/qty/manual/context, Stage7/8 expansion DEFER |
+| Preview technical service | historical extraction/fallback/price composition | DEFER port: fallback/commercial semantics differ from current baseline |
+
+Architect APPROVE adapter/input gate and canonical quote drafts. Current rule defaults are runtime behavior, not confirmed user answers. Unknown/incomplete inputs show VALIDAR without invoking mappings. Physical OG certification is separate from tested runtime mappings.
+
+### Acceptance checklist
+
+- [x] Clean exact entry, read and remote-write preflight, protected refs verified.
+- [x] Canonical owners/audit matrix established before implementation.
+- [x] One native Premium workspace uses unchanged canonical technical engine/data (byte comparison against entry PASS).
+- [x] Incomplete/invalid inputs show VALIDAR without engine calls or invented parts; unit/browser PASS.
+- [x] Manual edits/all-remove persist; replacement/reset requires explicit confirmation; edit invalidates review.
+- [x] Client/vehicle identity survives save/refresh; stale async continuations/detached controls are inert.
+- [x] Canonical quote handoff retains codes/quantities/notes/overrides, complete linked identity and unlinked manual client/terms.
+- [x] Offline/current outbox/reconnect/409 preserve data and honest status in real loopback HTTP/IndexedDB browsers.
+- [x] Held GET/operations-only pull/seed and scheduled/reconnect/human-review old ACK windows preserve newer durable draft through refresh/later real ACK.
+- [x] Eight viewports, keyboard/focus/touch and latest technical browser PASS (synthetic isolated fixtures; no physical OG certification).
+- [x] Stage3/4/5, shell/PWA/sync and full gates PASS; independent QA PASS.
+- [ ] Checkpoint/Brain updated; authorized push verified; clean tree/protected refs intact.
+- [ ] Stage6 COMPLETE; Stage7 not executed.
+
+### File list (local acceptance PASS; publication pending)
+
+- apps/sistema-og/app.js
+- apps/sistema-og/index.html
+- apps/sistema-og/components/technical-workspace.js
+- apps/sistema-og/components/technical-workspace.css
+- apps/sistema-og/service-worker.js (asset/version only)
+- apps/sistema-og/services/sync-bridge-service.js (atomic captured-outbox acknowledgement)
+- package.json (scripts only)
+- scripts/validate.mjs
+- scripts/test_technical_workspace.mjs
+- scripts/test_technical_workspace_browser.mjs
+- scripts/test_technical_context_browser.mjs
+- scripts/test_sync_conflict_ui.mjs
+- scripts/test_call_ai_workspace_browser.mjs (storage failure probe targets actual outbox.put; original durability/retry assertions retained)
+- docs/stories/CONVERGENCE-01-dutra-os-one-system.md
+- docs/handoffs/V3_UNIFICATION_CHECKPOINT.md
+- DUTRA_OS_CONTEXT.md, AI_HANDOFF.md, ROADMAP.md, CHANGELOG.md
+- docs/01-ARQUITETURA.md, tasks/TODO.md, tasks/DONE.md
+- docs/second-brain/sources.jsonl, decisions.jsonl, incidents.jsonl, cycles.jsonl
+- docs/second-brain/BRAIN_INDEX.md, BRAIN_METRICS.md (root refresh pending)
+
+Durable record IDs, executed evidence, runtime access drift and rollback are in the current Stage6 checkpoint. No hosted Stage6 preview was found; the existing V3 URL is a different historical branch/SHA. No Stage7, protected ref or production change.

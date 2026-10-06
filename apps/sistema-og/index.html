@@ -37,6 +37,7 @@
   <!-- Estilos Customizados Ultra Clean & Print Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="components/app-shell.css">
+  <link rel="stylesheet" href="components/technical-workspace.css">
 </head>
 <body class="dutra-shell bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
 
@@ -537,87 +538,28 @@
     <!-- ======================================================================= -->
     <!-- ABA 2: CONSULTOR DE SUPORTES POR TIPO DE CAMINHÃO (ÁRVORE DE DECISÃO)    -->
     <!-- ======================================================================= -->
-    <div id="tab-guia" class="tab-content hidden space-y-6">
-
-      <section class="og-vehicle-gallery" aria-labelledby="vehicle-gallery-title">
-        <div class="og-vehicle-gallery-head">
-          <div>
-            <span class="og-kicker">ESCOLHA PELA OPERAÇÃO</span>
-            <h2 id="vehicle-gallery-title">Qual caminhão você está configurando?</h2>
-          </div>
-          <p>A imagem orienta a categoria; o nome e as perguntas técnicas confirmam a aplicação correta.</p>
-        </div>
-        <div class="og-vehicle-gallery-grid">
-          <article class="og-vehicle-visual">
-            <img src="assets/premium/optimized/caminhoes-medios-960.webp" loading="lazy" width="960" height="540" alt="Caminhões médios e urbanos">
-            <div class="og-vehicle-copy"><strong>Leves e médios</strong><small>Escolha a configuração exata</small></div>
-            <div class="og-vehicle-options" aria-label="Configurações de caminhões leves e médios">
-              <button type="button" data-og-vehicle="3_4">3/4 ou VUC</button>
-              <button type="button" data-og-vehicle="toco_4x2">Toco 4x2</button>
-            </div>
-          </article>
-          <article class="og-vehicle-visual">
-            <img src="assets/premium/optimized/caminhoes-pesados-960.webp" loading="lazy" width="960" height="540" alt="Cavalos mecânicos e caminhões pesados">
-            <div class="og-vehicle-copy"><strong>Pesados e conjuntos</strong><small>Escolha a composição exata</small></div>
-            <div class="og-vehicle-options" aria-label="Configurações de caminhões pesados e conjuntos">
-              <button type="button" data-og-vehicle="trucado_6x2_8x2">Truck ou Bitruck</button>
-              <button type="button" data-og-vehicle="trucado_reboque">Romeu e Julieta</button>
-              <button type="button" data-og-vehicle="cavalo_toco_carreta3">Cavalo 4x2 + Carreta</button>
-              <button type="button" data-og-vehicle="trucado_carreta3">Cavalo 6x2 + Carreta</button>
-              <button type="button" data-og-vehicle="bitrem_7eixos">Bitrem</button>
-              <button type="button" data-og-vehicle="rodotrem_9eixos">Rodotrem</button>
-            </div>
-          </article>
+    <div id="tab-guia" class="tab-content hidden">
+      <section id="technical-workspace" class="technical-workspace" aria-labelledby="technical-title">
+        <header class="technical-header"><div><span class="og-kicker">APLICAÇÃO TÉCNICA · OG</span><h1 id="technical-title">Do veículo à composição certa</h1><p>Configure, revise e leve as peças para a cotação. Dados incompletos permanecem em VALIDAR.</p></div><span class="technical-source">Motor atual · catálogo OG</span></header>
+        <div class="technical-grid">
+          <section class="technical-panel technical-context" aria-labelledby="technical-context-title">
+            <span class="og-kicker">01 · CONTEXTO</span><h2 id="technical-context-title">Cliente e veículo</h2>
+            <label>Cliente do CRM<select id="technical-client"><option value="">Sem cliente vinculado</option></select></label>
+            <label>Configuração<select id="technical-vehicle"><option value="">Escolha a configuração</option></select></label>
+            <label>Identificação / modelo<input id="technical-name" placeholder="Nome do veículo, se conhecido" maxlength="180"></label>
+            <div class="technical-field-pair"><label>Veículos<input id="technical-qty" type="number" min="1" max="999" step="1" value="1"></label><label>Libragem<select id="consultant-libras-select"><option value="">Confirmar</option><option value="110">110 PSI</option><option value="115">115 PSI</option><option value="120">120 PSI</option></select></label></div>
+            <label class="technical-checkbox"><input id="consultant-include-dianteira" type="checkbox" checked>Incluir dianteira</label>
+            <label>Observações da aplicação<textarea id="technical-notes" rows="3" placeholder="Exceções e informações que precisam ser verificadas"></textarea></label>
+            <p id="technical-client-context" class="technical-hint">O cliente é o mesmo do CRM. Trabalhar sem vínculo não cria outro cadastro.</p>
+          </section>
+          <section class="technical-panel technical-configuration" aria-labelledby="technical-config-title"><span class="og-kicker">02 · CONFIGURAÇÃO</span><h2 id="technical-config-title">Confirme o que muda a aplicação</h2><div id="consultant-questions-container"></div><p id="technical-axles" class="technical-hint">Eixos não determinados</p></section>
+          <section class="technical-panel technical-result" aria-labelledby="technical-result-title"><span class="og-kicker">03 · REVISÃO</span><h2 id="technical-result-title">Peças e quantidades</h2><div id="technical-state" class="technical-status" role="status" aria-live="polite"></div><div id="consultant-resolution-container"></div>
+            <details class="technical-manual-tools"><summary>Adicionar peça do catálogo</summary><div class="technical-add"><label>Peça<select id="technical-add-code"></select></label><label>Por veículo<input id="technical-add-qty" type="number" min="1" step="1" value="1"></label><button id="technical-add-item" type="button">Adicionar peça</button></div></details>
+            <div id="technical-manual-review" hidden><label class="technical-checkbox"><input id="technical-confirm-manual" type="checkbox">Revisei os ajustes para esta configuração</label><button id="technical-reset-manual" type="button">Voltar ao cálculo do motor</button><p class="technical-hint">Recalcular não apaga ajustes. A substituição exige confirmação explícita.</p></div>
+            <div class="technical-actions"><button id="technical-save-draft" type="button">Salvar rascunho</button><button id="btn-inject-consultant-to-quote" type="button" class="technical-primary" disabled>Continuar na cotação</button></div><p id="technical-feedback" role="status" aria-live="polite">Nenhuma proposta ou contato é registrado ao salvar um rascunho técnico.</p>
+          </section>
         </div>
       </section>
-      
-      <div class="clean-card p-5">
-        <div class="max-w-3xl mb-4">
-          <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">ÁRVORE DE DECISÃO TÉCNICA</span>
-          <h2 class="text-lg font-bold text-slate-100 mt-2">Consultor Inteligente de Suportes por Caminhão</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Digite o modelo (ex: <i>"Accelo"</i>, <i>"Delivery 3/4"</i>, <i>"Scania R450"</i>, <i>"Volvo VM"</i>, <i>"Bitrem 6x4"</i>) e adicione o veículo diretamente na cotação multi-veículos!</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-          <div class="md:col-span-2">
-            <input type="text" id="consultant-search-input" placeholder="Digite: Accelo, Delivery 3/4, Toco Scania, Bitrem, Rodotrem..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="flex-1">
-              <select id="consultant-libras-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 font-bold">
-                <option value="110" selected>110 Libras (EQ-110)</option>
-                <option value="115">115 Libras (EQ-115)</option>
-                <option value="120">120 Libras (EQ-120)</option>
-              </select>
-            </div>
-            <label class="flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
-              <input type="checkbox" id="consultant-include-dianteira" checked class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500">
-              <span>Dianteira</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-1.5 mb-4" id="consultant-vehicle-quick-buttons">
-          <!-- Populado via app.js -->
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div id="consultant-questions-container" class="lg:col-span-7 space-y-2.5">
-            <!-- Renderizado via app.js -->
-          </div>
-
-          <div id="consultant-resolution-container" class="lg:col-span-5 bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <!-- Renderizado via app.js -->
-          </div>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-800 text-right">
-          <button id="btn-inject-consultant-to-quote" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition inline-flex items-center gap-2">
-            <span>⚡ Injetar este Veículo na Cotação Multi-Veículos</span>
-          </button>
-        </div>
-      </div>
-
     </div>
 
     <!-- ======================================================================= -->
@@ -1479,6 +1421,7 @@
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>
   <script src="performance-engine.js"></script>
+  <script src="components/technical-workspace.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

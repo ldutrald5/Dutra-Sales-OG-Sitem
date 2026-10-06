@@ -1,0 +1,35 @@
+.technical-workspace { --technical-surface:var(--og-surface,#15171b); color:var(--og-text,#f8fafc); min-width:0; }
+.technical-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.technical-header h1 { font-size:clamp(22px,2.2vw,32px); font-weight:800; line-height:1.2; margin:8px 0; }
+.technical-header p,.technical-hint { color:#a8b2c1; font-size:13px; line-height:1.6; }
+.technical-source { color:var(--og-yellow,#ffde17); border:1px solid #4f4c31; border-radius:8px; padding:8px 12px; font-size:12px; white-space:nowrap; }
+.technical-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+.technical-panel { min-width:0; border:1px solid var(--og-border,#30343a); border-radius:16px; padding:18px; background:var(--technical-surface); }
+.technical-panel h2 { font-size:18px; font-weight:700; margin:8px 0 18px; }
+.technical-workspace label { display:flex; flex-direction:column; gap:7px; font-size:13px; font-weight:600; margin-bottom:14px; min-width:0; }
+.technical-workspace input:not([type=checkbox]),.technical-workspace select,.technical-workspace textarea { width:100%; min-width:0; min-height:44px; padding:10px; border-radius:8px; border:1px solid #454b55; background:#0b0d11; color:#f8fafc; font-size:16px; }
+.technical-workspace textarea { resize:vertical; }
+.technical-workspace button,.technical-manual-tools summary { min-height:44px; padding:10px 13px; background:#242830; border:1px solid #454b55; border-radius:9px; font-size:13px; font-weight:700; text-align:left; }
+.technical-workspace :is(button,input,select,textarea,summary):focus-visible { outline:3px solid #ffde17; outline-offset:3px; }
+.technical-workspace :disabled { opacity:.45; cursor:not-allowed; }
+.technical-workspace button[aria-pressed=true],.technical-workspace .technical-primary { background:#ffde17; border-color:#ffde17; color:#141414; }
+.technical-field-pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+.technical-workspace .technical-checkbox { flex-direction:row; align-items:center; min-height:44px; font-weight:500; }
+.technical-checkbox input { width:22px; height:22px; accent-color:#ffde17; flex-shrink:0; }
+.technical-options { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 20px; }
+.technical-options button { flex:1 1 130px; }
+.technical-workspace legend { font-size:14px; font-weight:600; }
+.technical-status { border:1px solid #625a29; background:#ffde170a; border-radius:10px; padding:12px; margin-bottom:16px; display:grid; gap:6px; }
+.technical-status strong { color:#ffde17; }.technical-status span { font-size:12px; color:#c2c9d4; line-height:1.6; }
+.technical-status[data-state=error] { border-color:#a54747; }.technical-status[data-state=error] strong { color:#ff9b9b; }
+.technical-empty { color:#a8b2c1; font-size:14px; line-height:1.7; padding:16px 0; }
+[data-technical-item] { border-bottom:1px solid #30343a; padding:14px 0; display:grid; gap:12px; min-width:0; }
+[data-technical-item] strong,[data-technical-item] small { display:block; margin-top:5px; overflow-wrap:anywhere; } [data-technical-item] strong { font-size:14px; } [data-technical-item] small { font-size:12px; color:#a8b2c1; }
+.technical-code { color:#ffde17; font-family:monospace; font-size:14px; font-weight:700; overflow-wrap:anywhere; }
+.technical-item-actions { display:grid; grid-template-columns:minmax(0,1fr) 90px; gap:10px; align-items:end; }.technical-item-actions label { margin:0; }.technical-item-actions button { grid-column:1/-1; }
+.technical-manual-tools { margin:16px 0; }.technical-manual-tools summary { cursor:pointer; }.technical-add { margin-top:14px; }
+.technical-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }.technical-actions button { flex:1 1 160px; text-align:center; }
+#technical-feedback { font-size:12px; line-height:1.6; color:#c2c9d4; margin-top:12px; }#technical-feedback[data-state=error] { color:#ff9b9b; }
+@media(min-width:768px) and (max-width:1199px) { .technical-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }.technical-result { grid-column:1/-1; } }
+@media(min-width:1200px) { .technical-grid { grid-template-columns:minmax(230px,.8fr) minmax(240px,.9fr) minmax(340px,1.3fr); } }
+@media(max-width:430px) { .technical-header { flex-direction:column; }.technical-panel { padding:14px; }.technical-source { white-space:normal; } }

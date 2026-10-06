@@ -1,5 +1,62 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
+STAGE: 6 — APLICAÇÃO TÉCNICA PREMIUM
+STATUS: READY_FOR_PUBLICATION — local gates and independent QA PASS; real push proof pending
+UPDATED_AT: 2026-10-06
+BRANCH: integration/dutra-os-one-system
+PRE_STAGE6_SHA / ROLLBACK: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8
+POST_STAGE6_SHA: PENDING — no Stage6 commit/push claimed
+FINAL_CLOSURE_HEAD / LOCAL==REMOTE: PENDING — verify after authorized real push/fetch
+AUTHORIZATION: QG Stage6 only, including bounded identity/persistence recoveries; no Stage7/8, protected branch changes or production deployment.
+
+## Stage6 ownership and delivered behavior
+
+| Capability | Owner / path retained | Stage6 boundary |
+|---|---|---|
+| Data, configurations, questions, catalog | `OG_DATA`, `apps/sistema-og/data.js` | Unchanged byte for byte; UI reads current configuration tree/catalog |
+| Supports and physical composition | `resolveVehicleSupports` / `buildConsolidatedVehiclePieces`, `app.js` | Original function bodies byte intact against entry SHA; no V3 engine/fallback port |
+| Technical context | `state.consultant` | Existing owner; thin `components/technical-workspace.js` presentation/input adapter |
+| Durable draft | `state.operations.quotes` / `OG_OPERATIONS_MODEL` | `TECH-DRAFT-*`, `source:technical_workspace`, `status:technical_draft`, stable ID/clientId, createdAt/updatedAt, payload.client/vehicles + technicalContext |
+| CRM / quote identity | `OG_CRM_SERVICE`, `state.leads`, current `state.client` projection | No technical client registry; manual quote client remains manual when unlinked |
+| Handoff / prices | `state.vehicles`, `recalculateQuote`, `resolveItemPrice` / `calculateCompleteQuote` | Explicit current cotação handoff; same pricing/history/proposal owners |
+| Persistence / sync / navigation | Existing local operations storage, `OG_SYNC_BRIDGE`, foreground controller, SW, `switchTab` | No new store/schema/sender/router; minimal scoped CSS and SW asset/version update |
+
+INPUT_GATE: known configuration, each active conditional question has a valid option, supported PSI, positive integer vehicle quantity and boolean front inclusion before calling the original builder. Incomplete/unknown/invalid inputs yield empty/VALIDAR without default engine results or invented parts. Hook failure is explicit unavailable/error. UI labels runtime results as software rules requiring OG confirmation; computational parity is not physical OG certification (`OQ-OG-TECH-001` remains open).
+
+MANUAL_REVIEW: replace/edit/add/remove current catalog items, vehicle quantity/name and notes; preserve code/qty/customPrice/technicalContext in the native vehicle contract. Every composition edit invalidates manual confirmation. Empty manual array remains empty after save/refresh and cannot resurrect automatic items. Reset to automatic and configuration changes affecting overrides require explicit confirmation; quote replacement compares name/qty/configuration/PSI/front/items, so unchanged parts do not hide manual vehicle edits.
+
+DRAFT_AND_BRIDGES: save technical draft → `saveOperationsToStorage` → awaited existing durable outbox; UI acknowledges local persistence, global sync status requires remote ACK. No history, generatedDocuments, proposal event/value, activityEvents or contact/send fact is created by technical save. Thin handoff is Premium technical → current cotação; commercial proposal/public metadata expansion is deferred. Different linked client copies complete CRM identity/segment and resets prior billing defaults; cancellation preserves the existing quote. Unlinked draft copies the current manual quote client/terms and compares actual identity rather than equating all null clientIds. No CRM is invented. Saved technical contexts are recovered from canonical records with ID/client discriminator checks, explicit client selection and visible recovery feedback; dirty live edits are not replaced by pull/render.
+
+ASYNC_SAFETY: controls capture connected DOM + draft signature and canonical lead identity. Save captures its draft before await; a later context/navigation cannot receive the old handoff. Submission is latched; return to the same client after another context cannot revive detached controls. Existing quotes/manual edits require confirmation before replacement.
+
+## Stage6 bounded sync recoveries and prevention
+
+1. Held bootstrap/reconnect GET delivered after a durable save replaced operations with an older snapshot, then scheduled PUT/ACK erased the draft/outbox while showing OK. Reproduction extracted real app functions (`handoff-runtime-review.cjs`); browser regression now holds real loopback GET and proves save survives response, refresh, subsequent PUT/ACK. Existing `loadSharedState` captures generation and rechecks generation/outbox/writer/review gates before applying remote state. Operations-only pull and local seed inspect canonical collection counts, including a technical draft with zero CRM/history/events.
+2. Scheduled, queued reconnect and human-review PUT ACK could clear a newer durable outbox. Both foreground writers reproduced the window with serialized OLD payload, durable NEW save and retained timers (`old-ack-runtime-review.cjs`). Writers serialize immutable current wire snapshots and separately capture the exact existing outbox intention under lock: deep-cloned `expectedQueuedBody`, or null when absent. `clearQueuedState(expectedBody)` compares/deletes within one IndexedDB readwrite transaction. This also permits current recovered state to ACK an older captured queue without false mismatch, while a newly changed queue survives. Generation/mismatch preserves pending work and uses the current controller's timer; only the matching current ACK may produce OK. Explicit review queues its reviewed snapshot before send and applies the same safety. No retry manager, persistence or optional SW lock added. HTTP503 stays pending; HTTP409 retains explicit review.
+
+## Stage6 validation, runtime and closeout
+
+LOCAL_GATES: PASS — npm run lint/og:check; npm test 77/77 (tests-closeout.log); release:gate; technical input/conditional/unknown/quantity/manual/error unit; Brain refresh/check 148 records, zero warnings. No npm ci repeat: installed entry dependencies and lock unchanged; optional existing Playwright/Chromium are developer tools, no product dependency.
+BROWSER_ACCEPTANCE: PASS — technical workspace eleven functional cases/eight viewports; independent context eleven flows including held GET, operations-only pull/seed, prior outbox versus newer recovered wire snapshot, scheduled/reconnect/human-review old ACK gaps, unlinked manual client, complete A→B identity/billing/pricing/history, A/B draft recovery and override replacement. Current technical UI discloses the manual quotation context when unlinked, without creating CRM identity.
+REGRESSIONS: PASS — unchanged Meu Dia original; Prospecção original final (prospect-browser-final.log), Call AI thirteen flows (call-ai-browser-final.log), foreground sync/reconnect/503/409/manual review, shell routes/first paint/localized recovery/installed PWA offline reload. The earlier rapid Prospecção reconnect run timed out; the unchanged original final and two temporary diagnostic runs passed real remote ACK. No timeout or assertion was changed and no cause is claimed for that isolated earlier failure. Diagnostic code exists only outside Git.
+ARCHITECT: final APPROVE — original technical/pricing functions and OG_DATA byte intact; no extra owner/schema/provider/infra. INDEPENDENT_QA: PASS — current implementation and local runtime acceptance (qa-independent-review.md). Publication remains an independent @devops gate.
+REGRESSION_HARNESS: Call AI's real storage-failure probe now aborts `outbox.put` rather than every outbox readwrite transaction; unrelated ACK compare/delete is not a result write. Actual durable-result abort, zero result PUT before canonical command ACK, same-ID retry and no duplicate interaction assertions remain. Final Stage5 browser result is tracked with the closing gates, not inferred from the harness change.
+
+VIEWPORTS_TESTED: 320x568, 360x800, 390x844, 430x932, 768x1024, 1280x720, 1440x900, 1920x1080 — latest technical browser PASS for long codes/many manual items, navigation, touch/focus/keyboard and overflow. Tests use synthetic isolated records and real loopback HTTP/IndexedDB; no customer/provider/Supabase hosted writes or physical installation/device certification.
+EVIDENCE: `/workspace/scratch/stage6/{architect-audit,handoff-runtime-review,runtime-access}.md`; `{tests-closeout,technical-browser-final,technical-context-browser-final,call-ai-browser-final,prospect-browser-final,day-browser-latest,sync-browser-latest,shell-browser-final,lint-final,brain-refresh-final,brain-check-final,release-final}.log`; `technical/results.txt` and eight synthetic screenshots. Initial failures and deterministic repro scripts (including ACK contract pre/postfix) remain outside Git; no production diagnostic instrumentation.
+TEST_PATHS: `scripts/test_technical_workspace.mjs`; `scripts/test_technical_workspace_browser.mjs`; `scripts/test_technical_context_browser.mjs`; existing Stage3/4/5, shell/PWA/sync gates. Full suite includes the canonical technical unit test; browser tools remain optional development prerequisites without product dependency changes.
+FILES_CHANGED: app.js; index.html; components/technical-workspace.js/.css; service-worker.js; services/sync-bridge-service.js; package.json scripts; scripts/validate.mjs; technical unit/workspace/context browser tests; scripts/test_sync_conflict_ui.mjs; scripts/test_call_ai_workspace_browser.mjs; story; this checkpoint; DUTRA_OS_CONTEXT/AI_HANDOFF/ROADMAP/CHANGELOG/docs01Arquitetura/tasks; Second Brain source/decision/two incidents/cycle and generated index/metrics after refresh. No OG_DATA/Supabase/preview-v2/package-lock/dependency changes.
+DURABLE_MEMORY: SRC-CONVERGENCE-TECH-20261006-001; DEC-CONVERGENCE-TECH-001; INC-SYNC-STALE-GET-001; INC-SYNC-STALE-ACK-001; CYCLE-CONVERGENCE-STAGE6-20261006-001. Prior records retained; refresh/check PASS (148 records, zero warnings).
+
+ACCESS_VERIFIED_READONLY: Railway/Sites inventory and public health audited 2026-10-06 13:05–13:11 UTC; no hosted integration preview exists in returned inventory. https://dutra-os-v3-premium-production.up.railway.app is historical V3 (`dutra-os-ui-v3-premium`, SHA 7ce99b313724ac2ad2bb9996c12eea9b897a7e3f), not Stage6. Core live SHA f4c2b3c68d747b6477410ffff50521d8788f8d62 differs from remote main 5255dc5d432850dfeebe0a523402a1902b1d3a52. No deployment, service, domain, Site or tunnel created; access credentials remain runtime-managed and undisclosed.
+KNOWN_RISKS / GAPS: official OG provenance remains incomplete; manual review is not factory certification. Public proposal metadata enrichment/deep Client360/Stage7 remain deferred. Isolated local acceptance does not prove physical-device or hosted-provider behavior. Existing caught empty-storage bootstrap TDZ is separate baseline debt. A hosted Stage6 link needs a separately authorized preview environment; existing production/V3 links do not prove integration acceptance.
+ROLLBACK: preserve localStorage/IndexedDB/private .data/volume first; reverse only Stage6 runtime/adapters/test/asset changes to PRE_STAGE6_SHA on the integration branch, retaining additive technical draft records and outbox. No reset/data deletion or production rollback performed.
+PUSH / PROTECTED_REFS_VERIFICATION: PENDING final normal-hook real push/fetch; prior read/remote-write preflight PASS is not publication proof. main/V3/V2/#109/#110 and production are outside scope.
+BLOCKERS: real publication proof pending. Hosted Stage6 access is a separate runtime gap, not a deployed integration claim.
+SAFE_TO_START_STAGE7: NO — fresh QG authorization required after Stage6 closeout.
+
+## Stage5 historical checkpoint (closed at 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8)
+
 STAGE: 5 — CALL AI / CALL INTELLIGENCE PREMIUM
 STATUS: COMPLETE — technical acceptance, independent QA and real implementation publication verified
 UPDATED_AT: 2026-10-06

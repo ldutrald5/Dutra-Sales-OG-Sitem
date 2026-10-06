@@ -463,4 +463,8 @@ Stage4 COMPLETE; implementation publication verified in Stage4 checkpoint. Prior
 
 ## CONVERGENCE-01 — Stage5 current
 
-Stage5: concluída em 2026-10-06; gates locais/13 fluxos/eight viewports/QA/publicação real PASS. SHA e fechamento documental em docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Nenhum trabalho Stage6 autorizado.
+Stage5: concluída em 2026-10-06; gates locais/13 fluxos/eight viewports/QA/publicação real PASS. SHA e fechamento documental no checkpoint histórico Stage5. A autorização posterior Stage6 está registrada abaixo.
+
+## CONVERGENCE-01 — Stage6 current
+
+Stage6 autorizada em 2026-10-06 e implementada na integração: apresentação técnica, input gate, draft no owner existente, edição manual e handoff nativo; correções delimitadas de identidade/GET/ACK. Evidência anterior full77/viewports e regressões críticas em [checkpoint](../docs/handoffs/V3_UNIFICATION_CHECKPOINT.md). Gates77/Brain148/release/QA final PASS. Pendente: push real/fetch LOCAL==REMOTE e refs protegidas. Stage7 não autorizada; sem preview hospedado Stage6 comprovado.

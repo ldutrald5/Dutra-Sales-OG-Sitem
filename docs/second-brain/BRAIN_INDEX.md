@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 16 |
-| decision | 19 |
+| cycle | 17 |
+| decision | 20 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 16 |
+| incident | 18 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 28 |
+| source | 29 |
 
 ## Active decisions
 
@@ -57,6 +57,8 @@ Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Use a dedicated Prompt Architect to convert human intent into scoped L0-L3 execution missions; Builder Brain remains decision/learning governance, Context Router remains retrieval authority, and SubagentPromptBuilder remains AIOX static task/agent packaging.
 - **DEC-CONVERGENCE-SHELL-001 — Static presentation shell retains canonical navigation and sync owners** (active/high)
   apps/sistema-og is the unified target shell; preview-v2 remains UX reference. Reuse switchTab/hash/history and existing state/services. Static nav/status, localized feedback and scoped canonical tokens may adapt presentation; an ephemeral bootstrap promise coordinates recovery/reconnect without a new sync model.
+- **DEC-CONVERGENCE-TECH-001 — Thin technical presentation and draft over current quote owners** (active/high)
+  Premium technical UI validates active explicit inputs before calling original app.js builders and uses existing state.consultant, operations.quotes and state.vehicles. TECH-DRAFT technical_workspace/technical_draft stores identity, timestamps, payload.client/vehicles and technicalContext; awaited current outbox precedes local success. Save creates no proposal/contact/history fact. Reviewed native quote handoff preserves manual composition and current pricing; linked identity is copied completely and unlinked manual quote owner is retained.
 
 ## Open questions
 
@@ -84,16 +86,16 @@ Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Normalized reviewed command must ACK before confirmed local projection; durable current outbox must complete before success/advance. Failures retain explicit retry without duplicating identity/history.
 - **INC-SYNC-RECONNECT-LOCK-001 — Reconnect event lost while prior foreground sync releases its lock** (resolved/high)
   An explicit reconnect blocked by the existing foreground lock is consumed once after release with current gates revalidated. Errors alone do not trigger retries or fake OK.
+- **INC-SYNC-STALE-GET-001 — Held remote GET overwrote newer durable technical draft** (resolved/high)
+  A remote read may apply only to the unchanged local generation and current recovery gates; canonical operations are data even with no CRM/history/events.
+- **INC-SYNC-STALE-ACK-001 — Old PUT ACK erased a newer durable outbox intention** (resolved/high)
+  Remote ACK retires only the exact captured recovery intention atomically; an ACK for old work cannot clear a later durable save or certify current OK.
 - **INC-EXEC-ENV-001 — Structural convergence blocked by missing checkout and unreachable proxy** (resolved/high)
   Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
 - **INC-MEU-DIA-REFRESH-001 — Confirmed Mesa outcome lost on immediate refresh during sync debounce** (resolved/high)
   A local-first outcome must be recoverable before the UI confirms success or advances. Reuse the canonical outbox instead of waiting for debounced transport.
 - **INC-PROSPECT-FOCUS-001 — Empty filtered prospect queue retained stale actionable focus** (resolved/high)
   Focused prospect identity must belong to its active canonical queue. A valid normalized session additionally requires exact session/member/company membership; zero local eligible items cannot leave an old local focus actionable.
-- **INC-SYNC-SW-READY-001 — Optional Service Worker readiness blocked foreground reconnect** (resolved/high)
-  Optional Background Sync registration must not hold the foreground sync write lock or delay visible pending-state delivery after a durable outbox write.
-- **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (resolved/high)
-  The live Supabase backend is now reconstructable from reviewed Git evidence: the exact 25 recorded migrations, all 13 deployed Edge Function sources, and a catalog-derived bootstrap supplement for eight CRM tables that had existed outside recorded migration history.
 
 ## Candidate / planned ideas
 
@@ -157,6 +159,8 @@ Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
   Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
+- **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
+  Entry 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8 audit established OG_DATA/app.js technical owners; byte comparison preserved both original technical functions and data. Synthetic VM repros executed real app callbacks and exposed held-GET draft loss, operations-only recovery omission and old-ACK deletion of a newer durable outbox. Real loopback HTTP/IndexedDB browsers protect these boundaries. This source does not certify physical OG application, hosted provider operation or final Stage6 publication.
 - **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
   Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
 - **SRC-CONVERGENCE-SHELL-20261005-001 — Stage 2 audited shell implementation and execution evidence** (validated/high)
@@ -173,8 +177,6 @@ Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Live repository audit established GitHub main at f4c2b3c68d747b6477410ffff50521d8788f8d62 as the current canonical code line and identified the existing Builder Brain, context manifests, knowledge services, current tests and newer Call Intelligence/Whisper implementation.
 - **SRC-CALLINT-20261001-001 — Call Intelligence and local Whisper production hardening commits** (implemented/high)
   Main commit chain 39be4d18 → 445ac095 → d631ef29 → af5469eb → f4c2b3c6 hardened signed audio upload, fact extraction, production metric hygiene and the local faster-whisper fallback, then added an opt-in production end-to-end self-test.
-- **SRC-TECH-HANDOFF-20261001-001 — Live GitHub/Railway/Supabase technical recovery audit** (validated/high)
-  Live audit verified GitHub main and Railway production alignment before the Intelligence Compiler merge, persistent Railway volume /data, PWA cache v67, an active hybrid Supabase/Postgres backend, and a reproducibility gap: the remote Supabase project had 25 applied migrations and 13 active Edge Functions while the repository versioned only 4 migration files and 2 Edge Function sources.
 
 ## Retrieval workflow
 
