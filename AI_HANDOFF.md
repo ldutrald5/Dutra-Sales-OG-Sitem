@@ -2,7 +2,7 @@
 
 ## Handoff atual — Stage6
 
-Leia [o checkpoint atual](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) para owners técnicos, input gate/VALIDAR, edição manual, draft canônico, handoff de cotação e regressões de GET/ACK concorrentes. Stage6 tem gates locais e QA independente PASS; publicação final pendente; não iniciar Stage7. Não apresentar o Railway V3 histórico como integração Stage6: a auditoria somente leitura não encontrou preview hospedado da branch de integração.
+Leia [o checkpoint atual](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) para owners técnicos, input gate/VALIDAR, edição manual, draft canônico, handoff de cotação e regressões de GET/ACK concorrentes. Stage6 COMPLETE: gates locais, QA independente e publicação real na integração PASS; não iniciar Stage7. Não apresentar o Railway V3 histórico como integração Stage6: a auditoria somente leitura não encontrou preview hospedado da branch de integração.
 
 Este arquivo existe para que qualquer nova IA, agente ou desenvolvedor consiga continuar o projeto sem reconstruir sua história a partir de chats.
 

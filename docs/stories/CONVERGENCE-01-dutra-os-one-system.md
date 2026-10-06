@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage6 local gates and independent QA PASS; publication pending on integration/dutra-os-one-system. Entry/rollback: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage5 COMPLETE and earlier stops are historical; QG authorized only Stage6 on 2026-10-06. Stage7 NOT AUTHORIZED.
+Current execution status: Stage6 COMPLETE; implementation, local gates, independent QA and integration-only publication verified on integration/dutra-os-one-system. Entry/rollback: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage5 COMPLETE and earlier stops are historical; QG authorized only Stage6 on 2026-10-06. Stage7 NOT AUTHORIZED.
 
 ## Mission
 
@@ -341,10 +341,10 @@ Architect APPROVE adapter/input gate and canonical quote drafts. Current rule de
 - [x] Held GET/operations-only pull/seed and scheduled/reconnect/human-review old ACK windows preserve newer durable draft through refresh/later real ACK.
 - [x] Eight viewports, keyboard/focus/touch and latest technical browser PASS (synthetic isolated fixtures; no physical OG certification).
 - [x] Stage3/4/5, shell/PWA/sync and full gates PASS; independent QA PASS.
-- [ ] Checkpoint/Brain updated; authorized push verified; clean tree/protected refs intact.
-- [ ] Stage6 COMPLETE; Stage7 not executed.
+- [x] Checkpoint/Brain updated; authorized push verified; clean tree/protected refs intact.
+- [x] Stage6 COMPLETE; Stage7 not executed.
 
-### File list (local acceptance PASS; publication pending)
+### File list (Stage6 acceptance/publication COMPLETE)
 
 - apps/sistema-og/app.js
 - apps/sistema-og/index.html

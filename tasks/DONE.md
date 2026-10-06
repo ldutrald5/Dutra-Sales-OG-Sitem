@@ -270,6 +270,6 @@ Premium prospecting reuses all canonical owners; safe batch/link/provenance, sha
 
 Call Intelligence Premium reutiliza owners atuais com revisão humana, proteção async e retry/durabilidade. Gates locais/full76/Brain/browser13/eight viewports PASS; QA independente e publicação real verificada em 6eee22a4bf74960f40408a56cfb2aa9634a9e072; fechamento documental/SHA final no checkpoint Stage5. Nenhuma produção/main/Stage6.
 
-## CONVERGENCE-01 Stage6 — implementação local (2026-10-06)
+## CONVERGENCE-01 Stage6 — COMPLETE (2026-10-06)
 
-Concluída a implementação delimitada da Aplicação Técnica Premium sobre motor/dados originais, draft/outbox e cotação atuais. Regressões sintéticas reproduzem perda por GET antigo e ACK que apagava fila nova, com prevenção registrada no Second Brain. Gates77/Brain148/release/QA final PASS; este registro ainda não conclui a publicação Stage6, pendente em [TODO/checkpoint](../docs/handoffs/V3_UNIFICATION_CHECKPOINT.md); Stage7 não executada.
+Concluída a implementação delimitada da Aplicação Técnica Premium sobre motor/dados originais, draft/outbox e cotação atuais. Regressões sintéticas reproduzem perda por GET antigo e ACK que apagava fila nova, com prevenção registrada no Second Brain. Gates77/Brain148/release/QA final e publicação real somente na integração PASS; SHA de implementação fadec3678b7d371358e7e9635e5c8946d858ec59 e fechamento documental em [checkpoint](../docs/handoffs/V3_UNIFICATION_CHECKPOINT.md); Stage7 não executada.

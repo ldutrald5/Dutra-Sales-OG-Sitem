@@ -1,6 +1,6 @@
 # Changelog — DUTRA OS
 
-## [Unreleased] — CONVERGENCE-01 Stage6 (aceite local PASS; publicação pendente)
+## [Unreleased] — CONVERGENCE-01 Stage6 (COMPLETE; integração publicada, sem deploy)
 
 - Aplicação Técnica Premium no shell único; input gate mostra VALIDAR sem chamar o motor com configuração incompleta/inválida. Motor técnico e `OG_DATA` preservados byte a byte.
 - Rascunho em `operations.quotes` aguarda outbox existente; edição manual revisada e handoff explícito preservam cliente, códigos, quantidades e cotação/preços atuais, sem criar fato de proposta.
