@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage 4 COMPLETE; technical acceptance/QA and integration publication verified. Final documentation-only closure follows. Latest authoritative Stage 4 evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Historical BLOCKED/stop entries below were resolved by explicitly authorized recoveries. Stage 5 NOT STARTED.
+Current execution status: Stage 4 COMPLETE; technical acceptance/QA and integration publication verified. Final documentation-only closure follows. Latest authoritative Stage 4 evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Historical BLOCKED/stop entries below were resolved by explicitly authorized recoveries. Stage 5 IN PROGRESS under fresh QG authorization; Stage 6 not authorized.
 
 ## Mission
 
@@ -274,3 +274,36 @@ Stage 4 RECOVERY / 2026-10-05: QG authorized preserved-WIP empty-focus correctio
 Stage4 RECOVERY2 / 2026-10-05: optional serviceWorker.ready was proven to hold foreground write lock after failed offline debounced PUT; detached best-effort registration now follows durable outbox persistence and does not block finally/reconnect. Original day test unchanged PASS. New deterministic sync browser proves failed offline PUT before reconnect, real ACK/outboxclear/OK, 503notOK/no loop, 409explicitreviewresolution and boundedlisteners. Full76/Brain138/Stage4/day/shell/SalesExecution gates PASS; @architect APPROVE and @qa final PASS. Publication pending; prior recovery stop history retained. New file list additionally includes scripts/test_sync_reconnect_browser.mjs and generated Brain artifacts; full list in checkpoint. No Stage5/main/production.
 
 Stage4 COMPLETE: implementation/test/Brain/checkpoint published and verified at 6379c4f81007b78582444e0aeeaab26c96aa4dc7; protected refs unchanged and working tree clean. Final doc-only closure preserves tested runtime. STOP before Stage5; new QG authorization required.
+
+
+## Stage 5 — Call AI / Call Intelligence Premium (QG authorized 2026-10-05)
+
+PRE_STAGE5_SHA / rollback: a8a75b3fdf65560359cf63e3be009e3eaca31e78. Single apps/sistema-og shell; preview-v2 is UX reference, no engine port.
+
+Audit matrix closed before implementation:
+
+| Capability | Current owner / source | V3 reference / target decision |
+|---|---|---|
+| Account/context/history | OG_CRM_SERVICE / state.leads / existing interactions | Compact context and history; KEEP |
+| Transcription | Call Intelligence client → Node gateway → existing Edge / private recordings | State clarity / transcript separation; KEEP |
+| Whisper fallback | Current gateway → faster-whisper worker → trusted transcript ingestion | Honest error/fallback display; KEEP |
+| Orientation/analysis | OG_CALL_AI_PROMPTS / OG_AI_SERVICE; existing local fallback, no configured remote orientation provider | Review candidates distinguished from facts; ADAPT presentation |
+| Review/result | Current Review → recordCallResult; current local interaction projection | Editable, explicit approval and retry; ADAPT boundary |
+| Follow-up/queue/NBA | OG_INTERACTION_SERVICE / OG_SALES_DESK / OG_LEAD_INTELLIGENCE | Reuse Mission Control consequences; DO NOT DUPLICATE |
+| Sync/PWA | Existing durable outbox / foreground ACK / same SW strategy | Keep Stage4 reconnect fix; KEEP |
+| UX | Current shell/tokens + V3 operational context/transcript/review reference | Scoped mobile/desktop CSS; ADAPT |
+
+@architect approves captured generation/account/session/recording guards, transient latches, normalized RPC before local projection, durable queue before success. No provider/schema/owner changes.
+
+Acceptance: real transcription contract/fallback retained; explicit human review/edit/discard; late A response cannot affect B/A-new-session; failed normalized result retains review/retry; edited confirmed result feeds same CRM/history/follow-up/Mission Control; offline never fabricates AI; genuine reconnect/409 preserve outbox; eight viewports; Stage3/4 regressions; full suite/Brain; authorized integration publication verified, main/production intact. Stage6 remains unauthorized.
+
+
+Stage5 local acceptance / 2026-10-06:
+- [x] Same-shell Premium UI, actual existing transcription/Whisper contracts retained, human edit/discard and honest local/offline/provider states.
+- [x] Captured account/session guards, A→B→A/late media/upload/status/manual/fallback and fully cleared new-session drafts.
+- [x] Normalized ACK-before-local, module failure/retry/idempotency and actual durable outbox error/recovery; no second owner.
+- [x] CRM/result/follow-up/Meu Dia/external semantics + Stage3/4/sync/PWA regressions and full76/Brain.
+- [x] Eight viewports, contrast/overflow/touch/focus/keyboard approval.
+- [x] Independent final QA PASS; release gate PASS.
+- [ ] Committed/pushed clean integration and protected refs verified.
+File list / source IDs / evidence / rollback: current Stage5 checkpoint. Stage6 requires fresh QG authorization.

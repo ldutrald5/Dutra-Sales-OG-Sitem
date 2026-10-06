@@ -282,3 +282,8 @@ The architect-approved single shell lives in apps/sistema-og and projects existi
 ## Meu Dia operational projection — CONVERGENCE-01 Stage3
 
 [Owner audit and bounded decisions](audits/CONVERGENCE_01_STAGE3_MEU_DIA_AUDIT.md): presentation consumes SalesDesk/LeadIntelligence, explicit existing activities and quote history. Local outcomes await the existing durable outbox before success; normalized outcomes retain reviewed recordCallResult. No additional commercial store, score, agenda or execution engine.
+
+
+## Call Intelligence review boundary — CONVERGENCE-01 Stage5
+
+Premium presentation reuses current context/prompts/AI service, explicit recording client/gateway/private transcription and existing Whisper path. Async continuations are bound to account/session/recording/generation; discarded drafts and late responses cannot migrate identities. Review invokes existing normalized recordCallResult before local confirmation, then awaits current durable outbox before success. Provider absence remains explicit local guidance, never remote analysis success; inferred fields require review. Explicit reconnect blocked by a foreground lock is coalesced once after release in the same sync controller. [Evidence and rollback](handoffs/V3_UNIFICATION_CHECKPOINT.md); no provider/schema/engine/store replacement.

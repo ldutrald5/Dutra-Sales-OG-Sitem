@@ -99,3 +99,10 @@ Fluxo:
 O plano atual não permite provisionar mais um serviço. Por isso o worker roda **no mesmo container do `sistema-og`**, em `127.0.0.1:8765`, sem exposição pública. O container usa `Dockerfile.whisper`, com Node 24 para o Sistema OG e Python/faster-whisper para o fallback.
 
 O limite observado do serviço é 1 GB de memória e 2 vCPU. O modelo inicial permanece `base`/CPU/int8; se uso real mostrar pressão de memória ou latência excessiva, o primeiro downgrade seguro é `tiny`, sem mudar o contrato do Call Intelligence.
+
+
+## CONVERGENCE-01 Stage5 — uso no shell único
+
+Selecione uma conta do CRM. Texto importado é uma entrada manual transitória; áudio exige gravação e upload explícitos. Transcrição literal e sugestões permanecem separadas. A orientação atual utiliza OG_AI_SERVICE com modo local identificado quando nenhum provider estiver conectado. “Revisar sugestão” abre campos editáveis, nunca confirma frota/estágio automaticamente; o resultado só é registrado por aprovação humana. Solicitar proposta não comprova envio.
+
+Troca/reset/discard invalida respostas antigas. Falha normalizada mantém a revisão para retry da mesma sessão; ACK seguido de erro durável mantém campos confirmados bloqueados para concluir a gravação. Offline permite revisão local suportada e explica indisponibilidade remota. Histórico/CRM/follow-up/Meu Dia usam os owners atuais. [Checkpoint e limites de validação](handoffs/V3_UNIFICATION_CHECKPOINT.md).

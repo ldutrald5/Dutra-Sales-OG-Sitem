@@ -459,3 +459,8 @@ Stage3 COMPLETE with implementation publication verified; authoritative checkpoi
 ## CONVERGENCE-01 — Stage4 current
 
 Stage4 COMPLETE; implementation publication verified in Stage4 checkpoint. Prior Stage4 prohibition was superseded by QG authorization. STOP before Stage5; no pending Stage4 implementation.
+
+
+## CONVERGENCE-01 — Stage5 current
+
+Stage5: gates locais/13 fluxos/eight viewports PASS; QA/publicação final acompanhadas em docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Nenhum trabalho Stage6 autorizado.

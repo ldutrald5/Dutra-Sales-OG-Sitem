@@ -1,8 +1,8 @@
 # DUTRA OS — Contexto Canônico
 
-## CONVERGENCE-01 Stage4
+## CONVERGENCE-01 Stage5
 
-Prospecção Premium reutiliza CRM/queue/score/NBA/resultado/outbox atuais. Conversão revisa duplicidade no commit; foco pertence à fila ativa; sync foreground não aguarda worker opcional. Evidência e estado de publicação em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`. Stage5 exige nova autorização.
+Call Intelligence Premium consome os owners atuais, com revisão humana, identidade de sessão protegida e persistência durável antes de sucesso. Transcrição/Whisper mantidos; orientação local identificada quando não há provider remoto. Evidência/publicação em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`; Stage6 exige nova autorização.
 
 > Fonte de verdade para humanos e IAs que trabalham neste repositório.
 > Antes de alterar o produto, leia também `AI_HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md` e `AGENTS.md`.

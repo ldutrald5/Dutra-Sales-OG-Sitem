@@ -1,8 +1,8 @@
 # DUTRA OS — Roadmap Vivo
 
-## CONVERGENCE-01 — Stage4
+## CONVERGENCE-01 — Stage5
 
-Prospecção Premium e dois recoveries canônicos têm aceite técnico/QA PASS. Publicação/status exato em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`. Stage5 NÃO iniciada; depende de autorização QG. Notas de STOP anteriores são históricas.
+Call Intelligence Premium e recoveries de contexto/revisão/reconexão passaram nos gates locais. Estado exato de QA/publicação em `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md`. Stage6 não autorizada; nenhum merge em main ou deploy de produção.
 
 Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado permanece em `docs/10-ROADMAP.md`.
 

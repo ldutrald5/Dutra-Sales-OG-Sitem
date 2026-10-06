@@ -1,5 +1,40 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
+STAGE: 5 — CALL AI / CALL INTELLIGENCE PREMIUM
+STATUS: IN PROGRESS — technical acceptance and independent QA PASS; integration publication pending
+UPDATED_AT: 2026-10-06
+BRANCH: integration/dutra-os-one-system
+PRE_STAGE5_SHA / ROLLBACK: a8a75b3fdf65560359cf63e3be009e3eaca31e78
+POST_STAGE5_SHA: pending validated commit/publication
+AUTHORIZATION: fresh QG Stage5 only; no Stage6/main merge/production deployment.
+
+## Stage5 architecture and evidence
+
+CRM/context/history: OG_CRM_SERVICE / state.leads / OG_CALL_AI_CONTEXT / existing lead.interactions. Queue/priority/NBA/follow-up retain OG_SALES_DESK / OG_LEAD_INTELLIGENCE / OG_INTERACTION_SERVICE. Review remains the only normalized result handoff: existing recordCallResult → gateway → atomic command. No new CRM, Call AI, Sales Execution, transcription, history or persistence engine.
+
+TRANSCRIPTION_PATH: explicit MediaRecorder capture → current signed private upload → Call Intelligence gateway/Edge provider → current transcript/metrics. WHISPER_FALLBACK: existing local worker + trusted transcript ingestion; no provider/schema/retention changes. Browser validation uses synthetic mic/audio/client contract fixtures; live provider/customer/physical-device acceptance is NOT RUN and never implied by PASS.
+
+ORIENTATION: current OG_CALL_AI_PROMPTS / OG_AI_SERVICE. No remote orientation provider is configured in this app; existing local guidance stays usable and is explicitly labelled local/unavailable rather than remote AI success. Pasted text is a transient manual input to these existing contracts, not a new transcription system. Transcript literal, local guidance, suggestions and CRM facts remain distinguishable; suggested fields never auto-update CRM. Review permits edit/discard before approval; asking for a proposal does not mark it sent.
+
+ASYNC_SAFETY: captured account/session/recording/generation validated after awaits and before continuations/render. A→B→A and reset invalidate old requests. Returned stale media permissions stop their tracks. Polls/submits are latched and bounded; session discard/reset clears drafts/signals/suggestions/origin. Normalized module absence or RPC failure preserves Review for explicit retry with the same external ID, before any confirmed local projection. Existing durable queue is awaited before success/advance; an ACK followed by outbox failure keeps confirmed fields locked for idempotent completion.
+
+SYNC: existing foreground controller/outbox/SW strategy retained. Deterministic regression reproduced online arriving between durable queue completion and prior lock release (sync-lock-reproduced.log, original 30s timeout). A transient reconnect intent, set only by explicit reconnect blocked by the lock, is consumed once after release with current online/conflict/review gates rechecked. No timer/manager/store/retry loop added; 503 remains pending, actual409 requires review/send. Stage4 nonblocking serviceWorker.ready fix retained.
+
+TEMPORARY_INTERNAL_BRIDGES: Premium CallAI → current client sheet/history and current reviewed execution commands; deep Client360 deferred. No preview-v2 engine port or second application.
+
+VIEWPORTS_TESTED: 320x568,360x800,390x844,430x932,768x1024,1280x720,1440x900,1920x1080. PASS: workspace/review, long/incomplete context, overflow≤1px, touch targets≥44px, import contrast≥4.5, focus/keyboard and actual Enter approval. Scoped shell-token CSS plus minimal SW v71 asset/version update; no caching of API/AI responses.
+
+TEST_RESULTS: lint/og:check PASS; npm test 76/76 PASS; call-ai static PASS; Call Intelligence gateway/contract + local Whisper contract PASS; Sales Execution adapter/gateway PASS; Call AI browser13/13 PASS (edited/ignored candidates, correct identity, module/RPC failure, same-ID retry, actual IndexedDB abort-after-ACK recovery, terminal follow-up cleared, delayed account/session/permission/upload/manual/poll/fallback, actual outbox/ACK/503/409, WhatsApp opened≠sent and eight viewports). Stage3 Meu Dia, Stage4 Prospecção including stale/empty/out-of-queue, deterministic reconnect and shell/PWA PASS. Brain refresh/check PASS:143 records/zero warnings. Original timeout/assertions retained; browser identity assertions now check exact data-lead-id + account and empty factual summary instead of fabricated call text, and Meu Dia waits for its existing asynchronous durable-command render before asserting overdue=0.
+QA: independent PASS, 13/13 executed flows/eight viewports/zero uncaught browser errors; report /workspace/scratch/stage5/qa-stage5-verdict.md. Architect APPROVE bounded ownership/review/reconnect changes. Release gate PASS. PUSH: pending authorized integration publication.
+EVIDENCE: /workspace/scratch/stage5/{call-ai-browser-final,tests-final-verified,brain-final-verified,day-complete,prospecting-sync-final,sync-lock-reproduced,sync-lock-fixed,shell-complete,call-contracts-final,sales-final}.log and call-ai/16 synthetic screenshots. npm ci not repeated: installed entry dependencies/lock unchanged; Playwright/Chromium already available optional developer tools, no product dependency added.
+FILES_CHANGED: app.js; index.html; components/call-ai-workspace.css; service-worker.js; package.json (scripts only); scripts/test_call_ai_workspace_browser.mjs; Stage3/4/sync browsers and sync conflict signature check; existing story/checkpoint; compact context/handoff/roadmap/changelog/tasks/architecture/CallAI docs; Second Brain source/3 incidents/cycle and generated index/metrics. No deletions, supabase/**/preview-v2/** changes or package-lock/dependency changes.
+DURABLE_MEMORY: SRC-CONVERGENCE-CALLAI-20261006-001; INC-CALLAI-CONTEXT-001; INC-CALLAI-RETRY-001; INC-SYNC-RECONNECT-LOCK-001; CYCLE-CONVERGENCE-STAGE5-20261006-001. Prior records preserved.
+KNOWN_GAPS: actual hosted provider/private storage/Whisper end-to-end and physical-device acceptance were not invoked; fixtures/contracts preserve current paths. Remote orientation provider remains unconfigured. Existing caught empty-storage bootstrap TDZ is separate baseline debt. No new infrastructure or external service.
+MAIN / V2 / V3 / #109 / #110 / PRODUCTION MODIFIED: NO
+SAFE_TO_START_STAGE6: NO — fresh QG authorization required.
+
+## Stage4 historical checkpoint (closed at a8a75b3fdf65560359cf63e3be009e3eaca31e78)
+
 STAGE: 4 — PROSPECÇÃO + SALES EXECUTION PREMIUM
 STATUS: COMPLETE — technical acceptance, independent QA and implementation publication verified; final documentation closure follows
 UPDATED_AT: 2026-10-05

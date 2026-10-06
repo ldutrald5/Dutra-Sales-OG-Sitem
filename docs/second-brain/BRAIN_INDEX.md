@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 143 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 15 |
+| cycle | 16 |
 | decision | 19 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 13 |
+| incident | 16 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 27 |
+| source | 28 |
 
 ## Active decisions
 
@@ -78,6 +78,12 @@ Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-CALLAI-CONTEXT-001 — Late Call AI response or discarded session contaminates active context** (resolved/high)
+  Presentation continuations retain captured account/session/recording/generation; reset/discard invalidates old requests and clears draft metadata/suggestions. No inferred CRM facts are automatic.
+- **INC-CALLAI-RETRY-001 — Local Call AI confirmation preceded normalized command and suppressed retry** (resolved/high)
+  Normalized reviewed command must ACK before confirmed local projection; durable current outbox must complete before success/advance. Failures retain explicit retry without duplicating identity/history.
+- **INC-SYNC-RECONNECT-LOCK-001 — Reconnect event lost while prior foreground sync releases its lock** (resolved/high)
+  An explicit reconnect blocked by the existing foreground lock is consumed once after release with current gates revalidated. Errors alone do not trigger retries or fake OK.
 - **INC-EXEC-ENV-001 — Structural convergence blocked by missing checkout and unreachable proxy** (resolved/high)
   Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
 - **INC-MEU-DIA-REFRESH-001 — Confirmed Mesa outcome lost on immediate refresh during sync debounce** (resolved/high)
@@ -88,12 +94,6 @@ Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Optional Background Sync registration must not hold the foreground sync write lock or delay visible pending-state delivery after a durable outbox write.
 - **INC-SUPABASE-DRIFT-001 — Supabase remote schema and Edge Functions exceed versioned repository state** (resolved/high)
   The live Supabase backend is now reconstructable from reviewed Git evidence: the exact 25 recorded migrations, all 13 deployed Edge Function sources, and a catalog-derived bootstrap supplement for eight CRM tables that had existed outside recorded migration history.
-- **INC-V3-BLACK-001 — Historical V3 black screen and delayed first paint** (resolved/medium)
-  The earlier V3 preview could render a black screen or delay the shell; the durable lesson is that the primary interface must render before optional/heavy modules.
-- **INC-TECH-DATA-LOAD-001 — Historical technical configurator returned zero OG configurations** (resolved/medium)
-  A technical configurator showed zero configurations when its OG data dependency had not been loaded before initialization.
-- **INC-METRIC-CLOSE-001 — Historical close rate reached 48400 percent** (resolved/medium)
-  A historical close-rate calculation mixed sales from a broad CRM population with proposals from a narrower prospecting population, producing an impossible 48400 percent result.
 
 ## Candidate / planned ideas
 
@@ -155,6 +155,8 @@ Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
+  Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
 - **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
   Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
 - **SRC-CONVERGENCE-SHELL-20261005-001 — Stage 2 audited shell implementation and execution evidence** (validated/high)
@@ -173,8 +175,6 @@ Generated from 138 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Main commit chain 39be4d18 → 445ac095 → d631ef29 → af5469eb → f4c2b3c6 hardened signed audio upload, fact extraction, production metric hygiene and the local faster-whisper fallback, then added an opt-in production end-to-end self-test.
 - **SRC-TECH-HANDOFF-20261001-001 — Live GitHub/Railway/Supabase technical recovery audit** (validated/high)
   Live audit verified GitHub main and Railway production alignment before the Intelligence Compiler merge, persistent Railway volume /data, PWA cache v67, an active hybrid Supabase/Postgres backend, and a reproducibility gap: the remote Supabase project had 25 applied migrations and 13 active Edge Functions while the repository versioned only 4 migration files and 2 Edge Function sources.
-- **SRC-INTEL-CLOSEOUT-001 — DUTRA Intelligence Compiler V1 PR and CI closeout** (implemented/high)
-  PR #104 merged the Intelligence Compiler V1 to main as commit 72354a1f04d6fdd5584fe876ec4b09bb050a312a after PR workflows Package 00R CI #404, Sales Execution P0 #24 and Call Intelligence V1 #22 passed; main Package 00R CI #405 also passed after merge.
 
 ## Retrieval workflow
 

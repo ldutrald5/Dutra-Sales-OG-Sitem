@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage5
+
+- Call Intelligence Premium no shell único; texto/conversa, transcrição literal e revisão editável preservam os engines atuais.
+- Respostas antigas e sessões descartadas não contaminam contas; comando normalizado antecede confirmação local, retry idempotente e outbox durável.
+- Reconexão durante lock preserva intenção no controller atual; erro503/conflito409 permanecem explícitos. Gates, viewports e publicação no checkpoint; Stage6 não autorizada.
+
 ## [Unreleased] — CONVERGENCE-01 Stage4
 
 - Prospecção Premium no shell único, importação/vínculo CRM revisados e resultado canônico com recuperação durável.

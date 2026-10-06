@@ -1,8 +1,8 @@
 # DUTRA OS — AI Handoff
 
-## Handoff atual — Stage4
+## Handoff atual — Stage5
 
-Leia `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md` para owners, recoveries de foco/reconnect, gates e publicação. Preserve o WIP/histórico conforme estado verificado; não retome Stage5 sem autorização QG.
+Leia `docs/handoffs/V3_UNIFICATION_CHECKPOINT.md` para owners de Call AI, guards async, Review/retry, reconexão e evidência/publicação. Estado de implementação no checkpoint; não iniciar Stage6 sem nova autorização QG.
 
 Este arquivo existe para que qualquer nova IA, agente ou desenvolvedor consiga continuar o projeto sem reconstruir sua história a partir de chats.
 
