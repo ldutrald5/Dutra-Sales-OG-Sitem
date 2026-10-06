@@ -463,4 +463,4 @@ Stage4 COMPLETE; implementation publication verified in Stage4 checkpoint. Prior
 
 ## CONVERGENCE-01 — Stage5 current
 
-Stage5: gates locais/13 fluxos/eight viewports PASS; QA/publicação final acompanhadas em docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Nenhum trabalho Stage6 autorizado.
+Stage5: concluída em 2026-10-06; gates locais/13 fluxos/eight viewports/QA/publicação real PASS. SHA e fechamento documental em docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Nenhum trabalho Stage6 autorizado.

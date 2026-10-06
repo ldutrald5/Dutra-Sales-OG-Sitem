@@ -266,6 +266,6 @@ Meu Dia operational home consumes canonical CRM/SalesDesk/LeadIntelligence and f
 Premium prospecting reuses all canonical owners; safe batch/link/provenance, shared result/outbox, stale-focus and optional-worker-ready recoveries validated. Full76, Brain138 and all four browser gates PASS; publication recorded in Stage4 checkpoint. No Stage5/main/production.
 
 
-## CONVERGENCE-01 Stage5 — aceite técnico 2026-10-06
+## CONVERGENCE-01 Stage5 — concluída 2026-10-06
 
-Call Intelligence Premium reutiliza owners atuais com revisão humana, proteção async e retry/durabilidade. Gates locais/full76/Brain/browser13/eight viewports PASS; conclusão/publicação exata no checkpoint Stage5. Nenhuma produção/main/Stage6.
+Call Intelligence Premium reutiliza owners atuais com revisão humana, proteção async e retry/durabilidade. Gates locais/full76/Brain/browser13/eight viewports PASS; QA independente e publicação real verificada em 6eee22a4bf74960f40408a56cfb2aa9634a9e072; fechamento documental/SHA final no checkpoint Stage5. Nenhuma produção/main/Stage6.

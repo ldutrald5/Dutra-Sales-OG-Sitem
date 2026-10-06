@@ -1,11 +1,12 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
 STAGE: 5 — CALL AI / CALL INTELLIGENCE PREMIUM
-STATUS: IN PROGRESS — technical acceptance and independent QA PASS; integration publication pending
+STATUS: COMPLETE — technical acceptance, independent QA and real implementation publication verified
 UPDATED_AT: 2026-10-06
 BRANCH: integration/dutra-os-one-system
 PRE_STAGE5_SHA / ROLLBACK: a8a75b3fdf65560359cf63e3be009e3eaca31e78
-POST_STAGE5_SHA: pending validated commit/publication
+POST_STAGE5_SHA: 6eee22a4bf74960f40408a56cfb2aa9634a9e072 (verified implementation + validation publication boundary; final closure is documentation only)
+FINAL_CLOSURE_HEAD: containing final closure commit; obtain with git log -1 --format=%H -- docs/handoffs/V3_UNIFICATION_CHECKPOINT.md and verify LOCAL == REMOTE after closure publication
 AUTHORIZATION: fresh QG Stage5 only; no Stage6/main merge/production deployment.
 
 ## Stage5 architecture and evidence
@@ -24,13 +25,17 @@ TEMPORARY_INTERNAL_BRIDGES: Premium CallAI → current client sheet/history and 
 
 VIEWPORTS_TESTED: 320x568,360x800,390x844,430x932,768x1024,1280x720,1440x900,1920x1080. PASS: workspace/review, long/incomplete context, overflow≤1px, touch targets≥44px, import contrast≥4.5, focus/keyboard and actual Enter approval. Scoped shell-token CSS plus minimal SW v71 asset/version update; no caching of API/AI responses.
 
-TEST_RESULTS: lint/og:check PASS; npm test 76/76 PASS; call-ai static PASS; Call Intelligence gateway/contract + local Whisper contract PASS; Sales Execution adapter/gateway PASS; Call AI browser13/13 PASS (edited/ignored candidates, correct identity, module/RPC failure, same-ID retry, actual IndexedDB abort-after-ACK recovery, terminal follow-up cleared, delayed account/session/permission/upload/manual/poll/fallback, actual outbox/ACK/503/409, WhatsApp opened≠sent and eight viewports). Stage3 Meu Dia, Stage4 Prospecção including stale/empty/out-of-queue, deterministic reconnect and shell/PWA PASS. Brain refresh/check PASS:143 records/zero warnings. Original timeout/assertions retained; browser identity assertions now check exact data-lead-id + account and empty factual summary instead of fabricated call text, and Meu Dia waits for its existing asynchronous durable-command render before asserting overdue=0.
-QA: independent PASS, 13/13 executed flows/eight viewports/zero uncaught browser errors; report /workspace/scratch/stage5/qa-stage5-verdict.md. Architect APPROVE bounded ownership/review/reconnect changes. Release gate PASS. PUSH: pending authorized integration publication.
+TEST_RESULTS: lint/og:check PASS; npm test 76/76 PASS; call-ai static PASS; Call Intelligence gateway/contract + local Whisper contract PASS; Sales Execution adapter/gateway PASS; Call AI browser13/13 PASS (edited/ignored candidates, correct identity, module/RPC failure, same-ID retry, actual IndexedDB abort-after-ACK recovery, terminal follow-up cleared, delayed account/session/permission/upload/manual/poll/fallback, actual outbox/ACK/503/409, WhatsApp opened≠sent and eight viewports). Stage3 Meu Dia, Stage4 Prospecção including stale/empty/out-of-queue, deterministic reconnect and shell/PWA PASS. Brain refresh/check PASS:143 records/zero warnings. Original timeouts/behavioral invariants retained; browser identity assertions now check exact data-lead-id + account and empty factual summary instead of fabricated call text, and Meu Dia waits for its existing asynchronous durable-command render before asserting overdue=0.
+QA: independent PASS, 13/13 executed flows/eight viewports/zero uncaught browser errors; report /workspace/scratch/stage5/qa-stage5-verdict.md. Architect APPROVE bounded ownership/review/reconnect changes. Release gate PASS. PUSH: PASS — normal hooks (76/76), real authenticated push and fetch verified LOCAL == REMOTE == 6eee22a4bf74960f40408a56cfb2aa9634a9e072; clean tree. Final documentation-only closure must also verify exact equality.
 EVIDENCE: /workspace/scratch/stage5/{call-ai-browser-final,tests-final-verified,brain-final-verified,day-complete,prospecting-sync-final,sync-lock-reproduced,sync-lock-fixed,shell-complete,call-contracts-final,sales-final}.log and call-ai/16 synthetic screenshots. npm ci not repeated: installed entry dependencies/lock unchanged; Playwright/Chromium already available optional developer tools, no product dependency added.
 FILES_CHANGED: app.js; index.html; components/call-ai-workspace.css; service-worker.js; package.json (scripts only); scripts/test_call_ai_workspace_browser.mjs; Stage3/4/sync browsers and sync conflict signature check; existing story/checkpoint; compact context/handoff/roadmap/changelog/tasks/architecture/CallAI docs; Second Brain source/3 incidents/cycle and generated index/metrics. No deletions, supabase/**/preview-v2/** changes or package-lock/dependency changes.
 DURABLE_MEMORY: SRC-CONVERGENCE-CALLAI-20261006-001; INC-CALLAI-CONTEXT-001; INC-CALLAI-RETRY-001; INC-SYNC-RECONNECT-LOCK-001; CYCLE-CONVERGENCE-STAGE5-20261006-001. Prior records preserved.
 KNOWN_GAPS: actual hosted provider/private storage/Whisper end-to-end and physical-device acceptance were not invoked; fixtures/contracts preserve current paths. Remote orientation provider remains unconfigured. Existing caught empty-storage bootstrap TDZ is separate baseline debt. No new infrastructure or external service.
+COMMITS: 332481efda687e9fd70d42abc18e5c21f377d8a3 runtime/regression; 6eee22a4bf74960f40408a56cfb2aa9634a9e072 validation/Brain/checkpoint; containing closure commit records publication.
+PROTECTED_REFS: main5255dc5d432850dfeebe0a523402a1902b1d3a52; V37ce99b313724ac2ad2bb9996c12eea9b897a7e3f; V2dutra-os-ui-v2-preview6b4bf7937aee8b236ce28701f9d149a69e0bdd7e; #109branch+PRc7585ba688ecca8e01b1ff8044cbef52aa5ac477; #110branch+PR6031e04462340847c8bcff3d5d698427db444918 — verified unchanged after real publication.
+BLOCKERS: NONE
 MAIN / V2 / V3 / #109 / #110 / PRODUCTION MODIFIED: NO
+READINESS_STAGE6: technically ready; execution requires fresh QG authorization.
 SAFE_TO_START_STAGE6: NO — fresh QG authorization required.
 
 ## Stage4 historical checkpoint (closed at a8a75b3fdf65560359cf63e3be009e3eaca31e78)
