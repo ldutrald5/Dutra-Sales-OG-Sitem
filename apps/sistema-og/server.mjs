@@ -11,6 +11,7 @@ const proposalIntelligence = require('./services/proposal-intelligence-service.j
 const proposalStore = require('./server-proposal-store.cjs');
 const salesExecutionGateway = require('./server-sales-execution-gateway.cjs');
 const callIntelligenceGateway = require('./server-call-intelligence-gateway.cjs');
+const { createAccessSessions } = require('./server-access-session.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
@@ -42,6 +43,9 @@ const types = {
 };
 
 fs.mkdirSync(dataDir, { recursive: true });
+const accessSessions = process.env.OG_PERSISTENT_AUTH === 'true'
+  ? createAccessSessions({ dataDir, secret: process.env.OG_SESSION_SECRET || localAccessToken, pin: localAccessPin })
+  : null;
 
 function readWhisperSelfTestStatus() {
   try {
@@ -83,11 +87,16 @@ function readSharedState() {
   }
 }
 
-function isAuthorized(req) {
-  if (!lanMode) return true;
+function isBearerAuthorized(req) {
   const authorization = req.headers.authorization;
-  if (authorization === `Bearer ${localAccessToken}`) return true;
-  return Boolean(hostedMode && localAccessPin && authorization === `Bearer ${localAccessPin}`);
+  if (localAccessToken && authorization === `Bearer ${localAccessToken}`) return true;
+  return Boolean(!accessSessions && hostedMode && localAccessPin && authorization === `Bearer ${localAccessPin}`);
+}
+
+function isAuthorized(req) {
+  if (accessSessions?.authorized(req)) return true;
+  if (!lanMode && !accessSessions) return true;
+  return isBearerAuthorized(req);
 }
 
 function allowWrite(req) {
@@ -334,7 +343,7 @@ const server = http.createServer(async (req, res) => {
   // Public metadata contains no credentials or customer data; never cached by the PWA.
   if (url.pathname === '/runtime-config.js' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type':'application/javascript; charset=utf-8', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' });
-    return res.end('window.OG_RUNTIME = Object.freeze(' + JSON.stringify({ isolatedPreview: process.env.OG_ISOLATED_PREVIEW === 'true' }) + ');');
+    return res.end('window.OG_RUNTIME = Object.freeze(' + JSON.stringify({ isolatedPreview: process.env.OG_ISOLATED_PREVIEW === 'true', persistentAuth: Boolean(accessSessions) }) + ');');
   }
   if (process.env.OG_ISOLATED_PREVIEW === 'true' && /^\/api\/(sales-execution|call-intelligence|prospects\/research|ai)(\/|$)/.test(url.pathname)) {
     res.writeHead(503, { 'Content-Type':'application/json', 'Cache-Control':'no-store' });
@@ -370,6 +379,31 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       return sendJson(res, /Payload muito grande/.test(error.message) ? 413 : 400, { error:error.message });
     }
+  }
+
+  if (accessSessions && url.pathname.startsWith('/api/access/')) {
+    if (url.pathname === '/api/access/session' && req.method === 'GET') {
+      return sendJson(res, accessSessions.authorized(req) ? 200 : 401, { authenticated: accessSessions.authorized(req) });
+    }
+    if (req.method !== 'POST' || !accessSessions.sameOrigin(req)) return sendJson(res, 403, { error: 'Origem não autorizada' });
+    try {
+      if (url.pathname === '/api/access/login') {
+        if (!accessSessions.allowLogin(req)) return sendJson(res, 429, { error: 'Muitas tentativas. Aguarde um minuto.' });
+        const body = await readBody(req, 2000);
+        const cookie = accessSessions.issue(String(body.pin || ''), body.remember === true);
+        if (!cookie) return sendJson(res, 401, { error: 'PIN inválido' });
+        res.setHeader('Set-Cookie', cookie);
+        return sendJson(res, 200, { authenticated: true });
+      }
+      if (url.pathname === '/api/access/logout') {
+        res.setHeader('Set-Cookie', accessSessions.revoke(req));
+        return sendJson(res, 200, { authenticated: false });
+      }
+    } catch { return sendJson(res, 503, { error: 'Não foi possível manter a sessão. Tente novamente.' }); }
+    return sendJson(res, 404, { error: 'Rota não encontrada' });
+  }
+  if (accessSessions?.authorized(req) && !isBearerAuthorized(req) && url.pathname.startsWith('/api/') && !['GET', 'HEAD'].includes(req.method) && !accessSessions.sameOrigin(req)) {
+    return sendJson(res, 403, { error: 'Origem não autorizada' });
   }
 
   if (url.pathname.startsWith('/api/') && !isAuthorized(req)) return sendJson(res, 401, { error: 'Código de acesso necessário' });
@@ -623,6 +657,9 @@ const server = http.createServer(async (req, res) => {
 
   const relative = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname).replace(/^\/+/, '');
   const file = path.resolve(root, relative);
+  if (relative.split(/[\\/]/).some(segment => segment.startsWith('.')) || file === dataDir || file.startsWith(dataDir + path.sep)) {
+    return sendJson(res, 403, { error: 'Acesso negado' });
+  }
   if (!file.startsWith(root + path.sep) && file !== path.join(root, 'index.html')) {
     res.writeHead(403);
     return res.end('Acesso negado');

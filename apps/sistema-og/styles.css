@@ -1662,3 +1662,15 @@ body.og-dialog-open { overflow: hidden; }
 .call-intelligence-dashboard-detail { color:#8f99a9; font-size:.58rem; line-height:1.45; }
 @media (max-width:900px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:560px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* PIN session uses the unified shell; no domain/state ownership. */
+#access-session-dialog { width:min(420px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; background:var(--bg-card,#181818); color:var(--text,#fff); border:1px solid #666; border-radius:12px; padding:24px; }
+#access-session-dialog::backdrop { background:#000c; }
+#access-session-dialog form { display:grid; gap:16px; }
+#access-session-dialog label { display:grid; gap:8px; }
+#access-session-dialog input[type=password], #access-session-dialog button, #access-session-logout { min-height:44px; }
+#access-session-dialog input[type=password] { width:100%; box-sizing:border-box; }
+#access-session-dialog label:has(input[type=checkbox]) { display:flex; align-items:center; }
+#access-session-dialog button { background:#ffd600; color:#111; border-radius:8px; }
+#access-session-dialog [role=status] { overflow-wrap:anywhere; }
+#access-session-logout { background:transparent; color:inherit; border:1px solid #777; border-radius:6px; padding:4px 12px; }

@@ -375,3 +375,16 @@ Durable record IDs, executed evidence, runtime access drift and rollback are in 
 - [x] Hosted synthetic acceptance and verified integration publication; see V3_UNIFICATION_CHECKPOINT Stage6.6 for live closeout.
 - Files: app.js (guarded technical bridge/status/external actions); index.html/runtime-config.js/server.mjs (explicit runtime metadata); service-worker.js (noncached config/cache refresh); package.json; scripts/fixtures/isolated-preview-seed.json; scripts/test_preview_reality_browser.mjs; scripts/test_hosted_runtime.mjs; checkpoint/runtime; source/incident and generated Brain index/metrics.
 - Stage 7 remains unauthorized.
+
+## Stage 6.7 recovery — persistent pilot access (2026-10-07)
+
+QG authorized bounded auth/isolated persistence and primary seed CRM OG dr.ods. Runtime CRM remains OG_CRM_SERVICE/state.leads. Stage7 not authorized.
+
+- [x] Verify Stage6.6 ancestry and safe integration branch/write preflight.
+- [x] Implement opt-in server-validated persistent session, remember-device/logout, no raw PIN storage in enabled mode.
+- [x] Protect origin/expiry/replay/restart/concurrent login/offline mode; synthetic unit and browser regression.
+- [ ] Recover current hosted pilot store before redeploy/volume attachment.
+- [ ] Receive CRM OG dr.ods, import/enrich/dedup through existing canonical contracts.
+- [ ] Verify deployed session, isolated durable volume and real-client end-to-end flows.
+
+Status: BLOCKED for missing primary file and recoverable hosted snapshot; auth local package proceeds independently. File List: apps/sistema-og/{app.js,index.html,server.mjs,server-access-session.cjs,service-worker.js,styles.css,services/access-session-client.js}; scripts/{test_access_session.mjs,test_access_session_browser.mjs,validate.mjs}; package.json; docs/{01-ARQUITETURA.md,handoffs/V3_UNIFICATION_CHECKPOINT.md,runtime/DUTRA_OS_RUNTIME.md,second-brain/sources.jsonl,second-brain/decisions.jsonl,second-brain/cycles.jsonl,second-brain/BRAIN_INDEX.md,second-brain/BRAIN_METRICS.md}; this story.

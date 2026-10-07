@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 150 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 153 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 17 |
-| decision | 20 |
+| cycle | 18 |
+| decision | 21 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 19 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 30 |
+| source | 31 |
 
 ## Active decisions
 
@@ -59,6 +59,8 @@ Generated from 150 records. Do not edit by hand; run `npm run og:brain:refresh`.
   apps/sistema-og is the unified target shell; preview-v2 remains UX reference. Reuse switchTab/hash/history and existing state/services. Static nav/status, localized feedback and scoped canonical tokens may adapt presentation; an ephemeral bootstrap promise coordinates recovery/reconnect without a new sync model.
 - **DEC-CONVERGENCE-TECH-001 — Thin technical presentation and draft over current quote owners** (active/high)
   Premium technical UI validates active explicit inputs before calling original app.js builders and uses existing state.consultant, operations.quotes and state.vehicles. TECH-DRAFT technical_workspace/technical_draft stores identity, timestamps, payload.client/vehicles and technicalContext; awaited current outbox precedes local success. Save creates no proposal/contact/history fact. Reviewed native quote handoff preserves manual composition and current pricing; linked identity is copied completely and unlinked manual quote owner is retained.
+- **DEC-PILOT-ACCESS-SESSION-001 — Opt-in persistent PIN session on existing hosted runtime** (active/high)
+  OG_PERSISTENT_AUTH enables server-validated PIN sessions with opaque random IDs signed by server secret, hashed IDs and expiry in existing dataDir/access-sessions.json, Secure HttpOnly SameSite=Strict Path=/ cookie. Remember-device grants 30 days; unchecked grants browser-session cookie with 24h server expiry. Explicit logout revokes the ID. Non-secret last-known mode supports offline PWA bootstrap but never authorizes a request. Cookie writes require same-origin; only validated existing bearer clients are exempt. No raw PIN browser persistence, second CRM or external auth infrastructure. Default-off protects existing deployment compatibility.
 
 ## Open questions
 
@@ -159,6 +161,8 @@ Generated from 150 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
   Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
+- **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
+  QG recovery approved primary pilot seed CRM OG dr.ods, canonical runtime OG_CRM_SERVICE/state.leads, existing filesystem isolated persistence and signed HttpOnly PIN session. Legacy runtime prompts store raw credential in sessionStorage; concurrent bootstrap 401s can re-prompt. New synthetic tests protect PIN validation, signed-cookie expiry/revocation/restart, no browser PIN store, origin protection, browser reopen and reconnect. Live deployment and real import are not certified by this source.
 - **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
   Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
 - **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
@@ -175,8 +179,6 @@ Generated from 150 records. Do not edit by hand; run `npm run og:brain:refresh`.
   CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
   Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
-- **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
-  Live repository audit established GitHub main at f4c2b3c68d747b6477410ffff50521d8788f8d62 as the current canonical code line and identified the existing Builder Brain, context manifests, knowledge services, current tests and newer Call Intelligence/Whisper implementation.
 
 ## Retrieval workflow
 

@@ -289,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function apiFetch(url, options = {}) {
+    if (window.OG_ACCESS_SESSION?.enabled()) return window.OG_ACCESS_SESSION.request(url, options);
     const hosted = location.hostname !== '127.0.0.1' && location.hostname !== 'localhost';
     const includeContentType = Boolean(options.body);
     const usedToken = hosted ? (sessionStorage.getItem('og_cloud_access_token') || cloudAccessToken()) : '';
