@@ -1,0 +1,7 @@
+{
+  "seedId": "dutra-isolated-preview-demo-20261007",
+  "leads": [
+    {"id":"DEMO-DUTRA-CLIENT","internalCode":"DEMO-PREVIEW-001","empresa":"Transportadora Demo DUTRA","nome":"João Demo","status":"contatado","conversationStage":"diagnosis","priority":"alta","priorityBand":"urgente","nextAction":"DEMO: ligação de diagnóstico","followUpAt":"2026-10-07T09:00","fleet":2,"fleetNotes":"DEMO / TESTE / PREVIEW: 2 veículos fictícios","notes":"DEMO / TESTE / PREVIEW — dados inteiramente sintéticos. Dor fictícia: desgaste irregular / controle de pressão.","sourceChannel":"preview_demo","sourceLabel":"DEMO / TESTE / PREVIEW sintético","telefone":"","cnpj":"","email":"","interactions":[]},
+    {"id":"DEMO-DUTRA-PROSPECT","internalCode":"DEMO-PREVIEW-002","empresa":"Logística Exemplo — DEMO","nome":"Contato DEMO","status":"novo","conversationStage":"first_contact","priority":"media","nextAction":"DEMO: revisar primeiro contato","notes":"DEMO / TESTE / PREVIEW — prospect fictício, sem identificadores reais.","sourceChannel":"preview_demo","sourceLabel":"DEMO / TESTE / PREVIEW sintético","telefone":"","cnpj":"","email":"","interactions":[]}
+  ]
+}

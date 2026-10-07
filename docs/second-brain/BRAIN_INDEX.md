@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 150 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -11,11 +11,11 @@ Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | decision | 20 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 18 |
+| incident | 19 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 29 |
+| source | 30 |
 
 ## Active decisions
 
@@ -80,6 +80,8 @@ Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-TECH-ENTRY-CONTEXT-001 — Client-origin technical navigation must carry canonical identity** (resolved/high)
+  Client-origin technical navigation switched tabs without selecting the originating canonical lead. The existing technical selector and dirty-draft confirmation now receive that identity from both the sales card and client sheet. No new CRM, context owner or technical engine.
 - **INC-CALLAI-CONTEXT-001 — Late Call AI response or discarded session contaminates active context** (resolved/high)
   Presentation continuations retain captured account/session/recording/generation; reset/discard invalidates old requests and clears draft metadata/suggestions. No inferred CRM facts are automatic.
 - **INC-CALLAI-RETRY-001 — Local Call AI confirmation preceded normalized command and suppressed retry** (resolved/high)
@@ -94,8 +96,6 @@ Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
 - **INC-MEU-DIA-REFRESH-001 — Confirmed Mesa outcome lost on immediate refresh during sync debounce** (resolved/high)
   A local-first outcome must be recoverable before the UI confirms success or advances. Reuse the canonical outbox instead of waiting for debounced transport.
-- **INC-PROSPECT-FOCUS-001 — Empty filtered prospect queue retained stale actionable focus** (resolved/high)
-  Focused prospect identity must belong to its active canonical queue. A valid normalized session additionally requires exact session/member/company membership; zero local eligible items cannot leave an old local focus actionable.
 
 ## Candidate / planned ideas
 
@@ -157,6 +157,8 @@ Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
+  Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
 - **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
   Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
 - **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
@@ -175,8 +177,6 @@ Generated from 148 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
 - **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
   Live repository audit established GitHub main at f4c2b3c68d747b6477410ffff50521d8788f8d62 as the current canonical code line and identified the existing Builder Brain, context manifests, knowledge services, current tests and newer Call Intelligence/Whisper implementation.
-- **SRC-CALLINT-20261001-001 — Call Intelligence and local Whisper production hardening commits** (implemented/high)
-  Main commit chain 39be4d18 → 445ac095 → d631ef29 → af5469eb → f4c2b3c6 hardened signed audio upload, fact extraction, production metric hygiene and the local faster-whisper fallback, then added an opt-in production end-to-end self-test.
 
 ## Retrieval workflow
 

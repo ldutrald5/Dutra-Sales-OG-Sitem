@@ -321,7 +321,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
   if (['/health', '/api/health'].includes(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) {
-    const release = String(process.env.OG_RELEASE_SHA || '').trim();
+    const release = String(process.env.OG_RELEASE_SHA || process.env.RAILWAY_GIT_COMMIT_SHA || '').trim();
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
@@ -329,6 +329,16 @@ const server = http.createServer(async (req, res) => {
     });
     if (req.method === 'HEAD') return res.end();
     return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null, whisperSelfTest: readWhisperSelfTestStatus() }));
+  }
+
+  // Public metadata contains no credentials or customer data; never cached by the PWA.
+  if (url.pathname === '/runtime-config.js' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type':'application/javascript; charset=utf-8', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' });
+    return res.end('window.OG_RUNTIME = Object.freeze(' + JSON.stringify({ isolatedPreview: process.env.OG_ISOLATED_PREVIEW === 'true' }) + ');');
+  }
+  if (process.env.OG_ISOLATED_PREVIEW === 'true' && /^\/api\/(sales-execution|call-intelligence|prospects\/research|ai)(\/|$)/.test(url.pathname)) {
+    res.writeHead(503, { 'Content-Type':'application/json', 'Cache-Control':'no-store' });
+    return res.end(JSON.stringify({ error:'Integração externa indisponível no preview isolado.' }));
   }
 
   const publicProposalMatch = url.pathname.match(/^\/p\/([A-Za-z0-9_-]{24,160})$/);

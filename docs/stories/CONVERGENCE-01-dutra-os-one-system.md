@@ -367,3 +367,11 @@ Architect APPROVE adapter/input gate and canonical quote drafts. Current rule de
 - docs/second-brain/BRAIN_INDEX.md, BRAIN_METRICS.md (root refresh pending)
 
 Durable record IDs, executed evidence, runtime access drift and rollback are in the current Stage6 checkpoint. No hosted Stage6 preview was found; the existing V3 URL is a different historical branch/SHA. No Stage7, protected ref or production change.
+
+## Stage 6.6 — isolated synthetic reality check
+
+- [x] Existing hosted seed and canonical context audited; no parallel owners or production data.
+- [x] Two-viewport result/follow-up/technical/quote proof and proportional affected gates PASS.
+- [ ] Hosted synthetic acceptance and verified integration publication; see V3_UNIFICATION_CHECKPOINT Stage6.6 for live closeout.
+- Files: app.js (guarded technical bridge/status/external actions); index.html/runtime-config.js/server.mjs (explicit runtime metadata); service-worker.js (noncached config/cache refresh); package.json; scripts/fixtures/isolated-preview-seed.json; scripts/test_preview_reality_browser.mjs; scripts/test_hosted_runtime.mjs; checkpoint/runtime; source/incident and generated Brain index/metrics.
+- Stage 7 remains unauthorized.

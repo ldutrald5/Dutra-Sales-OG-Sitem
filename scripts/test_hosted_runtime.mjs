@@ -46,6 +46,7 @@ const child = spawn(process.execPath, ['scripts/start-og-hosted.mjs'], {
     RAILWAY_VOLUME_MOUNT_PATH: dataDir,
     RAILWAY_PUBLIC_DOMAIN: 'sistema-og-preview.up.railway.app',
     OG_ACCESS_TOKEN: token,
+    OG_ISOLATED_PREVIEW: 'false',
     OG_RELEASE_SHA: 'test-release-sha'
   },
   stdio: ['ignore', 'pipe', 'pipe']
@@ -69,6 +70,11 @@ try {
   assert.equal(healthBody.service, 'sistema-og');
   assert.equal(healthBody.release, 'test-release-sha');
   assert.equal(healthBody.whisperSelfTest, null);
+
+  response = await fetch(`http://127.0.0.1:${port}/runtime-config.js`);
+  assert.equal(response.status,200);
+  assert.match(await response.text(), /"isolatedPreview":false/, 'Standard hosted runtime must not inherit preview semantics');
+  assert.match(response.headers.get('cache-control'), /no-store/);
 
   response = await fetch(`http://127.0.0.1:${port}/api/state`);
   assert.equal(response.status, 401, 'API hosted deve exigir código de acesso');

@@ -155,10 +155,27 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Erro ao ler localStorage', e);
   }
 
+  if (window.OG_RUNTIME?.isolatedPreview === true) {
+    const originalOpen = window.open.bind(window);
+    const externalAction = url => /^(tel:|mailto:|whatsapp:)|https?:\/\/(wa\.me|(?:api|web)\.whatsapp\.com)(\/|$)/i.test(String(url || ''));
+    window.open = (url, ...args) => {
+      if (!externalAction(url)) return originalOpen(url, ...args);
+      showNotification('Preview isolado: nenhuma comunicação externa será aberta.', 'info');
+      return null;
+    };
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href]');
+      if (link && externalAction(link.href)) { event.preventDefault(); event.stopImmediatePropagation(); }
+    }, true);
+  }
+
   function setSyncStatus(label, mode = 'idle') {
     const badge = document.getElementById('og-sync-status');
     if (!badge) return;
-    const text = String(label || 'Sincronização');
+    const actualText = String(label || 'Sincronização');
+    const preview = window.OG_RUNTIME?.isolatedPreview === true;
+    const text = preview ? `Preview isolado · ${mode === 'ok' ? 'Dados temporários' : actualText}` : actualText;
+    badge.dataset.runtime = preview ? 'isolated-preview' : 'standard';
     badge.textContent = text;
     badge.dataset.mode = mode;
     badge.dataset.updatedAt = new Date().toISOString();
@@ -2729,6 +2746,17 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // CONSULTOR INTELIGENTE DE SUPORTES & ÁRVORE DE DECISÃO
   // =========================================================================
 
+  function openTechnicalForLead(leadId) {
+    if (!OG_CRM_SERVICE.getLeadById(state.leads, leadId)) return;
+    closeClientSheet();
+    switchTab('guia');
+    const select = document.getElementById('technical-client');
+    if (String(select.value) === String(leadId)) return;
+    select.value = leadId;
+    // Reuse the controller's existing dirty-draft/identity confirmation contract.
+    select.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+
   function emptyTechnicalDraft(leadId = '') {
     return { id: `TECH-DRAFT-${crypto.randomUUID()}`, leadId, selectedVehicleId:'', answers:{},
       libras:'', includeDianteira:true, targetVehicleName:'', qty:1, notes:'', manualItems:null,
@@ -4329,7 +4357,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
           <button type="button" data-sheet-whatsapp>WhatsApp</button>
           <a href="tel:${escapeHtml(lead.telefone || '')}">Ligar</a>
           <button type="button" data-sheet-call-ai>Call AI</button>
-          <button type="button" data-sheet-quote>Cotar</button>
+          <button type="button" data-sheet-quote>Cotar</button><button type="button" data-sheet-technical>Aplicação técnica</button>
         </div>
 
         <div class="client-sheet-summary">
@@ -4476,6 +4504,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
 
     overlay.querySelector('[data-sheet-whatsapp]')?.addEventListener('click', () => openDeskWhatsApp(OG_CRM_SERVICE.getLeadById(state.leads, lead.id) || lead));
+    overlay.querySelector('[data-sheet-technical]')?.addEventListener('click', () => openTechnicalForLead(lead.id));
     overlay.querySelector('[data-sheet-call-ai]')?.addEventListener('click', () => {
       closeClientSheet();
       const returnTab = state.currentTab || 'dia';
@@ -4697,7 +4726,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const extras = root.querySelector('.sales-desk-primary-actions');
     extras.insertAdjacentHTML('beforeend', '<button type="button" data-client-proposal>Proposta</button><button type="button" data-client-technical>Aplicação técnica</button>');
     root.querySelector('[data-client-proposal]').addEventListener('click', () => openDeskQuote(lead));
-    root.querySelector('[data-client-technical]').addEventListener('click', () => switchTab('guia'));
+    root.querySelector('[data-client-technical]').addEventListener('click', () => openTechnicalForLead(lead.id));
     if (lead.salesExecution?.companyId) {
       registerDetails.hidden = true;
       root.querySelector('[data-client-register]').textContent = 'Registrar resultado';

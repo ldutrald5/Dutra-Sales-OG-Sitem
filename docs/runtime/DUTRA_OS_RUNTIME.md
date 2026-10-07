@@ -188,3 +188,17 @@ STATUS: COMPLETE — recovery REUSE EXISTING UXR PREVIEW authorized by QG to avo
 - Reality check for Lucas: Meu Dia → Cliente → Prospecção → Registrar resultado → Call AI → Follow-up → Aplicação Técnica → Cotação existente. Ask: “Em qual momento eu ainda preciso sair deste sistema?” Record mandatory exits as prioritized backlog, without implementing Stage 7.
 
 NEXT: STOP. Stage 7 requires fresh QG authorization.
+
+
+## Stage 6.6 — Synthetic reality check (2026-10-07)
+
+ENTRY_SHA: `8325f5cf6c2f0104138106f3025a0708ca06c069`.
+STATUS: LOCAL VALIDATION PASS; hosted publication/acceptance pending below.
+
+Reuses `applyHostedSeed` / `OG_STATE_SEED_GZIP_B64`, idempotent canonical merge, existing `state.leads` and durable sync/outbox. Fixture `scripts/fixtures/isolated-preview-seed.json` contains only DEMO-DUTRA-CLIENT / DEMO-DUTRA-PROSPECT, synthetic company/contact/context, no telephone/CNPJ/email or production data. No separate CRM, score, agenda, history, sync or demo engine. Existing guarded technical client change carries canonical identity from the sales card and client sheet; no unsaved draft overwritten without the existing confirmation.
+
+`OG_ISOLATED_PREVIEW=true` is an explicit service-only switch. Public no-store runtime metadata contains no data/secrets; SW never caches it. Preview status annotates actual sync mode (never forces OK), preserving visible failures/offline/conflict and all ordinary production semantics. External communication launch and remote Sales Execution/Call Intelligence/research endpoints are blocked in isolated preview; canonical local review/result/follow-up and ephemeral `/api/state` still work. Existing access PIN remains required; no production credentials copied. Health release can read Railway's deployed commit metadata.
+
+QA proportional: og:check PASS; new `og:preview:reality:test` PASS at 390x844 / 1440x900 through real seed→Meu Dia→client sheet→Call AI review→result/follow-up→Meu Dia→technical→quote, exact CRM identity/vehicle/pieces/quantities, real ACK/offline/reconnect and honest HTTP503. Standard hosted config/auth, hosted seed, client sheet/CRM, Call AI, technical unit/context browser, sync bridge/conflict/reconnect/HTTP409 and PWA release checks PASS. No eight-viewport matrix or independent full-stage replay. Durable lesson SRC-CONVERGENCE-REALITY-20261007-001 / INC-TECH-ENTRY-CONTEXT-001; Brain150 zero warnings.
+
+Rollback: entry SHA above plus service's prior pinned `85e17dffd04f2f1f16eab1714344778bb60a3422`; disable only service-specific preview flag/seed if reverting. Never clear persisted user state. Synthetic seed is additive and marker-controlled; ephemeral container replacement can restore the fixture and lose preview-only changes. Stage7 NOT authorized.

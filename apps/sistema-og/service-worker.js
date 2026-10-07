@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v72';
+const SW_VERSION = 'v73';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -186,6 +186,7 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname === '/runtime-config.js') return;
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/public-api/') || url.pathname.startsWith('/p/')) return;
   if (req.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(req));
