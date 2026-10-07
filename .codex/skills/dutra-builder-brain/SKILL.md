@@ -237,6 +237,60 @@ Every package must define objective, problem solved, evidence/decision basis, de
 
 See `templates/implementation-package.md`.
 
+## Value-per-credit and convergence rule
+
+Treat time, execution credits and user attention as first-class product constraints.
+
+- Optimize for **visible operational value per unit of execution**, not number of stages, documents, gates or commits.
+- The primary convergence metric is: **how much real work can the user complete end-to-end from one canonical system entry point?**
+- A unified Git branch is not sufficient if the user still has to operate separate hosted systems.
+- After the architecture/owners are stable enough, prefer an **isolated unified preview / reality check** before extending the roadmap with more hidden branch-only features.
+- If the user still needs an old/parallel system to finish the core workflow, closing that gap outranks polishing another isolated module unless safety or dependency order requires otherwise.
+- Once canonical owners and contracts are stable, prefer **outcome-oriented sprints** that bundle adjacent stages with one heavy regression at the milestone boundary instead of repeating full ceremony after every small slice.
+- During implementation, run targeted tests for the changed module and nearest integrations. Run broad viewport/PWA/sync/full-suite/independent QA when risk warrants it, at milestone/release boundaries, or when repository policy explicitly requires it.
+- Do not repeatedly regenerate documentation that did not materially change. Capture durable deltas, incidents, decisions and new invariants; avoid ceremonial duplication.
+- Never save credits by weakening checks that protect against data loss, duplicate writes, stale identity, destructive migration, sync corruption, wrong technical application or false external-action claims.
+
+### Reality-check gate
+
+When several historical interfaces/branches exist, periodically stop feature work and prove the current integrated product to the real user.
+
+The gate asks:
+
+1. Is there one accessible preview/runtime for the integration branch?
+2. Can the user complete the target workflow without opening the old systems?
+3. Which exact step still forces a legacy detour?
+4. Does the new system preserve the canonical owners and data?
+5. What is the smallest package that removes the next legacy dependency?
+
+Turn observed legacy detours into prioritized work. Do not continue a long stage sequence purely because it was planned earlier.
+
+### Action-first autonomy
+
+When analysis produces a clearly important next action:
+
+- do not stop at “I would”, “we could” or a passive recommendation;
+- if the action is already authorized, safe and inside scope, **execute it**;
+- if it requires a separate authorization or external side effect, immediately provide the exact executable Action Pack / prompt / command sequence needed next;
+- do not ask for approval for trivial internal investigative steps already covered by the active mission;
+- solve local implementation bugs and regressions autonomously before escalating;
+- escalate only when a real stop condition, product decision, destructive risk, live-production action or authorization boundary is reached.
+
+Important insight should normally become an executable next step in the same response.
+
+### Reasoning-effort budget
+
+When the execution environment exposes model/reasoning controls, recommend the configuration explicitly before delegated work.
+
+Use proportional effort:
+
+- MICRO / routine UI / docs / known local fix: Medium or High.
+- STANDARD bounded implementation: High / Extra High where available.
+- Multi-module or structural sprint: Max/highest non-Ultra tier when available.
+- Ultra/deepest reasoning: reserve for ambiguous architecture, race conditions, data-integrity/sync bugs, destructive-risk analysis, difficult incident recovery and final high-risk release gates.
+
+Do not use the maximum setting by habit. Higher reasoning is justified by risk/ambiguity, not by task length alone.
+
 ## Stop conditions
 
 Pause broad implementation and surface a blocker when source of truth is ambiguous, destructive migration lacks restore, environment is unreproducible, external claim is unverified, license blocks/obscures intended reuse, package is too large to rollback independently, or work conflicts with an active decision without explicit review.
