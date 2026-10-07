@@ -23,6 +23,24 @@ metadata:
 - Infrastructure work should unlock visible workflow value when safe.
 - Ideas are candidates, not commitments.
 
+## Métrica de progresso: um sistema de verdade
+
+Roadmap não é medido por quantidade de Stages concluídas.
+
+A métrica principal é:
+
+> **quantas atividades reais o vendedor consegue concluir ponta a ponta dentro de um único DUTRA OS acessível?**
+
+Regras:
+
+- Branch unificada sem ambiente acessível ainda não é unificação operacional.
+- Se o usuário continua usando V3/legado/sistema atual em paralelo para concluir o trabalho, identificar exatamente onde ocorre a troca e priorizar a remoção dessa dependência.
+- Após uma convergência estrutural relevante, publicar um preview isolado e fazer reality check com uso real antes de adicionar muitos módulos invisíveis.
+- Priorizar aposentadoria progressiva das interfaces antigas sobre uma sequência artificial de features.
+- Agrupar etapas adjacentes em sprint de resultado quando owners e contratos já estão estáveis.
+- Fazer user acceptance por milestone: "consigo realizar meu trabalho sem sair daqui?"
+- Créditos, tempo de execução e custo cognitivo do usuário são restrições reais de produto.
+
 ## Procedure
 Frame real user friction → verify existing capability → map dependency/risk → choose smallest valuable slice → define DoD/loading/empty/error/offline → test → update roadmap/brain if durable.
 
