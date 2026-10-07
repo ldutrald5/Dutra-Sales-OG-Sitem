@@ -168,3 +168,23 @@ Para “sistema online”, “celular”, “deploy”, “status”, “domíni
 6. após write, verificar deploy + health + logs.
 
 Nunca confiar apenas em hash/URL lembrados de conversa.
+
+
+## Stage 6.5 — Unified Preview / Reality Check (2026-10-07)
+
+STATUS: COMPLETE — recovery REUSE EXISTING UXR PREVIEW authorized by QG to avoid the Free plan fourth-service provisioning limit. No upgrade, new project, service or volume.
+
+- Project: DUTRA OS UXR-01 Preview (`d8e7173f-b8d3-4f8a-85e7-33c93d627774`); environment production (`e5b1fd77-0460-431c-b886-7be134a5c5f3`). This is the preview project, not official production.
+- Reused service: `dutra-os-uxr01-preview` (`b385d7a3-616c-4c44-82c7-7c9541ba7c45`), now the Unified Preview. Existing technical name/domain retained; former UXR source consciously replaced.
+- Source: `ldutrald5/Dutra-Sales-OG-Sitem`, branch `integration/dutra-os-one-system`, pinned deployed SHA `85e17dffd04f2f1f16eab1714344778bb60a3422`. Pin prevents subsequent documentation pushes from implicitly deploying a different commit; reconnect source deliberately for later authorized releases.
+- Deployment: `639a9b9b-0758-4af2-bd6e-2c8e057a8c9d`, SUCCESS. RAILPACK, repository root `/`, `npm start`, health `/health`.
+- URL: https://dutra-os-uxr01-preview-production.up.railway.app
+- HTTP application and health: 200; health `ok=true`. Release field is null; deployed SHA is verified through Railway deployment metadata, not inferred from health.
+- Isolation: no attached volume, database migration, production credentials or seed copied. Only pre-existing preview OG_ACCESS_PIN / OG_ACCESS_TOKEN / OG_DATA_DIR remain. Filesystem persistence is EPHEMERAL; use disposable test data, not the only copy of customer records.
+- Browser smoke on the live domain: 390x844 and 1440x900 PASS. Meu Dia, Prospecção, Call AI UI, Aplicação Técnica (`guia`) and existing Cotação navigate inside one shell; one visible workspace, zero horizontal overflow and zero page/bootstrap errors. Access-code prompt displayed. No mandatory navigation to historical V3.
+- Scope of smoke: prompt dismissed without changing credentials; authenticated persistence/commercial writes and remote AI/provider workflows were NOT tested. Existing preview access code is required for protected APIs. Call AI/Whisper, Prospect Search and remote Sales Execution credentials were not copied; their remote capabilities may be unavailable and are not certified by UI smoke.
+- Preservation confirmed live: V2 deployment `267a08bc-0e1f-4fd3-8674-2e35f41fba1a`, V3 `0d869744-565e-42a7-be53-f21d9007e868`, official production `def9b0c2-301b-4c83-a459-07ff29c0dda3` and its `/data` volume unchanged. Main and protected Git branches untouched. No application code changes.
+- Runtime rollback: prior UXR source `uxr-01-mobile-simplification`, deployment `75ffd707-2287-4d84-bde4-a038a4f53745`, SHA `417d4fab88bf18e561559a62570f2404f0dab973`; retained as historical locator, no rollback executed.
+- Reality check for Lucas: Meu Dia → Cliente → Prospecção → Registrar resultado → Call AI → Follow-up → Aplicação Técnica → Cotação existente. Ask: “Em qual momento eu ainda preciso sair deste sistema?” Record mandatory exits as prioritized backlog, without implementing Stage 7.
+
+NEXT: STOP. Stage 7 requires fresh QG authorization.
