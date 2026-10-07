@@ -84,8 +84,10 @@ async function stopLocal() {
   if (server && !server.killed) await new Promise(resolve => { server.once('exit', resolve); server.kill('SIGTERM'); });
 }
 const apiState = async context => {
-  const response = await context.request.get(base + '/api/state', { headers: { Authorization: `Bearer ${bearer}` } });
-  assert.equal(response.status(), 200, 'Canonical pilot state must be readable');
+  // Native fetch honors the managed environment's network proxy. Playwright's
+  // API client bypasses it and can include bearer headers in connection errors.
+  const response = await fetch(base + '/api/state', { headers: { Authorization: `Bearer ${bearer}` }, signal: AbortSignal.timeout(15000) });
+  assert.equal(response.status, 200, 'Canonical pilot state must be readable');
   return response.json();
 };
 async function navigate(page, tab) {
@@ -128,7 +130,9 @@ async function settled(page) {
 
 try {
   if (!live) { dataDir = await mkdtemp(path.join(os.tmpdir(), 'dutra-private-pilot-')); await startLocal(); }
-  browser = await chromium.launch({ executablePath: process.env.OG_CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
+  const proxy = live && (process.env.HTTPS_PROXY || process.env.HTTP_PROXY);
+  const proxyUrl = proxy ? new URL(proxy) : null;
+  browser = await chromium.launch({ executablePath: process.env.OG_CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'], ...(proxyUrl ? { proxy: { server: proxyUrl.origin, ...(proxyUrl.username ? { username: decodeURIComponent(proxyUrl.username), password: decodeURIComponent(proxyUrl.password) } : {}) } } : {}) });
   let savedQuoteId;
   for (const [width, height] of restartOnly ? [] : [[390, 844], [1440, 900]]) {
     const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block', ...(live ? { extraHTTPHeaders: { Authorization: `Bearer ${bearer}` } } : {}) });
@@ -242,6 +246,13 @@ try {
     await probe.close();
     console.log('Pilot persistent local filesystem: process restart + repeated hosted seed preserves exact current state PASS (Railway volume tested separately)');
   }
+} catch (error) {
+  // Test failure output must not reproduce private API credentials or client
+  // payloads from library call logs/deep equality diagnostics.
+  const message = String(error?.message || error).split('\n')[0].replaceAll(bearer, '[REDACTED]').replaceAll(localPin, '[REDACTED]');
+  const location = String(error?.stack || '').match(/test_pilot_reality_browser\.mjs:\d+:\d+/)?.[0] || '';
+  console.error(`Pilot reality failure: ${message}${location ? ' (' + location + ')' : ''}`);
+  process.exitCode = 1;
 } finally {
   await browser?.close();
   await stopLocal();
