@@ -128,6 +128,49 @@ Regras essenciais:
 - contexto histórico somente se mudar a decisão atual;
 - fatos dinâmicos ficam fora de Skills/prompt global.
 
+## Economia de execução e ação imediata
+
+Todo prompt delegado deve otimizar **resultado útil por crédito/tempo**, não apenas completude formal.
+
+Antes de criar uma sequência longa de Stages, verificar:
+
+- o usuário já consegue acessar a branch integrada em um preview real?
+- ele ainda precisa alternar entre sistema atual, V3 ou legado?
+- a próxima etapa remove uma dependência real do sistema antigo ou apenas melhora código invisível?
+- módulos adjacentes com owners estáveis podem ser agrupados em um sprint orientado a resultado?
+- quais testes são realmente afetados agora e quais podem ser concentrados no gate do milestone?
+
+Quando a integração ainda não estiver acessível ao usuário, priorizar um **Unified Preview / Reality Check** antes de continuar uma fila longa de features, salvo bloqueio técnico ou de segurança.
+
+### Configuração recomendada obrigatória
+
+Quando o executor permitir seleção de modelo/inteligência, iniciar o Execution Prompt com:
+
+~~~text
+CONFIGURAÇÃO RECOMENDADA:
+Modelo: <melhor modelo disponível para a missão>
+Inteligência: <proporcional ao risco>
+Velocidade: <quando aplicável>
+Motivo: <uma linha>
+~~~
+
+Não recomendar Ultra/máximo automaticamente. Reservar esforço extremo para arquitetura ambígua, concorrência/race, dados/sync, incidentes difíceis e release de alto risco.
+
+### Action-first
+
+Se durante a análise surgir uma ação claramente necessária e já autorizada, o prompt deve mandar **executá-la**, não apenas descrevê-la como recomendação.
+
+Se depender de autorização separada, o resultado deve trazer imediatamente o próximo Action Pack executável, com escopo, guardrails e critério de sucesso. Evitar respostas que terminem apenas em “eu faria X”.
+
+### QA proporcional
+
+- MICRO: teste diretamente afetado.
+- STANDARD: módulo + integração vizinha.
+- STRUCTURAL: gates amplos proporcionais ao risco.
+- MILESTONE/RELEASE: regressão ampla, viewport/PWA/sync/QA independente quando aplicáveis.
+
+Não repetir a matriz completa em cada subetapa se o código afetado não justifica isso e a política do repositório não exige. Não economizar em testes de integridade de dados, identidade, sync, ações externas ou regra técnica.
+
 ## Guardrails DUTRA
 
 Carregar `docs/prompts/architect/DUTRA-GUARDRAILS.md` quando a missão tocar produto/código real.
