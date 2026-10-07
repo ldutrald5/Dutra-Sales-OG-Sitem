@@ -372,6 +372,6 @@ Durable record IDs, executed evidence, runtime access drift and rollback are in 
 
 - [x] Existing hosted seed and canonical context audited; no parallel owners or production data.
 - [x] Two-viewport result/follow-up/technical/quote proof and proportional affected gates PASS.
-- [ ] Hosted synthetic acceptance and verified integration publication; see V3_UNIFICATION_CHECKPOINT Stage6.6 for live closeout.
+- [x] Hosted synthetic acceptance and verified integration publication; see V3_UNIFICATION_CHECKPOINT Stage6.6 for live closeout.
 - Files: app.js (guarded technical bridge/status/external actions); index.html/runtime-config.js/server.mjs (explicit runtime metadata); service-worker.js (noncached config/cache refresh); package.json; scripts/fixtures/isolated-preview-seed.json; scripts/test_preview_reality_browser.mjs; scripts/test_hosted_runtime.mjs; checkpoint/runtime; source/incident and generated Brain index/metrics.
 - Stage 7 remains unauthorized.
