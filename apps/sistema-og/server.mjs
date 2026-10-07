@@ -47,6 +47,27 @@ const accessSessions = process.env.OG_PERSISTENT_AUTH === 'true'
   ? createAccessSessions({ dataDir, secret: process.env.OG_SESSION_SECRET || localAccessToken, pin: localAccessPin })
   : null;
 
+function persistentPilotStore() {
+  const mount = String(process.env.RAILWAY_VOLUME_MOUNT_PATH || '').trim();
+  if (!mount) return false;
+  try {
+    const mounted = fs.realpathSync(mount), target = fs.realpathSync(dataDir);
+    return target === mounted || target.startsWith(mounted + path.sep);
+  } catch { return false; }
+}
+
+function pilotRealDataReady() {
+  if (!accessSessions || process.env.OG_ISOLATED_PREVIEW !== 'true' || process.env.OG_PILOT_REAL_DATA !== 'true' || !persistentPilotStore()) return false;
+  const id = String(process.env.OG_PILOT_SEED_ID || '');
+  if (!/^PILOT-[A-Za-z0-9._-]{1,110}$/.test(id)) return false;
+  try {
+    const marker = JSON.parse(fs.readFileSync(path.join(dataDir, '.seed-history', id + '.json'), 'utf8'));
+    return marker.seedId === id && marker.sourceSha256 === process.env.OG_PILOT_SOURCE_SHA256
+      && marker.review?.backupValidated === true && marker.review?.realDataValidated === true
+      && readSharedState().leads.some(lead => lead.importMeta?.pilotReal === true);
+  } catch { return false; }
+}
+
 function readWhisperSelfTestStatus() {
   try {
     const file = path.join(dataDir, 'whisper-self-test.json');
@@ -337,13 +358,13 @@ const server = http.createServer(async (req, res) => {
       'X-Content-Type-Options': 'nosniff'
     });
     if (req.method === 'HEAD') return res.end();
-    return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null, whisperSelfTest: readWhisperSelfTestStatus() }));
+    return res.end(JSON.stringify({ ok: true, service: 'sistema-og', release: release || null, persistent: persistentPilotStore(), whisperSelfTest: readWhisperSelfTestStatus() }));
   }
 
   // Public metadata contains no credentials or customer data; never cached by the PWA.
   if (url.pathname === '/runtime-config.js' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type':'application/javascript; charset=utf-8', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' });
-    return res.end('window.OG_RUNTIME = Object.freeze(' + JSON.stringify({ isolatedPreview: process.env.OG_ISOLATED_PREVIEW === 'true', persistentAuth: Boolean(accessSessions) }) + ');');
+    return res.end('window.OG_RUNTIME = Object.freeze(' + JSON.stringify({ isolatedPreview: process.env.OG_ISOLATED_PREVIEW === 'true', persistentAuth: Boolean(accessSessions), pilotRealData: pilotRealDataReady() }) + ');');
   }
   if (process.env.OG_ISOLATED_PREVIEW === 'true' && /^\/api\/(sales-execution|call-intelligence|prospects\/research|ai)(\/|$)/.test(url.pathname)) {
     res.writeHead(503, { 'Content-Type':'application/json', 'Cache-Control':'no-store' });

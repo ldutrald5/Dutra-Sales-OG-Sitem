@@ -1,13 +1,13 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 153 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 155 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 18 |
+| cycle | 19 |
 | decision | 21 |
 | experiment | 1 |
 | idea | 3 |
@@ -15,7 +15,7 @@ Generated from 153 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 31 |
+| source | 32 |
 
 ## Active decisions
 
@@ -163,6 +163,8 @@ Generated from 153 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
 - **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
   QG recovery approved primary pilot seed CRM OG dr.ods, canonical runtime OG_CRM_SERVICE/state.leads, existing filesystem isolated persistence and signed HttpOnly PIN session. Legacy runtime prompts store raw credential in sessionStorage; concurrent bootstrap 401s can re-prompt. New synthetic tests protect PIN validation, signed-cookie expiry/revocation/restart, no browser PIN store, origin protection, browser reopen and reconnect. Live deployment and real import are not certified by this source.
+- **SRC-PILOT-IMPORT-20261007-001 — Stage 6.7 authorized pilot restore and source import validation** (validated/high)
+  The user-authorized pilot snapshot was validated by the existing backup owner. The bundled workbook reader and canonical CRM import matcher consolidate the primary ODS and safely enrich from the secondary workbook. Original IDs, history and operations are preserved; ambiguous identities remain in private review. Synthetic regression and private-data preparation verify repeated import without duplication. No private customer records or credentials are stored in the Brain.
 - **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
   Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
 - **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
@@ -177,8 +179,6 @@ Generated from 153 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Stage 4 audit and isolated regression execution adapted the current app to premium prospecting without porting V3 engines. Browser evidence exposed stale filtered focus and then an offline reconnect race caused by unresolved optional Service Worker readiness holding the foreground write lock. Both causes were reproduced and protected by actual canonical mutation, remote acknowledgement and conflict review tests.
 - **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
   CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
-- **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
-  Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
 
 ## Retrieval workflow
 

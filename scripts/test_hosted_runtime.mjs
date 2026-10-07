@@ -62,6 +62,7 @@ try {
   assert.equal(healthBody.service, 'sistema-og');
   assert.equal(healthBody.release, 'test-release-sha');
   assert.equal(healthBody.whisperSelfTest, null);
+  assert.equal(healthBody.persistent, true, 'dataDir matches the explicit local volume fixture');
 
   response = await fetch(`http://127.0.0.1:${port}/api/health`);
   assert.equal(response.status, 200, '/api/health deve permanecer público para diagnóstico');
@@ -73,7 +74,9 @@ try {
 
   response = await fetch(`http://127.0.0.1:${port}/runtime-config.js`);
   assert.equal(response.status,200);
-  assert.match(await response.text(), /"isolatedPreview":false/, 'Standard hosted runtime must not inherit preview semantics');
+  const runtimeText = await response.text();
+  assert.match(runtimeText, /"isolatedPreview":false/, 'Standard hosted runtime must not inherit preview semantics');
+  assert.match(runtimeText, /"pilotRealData":false/, 'Mount alone does not certify real pilot data');
   assert.match(response.headers.get('cache-control'), /no-store/);
 
   response = await fetch(`http://127.0.0.1:${port}/api/state`);

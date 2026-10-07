@@ -12,7 +12,7 @@ const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'12
 const base=`http://localhost:${port}`;
 let server,context;
 async function start(){
- server=spawn(process.execPath,['apps/sistema-og/server.mjs'],{cwd:new URL('../',import.meta.url),env:{...process.env,OG_PORT:String(port),OG_HOST:'127.0.0.1',OG_DATA_DIR:dataDir,OG_PERSISTENT_AUTH:'true',OG_LOCAL_ACCESS_TOKEN:'artificial-browser-test-key-not-production',OG_LOCAL_ACCESS_PIN:'123456'},stdio:'pipe'});
+ server=spawn(process.execPath,['apps/sistema-og/server.mjs'],{cwd:new URL('../',import.meta.url),env:{...process.env,OG_PORT:String(port),OG_HOST:'127.0.0.1',OG_DATA_DIR:dataDir,OG_PERSISTENT_AUTH:'true',OG_ISOLATED_PREVIEW:'true',OG_LOCAL_ACCESS_TOKEN:'artificial-browser-test-key-not-production',OG_LOCAL_ACCESS_PIN:'123456'},stdio:'pipe'});
  await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('server startup timeout')),10000);server.stdout.on('data',b=>{if(String(b).includes('Sistema OG no computador')){clearTimeout(t);resolve();}});server.once('exit',code=>{clearTimeout(t);reject(new Error(`server exited ${code}`));});});
 }
 async function stop(){if(server&&!server.killed)await new Promise(resolve=>{server.once('exit',resolve);server.kill();});}
@@ -41,6 +41,8 @@ try {
  await context.setOffline(true);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='offline');
  await page.reload();await page.waitForFunction(()=>document.body.dataset.shellReady==='true');
  assert.ok(await page.evaluate(()=>window.OG_ACCESS_SESSION.enabled()),'installed PWA offline startup retains auth mode');
+ assert.equal(await page.evaluate(()=>window.OG_RUNTIME?.isolatedPreview),true,'offline PWA boot must retain the explicit isolated external-action boundary');
+ assert.equal(await page.evaluate(()=>window.OG_RUNTIME?.pilotRealData),false,'a preview without validated seed and mount cannot claim a real persistent pilot');
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('og_cloud_access_token')),null);assert.equal(nativePrompts,0);
  // CDP offline emulation with a controlling SW can set onLine=true without an
  // online event after navigation. Match the existing shell/PWA harness: drive

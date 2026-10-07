@@ -95,6 +95,7 @@ function meaningfulState(state) {
       stateRevision(state) > 0 ||
       state.leads.length > 0 ||
       state.history.length > 0 ||
+      Object.values(state.operations || {}).some(value => Array.isArray(value) && value.length > 0) ||
       clean(state.updatedAt)
     )
   );
@@ -130,9 +131,10 @@ function leadKeys(lead = {}) {
 }
 
 function mergeUniqueObjects(existing, incoming, keyFn) {
-  const out = [];
-  const seen = new Set();
-  for (const item of [...(Array.isArray(existing) ? existing : []), ...(Array.isArray(incoming) ? incoming : [])]) {
+  // Never normalize away the user's existing records during an additive seed.
+  const out = Array.isArray(existing) ? [...existing] : [];
+  const seen = new Set(out.map(keyFn).filter(Boolean));
+  for (const item of (Array.isArray(incoming) ? incoming : [])) {
     const key = keyFn(item);
     if (!key || seen.has(key)) continue;
     seen.add(key);
@@ -151,7 +153,7 @@ function mergeLead(existing, imported) {
   merged.contacts = mergeUniqueObjects(existing.contacts, imported.contacts, item => {
     const phone = digits(item?.phone || item?.telefone);
     const name = clean(item?.name || item?.nome).toLowerCase();
-    return phone || name;
+    return phone || name ? `${phone}|${name}` : "";
   });
   merged.referrals = mergeUniqueObjects(existing.referrals, imported.referrals, item => [clean(item?.name).toLowerCase(), clean(item?.company).toLowerCase(), digits(item?.phone)].join('|'));
   merged.interactions = Array.isArray(existing.interactions) ? existing.interactions : [];
@@ -185,6 +187,15 @@ export function mergeSeedLeads(existingLeads = [], importedLeads = []) {
 
   for (const imported of importedLeads) {
     if (!imported || typeof imported !== 'object' || Array.isArray(imported) || !clean(imported.id)) continue;
+    // Canonical identity precedes identifiers that can be absent or shared.
+    // Keep the existing record and its human history when restoring the same ID.
+    const exactId = output.findIndex(lead => String(lead.id) === String(imported.id));
+    if (exactId >= 0) {
+      output[exactId] = mergeLead(output[exactId], imported);
+      matched += 1;
+      rebuildIndex();
+      continue;
+    }
     const candidateIndexes = new Set();
     for (const key of leadKeys(imported)) {
       const bucket = indexByKey.get(key) || [];
@@ -295,7 +306,7 @@ export function applyHostedSeed(options = {}) {
   let selected = newestState(candidates);
   let base = selected?.state || null;
   let baseSource = selected?.file || null;
-  if ((!base || (stateRevision(base) === 0 && base.leads.length === 0 && base.history.length === 0)) && payload.fallbackState) {
+  if ((!base || !meaningfulState(base)) && payload.fallbackState) {
     base = payload.fallbackState;
     baseSource = 'fallbackState';
   }

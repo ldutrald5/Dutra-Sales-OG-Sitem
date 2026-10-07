@@ -4,6 +4,7 @@
   let loginPromise = null;
   let generation = 0;
   const MODE_KEY = 'og_access_session_enabled';
+  const RUNTIME_KEY = 'og_runtime_mode';
   function enabled() {
     if (typeof global.OG_RUNTIME?.persistentAuth === 'boolean') return global.OG_RUNTIME.persistentAuth;
     // Non-secret last-known mode permits offline startup, never grants server access.
@@ -59,6 +60,14 @@
   }
   function initialize() {
     try {
+      if (global.OG_RUNTIME && typeof global.OG_RUNTIME.isolatedPreview === 'boolean') {
+        const metadata = {};
+        for (const key of ['isolatedPreview', 'persistentAuth', 'pilotRealData']) metadata[key] = global.OG_RUNTIME[key] === true;
+        global.localStorage.setItem(RUNTIME_KEY, JSON.stringify(metadata));
+      } else {
+        const metadata = JSON.parse(global.localStorage.getItem(RUNTIME_KEY) || 'null');
+        if (metadata && typeof metadata.isolatedPreview === 'boolean') global.OG_RUNTIME = Object.freeze(metadata);
+      }
       if (typeof global.OG_RUNTIME?.persistentAuth === 'boolean') {
         if (global.OG_RUNTIME.persistentAuth) global.localStorage.setItem(MODE_KEY, 'true');
         else global.localStorage.removeItem(MODE_KEY);

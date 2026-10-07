@@ -174,8 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!badge) return;
     const actualText = String(label || 'Sincronização');
     const preview = window.OG_RUNTIME?.isolatedPreview === true;
-    const text = preview ? `Preview isolado · ${mode === 'ok' ? 'Dados temporários' : actualText}` : actualText;
-    badge.dataset.runtime = preview ? 'isolated-preview' : 'standard';
+    const pilot = preview && window.OG_RUNTIME?.pilotRealData === true;
+    const text = pilot ? `Piloto DUTRA OS · Dados reais · Ambiente isolado${mode === 'ok' ? '' : ' · ' + actualText}` : preview ? `Preview isolado · ${mode === 'ok' ? 'Dados temporários' : actualText}` : actualText;
+    badge.dataset.runtime = pilot ? 'isolated-pilot' : preview ? 'isolated-preview' : 'standard';
     badge.textContent = text;
     badge.dataset.mode = mode;
     badge.dataset.updatedAt = new Date().toISOString();

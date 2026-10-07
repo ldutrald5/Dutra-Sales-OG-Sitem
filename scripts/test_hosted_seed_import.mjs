@@ -146,3 +146,36 @@ assert.throws(
 );
 
 console.log('Hosted corrupt-seed guard tests: PASS');
+
+// An operations-only pilot store is user work, even without a lead/revision yet.
+const opsOnlyRoot=fs.mkdtempSync(path.join(os.tmpdir(),'og-seed-ops-only-'));
+try {
+  const existing={revision:0,updatedAt:null,leads:[],history:[],operations:{quotes:[{id:'QA-QUOTE',clientId:'QA-CUSTOMER',items:[{id:'QA-PIECE',quantity:2}]}]}};
+  fs.writeFileSync(path.join(opsOnlyRoot,'shared-state.json'),JSON.stringify(existing));
+  const payload={seedId:'QA-OPS-PRESERVE',leads:[],fallbackState:{revision:2,leads:[{id:'QA-FALLBACK'}],history:[],operations:{quotes:[]}}};
+  const result=applyHostedSeed({env:{OG_DATA_DIR:opsOnlyRoot,RAILWAY_VOLUME_MOUNT_PATH:opsOnlyRoot,OG_STATE_SEED_GZIP_B64:zlib.gzipSync(JSON.stringify(payload)).toString('base64')}});
+  const state=JSON.parse(fs.readFileSync(path.join(opsOnlyRoot,'shared-state.json')));
+  assert.notEqual(result.baseSource,'fallbackState');
+  assert.deepEqual(state.operations,existing.operations);
+  assert.equal(state.leads.length,0,'fallback may not replace a quote-only store');
+  const replay=applyHostedSeed({env:{OG_DATA_DIR:opsOnlyRoot,OG_STATE_SEED_GZIP_B64:zlib.gzipSync(JSON.stringify(payload)).toString('base64')}});
+  assert.equal(replay.status,'already_applied');
+  console.log('Hosted operations-only preservation + repeat marker: PASS');
+}finally{fs.rmSync(opsOnlyRoot,{recursive:true,force:true});}
+
+const noIdentifiers=mergeSeedLeads([{id:'QA-ID-ONLY',empresa:'QA Empresa',interactions:[{id:'QA-HUMAN'}]}],[{id:'QA-ID-ONLY',empresa:'QA Empresa importada',email:'qa@example.invalid'}]);
+assert.equal(noIdentifiers.leads.length,1,'canonical ID must make identifier-free import idempotent');
+assert.equal(noIdentifiers.matched,1);assert.equal(noIdentifiers.leads[0].empresa,'QA Empresa');
+assert.deepEqual(noIdentifiers.leads[0].interactions,[{id:'QA-HUMAN'}]);
+assert.equal(noIdentifiers.leads[0].email,'qa@example.invalid');
+assert.equal(mergeSeedLeads(noIdentifiers.leads,[{id:'QA-ID-ONLY',empresa:'QA Empresa importada'}]).leads.length,1);
+console.log('Hosted canonical ID priority/idempotent enrichment: PASS');
+
+const manualContacts = [{name:'Pessoa A',phone:'000001',notes:'manual A'}, {name:'Pessoa B',phone:'000001',notes:'manual B'}];
+const sharedPhoneLead = {id:'SHARED-CENTRAL',contacts:manualContacts,additionalPhones:[{phone:'000001',notes:'manual1'},{phone:'000001',notes:'manual2'}]};
+const incomingContacts = {...sharedPhoneLead,contacts:[...manualContacts,{name:'Pessoa C',phone:'000001',notes:'source'}]};
+const contactRestore = mergeSeedLeads([sharedPhoneLead],[incomingContacts]);
+assert.deepEqual(contactRestore.leads[0].contacts,[...manualContacts,incomingContacts.contacts[2]],'distinct people sharing a switchboard and all existing notes must survive restoration');
+assert.deepEqual(contactRestore.leads[0].additionalPhones,sharedPhoneLead.additionalPhones,'existing phone records must remain intact');
+assert.deepEqual(mergeSeedLeads(contactRestore.leads,[incomingContacts]).leads[0].contacts,contactRestore.leads[0].contacts,'retry must not append contacts a second time');
+console.log('Hosted seed existing contact/switchboard preservation and retry: PASS');
