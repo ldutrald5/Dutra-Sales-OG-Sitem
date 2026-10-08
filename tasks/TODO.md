@@ -481,4 +481,4 @@ Stage7 online gate: prior Railway blocker resolved at6af84634; real acceptance f
 
 ## CONVERGENCE-01 — Stage7.1
 
-Em andamento: pacote local Ready for Review; gates82/Brain165/release, mapa/consulta e regressões PASS. Concluir publicação e smoke real somente no piloto. Stage7 aceita pelo QG; bloqueios históricos acima estão superados. Stage8 e Reverse Technical Lookup não implementados.
+Bloqueada somente em deploy/aceite online: pacote local Ready for Review, gates82/Brain165/release e push7104685 PASS. Aplicar patch exclusivo do piloto e06e857d e rodar smoke guardado; Railway cancelou apply. Stage7 aceita pelo QG; bloqueios históricos acima estão superados. Stage8 e Reverse Technical Lookup não implementados.

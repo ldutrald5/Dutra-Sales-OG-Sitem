@@ -433,7 +433,7 @@ Online correction033be666 published/CLEAN with81/81 gates. Reviewed one-service 
 
 ## Stage7.1 — Mapa técnico Cavalo × Carreta (2026-10-08)
 
-Status: Ready for Review; online acceptance pending verified pilot publication.
+Status: BLOCKED only on externally applied pilot deployment/online acceptance; local package Ready for Review, gates/publication PASS.
 
 - [x] CLEAN entry513b2d82 / remote equality / mandatory c8c08924 +033be666 ancestry and pilot health verified.
 - [x] Owner/data audit closed before implementation; no second engine/catalog/store.
@@ -442,6 +442,7 @@ Status: Ready for Review; online acceptance pending verified pilot publication.
 - [x] Multi-vehicle/quote projection and bounded snapshots; unchanged native prices and default quantities.
 - [x] Focused unit/browser: query emits no writes; manual choice, eight viewports, save/reload/reopen, real503/reconnect/409.
 - [x] Full gates82/82/Brain165/release and previous-stage regressions completed.
-- [ ] Integration push, pilot deployment and real tractor/trailer acceptance verified.
+- [x] Integration7104685 push/fetch CLEAN/equality and normal82-gate hooks verified.
+- [ ] Pilot patch e06e857d externally applied, actual deployment and real tractor/trailer acceptance verified; Railway apply cancelled.
 
 File List: apps/sistema-og/app.js, index.html, service-worker.js; components/technical-workspace.js, multi-vehicle-workspace.js, technical-application-map.js/.css; package.json; scripts/validate.mjs, test_technical_application_map.mjs, test_technical_application_map_browser.mjs, test_quote_composition_snapshot.mjs; checkpoint/story/architecture; DUTRA_OS_CONTEXT.md, AI_HANDOFF.md, ROADMAP.md, CHANGELOG.md, tasks/TODO.md +DONE.md; Second Brain source/decision/incident/cycle and generated index/metrics. No data.js, dependency, auth/sync engine, Supabase or production changes.

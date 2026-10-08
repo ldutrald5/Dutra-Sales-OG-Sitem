@@ -282,4 +282,4 @@ Stable independent configurations, quantity/consolidation, cloned history and ex
 
 ## CONVERGENCE-01 Stage7.1 — pacote local (2026-10-08)
 
-Mapa por origem/posição do único motor, consulta sem gravação, classificação manual VALIDAR e explicação na cotação implementados. Gates82/82/Brain165/release, oito viewports, snapshots limitados e regressões Stages3–7 PASS. Publicação/aceite online delimitados no checkpoint; não inferir COMPLETE de teste local.
+Mapa por origem/posição do único motor, consulta sem gravação, classificação manual VALIDAR e explicação na cotação implementados. Gates82/82/Brain165/release, oito viewports, snapshots limitados e regressões Stages3–7 PASS. Publicação da integração7104685 e hooks82/82 PASS. Deploy/aceite online bloqueados por cancelamento da aplicação Railway; patch e06e857d no checkpoint. Não inferir COMPLETE de teste local.

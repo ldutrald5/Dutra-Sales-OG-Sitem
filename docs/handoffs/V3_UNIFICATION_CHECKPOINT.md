@@ -2,7 +2,7 @@
 
 ## Current Stage7.1 — Technical application explainability (2026-10-08)
 
-STATUS: IN PROGRESS. PRE_SHA/rollback:513b2d82ad94c4fde608bb461ebb943e209e988f. Git/local/remote CLEAN/equal; c8c08924 and033be666 ancestry PASS. User/QG explicitly accepted Stage7 online save/reload/reopen; independently observed pilot deployment1a561d06-cbd4-49ed-a8e2-0a301bb9506a SUCCESS and health200/persistent at513b2d82, containing both required commits. Historical Stage7 blocker below is superseded. Only Stage7.1 authorized; no Stage8/main/official production.
+STATUS: BLOCKED — implementation/local gates/integration publication PASS; Railway cancelled pilot apply, online Stage7.1 acceptance NOT RUN. PRE_SHA/rollback:513b2d82ad94c4fde608bb461ebb943e209e988f. Git/local/remote CLEAN/equal; c8c08924 and033be666 ancestry PASS. User/QG explicitly accepted Stage7 online save/reload/reopen; independently observed pilot deployment1a561d06-cbd4-49ed-a8e2-0a301bb9506a SUCCESS and health200/persistent at513b2d82, containing both required commits. Historical Stage7 blocker below is superseded. Only Stage7.1 authorized; no Stage8/main/official production.
 
 Audit before implementation:
 
@@ -32,6 +32,14 @@ Files: app.js; components/technical-workspace.js, multi-vehicle-workspace.js, ne
 Pre-deploy fresh private recoverable snapshot:434leads,3history,19operations.quotes,revision33; full JSON reread equality. Isolated pilot service b385d7a3-616c-4c44-82c7-7c9541ba7c45 / preview project d8e7173f-b8d3-4f8a-85e7-33c93d627774, volume509ed70c-cdfc-44e9-9eaf-3d0dc144ff2c /data unchanged. Git main/V2/V3/#109/#110 refs match entry. Private live harness requires exact verified health SHA, captures fresh backup before any write and rejects original record changes; one explicitly marked unsent test quote, no external requests. Publication/deploy/online result recorded below after verification. Rollback code:513b2d82; preserve current data/volume, never reset user state.
 
 Known gaps: software rule provenance is not factory physical certification; missing/manual positions stay VALIDAR. Implemento consultation is a projection of existing conjunto rules, not a new standalone compatibility database. Provider absence and Reverse Technical Lookup remain deferred. No Stage8 or official production.
+
+Publication closeout: implementation710468534e36aca96eca92698713189315819dab committed/pushed only to integration by @devops; normal hooks82/82 PASS; fetch verified LOCAL=REMOTE/CLEAN. POST_SHA is the containing final documentation commit; determine with git log -1 --format=%H -- docs/handoffs/V3_UNIFICATION_CHECKPOINT.md and verify remote equality.
+
+Deployment blocker: reviewed single non-destructive source.commitSha patch **e06e857d-47fa-4a4d-8485-380667474ba6** pins only existing pilot service to710468534e36aca96eca92698713189315819dab. accept_deploy returned `Cancelled — the user did not approve this action. No changes were made.` Readback confirms patch STAGED; no build/restart/config/variable/volume change was applied. Current live deployment remains1a561d06-cbd4-49ed-a8e2-0a301bb9506a SUCCESS / health200/persistent release513b2d82ad94c4fde608bb461ebb943e209e988f. No alternate API/CLI bypass. Official production/V2/V3 remain the same deployments/config/mounts as entry.
+
+Concrete next action: apply only this reviewed source pin through the Railway preview-project platform; verify deployment SUCCESS and exact health SHA7104685. Then run guarded private `/workspace/private/stage71/online-acceptance.mjs --live-ready` with OG_EXPECTED_RELEASE set to the exact verified deployed SHA and NODE_USE_ENV_PROXY=1. Harness requires fresh full private backup, original-record protection before every PUT, one marked unsent quote for existing real canonical client, Cavalo×2 + Carreta×3, exact88pieces/44tires, native finance, classified origin/path/ID/context, leave/reopen/reload on390x844/1440x900. It blocks customer/provider/external writes and stops on actual409. This live Stage7.1 proof has NOT RUN; no new demo/customer/quote or live commercial mutation was created in this session.
+
+Stage7.1 local acceptance PASS; overall BLOCKED until hosted acceptance. REAL_CLIENT_FLOW/REAL_TRACTOR_TRAILER_FLOW/ONLINE_SMOKE: NOT RUN (local private real-source fixture PASS does not replace hosted proof). Stage7 remains QG-accepted and pilot usable at https://dutra-os-uxr01-preview-production.up.railway.app/ . Stage8 NOT STARTED / not authorized.
 
 ## Current Stage7 — Multi-Veículos Premium (2026-10-08)
 
