@@ -59,6 +59,26 @@ After a write:
 4. verify the public domain;
 5. report what changed and any remaining risk.
 
+## Approval-gated staged deploy protocol
+
+For a staged Railway patch that requires explicit user approval:
+
+1. read the staged changes live before acting;
+2. verify the exact service/environment, source SHA transition and whether the patch is destructive;
+3. never infer authorization from an old conversation when a fresh approval is required by the action;
+4. after explicit user approval, call the approval-gated deploy once;
+5. follow the resulting deployment through SUCCESS/FAILURE and inspect logs/health;
+6. verify the live service source SHA after success.
+
+If an executor/Codex attempt returns an approval-layer refusal such as `the user did not approve this action`, do not ask that executor to repeat the unchanged action. Preserve the patch and hand it to QG/ChatGPT for the explicit authorization flow.
+
+Treat:
+- code/test failure = implementation problem;
+- build/runtime failure = deployment problem;
+- approval refusal = authorization/handoff boundary.
+
+Do not burn implementation cycles on an authorization boundary.
+
 ## Mobile access workflow
 
 When the user asks to access the system from a phone:
