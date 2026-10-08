@@ -11,7 +11,7 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | decision | 23 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 21 |
+| incident | 22 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
@@ -86,6 +86,8 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-RAILWAY-APPROVAL-HANDOFF-001 — Repeated Railway approval refusal wasted Codex cycles** (resolved/high)
+  A staged Railway approval refusal is an authorization handoff boundary: Codex stops at PATCH_READY and QG owns the next authorized accept_deploy attempt.
 - **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
   Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 - **INC-TECH-MULTIPLIER-MANUAL-001 — Fleet multiplier incorrectly reclassified unit application as manual** (resolved/high)
