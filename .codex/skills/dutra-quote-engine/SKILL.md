@@ -23,6 +23,8 @@ Use with `dutra-core`; add `dutra-og-tech` for application/parts and `dutra-sale
 6. Quote creation is not proposal send/acceptance.
 7. Human review is required before external commercial send.
 8. Run quote/technical/proposal regressions after changes.
+9. ROI consumes explicitly sourced/reviewed scenario premises through OG_PROPOSAL_INTELLIGENCE.calculateRoi; missing premises = VALIDAR. Never assume universal tire/fuel gain, cycle, payback or guaranteed return.
+10. Prepared proposal revisions retain bounded immutable quote prices, quantities, vehicle IDs and application provenance; no whole CRM/history/state. A late publication response belongs only to the originally captured proposal/client/quote identity.
 
 Flow:
 account context → technical engine → pricing/calculation → manual review/override → proposal snapshot → explicit export/send.

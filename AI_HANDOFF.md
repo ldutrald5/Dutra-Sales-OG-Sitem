@@ -1,9 +1,14 @@
 # DUTRA OS — AI Handoff
 
+## Handoff atual — Stage8 / PATCH_READY
+
+Entrada verificada4c112964 após fast-forward de governança; piloto287517ae contém7104685/033be666 e passou aceite Cavalo/Carreta com cliente real. Stage8 adapta owner de proposta existente, sem novo motor/store. Preservar preços e snapshots mínimos/versionados, contexto async capturado e premissas de ROI revisadas. Próxima ação do QG: revisar staged patch do piloto e aplicar; Codex NÃO executa accept_deploy. Evidência e limites no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md).
+
+
 
 ## Handoff atual — Stage7.1
 
-Stage7 aceita pelo QG; runtime de entrada513b2d82 contém c8c08924 e033be666. [Checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) registra a auditoria e publicação Stage7.1. Mapa técnico é projeção da posição emitida pelo builder canônico; caminho é reconstruído de regra/contexto mínimos salvos. Não promover foto, inferência ou código da peça a regra física. Preservar snapshots limitados, identidade por veículo, outbox/auth/volume piloto. Não iniciar Stage8.
+Stage7 aceita pelo QG; runtime de entrada513b2d82 contém c8c08924 e033be666. [Checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) registra a auditoria e publicação Stage7.1. Mapa técnico é projeção da posição emitida pelo builder canônico; caminho é reconstruído de regra/contexto mínimos salvos. Não promover foto, inferência ou código da peça a regra física. Preservar snapshots limitados, identidade por veículo, outbox/auth/volume piloto. Instrução histórica supersedida pela autorização Stage8; não iniciar Stage8.1.
 
 ## Boot obrigatório
 
@@ -131,4 +136,4 @@ Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outco
 
 ## Handoff Stage7 — Multi-Veículos
 
-A autorização atual é Stage7, substituindo os bloqueios históricos de sequência acima. Consulte o checkpoint para composição canônica, assinaturas de identidade, recuperação em operations.quotes e gates reais. Não iniciar Stage8 nem alterar main/produção. O preview integrado é o piloto isolado UXR; V3 histórica continua separada.
+A autorização atual é Stage7, substituindo os bloqueios históricos de sequência acima. Consulte o checkpoint para composição canônica, assinaturas de identidade, recuperação em operations.quotes e gates reais. Autorização histórica Stage7 supersedida por Stage8; não alterar main/produção. O preview integrado é o piloto isolado UXR; V3 histórica continua separada.

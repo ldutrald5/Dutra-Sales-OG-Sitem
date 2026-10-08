@@ -1,0 +1,87 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {createRequire} from 'node:module';
+const require = createRequire(import.meta.url);
+const proposal = require('../apps/sistema-og/services/proposal-intelligence-service.js');
+const operationsModel = require('../apps/sistema-og/operations-model.js');
+const technical = require('../apps/sistema-og/components/technical-workspace.js');
+const applicationMap = require('../apps/sistema-og/components/technical-application-map.js');
+const workspace = require('../apps/sistema-og/components/proposal-workspace.js');
+const app = fs.readFileSync('apps/sistema-og/app.js','utf8');
+const dataVm = vm.createContext({});
+vm.runInContext(fs.readFileSync('apps/sistema-og/data.js','utf8'),dataVm);
+const data = JSON.parse(vm.runInContext('JSON.stringify(OG_DATA)',dataVm));
+function section(start,end) {const a=app.indexOf(start),b=app.indexOf(end,a+start.length);assert.ok(a>=0&&b>a);return app.slice(a,b);}
+const native = vm.createContext({OG_DATA:data,OG_PROPOSAL_INTELLIGENCE:proposal,state:null});
+vm.runInContext([section('  function resolveVehicleSupports(','  function renderConsultantEngine('),section('  function resolveItemPrice(','  function initQuoteImport('),section('  function calculateCompleteQuote(','  function recalculateQuote(')].join('\n'),native);
+const now='2026-10-08T15:00:00Z', clientId='FAKE-PREMIUM-CLIENT';
+const field = (value,unit) => ({value,unit,source:'Cenário sintético explicitamente revisado',status:'reviewed',version:1,updatedAt:now});
+const assumptions = {tires:true,fuel:true,fields:{tirePrice:field(2000,'BRL/pneu'),lifeMonths:field(24,'meses'),lifeGainPct:field(25,'%'),fuelMonthlyCost:field(10000,'BRL/mês'),fuelSavingPct:field(1.5,'%')}};
+const vehicles = [
+  {id:'FAKE-TRACTOR',name:'Cavalo de teste',vehicleTypeId:'toco_4x2',qty:2,scope:'cavalo',answers:{brand:'volvo'}},
+  {id:'FAKE-TRAILER',name:'Carreta de teste',vehicleTypeId:'trucado_carreta3',qty:3,scope:'carreta',answers:{}}
+].map(row => {
+  const technicalContext={id:`TECH-${row.id}`,leadId:clientId,selectedVehicleId:row.vehicleTypeId,targetVehicleName:row.name,qty:row.qty,applicationScope:row.scope,answers:row.answers,libras:120,includeDianteira:false,manualItems:null};
+  const items=native.buildConsolidatedVehiclePieces(row.vehicleTypeId,row.answers,120,false,row.scope).resultList;
+  return {id:row.id,clientId,name:row.name,vehicleTypeId:row.vehicleTypeId,qty:row.qty,libras:120,includeDianteira:false,items,technicalContext};
+});
+const source = {client:{nome:'Cliente sintético',empresa:'Empresa sintética',tier:'lead_ie',paymentMethod:'faturado',parcelasCount:6,freteTexto:'A combinar',vendedor:'Vendedor teste',proposalTerms:{validUntil:'2026-11-01',notes:'Versão um'},roiAssumptions:assumptions},vehicles,extraItems:[]};
+native.state=source;
+const quoteData=native.calculateCompleteQuote();
+assert.equal(quoteData.totalFinalVenda,6490);assert.equal(quoteData.totalPecas,88);assert.equal(quoteData.totalPneus,44);
+const maps=Object.fromEntries(vehicles.map(vehicle => {const draft=vehicle.technicalContext;const computed=technical.view(draft,data,native.buildConsolidatedVehiclePieces);return [vehicle.id,applicationMap.model({...computed,items:vehicle.items,draft,data})];}));
+const quote={id:'FAKE-QUOTE-8',clientId,totalValue:quoteData.totalFinalVenda,totalPecas:quoteData.totalPecas,payload:source};
+const input={quote,quoteState:source,clientId,quoteData,applicationMaps:maps};
+const snapshot=proposal.buildSnapshot(input,{now});
+assert.equal(snapshot.commercial.totalValue,quoteData.totalFinalVenda,'One unchanged native price/quantity owner');
+assert.equal(snapshot.vehicles[0].calculatedItems[0].priceUnit,quoteData.vehicles[0].calculatedItems[0].priceUnit);
+assert.ok(snapshot.vehicles[0].applicationRows.every(row=>row.scope==='cavalo'));
+assert.ok(snapshot.vehicles[1].applicationRows.every(row=>row.scope==='carreta'));
+assert.ok(snapshot.vehicles[1].applicationRows.some(row=>row.code==='EQ-1135'&&row.path.includes('Regra do motor: trucado_carreta3')));
+assert.deepEqual(snapshot.vehicles.map(row=>row.id),vehicles.map(row=>row.id));
+const close=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-8);
+close(snapshot.roi.tireMonthly,44*2000*(1/24-1/30));close(snapshot.roi.fuelMonthly,150);
+close(snapshot.roi.monthlySavings,44*2000*(1/24-1/30)+150);
+close(snapshot.roi.annualSavings,snapshot.roi.monthlySavings*12);close(snapshot.roi.paybackMonths,6490/snapshot.roi.monthlySavings);
+assert.deepEqual(proposal.calculateRoi({investment:6490,totalTires:44},assumptions),snapshot.roi,'Same deterministic ROI in quote and snapshot');
+for(const key of ['tirePrice','lifeMonths','lifeGainPct','fuelMonthlyCost','fuelSavingPct']) {
+  const missing=structuredClone(assumptions);missing.fields[key].value=null;
+  const result=proposal.calculateRoi({investment:6490,totalTires:44},missing);
+  assert.equal(result.status,'validate');assert.equal(result.monthlySavings,null);assert.equal(result.paybackMonths,null);
+  const unreviewed=structuredClone(assumptions);unreviewed.fields[key].status='validate';
+  assert.equal(proposal.calculateRoi({investment:6490,totalTires:44},unreviewed).status,'validate');
+}
+assert.equal(proposal.calculateRoi({investment:6490,totalTires:44}).status,'validate');
+const zero=structuredClone(assumptions);zero.fields.lifeGainPct.value=0;zero.fields.fuelSavingPct.value=0;
+const noReturn=proposal.calculateRoi({investment:6490,totalTires:44},zero);
+assert.equal(noReturn.monthlySavings,0);assert.equal(noReturn.paybackMonths,null);assert.equal(noReturn.roi12mPct,-100,'No artificial clamp/fallback');
+const fuelOnly=proposal.calculateRoi({investment:6490,totalTires:0},{...assumptions,tires:false});assert.equal(fuelOnly.status,'ready');assert.equal(fuelOnly.monthlySavings,150);
+const bad=structuredClone(assumptions);bad.fields.fuelSavingPct.value=101;assert.equal(proposal.calculateRoi({investment:6490,totalTires:44},bad).status,'validate');
+assert.throws(()=>proposal.buildSnapshot({...input,clientId:'FAKE-WRONG'}),/Cliente.*diverge/);
+assert.throws(()=>proposal.buildSnapshot({...input,quoteData:{...quoteData,totalFinalVenda:1}}),/Total.*diverge/);
+const stale=structuredClone(source);stale.vehicles[0].technicalContext.leadId='FAKE-WRONG';assert.throws(()=>proposal.buildSnapshot({...input,quoteState:stale}),/outro cliente/);
+let operations=operationsModel.createEmptyOperations(now);
+operations=proposal.prepareTrackingDraft(operations,input,{operationsModel,now});
+const first=structuredClone(operations.generatedDocuments[0]);
+assert.equal(first.version,1);assert.equal(first.status,'internal_draft');assert.equal(first.publication.publicEnabled,false);
+const unchanged=proposal.prepareTrackingDraft(operations,input,{operationsModel,now:'2026-10-09T15:00:00Z'});
+assert.equal(unchanged.generatedDocuments.length,1,'Idempotent unchanged preparation keeps original date/version');
+const revised=structuredClone(source);revised.client.proposalTerms.notes='Versão dois';
+operations=proposal.prepareTrackingDraft(unchanged,{...input,quoteState:revised},{operationsModel,now:'2026-10-09T15:00:00Z'});
+assert.equal(operations.generatedDocuments.length,2);assert.equal(operations.generatedDocuments[0].version,2);
+assert.notEqual(operations.generatedDocuments[0].id,first.id);assert.equal(operations.generatedDocuments[0].quoteId,first.quoteId);
+assert.deepEqual(operations.generatedDocuments.find(doc=>doc.id===first.id),first,'Old snapshot remains immutable');
+assert.equal(operations.activityEvents.filter(row=>row.type==='proposal.sent').length,0);
+const stored=JSON.parse(JSON.stringify(operations));assert.deepEqual(stored.generatedDocuments,operations.generatedDocuments,'Save/reopen serialization retains complete bounded versions');
+const malicious=structuredClone(source);malicious.vehicles[0].technicalContext.history=[{state:malicious}];malicious.client.history=[{leads:Array(434).fill('DO_NOT_COPY')}];
+const bounded=proposal.buildSnapshot({...input,quoteState:malicious},{now});
+const visit=value=>{if(value&&typeof value==='object')for(const [key,child]of Object.entries(value)){assert.ok(!['leads','history','state','operations','editingSnapshot'].includes(key));visit(child);}};
+visit(bounded);assert.ok(Buffer.byteLength(JSON.stringify(bounded))<30_000);
+assert.throws(()=>proposal.validatePublicSnapshot({...snapshot,history:[]}),/Campo proibido/);
+assert.throws(()=>{snapshot.vehicles[0].items[0].qty=999;},TypeError);
+source.vehicles[0].items[0].qty=999;assert.notEqual(snapshot.vehicles[0].items[0].qty,999,'No retained live references');
+const html=workspace.documentHtml(snapshot,first);assert.match(html,/CAVALO.*CARRETA/s);assert.match(html,/Cenário econômico estimado/);assert.doesNotMatch(workspace.roiHtml(proposal.calculateRoi({investment:6490,totalTires:44})),/R\$/);
+assert.match(workspace.documentHtml(snapshot,first,{sentConfirmed:true}),/ENVIO CONFIRMADO PELO USUÁRIO/);
+assert.match(workspace.documentHtml(snapshot,first),/PREPARADA/);
+console.log('Proposal Premium: native quote total, canonical IDs, technical scope/path, reviewed deterministic ROI, missing/zero safety, immutable revisions, idempotence, bounded snapshots and save/reopen PASS');

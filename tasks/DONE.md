@@ -1,5 +1,9 @@
 # Entregas existentes
 
+Stage8 — implementação Ready for Review: proposta/ROI explícito sobre owners atuais; full82/Brain171/release + browsers reais isolados/sintéticos PASS. Entrega e deploy são PATCH_READY→QG, sem aceite online Stage8 presumido.
+
+Stage7.1 — online acceptance COMPLETE: piloto287517ae, cliente real Cavalo×2/Carreta×3,88peças/44pneus/R$6490, mesmos contextos/IDs após reload/reopen390/1440; nenhuma ação externa.
+
 Este registro descreve capacidades já presentes no código. Não substitui testes de aceite nem implica que os módulos estejam completos.
 
 | Referência | Entrega comprovável | Evidência principal |

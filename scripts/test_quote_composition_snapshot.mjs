@@ -128,14 +128,14 @@ function runtime(source, requireSnapshot = true) {
     saveOperationsToStorage() { calls.operations++; }, saveLeadsToStorage() {},
     scheduleServerSync() { calls.sync.push(bytes(context.currentSyncPayload())); },
     showNotification(message, level) { calls.notifications.push({ message, level }); },
-    renderProposalTrackingStatus() {}, proposalDraftSignature:() => 'FAKE-PROPOSAL-SIGNATURE-0000',
+    renderProposalTrackingStatus() {}, renderProposalWorkspace() {}, proposalApplicationMaps:() => ({}), proposalDraftSignature:() => 'FAKE-PROPOSAL-SIGNATURE-0000',
     formatMoney:value => String(value), escapeHtml:value => String(value),
     hydrateQuoteClientInputs() { calls.hydrated++; }, recalculateQuote() { calls.recalculated++; },
     switchTab(tab) { calls.tabs.push(tab); },
     document:{ getElementById:id => id === 'history-container' ? container : null, createElement:() => ({}) },
     console:{ error(error) { throw error; } }
   });
-  const names = ['currentSyncPayload', 'findLeadForClientData', 'resolveHistoryLead',
+  const names = ['currentSyncPayload', 'findLeadForClientData', 'resolveHistoryLead', 'validProposalClient',
     'persistVehicleComposition', 'saveQuoteToHistory', 'renderHistory'];
   if (requireSnapshot) names.push('captureQuoteCompositionSnapshot');
   vm.runInContext(`'use strict';\n${names.map(name => extractFunction(source, name)).join('\n')}\n${extractFunction(server, 'readBody')}`, context);

@@ -29,13 +29,9 @@ function close(actual, expected, label) {
   assert.ok(Math.abs(actual - expected) < 1e-8, `${label}: expected ${expected}, received ${actual}`);
 }
 
-const constants = ['TIRE_BASE_LIFE_MONTHS', 'TIRE_LIFE_GAIN_RATE'].map(name => {
-  const match = app.match(new RegExp(`  const ${name} = [^;]+;`));
-  assert.ok(match, `Production constant must remain extractable: ${name}`);
-  return match[0];
-}).join('\n');
-const context = vm.createContext({ OG_DATA: freeze(data), state: null, crypto: { randomUUID } });
-vm.runInContext(`'use strict';\n${constants}\n${[
+const proposal = (await import('../apps/sistema-og/services/proposal-intelligence-service.js')).default;
+const context = vm.createContext({ OG_DATA: freeze(data), state: null, crypto: { randomUUID }, OG_PROPOSAL_INTELLIGENCE:proposal });
+vm.runInContext(`'use strict';\n${[
   section('  function resolveVehicleSupports(', '  function renderConsultantEngine('),
   section('  function quoteVehicleSignature(', '  function hydrateQuoteClientInputs('),
   section('  function resolveItemPrice(', '  function initQuoteImport('),

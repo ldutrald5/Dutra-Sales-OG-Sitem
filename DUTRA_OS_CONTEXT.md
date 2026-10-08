@@ -1,9 +1,14 @@
 # DUTRA OS — Contexto Canônico
 
+## CONVERGENCE-01 Stage8 — proposta derivada da cotação
+
+Stage7.1 foi aceita online no piloto, preservando cliente/veículos/split/valores após reload. Stage8 reutiliza OG_PROPOSAL_INTELLIGENCE em operations.generatedDocuments para versões imutáveis; preço continua em calculateCompleteQuote/resolveItemPrice. ROI usa premissas explicitamente informadas, com fonte e revisão; ausência = VALIDAR. Publicação termina em PATCH_READY para QG. Status/evidência no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md).
+
+
 
 ## CONVERGENCE-01 Stage7.1 — implementação delimitada
 
-Stage7 foi aceita pelo QG, incluindo o hotfix de snapshot e smoke online. Stage7.1 adiciona mapa Cavalo/Carreta e consulta Base Técnica sobre os mesmos owners: OG_DATA, resolveVehicleSupports/buildConsolidatedVehiclePieces, state.consultant/state.vehicles e calculateCompleteQuote. A origem nasce da posição que gerou cada peça; código sozinho não determina aplicação. CONFIRMADO NO MOTOR descreve o software, não certificação física OG; manual/contexto insuficiente ficam VALIDAR. Consulta não cria cotação. Status de gates/publicação/aceite real no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md). Stage8 não autorizada.
+Stage7 foi aceita pelo QG, incluindo o hotfix de snapshot e smoke online. Stage7.1 adiciona mapa Cavalo/Carreta e consulta Base Técnica sobre os mesmos owners: OG_DATA, resolveVehicleSupports/buildConsolidatedVehiclePieces, state.consultant/state.vehicles e calculateCompleteQuote. A origem nasce da posição que gerou cada peça; código sozinho não determina aplicação. CONFIRMADO NO MOTOR descreve o software, não certificação física OG; manual/contexto insuficiente ficam VALIDAR. Consulta não cria cotação. Status de gates/publicação/aceite real no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md). Histórico de autorização: Stage8 agora autorizada após aceite online7.1.
 
 ## Missão
 

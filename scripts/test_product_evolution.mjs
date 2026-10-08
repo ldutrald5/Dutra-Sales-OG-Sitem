@@ -13,9 +13,8 @@ for (const origin of ['dia', 'crm', 'call-ai']) {
 }
 assert.ok(html.includes('id="quick-lead-form"'), 'Formulário de cadastro rápido ausente');
 assert.ok(app.includes("quickLeadOrigin === 'call-ai'"), 'Novo cliente do Call AI deve voltar selecionado');
-assert.ok(app.includes('TIRE_BASE_LIFE_MONTHS = 18'), 'ROI deve usar ciclo-base de 18 meses');
-assert.ok(app.includes('12 / TIRE_BASE_LIFE_MONTHS'), 'ROI deve anualizar o ciclo de reposição');
-assert.ok(app.includes('12 / vidaUtilComOgMeses'), 'ROI deve comparar o ciclo ampliado');
+assert.ok(app.includes('OG_PROPOSAL_INTELLIGENCE.calculateRoi'), 'Cotação e simulador usam o mesmo ROI explícito');
+assert.ok(!app.includes('TIRE_LIFE_GAIN_RATE'), 'Não presumir ganho universal sem premissa revisada');
 assert.ok(data.includes('id: "micro_onibus"'), 'Segmento micro-ônibus ausente');
 assert.ok(data.includes('id: "van"'), 'Segmento vans ausente');
 assert.ok(!data.includes('Suporte Micro-ônibus'), 'Não deve inventar suporte de micro-ônibus');

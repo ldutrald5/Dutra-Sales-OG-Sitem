@@ -1,6 +1,40 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
-## Current Stage7.1 — Technical application explainability (2026-10-08)
+## Current Stage8 — Proposal + explicit ROI (2026-10-08)
+
+STATUS: LOCAL PASS — publication/staged handoff in progress. ENTRY_SHA:4c112964e16f158bb01806a33325a9b2ba76e3a6; runtime rollback:287517aeb75f7a5027e81a7168905f901785e15d. Clean integration fast-forward through six governance-only commits; both7104685 and033be666 ancestry verified. No Stage8.1/main/production changes authorized. Delivery ends at reviewed PATCH_READY; QG owns accept_deploy/online Stage8 acceptance.
+
+Stage7.1 ONLINE ACCEPTANCE: COMPLETE. Live pilot7361873c-e2b6-4a66-8ef4-0974f733dbe8 SUCCESS, health200/persistent/exact287517aeb75f7a5027e81a7168905f901785e15d. That runtime contains7104685. Guarded browser390x844/1440x900: existing real canonical client→Cavalo Volvo4x2×2 + Carreta3eixos×3→independent engine/scope/path→88pieces/44tires/5vehicles/R$6490→one explicitly unsent native quote→leave/reopen→reload/reopen PASS. Same client/vehicleIDs/configurations/technicalContexts/prices/quantities; bounded snapshot; no recursive CRM/history/state; all434leads and preexisting work preserved; no customer/provider/window.open requests. Fresh recoverable full backups and private proof outside Git. Harness corrected to skip the intentionally hidden/nonapplicable tractor-front input for trailer; no application fix/deploy required. Historical Stage7.1 BLOCKED below superseded.
+
+Stage8 audit before code:
+
+| Capability | Canonical owner/source | Decision |
+|---|---|---|
+| Client | OG_CRM_SERVICE / state.leads; quotation client reference | KEEP same canonical ID |
+| Quote/price | calculateCompleteQuote + resolveItemPrice / OG_DATA | KEEP quantities, tariffs, totals, payment calculations |
+| Proposal | OG_PROPOSAL_INTELLIGENCE / operations.generatedDocuments proposal_tracking | ADAPT bounded commercial/technical representation; immutable revisions |
+| History | state.history composition + existing proposal_tracking snapshots | KEEP; no second history/store |
+| Technical/multi | state.vehicles / technicalContext + OG_TECHNICAL_APPLICATION_MAP | REUSE context-based paths/splits; no compatibility rules |
+| ROI | two existing app routines, fixed18months/20%/fuel assumptions and fake fallback payback | MERGE into one deterministic helper within existing proposal owner; explicitly reviewed premises, missing=VALIDAR |
+| Print/PDF/WhatsApp | current renderOfficialProposalDocument / current templates/formatters | ADAPT unsupported ROI assertions only; Stage8.1 redesign DEFER |
+| Status/publication | existing internal_draft + prepared activity; explicit confirmed sent event | KEEP prepared != sent; no automatic external action |
+
+Bounded implementation: UI representation inside current Cotação; existing client draft stores optional commercial terms/ROI inputs. Prices originate only from current native quote. Existing proposal snapshots gain allowlisted immutable technical rows, original prices and ROI assumptions/results; historical versions never recalculate against changing catalog or live CRM. No remote services/dependencies/migrations. Revision checks enforce client/quote identity; new commercial revisions reference the same unchanged saved quote. Local real-data verification only; production unchanged.
+
+Backlog Stage8.1: refined white print, high-resolution PNG, multiple templates, client logo/branding, advanced visual editor and strategic-account layouts, all consuming the same canonical proposal/quote data.
+
+
+Stage8 local acceptance: PASS. Native quote/proposal contracts and new premium regression preserve investment6490,88pieces/44tires, vehicle identity/context/path and once-only fleet multipliers. Explicit tire scenario2000BRL/24months/25% is synthetic user-reviewed input, not an OG claim; optional fuel cost/percentage tested separately. Missing/source/unreviewed/zero scenarios never invent payback. Immutable v1/v2 and unchanged saved quote; historical prices cannot drift with live data. Snapshot<30KB and prior12-save/434-lead transport regression<5MB PASS. Status is prepared/internal_draft; confirmed-send label derives only existing proposal.sent events.
+
+Browser synthetic + private real434-lead pilot copies: two configurations, matching canonical client/prices, scope/path, explicit ROI, prepare/revision, leave/reopen/reload PASS. Hold A publication response→prepare B→release A: only original A acknowledged, B unchanged; stale form/foreign-client save rejected before mutation. Actual503 queues local versions, reload preserves, reconnect ACK clears queue; actual409 stays explicit, server snapshot unchanged; no retry loop/external requests/page errors. Responsive320x568,390x844,768x1024,1440x900 PASS; quantities remain readable. No Stage8 runtime claims from these isolated fixtures.
+
+Final gate: npm test PASS82/82 (includes og:check, proposal/public runtime, canonical CRM, technical/multi/snapshot, sync/reliability409, PWA, Brain171zero warnings, release:gate and intelligence). Previous-stage browser regressions PASS: Meu Dia, Prospecção empty/stale focus, CallAI13flows, shell/PWA/auth persist and technical map save/reopen/eightviewports/503/reconnect/409. Final scoped proposal browser/contract rerun covers presentation polish; no ceremonial full rerun after approval. Standard Git hooks remain enabled. Second Brain: DEC-CONVERGENCE-PROPOSAL-001, INC-ROI-IMPLICIT-PREMISES-001, INC-PROPOSAL-LATE-CONTEXT-001, source/cycle; quote-engine Skill gains durable ROI/revision rules.
+
+Files changed: app/index/SWv79; existing proposal-intelligence service; proposal-workspace.js/.css; package script additions; proposal_premium/proposal_workspace_browser and existing multi/product/snapshot test adapters; checkpoint/story/architecture/contexts/roadmap/changelog/tasks; quote-engine Skill; Brain source/decision/incidents/cycle/index/metrics. No OG_DATA, dependency/lockfile, provider, database/schema, auth/sync engine or production config changes. Existing export templates remain legacy; Stage8.1 owns refined print/PNG/layouts/branding/editor. Legacy pre-Stage8 proposals remain readable and mark absent historical technical/pricing information VALIDAR rather than reconstructing invented facts. Physical OG validation remains separate from software provenance.
+
+Release handoff: use only preview project d8e7173f-b8d3-4f8a-85e7-33c93d627774/environment e5b1fd77-0460-431c-b886-7be134a5c5f3/service b385d7a3-616c-4c44-82c7-7c9541ba7c45. Existing source pin7104685, actual current health287517ae; isolated500MB /data volume remains unchanged. Staged diff must contain only source.commitSha for the published final integration commit. DESTRUCTIVE:NO. Rollback actual tested pilot287517ae. Preserve private fresh backup and existing isolated volume. QG re-reads live patch→authorizes/applies→SUCCESS/exacthealth→online Stage8 smoke. Codex never calls accept_deploy. No Stage8.1/main/official production/V2/V3 change.
+
+## Historical Stage7.1 implementation — superseded by online acceptance above (2026-10-08)
 
 STATUS: BLOCKED — implementation/local gates/integration publication PASS; Railway cancelled pilot apply, online Stage7.1 acceptance NOT RUN. PRE_SHA/rollback:513b2d82ad94c4fde608bb461ebb943e209e988f. Git/local/remote CLEAN/equal; c8c08924 and033be666 ancestry PASS. User/QG explicitly accepted Stage7 online save/reload/reopen; independently observed pilot deployment1a561d06-cbd4-49ed-a8e2-0a301bb9506a SUCCESS and health200/persistent at513b2d82, containing both required commits. Historical Stage7 blocker below is superseded. Only Stage7.1 authorized; no Stage8/main/official production.
 
@@ -41,7 +75,7 @@ Concrete next action: apply only this reviewed source pin through the Railway pr
 
 Stage7.1 local acceptance PASS; overall BLOCKED until hosted acceptance. REAL_CLIENT_FLOW/REAL_TRACTOR_TRAILER_FLOW/ONLINE_SMOKE: NOT RUN (local private real-source fixture PASS does not replace hosted proof). Stage7 remains QG-accepted and pilot usable at https://dutra-os-uxr01-preview-production.up.railway.app/ . Stage8 NOT STARTED / not authorized.
 
-## Current Stage7 — Multi-Veículos Premium (2026-10-08)
+## Historical Stage7 implementation — accepted by QG (2026-10-08)
 
 STATUS: BLOCKED — online acceptance reproduced oversized recursive quotation snapshots; bounded fix/local gates/integration push PASS; Railway cancelled fixed-pilot apply, live repeat pending. Prior platform deploy blocker was resolved externally. PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. POST_STAGE7_SHA (implementation): `c8c08924d43d1589b30bd228d765f4f5260dd537`; final closure HEAD is the containing documentation commit. Branch: integration/dutra-os-one-system. Authorization: QG Stage7 only; no Stage8/main/production changes.
 

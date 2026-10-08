@@ -6,8 +6,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const TIRE_BASE_LIFE_MONTHS = 18;
-  const TIRE_LIFE_GAIN_RATE = 0.20;
   // Estado Global da Aplicação
   const state = {
     currentTab: 'dia',
@@ -1582,8 +1580,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalFinalVenda = totalSubtotalProdutos + taxaCartaoValor;
 
     const totalPneusFrota = totalEqualizadoresFrota * 2;
-    const precoPneu = parseFloat(state.client.precoPneu) || 1750.00;
-    const patrimonioEmRisco = totalPneusFrota * precoPneu;
 
     const parcelas = parseInt(state.client.parcelasCount, 10) || 6;
     const valorParcela = totalFinalVenda / parcelas;
@@ -1591,27 +1587,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalConjuntos = state.vehicles.reduce((acc, v) => acc + (parseInt(v.qty, 10) || 1), 0);
     const custoPorConjuntoMes = totalConjuntos > 0 ? valorParcela / totalConjuntos : valorParcela;
 
-    // Cálculo de ROI e Payback transparente
-    // Premissa 1: ciclo-base de 18 meses e +20% de vida útil (novo ciclo: 21,6 meses)
-    const patrimonioPneus = totalPneusFrota * precoPneu;
-    const vidaUtilComOgMeses = TIRE_BASE_LIFE_MONTHS * (1 + TIRE_LIFE_GAIN_RATE);
-    const custoPneusAnualSemOg = patrimonioPneus * (12 / TIRE_BASE_LIFE_MONTHS);
-    const custoPneusAnualComOg = patrimonioPneus * (12 / vidaUtilComOgMeses);
-    const economiaPneusAnual = Math.max(0, custoPneusAnualSemOg - custoPneusAnualComOg);
-    const economiaPneusMensal = economiaPneusAnual / 12;
-
-    // Premissa 2: 2% de economia média no consumo de combustível
-    const dieselPorVeiculoAno = 4320.00; // Média de R$ 18.000 diesel/mês * 2% = R$ 360/mês = R$ 4.320/veículo/ano
-    const economiaDieselAnual = totalConjuntos > 0 ? totalConjuntos * dieselPorVeiculoAno : (totalPneusFrota * 432.00);
-    const economiaDieselMensal = economiaDieselAnual / 12;
-
-    // Totais de Retorno
-    const economiaTotalAnual = economiaPneusAnual + economiaDieselAnual;
-    const economiaTotalMensal = economiaTotalAnual / 12;
-
-    const paybackDias = economiaTotalAnual > 0 ? Math.max(15, Math.round((totalFinalVenda / (economiaTotalAnual / 365)))) : 45;
-    const paybackMeses = (paybackDias / 30).toFixed(1);
-    const roiPercentual12m = totalFinalVenda > 0 ? Math.max(0, Math.round(((economiaTotalAnual - totalFinalVenda) / totalFinalVenda) * 100)) : 150;
+    // Explicit scenario inputs use the existing proposal owner; no assumed gain.
+    const roi = OG_PROPOSAL_INTELLIGENCE.calculateRoi({investment:totalFinalVenda,totalTires:totalPneusFrota},state.client.roiAssumptions);
+    const tireCost = roi.assumptions.fields.tirePrice;
+    const precoPneu = tireCost.status === 'reviewed' && tireCost.source && Number.isFinite(Date.parse(tireCost.updatedAt)) && tireCost.value > 0 ? tireCost.value : null;
+    const patrimonioEmRisco = precoPneu == null ? null : totalPneusFrota * precoPneu;
+    const economiaPneusMensal = roi.tireMonthly;
+    const economiaPneusAnual = roi.tireMonthly == null ? null : roi.tireMonthly * 12;
+    const economiaDieselMensal = roi.fuelMonthly;
+    const economiaDieselAnual = roi.fuelMonthly == null ? null : roi.fuelMonthly * 12;
+    const economiaTotalMensal = roi.monthlySavings;
+    const economiaTotalAnual = roi.annualSavings;
+    const paybackMeses = roi.paybackMonths;
+    const paybackDias = roi.paybackMonths == null ? null : roi.paybackMonths * 30;
+    const roiPercentual12m = roi.roi12mPct;
+    const vidaUtilComOgMeses = roi.lifeWithMonths;
     const custoPorVeiculo = totalConjuntos > 0 ? totalFinalVenda / totalConjuntos : totalFinalVenda;
 
     // Condições de Pagamento Comparativas
@@ -1636,7 +1626,8 @@ document.addEventListener('DOMContentLoaded', () => {
       custoPorVeiculo,
       patrimonioEmRisco,
       precoPneu,
-      vidaUtilPneuMeses: TIRE_BASE_LIFE_MONTHS,
+      roi,
+      vidaUtilPneuMeses: roi.assumptions.fields.lifeMonths.value,
       vidaUtilComOgMeses,
       economiaPneusAnual,
       economiaPneusMensal,
@@ -1668,6 +1659,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFreightQuoteInfo(data);
     renderOfficialProposalDocument(data);
     setupExportButtons(data);
+    renderProposalWorkspace(data);
   }
 
   // =========================================================================
@@ -2293,7 +2285,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           </div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
             <div style="font-size: 24px; font-weight: 900; color: #ef4444; font-family: monospace;">
-              R$ ${data.patrimonioEmRisco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${data.patrimonioEmRisco == null ? 'VALIDAR · custo do pneu' : formatMoney(data.patrimonioEmRisco)}
             </div>
             <div style="font-size: 11px; color: #94a3b8;">
               Patrimônio exposto sem proteção Olho de Gato
@@ -2383,32 +2375,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           ${vehicleCardsHtml}
         </div>
 
-        <!-- QUADRO DE ROI / PAYBACK COM ORIGEM DOS CÁLCULOS -->
-        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid #10b981; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-          <div style="font-size: 11px; font-weight: 900; color: #10b981; text-transform: uppercase; margin-bottom: 8px;">
-            📊 RETORNO FINANCEIRO ESTIMADO & PREMISSAS DE CÁLCULO
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 11px; margin-bottom: 10px;">
-            <div>
-              <div style="color: #94a3b8;">Economia em Pneus (18 → ${data.vidaUtilComOgMeses.toFixed(1)} meses):</div>
-              <div style="font-size: 14px; font-weight: 800; color: #34d399; font-family: monospace; margin-top: 2px;">R$ ${data.economiaPneusMensal.toFixed(2)}/mês</div>
-              <div style="font-size: 10px; color: #64748b;">(R$ ${data.economiaPneusAnual.toFixed(2)}/ano)</div>
-            </div>
-            <div>
-              <div style="color: #94a3b8;">Economia Estimada Diesel (2%):</div>
-              <div style="font-size: 14px; font-weight: 800; color: #60a5fa; font-family: monospace; margin-top: 2px;">R$ ${data.economiaDieselMensal.toFixed(2)}/mês</div>
-              <div style="font-size: 10px; color: #64748b;">(R$ ${data.economiaDieselAnual.toFixed(2)}/ano)</div>
-            </div>
-            <div>
-              <div style="color: #94a3b8;">Payback do Investimento:</div>
-              <div style="font-size: 16px; font-weight: 900; color: #f59e0b; font-family: monospace; margin-top: 2px;">~${data.paybackDias} dias</div>
-              <div style="font-size: 10px; color: #64748b;">(~${data.paybackMeses} meses de rodagem)</div>
-            </div>
-          </div>
-          <div style="font-size: 9.5px; color: #94a3b8; border-top: 1px solid rgba(16, 185, 129, 0.2); padding-top: 6px; line-height: 1.4;">
-            * <b>Origem dos Cálculos:</b> Pneus: +20% na quilometragem rodada pela equalização contínua de par casado. Diesel: redução de 2% de arrasto por pressão uniforme (média de ~R$ 360,00/mês de economia por caminhão). Economia Líquida Total: <b>R$ ${data.economiaTotalMensal.toFixed(2)}/mês (R$ ${data.economiaTotalAnual.toFixed(2)}/ano)</b>.
-          </div>
-        </div>
+        ${OG_PROPOSAL_WORKSPACE.roiHtml(data.roi)}
 
         <!-- TOTAL E PARCELAS -->
         <div style="background: #181d28; border: 1px solid #283244; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -2486,13 +2453,15 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     msg += `Cliente: *${clientEmpresa}* | A/C: Gestão de Frota e Diretoria\n`;
     msg += `Veículos: *${resumoVeiculos}* (${quoteData.totalConjuntos} veículos)\n`;
     msg += `Pneus atendidos: *${quoteData.totalPneus} pneus equalizados*\n\n`;
-    msg += `🛡️ *PROTEÇÃO PATRIMONIAL:*\n`;
-    msg += `• Patrimônio de Pneus Protegido: *R$ ${quoteData.patrimonioEmRisco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}*\n\n`;
-    msg += `📈 *PREMISSAS DE ECONOMIA & GANHO FINANCEIRO:*\n`;
-    msg += `• Pneus (vida útil de 18 para ${quoteData.vidaUtilComOgMeses.toFixed(1)} meses): Economia de *R$ ${quoteData.economiaPneusMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaPneusAnual.toFixed(2)}/ano)\n`;
-    msg += `• Combustível (est. 2% economia diesel): Economia de *R$ ${quoteData.economiaDieselMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaDieselAnual.toFixed(2)}/ano)\n`;
-    msg += `• *Economia Total Estimada:* *R$ ${quoteData.economiaTotalMensal.toFixed(2)}/mês* (R$ ${quoteData.economiaTotalAnual.toFixed(2)}/ano)\n`;
-    msg += `⏱️ *Payback do Investimento:* ~*${quoteData.paybackDias} dias* de operação! (~${quoteData.paybackMeses} meses)\n\n`;
+    if (quoteData.roi.status === 'ready') {
+      msg += `📈 *CENÁRIO COM PREMISSAS REVISADAS (não é garantia):*\n`;
+      msg += `• Economia mensal estimada: ${formatMoney(quoteData.roi.monthlySavings)}\n`;
+      msg += `• Economia anual estimada: ${formatMoney(quoteData.roi.annualSavings)}\n`;
+      msg += `• Payback: ${quoteData.roi.paybackMonths == null ? 'sem retorno neste cenário' : quoteData.roi.paybackMonths.toFixed(2) + ' meses'}\n`;
+      for (const [key,field] of Object.entries(quoteData.roi.assumptions.fields)) {
+        if (field.status === 'reviewed' && field.value != null) msg += `• ${OG_PROPOSAL_INTELLIGENCE.ROI_FIELDS[key].label}: ${field.value} ${field.unit} · Fonte: ${field.source}\n`;
+      }
+    } else msg += `ROI: VALIDAR — ${quoteData.roi.missing.join(' · ')}.\n`;
     msg += `💵 *Investimento:* *R$ ${quoteData.totalFinalVenda.toFixed(2)}*\n`;
     msg += `💳 *Condição:* *${quoteData.parcelas}x de R$ ${quoteData.valorParcela.toFixed(2)}* (R$ ${quoteData.custoPorConjuntoMes.toFixed(2)}/mês por veículo)\n`;
     msg += `🚚 *Frete:* ${freteInstalacao} | Treinamento técnico incluso\n`;
@@ -2503,6 +2472,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   function proposalDraftSignature(quoteData = {}) {
     return JSON.stringify({
       template:state.activePdfTemplate,
+      clientId:findLeadForClientData(state.client)?.id || null,
+      proposalTerms:state.client.proposalTerms || {},
+      roiAssumptions:OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(state.client.roiAssumptions),
       total:Number(quoteData.totalFinalVenda || 0),
       pieces:Number(quoteData.totalPecas || 0),
       client:{
@@ -2516,7 +2488,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       },
       vehicles:(state.vehicles || []).map(vehicle => ({
         id:vehicle.id,name:vehicle.name,vehicleTypeId:vehicle.vehicleTypeId,libras:vehicle.libras,includeDianteira:Boolean(vehicle.includeDianteira),qty:vehicle.qty,
-        items:(vehicle.items || []).map(item=>({code:item.code,qty:item.qty,customPrice:item.customPrice}))
+        technicalContext:OG_PROPOSAL_INTELLIGENCE.safeTechnicalContext(vehicle.technicalContext),
+        items:(vehicle.items || []).map(item=>({code:item.code,qty:item.qty,customPrice:item.customPrice,applicationScope:item.applicationScope}))
       })),
       extraItems:(state.extraItems || []).map(item=>({code:item.code,qty:item.qty,customPrice:item.customPrice}))
     });
@@ -2531,12 +2504,87 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     ) || null;
   }
 
+  function proposalApplicationMaps(data) {
+    return Object.fromEntries(data.vehicles.map(vehicle => {
+      const draft = {...(vehicle.technicalContext || {}),selectedVehicleId:vehicle.vehicleTypeId,libras:vehicle.libras,includeDianteira:vehicle.includeDianteira,qty:vehicle.qty};
+      const computed = OG_TECHNICAL_WORKSPACE.view(draft,OG_DATA,buildConsolidatedVehiclePieces);
+      return [vehicle.id,OG_TECHNICAL_APPLICATION_MAP.model({...computed,items:vehicle.items,draft,data:OG_DATA})];
+    }));
+  }
+
+  function proposalIdentity() {
+    return JSON.stringify([findLeadForClientData(state.client)?.id || '',state.vehicles.map(vehicle => vehicle.id),proposalDraftSignature(calculateCompleteQuote())]);
+  }
+
+  function renderProposalWorkspace(data = calculateCompleteQuote(),feedback = '') {
+    const lead = findLeadForClientData(state.client);
+    const record = proposalDocumentForContext();
+    const historical = Boolean(record && activeProposalContext.viewOnly);
+    const sentConfirmed = Boolean(record && state.operations.activityEvents.some(event => event.proposalId === record.id && OG_PROPOSAL_INTELLIGENCE.normalizeProposalEventType(event.type) === 'proposal.sent'));
+    let snapshot = historical ? record.snapshot : null;
+    if (!snapshot && lead && data.totalPecas > 0) {
+      try {
+        snapshot = OG_PROPOSAL_INTELLIGENCE.buildSnapshot({quote:{id:'CURRENT-DRAFT',clientId:lead.id,totalValue:data.totalFinalVenda,totalPecas:data.totalPecas},
+          clientId:lead.id,quoteState:captureQuoteCompositionSnapshot(),quoteData:data,applicationMaps:proposalApplicationMaps(data)});
+      } catch (error) {feedback = error.message || 'Revise o vínculo do cliente e dos veículos.';}
+    }
+    OG_PROPOSAL_WORKSPACE.render(document.getElementById('proposal-workspace'),{
+      identity:proposalIdentity(),snapshot,record:historical ? record : null,historical,feedback,sentConfirmed,
+      canPrepare:Boolean(lead && data.totalPecas > 0 && validProposalClient(lead)),terms:state.client.proposalTerms || {},
+      assumptions:OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(state.client.roiAssumptions),
+      documents:(state.operations.generatedDocuments || []).filter(doc => doc.documentType === 'proposal_tracking' && String(doc.clientId) === String(lead?.id)).slice(0,30)
+    },{
+      identity:proposalIdentity,
+      term:(key,value) => {state.client.proposalTerms = {...state.client.proposalTerms,[key]:value}; if (activeProposalContext) activeProposalContext.viewOnly = false; persistVehicleComposition(); recalculateQuote();},
+      assumptions:value => {state.client.roiAssumptions = OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(value); if (activeProposalContext) activeProposalContext.viewOnly = false; persistVehicleComposition(); recalculateQuote();},
+      prepare:prepareActiveProposal,
+      current:() => {if (activeProposalContext) activeProposalContext.viewOnly = false; recalculateQuote();},
+      open:id => {
+        const selected = state.operations.generatedDocuments.find(doc => doc.documentType === 'proposal_tracking' && doc.id === id && String(doc.clientId) === String(lead?.id));
+        if (!selected) return;
+        activeProposalContext = {quoteId:selected.quoteId,proposalId:selected.id,clientId:selected.clientId,viewOnly:true,signature:''};
+        recalculateQuote();
+      }
+    });
+    if (historical && snapshot.representationVersion === 2) document.getElementById('official-proposal-print').innerHTML = OG_PROPOSAL_WORKSPACE.documentHtml(snapshot,record,{sentConfirmed});
+  }
+
+  function validProposalClient(lead) {
+    return !state.vehicles.some(vehicle => [vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id => String(id) !== String(lead?.id || '')));
+  }
+
+  function sameSavedQuoteComposition(quote) {
+    if (!quote?.payload) return false;
+    const financial = client => ({tier:client.tier,paymentMethod:client.paymentMethod,parcelasCount:client.parcelasCount,nome:client.nome,empresa:client.empresa,cnpj:client.cnpj,freteTexto:client.freteTexto,prazoEntrega:client.prazoEntrega});
+    return JSON.stringify([financial(quote.payload.client || {}),quote.payload.vehicles,quote.payload.extraItems]) === JSON.stringify([financial(state.client),state.vehicles,state.extraItems]);
+  }
+
+  function prepareActiveProposal() {
+    const lead = findLeadForClientData(state.client);
+    if (!lead || !state.vehicles.length || !validProposalClient(lead)) return showNotification('Revise o cliente e a composição antes de preparar.', 'error');
+    const quote = state.history.find(item => item.id === activeProposalContext?.quoteId && String(item.clientId) === String(lead.id));
+    const data = calculateCompleteQuote();
+    if (!quote || !sameSavedQuoteComposition(quote) || quote.totalValue !== data.totalFinalVenda) {
+      saveQuoteToHistory(data);
+    } else {
+      try {
+        state.operations = OG_PROPOSAL_INTELLIGENCE.prepareTrackingDraft(state.operations,{quote,clientId:lead.id,quoteState:captureQuoteCompositionSnapshot(),quoteData:data,applicationMaps:proposalApplicationMaps(data)},{operationsModel:OG_OPERATIONS_MODEL});
+        const prepared = state.operations.generatedDocuments.filter(doc => doc.documentType === 'proposal_tracking' && doc.quoteId === quote.id).sort((a,b) => b.version - a.version)[0];
+        activeProposalContext = {quoteId:quote.id,proposalId:prepared.id,clientId:lead.id,signature:proposalDraftSignature(data),viewOnly:true};
+        saveOperationsToStorage();
+        showNotification(`Proposta versão ${prepared.version} preparada. O envio não foi registrado.`, 'success');
+      } catch (error) {return showNotification(error.message || 'Não foi possível preparar a proposta.', 'error');}
+    }
+    if (activeProposalContext) activeProposalContext.viewOnly = true;
+    recalculateQuote();
+  }
+
   function renderProposalTrackingStatus() {
     const root = document.getElementById('proposal-tracking-status');
     const publishButton = document.getElementById('btn-publish-proposal');
     if (!root || !publishButton) return;
     const documentRecord = proposalDocumentForContext();
-    publishButton.disabled = !documentRecord;
+    publishButton.disabled = !documentRecord || activeProposalContext.signature !== proposalDraftSignature(calculateCompleteQuote());
     if (!documentRecord) {
       publishButton.textContent = '🔗 Link rastreável';
       root.classList.add('hidden');
@@ -2557,7 +2605,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
 
   async function publishActiveProposal() {
     const documentRecord = proposalDocumentForContext();
-    if (!documentRecord) {
+    if (!documentRecord || activeProposalContext.signature !== proposalDraftSignature(calculateCompleteQuote())) {
       showNotification('Salve esta cotação primeiro para preparar a proposta rastreável.', 'info');
       return;
     }
@@ -2570,8 +2618,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Não foi possível publicar a proposta.');
-      const current = proposalDocumentForContext();
-      if (current) {
+      const current = state.operations.generatedDocuments.find(item => item.id === documentRecord.id && item.quoteId === documentRecord.quoteId && item.clientId === documentRecord.clientId);
+      if (current && JSON.stringify(current.snapshot) === JSON.stringify(documentRecord.snapshot)) {
         current.publication = {
           ...(current.publication || {}),
           publicEnabled:true,
@@ -2686,7 +2734,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function setupExportButtons(quoteData) {
-    if (activeProposalContext?.signature && activeProposalContext.signature !== proposalDraftSignature(quoteData)) activeProposalContext = null;
+    if (activeProposalContext && String(findLeadForClientData(state.client)?.id || '') !== String(activeProposalContext.clientId)) activeProposalContext = null;
     const btnWhatsappSimple = document.getElementById('btn-copy-whatsapp-simple');
     const btnWhatsappStandard = document.getElementById('btn-copy-whatsapp-standard');
     const btnWhatsappRoi = document.getElementById('btn-copy-whatsapp-roi');
@@ -2744,8 +2792,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     // Snapshot current canonical rows and their current totals together.
     quoteData = calculateCompleteQuote();
     state.lastQuoteData = quoteData;
-    persistVehicleComposition();
     const relatedLead = findLeadForClientData(state.client);
+    if (!validProposalClient(relatedLead)) {showNotification('Os veículos pertencem a outro cliente. Reabra o contexto correto antes de salvar.', 'error'); return null;}
+    persistVehicleComposition();
     const newQuote = {
       id: 'COT-' + Date.now().toString().slice(-6),
       date: new Date().toISOString(),
@@ -2765,7 +2814,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       if (relatedLead && window.OG_PROPOSAL_INTELLIGENCE?.prepareTrackingDraft) {
         state.operations = OG_PROPOSAL_INTELLIGENCE.prepareTrackingDraft(
           state.operations,
-          { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id },
+          { quote:newQuote, quoteState:newQuote.payload, clientId:relatedLead.id,quoteData,applicationMaps:proposalApplicationMaps(quoteData) },
           { operationsModel:OG_OPERATIONS_MODEL }
         );
         const proposalDocument = (state.operations.generatedDocuments || []).find(item =>
@@ -2789,6 +2838,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       }
       showNotification(relatedLead ? 'Cotação salva e rascunho de proposta rastreável preparado com segurança.' : 'Cotação salva com sucesso!', 'success');
       renderProposalTrackingStatus();
+      renderProposalWorkspace(quoteData);
     } catch (e) {
       console.error(e);
     }
@@ -3233,6 +3283,12 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           workingQuoteDraftId = null;
           hydrateQuoteClientInputs();
           persistVehicleComposition();
+          const documentRecord = (state.operations.generatedDocuments || []).filter(doc => doc.documentType === 'proposal_tracking' && String(doc.quoteId) === String(item.id)).sort((a,b) => Number(b.version) - Number(a.version))[0];
+          if (documentRecord?.snapshot?.representationVersion === 2) {
+            state.client.proposalTerms = {paymentTerms:documentRecord.snapshot.commercial.paymentTerms,validUntil:documentRecord.snapshot.commercial.validUntil,notes:documentRecord.snapshot.commercial.notes};
+            state.client.roiAssumptions = documentRecord.snapshot.roi?.assumptions;
+          }
+          activeProposalContext = documentRecord ? {quoteId:item.id,proposalId:documentRecord.id,clientId:item.clientId,signature:proposalDraftSignature(calculateCompleteQuote()),viewOnly:true} : null;
           switchTab('cotacao');
           recalculateQuote();
           showNotification('Cotação recuperada com sucesso!', 'success');
@@ -3544,59 +3600,20 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function initRoiCalculator() {
-    const inputTires = document.getElementById('roi-tires-count');
-    const inputTirePrice = document.getElementById('roi-tire-price');
-    const inputInvestment = document.getElementById('roi-investment');
-    const resEconomyTiresMonthly = document.getElementById('roi-res-economy-tires-monthly');
-    const resEconomyTires = document.getElementById('roi-res-economy-tires');
-    const resDieselMonthly = document.getElementById('roi-res-diesel-monthly');
-    const resDieselEconomy = document.getElementById('roi-res-diesel');
-    const resTotalMonthly = document.getElementById('roi-res-total-monthly');
-    const resTotalEconomy = document.getElementById('roi-res-total');
-    const resPayback = document.getElementById('roi-res-payback');
-
-    if (!inputTires || !inputTirePrice) return;
-
-    function fmt(v) {
-      return `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const ids = {tirePrice:'roi-tire-price',lifeMonths:'roi-life-months',lifeGainPct:'roi-life-gain',fuelMonthlyCost:'roi-fuel-cost',fuelSavingPct:'roi-fuel-saving'};
+    const get = id => document.getElementById(id);
+    if (!get('roi-tires-count')) return;
+    function calcRoi(event) {
+      if (event && event.target.id !== 'roi-reviewed') get('roi-reviewed').checked = false;
+      const source = get('roi-source').value.trim();
+      const fields = Object.fromEntries(Object.entries(ids).map(([key,id]) => [key,{value:get(id).value || null,source,status:get('roi-reviewed').checked ? 'reviewed' : 'validate',updatedAt:new Date().toISOString(),version:1}]));
+      const result = OG_PROPOSAL_INTELLIGENCE.calculateRoi({investment:Number(get('roi-investment').value),totalTires:Number(get('roi-tires-count').value)}, {tires:true,fuel:get('roi-fuel-enabled').checked,fields});
+      const fmt = value => value == null ? 'VALIDAR' : formatMoney(value);
+      for (const [id,value] of Object.entries({'roi-res-economy-tires-monthly':result.tireMonthly,'roi-res-economy-tires':result.tireMonthly == null ? null : result.tireMonthly * 12,'roi-res-diesel-monthly':result.fuelMonthly,'roi-res-diesel':result.fuelMonthly == null ? null : result.fuelMonthly * 12,'roi-res-total-monthly':result.monthlySavings,'roi-res-total':result.annualSavings})) get(id).textContent = fmt(value);
+      get('roi-res-payback').textContent = result.status !== 'ready' ? 'VALIDAR' : result.paybackMonths == null ? 'Sem retorno' : `${result.paybackMonths.toFixed(2)} meses`;
+      get('roi-missing').textContent = result.status === 'ready' ? 'Cenário revisado, sem garantia de resultado. Mesma fórmula da proposta.' : `VALIDAR: ${result.missing.join(' · ')}`;
     }
-
-    function calcRoi() {
-      const numPneus = parseInt(inputTires.value, 10) || 0;
-      const precoPneu = parseFloat(inputTirePrice.value) || 0;
-      const investimento = parseFloat(inputInvestment ? inputInvestment.value : '') || 0;
-
-      const patrimonioPneus = numPneus * precoPneu;
-      const vidaUtilComOgMeses = TIRE_BASE_LIFE_MONTHS * (1 + TIRE_LIFE_GAIN_RATE);
-      const custoPneusAnualSemOg = patrimonioPneus * (12 / TIRE_BASE_LIFE_MONTHS);
-      const custoPneusAnualComOg = patrimonioPneus * (12 / vidaUtilComOgMeses);
-      const economiaPneusAnual = Math.max(0, custoPneusAnualSemOg - custoPneusAnualComOg);
-      const economiaDieselAnual = numPneus * 450.00;
-      const totalAnual = economiaPneusAnual + economiaDieselAnual;
-      const totalMensal = totalAnual / 12;
-
-      if (resEconomyTiresMonthly) resEconomyTiresMonthly.textContent = fmt(economiaPneusAnual / 12);
-      if (resEconomyTires) resEconomyTires.textContent = fmt(economiaPneusAnual);
-      if (resDieselMonthly) resDieselMonthly.textContent = fmt(economiaDieselAnual / 12);
-      if (resDieselEconomy) resDieselEconomy.textContent = fmt(economiaDieselAnual);
-      if (resTotalMonthly) resTotalMonthly.textContent = fmt(totalMensal);
-      if (resTotalEconomy) resTotalEconomy.textContent = fmt(totalAnual);
-
-      if (resPayback) {
-        if (investimento > 0 && totalMensal > 0) {
-          const mesesPayback = investimento / totalMensal;
-          resPayback.textContent = mesesPayback < 1
-            ? `${Math.round(mesesPayback * 30)} dias`
-            : `${mesesPayback.toFixed(1)} meses`;
-        } else {
-          resPayback.textContent = '—';
-        }
-      }
-    }
-
-    inputTires.oninput = calcRoi;
-    inputTirePrice.oninput = calcRoi;
-    if (inputInvestment) inputInvestment.oninput = calcRoi;
+    for (const id of ['roi-tires-count','roi-investment','roi-source','roi-reviewed','roi-fuel-enabled',...Object.values(ids)]) get(id).addEventListener('change',calcRoi);
     calcRoi();
   }
 

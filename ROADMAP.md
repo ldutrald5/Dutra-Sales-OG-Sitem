@@ -1,5 +1,12 @@
 # DUTRA OS — Roadmap Vivo
 
+## CONVERGENCE-01 — Stage8 / Stage8.1
+
+Stage7.1 online COMPLETE. Stage8 entrega proposta comercial versionada e ROI com premissas explícitas sobre a cotação canônica. Publicação no piloto requer revisão/aplicação QG depois de PATCH_READY.
+
+Stage8.1 (backlog, não implementada): impressão branca refinada, PNG de alta resolução, múltiplos templates, logo/identidade por cliente, editor visual avançado e layouts de contas estratégicas, com a mesma fonte canônica. Reverse Technical Lookup segue diferido.
+
+
 
 ## CONVERGENCE-01 — Stage7.1
 

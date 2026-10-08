@@ -1,5 +1,14 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage8
+
+- Stage7.1 aceita online no piloto: cliente real, Cavalo/Carreta, mesmos IDs/peças/valores após salvar/reload/reabrir; nenhum envio externo.
+- Proposta Premium no shell atual, com veículos/split/caminho técnico, condições e versões imutáveis sobre a cotação e preço existentes.
+- ROI único no owner de proposta: premissas com valor/unidade/fonte/revisão/data; sem ganho universal ou payback inventado. Cotação, proposta e simulador usam a mesma fórmula.
+- Publicação assíncrona vinculada ao documento original; contexto incompatível rejeita gravação; snapshots não copiam CRM/history/state.
+- Stage8.1 exportação/templates permanece backlog. Entrega Stage8 termina em PATCH_READY; aplicação/aceite online pelo QG ainda não executados.
+
+
 ## [Unreleased] — CONVERGENCE-01 Stage7.1
 
 - Mapa Cavalo/Carreta por posição emitida pelo mesmo builder; caminho técnico real, sem classificação por código ou regra OG inventada.

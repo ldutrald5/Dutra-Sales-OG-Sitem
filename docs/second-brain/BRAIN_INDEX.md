@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 171 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 22 |
-| decision | 23 |
+| cycle | 23 |
+| decision | 24 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 22 |
+| incident | 24 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 35 |
+| source | 36 |
 
 ## Active decisions
 
@@ -65,6 +65,8 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
   state.vehicles remains the live quotation owner with per-vehicle items and one multiplier per configuration. The existing state.consultant editor starts explicit new/edit drafts, captures row identity and a nonrecursive technical/composition signature, and awaits current outbox before accepted handoff. operations.quotes quote_workspace/composition_draft is an additive deep-cloned recovery snapshot, not another store or engine. History reopen deep-clones and hydrates the existing client inputs. Background pulls cannot replace active work; explicit conflict choices restore their reviewed snapshot.
 - **DEC-CONVERGENCE-MAP-001 — Explain canonical application origin before consolidation** (active/high)
   Canonical builder emits code/quantity/position and optionally projects existing tractor/trailer branches. Read-only map rebuilds paths from saved minimal per-vehicle scope/context. Manual user scope is not physical confirmation; unknown origin stays VALIDAR. Consulta uses same draft/engine without commercial writes. No code-only classification, compatibility table, store or pricing engine.
+- **DEC-CONVERGENCE-PROPOSAL-001 — Immutable quote-derived proposal revisions with explicit scenario ROI** (active/high)
+  Existing OG_PROPOSAL_INTELLIGENCE/generatedDocuments proposal_tracking owns commercial representation and revisions. Native calculateCompleteQuote/resolveItemPrice owns prices and quantities. Allowlisted snapshot retains vehicle IDs, unit prices, technical scope/path and source-reviewed ROI assumptions. Same unchanged quote can gain a new immutable proposal revision; historical display never reprices against live CRM/catalog. Missing premises stay VALIDAR. One helper serves quote, proposal and current simulator. No new persistence owner or external action.
 
 ## Open questions
 
@@ -86,24 +88,22 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
-- **INC-RAILWAY-APPROVAL-HANDOFF-001 — Repeated Railway approval refusal wasted Codex cycles** (resolved/high)
-  A staged Railway approval refusal is an authorization handoff boundary: Codex stops at PATCH_READY and QG owns the next authorized accept_deploy attempt.
 - **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
   Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 - **INC-TECH-MULTIPLIER-MANUAL-001 — Fleet multiplier incorrectly reclassified unit application as manual** (resolved/high)
   Quote row presentation changes must not mutate unit technical origin.
+- **INC-RAILWAY-APPROVAL-HANDOFF-001 — Repeated Railway approval refusal wasted Codex cycles** (resolved/high)
+  A staged Railway deploy refusal caused by an approval boundary must be handed from Codex to QG instead of retried as if it were a code or runtime defect.
+- **INC-ROI-IMPLICIT-PREMISES-001 — Unsupported implicit ROI gains and invented fallback payback** (resolved/high)
+  An economic scenario must not promote example gains or absent inputs into confirmed savings.
+- **INC-PROPOSAL-LATE-CONTEXT-001 — Late publication response could target the newly selected proposal** (resolved/high)
+  Async publication acknowledgement belongs to its captured original proposal identity.
 - **INC-TECH-ENTRY-CONTEXT-001 — Client-origin technical navigation must carry canonical identity** (resolved/high)
   Client-origin technical navigation switched tabs without selecting the originating canonical lead. The existing technical selector and dirty-draft confirmation now receive that identity from both the sales card and client sheet. No new CRM, context owner or technical engine.
 - **INC-CALLAI-CONTEXT-001 — Late Call AI response or discarded session contaminates active context** (resolved/high)
   Presentation continuations retain captured account/session/recording/generation; reset/discard invalidates old requests and clears draft metadata/suggestions. No inferred CRM facts are automatic.
 - **INC-CALLAI-RETRY-001 — Local Call AI confirmation preceded normalized command and suppressed retry** (resolved/high)
   Normalized reviewed command must ACK before confirmed local projection; durable current outbox must complete before success/advance. Failures retain explicit retry without duplicating identity/history.
-- **INC-SYNC-RECONNECT-LOCK-001 — Reconnect event lost while prior foreground sync releases its lock** (resolved/high)
-  An explicit reconnect blocked by the existing foreground lock is consumed once after release with current gates revalidated. Errors alone do not trigger retries or fake OK.
-- **INC-SYNC-STALE-GET-001 — Held remote GET overwrote newer durable technical draft** (resolved/high)
-  A remote read may apply only to the unchanged local generation and current recovery gates; canonical operations are data even with no CRM/history/events.
-- **INC-SYNC-STALE-ACK-001 — Old PUT ACK erased a newer durable outbox intention** (resolved/high)
-  Remote ACK retires only the exact captured recovery intention atomically; an ACK for old work cannot clear a later durable save or certify current OK.
 
 ## Candidate / planned ideas
 
@@ -171,6 +171,8 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Protected live acceptance on6af84634 reached two independent applications/manual review and native quote save. Aggregate next-body minimum5994341bytes exceeded server readBody5000000bytes; isolated exact-baseline repeated native saves reproduce parser rejection at7536106bytes. Customer records/credentials remain private; only synthetic fixtures are versioned.
 - **SRC-CONVERGENCE-MAP-20261008-001 — Canonical technical position and bounded explanation audit** (validated/high)
   Audited OG_DATA, resolveVehicleSupports and actual addPiece positions. EQ1135 occurs in truck and trailer in the same rule. Existing canonical builders and snapshot regression support minimal explanation without physical-rule reinterpretation.
+- **SRC-CONVERGENCE-PROPOSAL-20261008-001 — Current proposal and ROI implementation audit** (validated/high)
+  Current app pricing and technical provenance remain canonical. Proposal tracking owner already exists in generatedDocuments. Two UI ROI routines contained implicit tire gain/cycle and incompatible fuel proxies; focused native-engine and snapshot regression now proves explicitly reviewed deterministic scenarios and immutable bounded proposal versions. Full release evidence belongs in the checkpoint.
 - **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
   Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
 - **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
@@ -183,8 +185,6 @@ Generated from 165 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Entry 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8 audit established OG_DATA/app.js technical owners; byte comparison preserved both original technical functions and data. Synthetic VM repros executed real app callbacks and exposed held-GET draft loss, operations-only recovery omission and old-ACK deletion of a newer durable outbox. Real loopback HTTP/IndexedDB browsers protect these boundaries. This source does not certify physical OG application, hosted provider operation or final Stage6 publication.
 - **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
   Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
-- **SRC-CONVERGENCE-SHELL-20261005-001 — Stage 2 audited shell implementation and execution evidence** (validated/high)
-  Pre-edit current/V3 matrix and architect/QA reviews support the single apps/sistema-og shell. Full75 gates, eight viewport/13 route browser acceptance and real API sync acknowledgement passed; implementation publication verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Browser missing online event is explicitly simulated only after real transport proof.
 
 ## Retrieval workflow
 

@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage7 COMPLETE / ACCEPTED BY QG; Stage7.1 authorized and implemented over canonical owners, with gates and real pilot acceptance tracked in V3_UNIFICATION_CHECKPOINT. Stage8 not authorized.
+Current execution status: Stage7 COMPLETE / ACCEPTED BY QG; Stage7.1 authorized and implemented over canonical owners, with gates and real pilot acceptance tracked in V3_UNIFICATION_CHECKPOINT. Stage7.1 online COMPLETE; Stage8 local gates PASS, publication handoff ends at PATCH_READY.
 
 ## Mission
 
@@ -443,6 +443,21 @@ Status: BLOCKED only on externally applied pilot deployment/online acceptance; l
 - [x] Focused unit/browser: query emits no writes; manual choice, eight viewports, save/reload/reopen, real503/reconnect/409.
 - [x] Full gates82/82/Brain165/release and previous-stage regressions completed.
 - [x] Integration7104685 push/fetch CLEAN/equality and normal82-gate hooks verified.
-- [ ] Pilot patch e06e857d externally applied, actual deployment and real tractor/trailer acceptance verified; Railway apply cancelled.
+- [x] Pilot externally applied; actual runtime287517ae contains7104685. Real Cavalo/Carreta native save/reload/reopen acceptance PASS390/1440; historical cancellation superseded.
 
 File List: apps/sistema-og/app.js, index.html, service-worker.js; components/technical-workspace.js, multi-vehicle-workspace.js, technical-application-map.js/.css; package.json; scripts/validate.mjs, test_technical_application_map.mjs, test_technical_application_map_browser.mjs, test_quote_composition_snapshot.mjs; checkpoint/story/architecture; DUTRA_OS_CONTEXT.md, AI_HANDOFF.md, ROADMAP.md, CHANGELOG.md, tasks/TODO.md +DONE.md; Second Brain source/decision/incident/cycle and generated index/metrics. No data.js, dependency, auth/sync engine, Supabase or production changes.
+
+
+## Stage8 — Proposta + ROI Premium (2026-10-08)
+
+Status: Ready for Review — local gates PASS; integration publication/staged patch in progress. Deploy/aceite online são responsabilidade QG; não executar accept_deploy.
+
+- [x] Stage7.1 online PASS, backup integral e ausência de ação externa.
+- [x] Owner/audit matrix no checkpoint antes de código; reutilização de proposta/price/quote/CRM/map.
+- [x] Representação comercial por veículo/split/caminho; mesmo total/quantidades; sem segundo motor/store.
+- [x] ROI explícito, revisado, determinístico; ausente VALIDAR; sem percentuais/fallbacks inventados.
+- [x] Revisões imutáveis vinculadas à cotação; identidade async e snapshot seguro.
+- [x] Browser/real-fixture/final82 gates PASS; Brain171/release; previous-stage browser regressions PASS.
+- [ ] Integration push CLEAN/equality; patch único do piloto revisado e PATCH_READY.
+
+File List: app.js/index.html/service-worker.js; services/proposal-intelligence-service.js; components/proposal-workspace.js/.css; package.json; scripts/test_proposal_premium.mjs/test_proposal_workspace_browser.mjs/test_product_evolution.mjs/test_multi_vehicle_workspace.mjs/test_quote_composition_snapshot.mjs; checkpoint/architecture/contexts/roadmap/changelog/tasks; dutra-quote-engine Skill; Second Brain source/decision/two incidents/cycle/index/metrics. Stage8.1 exportações/templates e Reverse Technical Lookup diferidos.
