@@ -166,6 +166,34 @@ When something fails:
 
 Use dutra-environment-guardian for Git/workspace/tooling failures.
 
+## Railway deploy approval handoff
+
+For DUTRA OS staged Railway releases, separate implementation from approval-gated runtime mutation.
+
+Default ownership:
+- **Workshop/Codex**: implement, test, commit, push, prepare/review the staged pilot patch, then return `PATCH_READY` with `PATCH_ID`, intended `IMPLEMENTATION_SHA`, service/environment, rollback SHA and local test evidence.
+- **QG/ChatGPT runtime operator**: re-read the live staged diff, verify it is the intended isolated target and whether it is destructive, obtain explicit user authorization, call the approval-gated deploy once, and follow it through deployment/health verification.
+- **User**: provides the explicit approval required for the runtime write.
+
+If Railway/tooling returns an approval-layer response such as `the user did not approve this action`, classify it as **APPROVAL_HANDOFF_REQUIRED**, not as a code/project failure.
+
+After that response:
+1. do not repeat the unchanged `accept_deploy` attempt in Codex;
+2. do not spend another implementation cycle trying to bypass the approval boundary;
+3. preserve the staged patch;
+4. return `PATCH_READY` to QG;
+5. QG performs the authorized runtime action through the connected runtime tool.
+
+A repeated approval refusal with unchanged patch/state is an operational anti-pattern and credit waste.
+
+After QG deploys, Codex may be used again only when code-level QA/fixes are actually needed. A successful deploy does not require a new Codex implementation pass.
+
+## Credit-aware validation standard
+
+During implementation, prefer the smallest focused tests that can falsify the current change. Run the broad release suite once at the final package gate unless a later fix materially invalidates it.
+
+Do not rerun an unchanged expensive suite merely because an external approval/deploy step was blocked. Approval/environment blockers are not test failures.
+
 ## Low-waste Codex prompt standard
 
 Prefer Codex prompts with:
