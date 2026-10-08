@@ -1,5 +1,12 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage7
+
+- Multi-Veículos Premium usa composição e totais existentes, com proveniência por veículo e quantidades multiplicadas uma vez.
+- Novo/editar/duplicar/remover usam IDs estáveis; ajustes manuais e preços de outros veículos permanecem preservados.
+- Snapshot recuperável no envelope/outbox atuais e cópia ao reabrir histórico; proteção contra controles e respostas obsoletos.
+- Gates, piloto real, publicação e limites no checkpoint; sem motor/store adicional, alteração técnica OG ou Stage8.
+
 ## [Unreleased] — CONVERGENCE-01 Stage6 (COMPLETE; integração publicada, sem deploy)
 
 - Aplicação Técnica Premium no shell único; input gate mostra VALIDAR sem chamar o motor com configuração incompleta/inválida. Motor técnico e `OG_DATA` preservados byte a byte.

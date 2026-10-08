@@ -301,3 +301,12 @@ Opt-in `OG_PERSISTENT_AUTH=true` reutiliza validação server-side e segredo de 
 A store de sessões e chave estável sobrevivem a reinício; redeploy só preserva sessões/dados se o diretório estiver em volume isolado. Antes de anexar volume/redeploy, recuperar snapshot da store piloto atual. Não compartilhar produção. Desabilitar flag reverte ao mecanismo anterior sem apagar CRM/outbox. Ver DEC-PILOT-ACCESS-SESSION-001 e testes access_session.
 
 Auth validation clarification: enabled session mode accepts PIN only through rate-limited login; existing strong API bearer stays compatible. Installed-PWA offline-reload QA uses explicit online event after CDP restores network, matching existing shell/PWA harness: trace showed navigator.onLine=true but zero native online events. Canonical handler must produce real sync OK/API200; no visual override or timeout increase. Ordinary no-reload reconnect and browser restart use normal browser events.
+
+
+## Multi-Veículos Premium — CONVERGENCE-01 Stage7
+
+A composição viva continua em `state.vehicles`: `items.qty` representa peças por veículo, enquanto `vehicle.qty` representa o número de veículos daquela configuração. `calculateCompleteQuote` continua multiplicando uma vez e calculando preços/totais; o componente Premium somente agrupa essas projeções e mantém a proveniência por ID. OG_DATA e os builders técnicos permanecem iguais ao baseline.
+
+Novo/editar usa o mesmo `state.consultant`, com ID de configuração separado do ID estável do veículo. Edição captura identidade e assinatura dos itens/contexto; controles desconectados e respostas obsoletas não alteram outra linha. Duplicação copia composição, notas e preços sem compartilhar referências e cria IDs próprios.
+
+`operations.quotes`, no envelope existente, contém snapshots aditivos `quote_workspace/composition_draft` com cliente, veículos e avulsos. As ações atualizam a outbox existente antes da confirmação de handoff. Recuperação inicial copia o snapshot; pull em segundo plano preserva trabalho ativo. Uma escolha humana explícita de versão do servidor/revisão recupera a composição escolhida, inclusive vazia. Cotações do histórico são copiadas ao reabrir; alterações não modificam o snapshot salvo. Nenhum catálogo, cálculo financeiro, CRM, store ou sync manager adicional.

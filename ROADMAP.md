@@ -95,3 +95,8 @@ Sempre: preservar integridade dos dados e conhecimento técnico OG.
 ## CONVERGENCE-01 execution boundary
 
 Stage 2 unified responsive shell completed only on integration/dutra-os-one-system. Stage 3 / Meu Dia is ready but NOT STARTED. Subsequent domain migrations remain in the CONVERGENCE-01 story; no new feature scope or release/deploy commitment is added.
+
+
+## CONVERGENCE-01 — Stage7 autorizada
+
+Multi-Veículos Premium sobre os owners atuais: configuração independente, quantidade por frota, consolidação e cotação/histórico canônicos. Stage8 de proposta/apresentações avançadas permanece dependente de nova autorização do QG; backlog de impressão/PNG/templates/personalização registrado no checkpoint.

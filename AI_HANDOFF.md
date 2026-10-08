@@ -128,3 +128,8 @@ Single shell is published on the integration branch, not production/main. Consul
 ## CONVERGENCE-01 Stage3 continuation boundary
 
 Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outcomes preserve canonical owners. Current status/publication/rollback is recorded in docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. No Stage4 execution or deployment is authorized by this note.
+
+
+## Handoff Stage7 — Multi-Veículos
+
+A autorização atual é Stage7, substituindo os bloqueios históricos de sequência acima. Consulte o checkpoint para composição canônica, assinaturas de identidade, recuperação em operations.quotes e gates reais. Não iniciar Stage8 nem alterar main/produção. O preview integrado é o piloto isolado UXR; V3 histórica continua separada.

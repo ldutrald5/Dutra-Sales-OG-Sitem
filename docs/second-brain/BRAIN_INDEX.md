@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 155 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 19 |
-| decision | 21 |
+| cycle | 20 |
+| decision | 22 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 19 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 32 |
+| source | 33 |
 
 ## Active decisions
 
@@ -61,6 +61,8 @@ Generated from 155 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Premium technical UI validates active explicit inputs before calling original app.js builders and uses existing state.consultant, operations.quotes and state.vehicles. TECH-DRAFT technical_workspace/technical_draft stores identity, timestamps, payload.client/vehicles and technicalContext; awaited current outbox precedes local success. Save creates no proposal/contact/history fact. Reviewed native quote handoff preserves manual composition and current pricing; linked identity is copied completely and unlinked manual quote owner is retained.
 - **DEC-PILOT-ACCESS-SESSION-001 — Opt-in persistent PIN session on existing hosted runtime** (active/high)
   OG_PERSISTENT_AUTH enables server-validated PIN sessions with opaque random IDs signed by server secret, hashed IDs and expiry in existing dataDir/access-sessions.json, Secure HttpOnly SameSite=Strict Path=/ cookie. Remember-device grants 30 days; unchecked grants browser-session cookie with 24h server expiry. Explicit logout revokes the ID. Non-secret last-known mode supports offline PWA bootstrap but never authorizes a request. Cookie writes require same-origin; only validated existing bearer clients are exempt. No raw PIN browser persistence, second CRM or external auth infrastructure. Default-off protects existing deployment compatibility.
+- **DEC-CONVERGENCE-FLEET-001 — Stable vehicle identities over existing quotation composition** (active/high)
+  state.vehicles remains the live quotation owner with per-vehicle items and one multiplier per configuration. The existing state.consultant editor starts explicit new/edit drafts, captures row identity and a nonrecursive technical/composition signature, and awaits current outbox before accepted handoff. operations.quotes quote_workspace/composition_draft is an additive deep-cloned recovery snapshot, not another store or engine. History reopen deep-clones and hydrates the existing client inputs. Background pulls cannot replace active work; explicit conflict choices restore their reviewed snapshot.
 
 ## Open questions
 
@@ -159,6 +161,8 @@ Generated from 155 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
+  Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
 - **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
   Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
 - **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
@@ -177,8 +181,6 @@ Generated from 155 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Audited canonical queue/NBA/outcome owners before edits. Deterministic projection and eight viewport browser gates passed, including immediate refresh, supported offline outcome, real local reconnect and HTTP409 conflict recovery. Independent architecture and QA approved. Normalized account selection is tested with isolated read fixtures; no external mutation is claimed.
 - **SRC-CONVERGENCE-PROSPECTING-20261005-001 — Canonical prospecting workspace and deterministic recovery evidence** (validated/high)
   Stage 4 audit and isolated regression execution adapted the current app to premium prospecting without porting V3 engines. Browser evidence exposed stale filtered focus and then an offline reconnect race caused by unresolved optional Service Worker readiness holding the foreground write lock. Both causes were reproduced and protected by actual canonical mutation, remote acknowledgement and conflict review tests.
-- **SRC-CONVERGENCE-ENV-20261004-001 — CONVERGENCE-01 Stage 0 execution environment preflight** (validated/high)
-  CONVERGENCE-01 Stage 0 documented the failed initial cloud workspace with no usable checkout and unreachable proxy transport, followed by successful recovery in a repository-attached workspace with a valid Git checkout.
 
 ## Retrieval workflow
 

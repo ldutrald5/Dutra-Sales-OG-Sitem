@@ -38,6 +38,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="components/app-shell.css">
   <link rel="stylesheet" href="components/technical-workspace.css">
+  <link rel="stylesheet" href="components/multi-vehicle-workspace.css">
 </head>
 <body class="dutra-shell bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
 
@@ -360,7 +361,7 @@
       </div>
 
       <!-- 2. Painel de Controle Multi-Veículos & Exportações -->
-      <div class="clean-card p-4 space-y-4">
+      <div class="clean-card p-4 space-y-4 multi-vehicle-controls">
         
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div class="flex items-center gap-2">
@@ -387,7 +388,7 @@
               <span>🧰 Só Peças</span>
             </button>
             <button id="btn-add-vehicle-slot" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition flex items-center gap-1.5">
-              <span>+ Adicionar Outro Caminhão</span>
+              <span>+ Adicionar veículo</span>
             </button>
           </div>
         </div>
@@ -428,6 +429,7 @@
         <div id="proposal-tracking-status" class="proposal-tracking-status hidden" aria-live="polite"></div>
 
         <!-- SANFONA / CONTAINER DE VEÍCULOS -->
+        <section id="multi-vehicle-workspace" class="multi-vehicle-workspace" aria-labelledby="fleet-workspace-title"></section>
         <div id="vehicles-accordion-container" class="space-y-3 pt-2">
           <!-- Renderizado dinamicamente via app.js -->
         </div>
@@ -1422,6 +1424,7 @@
   <script src="sales-materials.js"></script>
   <script src="performance-engine.js"></script>
   <script src="components/technical-workspace.js"></script>
+  <script src="components/multi-vehicle-workspace.js"></script>
   <script src="runtime-config.js"></script>
   <script src="services/access-session-client.js"></script>
   <script>window.OG_ACCESS_SESSION.initialize();</script>

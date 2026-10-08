@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const quoteClientDefaults = Object.freeze(JSON.parse(JSON.stringify(state.client)));
   let technicalWorkspace = null;
+  let workingQuoteDraftId = null;
   let serverSyncTimer = null;
   let localBackupTimer = null;
   let serverRevision = 0;
@@ -397,6 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab === 'crm') renderCrmModule();
     if (state.currentTab === 'biblioteca') renderMaterialLibrary();
     if (state.currentTab === 'historico') renderHistory();
+    restoreVehicleComposition();
+    recalculateQuote();
     technicalWorkspace?.refresh();
   }
 
@@ -433,6 +436,10 @@ document.addEventListener('DOMContentLoaded', () => {
       state.leads = (reviewState.leads || []).map(normalizeLead);
       state.history = reviewState.history || [];
       state.operations = OG_OPERATIONS_MODEL.migrateOperations(reviewState.operations || {});
+      const reviewedDraftId = workingQuoteDraftId;
+      workingQuoteDraftId = null;
+      restoreVehicleComposition(reviewedDraftId);
+      recalculateQuote();
       serverRevision = reviewState.revision;
       localStorage.setItem('og_leads_crm', JSON.stringify(state.leads));
       localStorage.setItem('og_cotacoes_history', JSON.stringify(state.history));
@@ -448,7 +455,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     banner.querySelector('[data-sync-server]')?.addEventListener('click', async () => {
       if (!confirm('Descartar as alterações locais conflitantes e carregar a versão atual do servidor? Um checkpoint local será mantido para recuperação.')) return;
+      const generation = serverSyncGeneration;
+      let queued;
+      try { queued = await OG_SYNC_BRIDGE.readQueuedState(); }
+      catch { return showNotification('A fila local está indisponível. Os dados e o conflito foram preservados.', 'warning'); }
       await checkpointLocalState('pre-use-server-version');
+      if (generation !== serverSyncGeneration) return showNotification('Há alterações mais recentes. Revise novamente antes de escolher a versão do servidor.', 'warning');
+      try {
+        if (!await OG_SYNC_BRIDGE.clearQueuedState(queued?.body ?? null)) {
+          return showNotification('Uma operação mais recente permanece na fila. Revise antes de carregar o servidor.', 'warning');
+        }
+      } catch {
+        return showNotification('Não foi possível concluir a revisão local. Os dados e o conflito foram preservados.', 'warning');
+      }
+      if (generation !== serverSyncGeneration) return showNotification('Há alterações mais recentes. Revise novamente antes de escolher a versão do servidor.', 'warning');
+      workingQuoteDraftId = null;
+      state.client = JSON.parse(JSON.stringify(quoteClientDefaults));
+      state.vehicles = [];
+      state.extraItems = [];
+      hydrateQuoteClientInputs();
       applySharedState(conflict.remote);
       serverRevision = Number(conflict.remote.revision || serverRevision);
       await clearSyncConflict();
@@ -986,7 +1011,98 @@ document.addEventListener('DOMContentLoaded', () => {
   // GESTÃO DE MÚLTIPLOS VEÍCULOS & CÁLCULOS POR VEÍCULO
   // =========================================================================
 
+  function quoteVehicleSignature(vehicle) {
+    const context = vehicle.technicalContext || {};
+    return JSON.stringify([
+      ...['id','name','qty','vehicleTypeId','libras','includeDianteira','items','clientId'].map(key => vehicle[key]),
+      ...['leadId','answers','notes','manualItems','manualConfirmed'].map(key => context[key])
+    ]);
+  }
+
+  function duplicateQuoteVehicle(vehicle) {
+    const duplicate = JSON.parse(JSON.stringify(vehicle));
+    duplicate.id = `veh_${crypto.randomUUID()}`;
+    duplicate.name = `${vehicle.name} · cópia`;
+    duplicate.collapsed = false;
+    if (duplicate.technicalContext) {
+      duplicate.technicalContext.id = `TECH-DRAFT-${crypto.randomUUID()}`;
+      duplicate.technicalContext.handoffId = duplicate.id;
+      duplicate.technicalContext.targetVehicleName = duplicate.name;
+      delete duplicate.technicalContext.editingVehicleId;
+      delete duplicate.technicalContext.editingSnapshot;
+    }
+    return duplicate;
+  }
+
+  function hydrateQuoteClientInputs() {
+    for (const [field,id] of Object.entries({nome:'client-name',empresa:'client-company',cnpj:'client-cnpj',ie:'client-ie',socioAdmin:'client-socio',telefone:'client-phone',cidadeUf:'client-city',tier:'client-tier',paymentMethod:'client-payment',precoPneu:'client-preco-pneu',parcelasCount:'client-parcelas',freteTexto:'client-frete-texto',prazoEntrega:'client-prazo-entrega'})) {
+      const input = document.getElementById(id);
+      if (input) input.value = state.client[field] ?? '';
+    }
+  }
+
+  function restoreVehicleComposition(preferredId = null) {
+    if (workingQuoteDraftId) return;
+    const records = state.operations.quotes.filter(item => item.source === 'quote_workspace' && item.status === 'composition_draft' && Array.isArray(item.payload?.vehicles)
+      && (!item.clientId || OG_CRM_SERVICE.getLeadById(state.leads, item.clientId)));
+    const record = records.find(item => item.id === preferredId)
+      || records.sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
+    if (!record || (record.clientId && !OG_CRM_SERVICE.getLeadById(state.leads, record.clientId))) return;
+    const payload = JSON.parse(JSON.stringify(record.payload));
+    state.client = {...quoteClientDefaults, ...payload.client};
+    state.vehicles = payload.vehicles;
+    state.extraItems = payload.extraItems || [];
+    workingQuoteDraftId = record.id;
+    hydrateQuoteClientInputs();
+  }
+
+  function persistVehicleComposition() {
+    workingQuoteDraftId ||= `FLEET-DRAFT-${crypto.randomUUID()}`;
+    const previous = state.operations.quotes.find(item => item.id === workingQuoteDraftId);
+    const now = new Date().toISOString();
+    const record = {id:workingQuoteDraftId, source:'quote_workspace', status:'composition_draft',
+      clientId:findLeadForClientData(state.client)?.id || null, createdAt:previous?.createdAt || now, updatedAt:now,
+      payload:JSON.parse(JSON.stringify({client:state.client,vehicles:state.vehicles,extraItems:state.extraItems}))};
+    const index = state.operations.quotes.findIndex(item => item.id === record.id);
+    if (index >= 0) state.operations.quotes[index] = record;
+    else state.operations.quotes.push(record);
+    saveOperationsToStorage();
+    const durable = OG_SYNC_BRIDGE.queueState(currentSyncPayload());
+    void durable.catch(() => showNotification('A composição continua neste aparelho. Não foi possível confirmar a fila local; salve novamente antes de sair.', 'warning'));
+    return durable;
+  }
+
+  function validQuoteVehicleDraft(draft) {
+    if (!draft.editingVehicleId) return true;
+    const vehicle = state.vehicles.find(item => item.id === draft.editingVehicleId);
+    return Boolean(vehicle && quoteVehicleSignature(vehicle) === draft.editingSnapshot
+      && (!vehicle.clientId || String(vehicle.clientId) === String(draft.leadId))
+      && String(findLeadForClientData(state.client)?.id || '') === String(draft.leadId || ''));
+  }
+
+  function startQuoteVehicle(vehicleId = null) {
+    if (!technicalWorkspace || technicalWorkspace.isBusy()) return;
+    const vehicle = vehicleId ? state.vehicles.find(item => item.id === vehicleId) : null;
+    if (vehicleId && !vehicle) return;
+    const leadId = findLeadForClientData(state.client)?.id || '';
+    if (vehicle?.clientId && String(vehicle.clientId) !== String(leadId)) {
+      showNotification('Este veículo pertence a outro cliente. Reabra a cotação original antes de editar.', 'warning');
+      return;
+    }
+    const draft = emptyTechnicalDraft(leadId);
+    if (vehicle) {
+      Object.assign(draft, JSON.parse(JSON.stringify(vehicle.technicalContext || {})), {
+        id:draft.id, leadId, handoffId:vehicle.id, editingVehicleId:vehicle.id,
+        editingSnapshot:quoteVehicleSignature(vehicle), selectedVehicleId:vehicle.vehicleTypeId,
+        targetVehicleName:vehicle.name, qty:vehicle.qty, libras:vehicle.libras, includeDianteira:vehicle.includeDianteira,
+        manualItems:JSON.parse(JSON.stringify(vehicle.items)), manualConfirmed:true
+      });
+    }
+    if (technicalWorkspace.start(draft)) switchTab('guia');
+  }
+
   function initMultiVehicleEngine() {
+    restoreVehicleComposition();
     const btnAddVehicle = document.getElementById('btn-add-vehicle-slot');
     const btnAddExtraItem = document.getElementById('btn-add-extra-piece');
     const selectExtraPiece = document.getElementById('quick-add-extra-piece-select');
@@ -1005,34 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnAddVehicle) {
-      btnAddVehicle.addEventListener('click', () => {
-        // Recolhe os veículos existentes
-        state.vehicles.forEach(v => { v.collapsed = true; });
-
-        const count = state.vehicles.length + 1;
-        const newVeh = {
-          id: 'veh_' + Date.now(),
-          name: `Veículo ${count} (Caminhão 3/4)`,
-          vehicleTypeId: '3_4',
-          libras: 110,
-          includeDianteira: true,
-          qty: 1,
-          collapsed: false,
-          items: [
-            { code: 'EQ-110', qty: 2, customPrice: null },
-            { code: 'EQ-110D', qty: 2, customPrice: null },
-            { code: 'EQ-1155', qty: 2, customPrice: null },
-            { code: 'EQ-1320', qty: 2, customPrice: null },
-            { code: 'EQ-1040', qty: 2, customPrice: null },
-            { code: 'EQ-1043', qty: 2, customPrice: null },
-            { code: 'EQ-1041', qty: 2, customPrice: null }
-          ]
-        };
-
-        state.vehicles.push(newVeh);
-        recalculateQuote();
-        showNotification(`Novo veículo adicionado! Configure as peças abaixo.`, 'success');
-      });
+      btnAddVehicle.addEventListener('click', () => startQuoteVehicle());
     }
 
     if (btnAddExtraItem && selectExtraPiece && inputExtraQty) {
@@ -1053,6 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectExtraPiece.value = '';
         inputExtraQty.value = 1;
+        persistVehicleComposition();
         recalculateQuote();
         showNotification('Item avulso adicionado!', 'success');
       });
@@ -1063,7 +1153,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const startPartsOnly = () => {
           state.vehicles = [];
           state.extraItems = [];
-          recalculateQuote();
+          persistVehicleComposition();
+        recalculateQuote();
           document.getElementById('extra-items-container')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           showNotification('Cotação de reposição iniciada. Adicione as peças necessárias.', 'success');
         };
@@ -1078,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pdfTemplateSelect) {
       pdfTemplateSelect.addEventListener('change', (e) => {
         state.activePdfTemplate = e.target.value;
+        persistVehicleComposition();
         recalculateQuote();
         showNotification(`Modelo de proposta alterado para: ${pdfTemplateSelect.options[pdfTemplateSelect.selectedIndex].text}`, 'info');
       });
@@ -1566,6 +1658,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.lastQuoteData = data;
 
     renderVehicleAccordions(data);
+    window.OG_MULTI_VEHICLE_WORKSPACE?.render(document.getElementById('multi-vehicle-workspace'), data, OG_DATA.catalog);
     renderExtraItemsTable(data);
     renderMetrics(data);
     renderFreightQuoteInfo(data);
@@ -1610,6 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
     quoteData.vehicles.forEach((veh, vehIndex) => {
       const card = document.createElement('div');
       card.className = `vehicle-card mb-3 ${!veh.collapsed ? 'active-vehicle' : ''}`;
+      card.dataset.vehicleId = veh.id;
 
       // Linhas da tabela interna do veículo
       let itemsRows = veh.calculatedItems.map((item, itemIndex) => `
@@ -1634,7 +1728,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="text-[10px] text-slate-400">R$</span>
               <input type="number" step="0.01" min="0" value="${item.priceUnit.toFixed(2)}" data-vidx="${vehIndex}" data-iidx="${itemIndex}" class="input-veh-item-price w-20 bg-slate-900 border ${item.isCustomPrice ? 'border-amber-500 text-amber-300 font-bold' : 'border-slate-700 text-slate-200'} rounded px-1.5 py-0.5 text-right text-xs" title="Editar valor unitário">
             </div>
-            ${item.isCustomPrice ? `<div class="text-[9px] text-amber-400/80 cursor-pointer btn-reset-veh-price" data-vidx="${vehIndex}" data-iidx="${itemIndex}">Padrão: R$ ${item.standardPrice.toFixed(2)} (↺)</div>` : ''}
+            ${item.isCustomPrice ? `<button type="button" class="text-[9px] text-amber-400/80 btn-reset-veh-price" data-vidx="${vehIndex}" data-iidx="${itemIndex}">Padrão: R$ ${item.standardPrice.toFixed(2)} (↺)</button>` : ''}
           </td>
           <td class="py-2.5 px-3 text-right font-bold font-mono text-amber-400">
             R$ ${item.subtotal.toFixed(2)}
@@ -1652,9 +1746,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="text-lg">🚛</span>
             <div class="flex-1 sm:flex-initial">
               <div class="flex items-center gap-2">
-                <input type="text" value="${veh.name}" data-vidx="${vehIndex}" class="input-veh-name bg-transparent font-bold text-sm text-slate-100 hover:bg-slate-800/50 focus:bg-slate-950 focus:border-amber-500 rounded px-1 border border-transparent focus:border">
+                <input type="text" aria-label="Nome da configuração" value="${escapeHtml(veh.name)}" data-vidx="${vehIndex}" class="input-veh-name bg-transparent font-bold text-sm text-slate-100 hover:bg-slate-800/50 focus:bg-slate-950 focus:border-amber-500 rounded px-1 border border-transparent focus:border">
                 <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/25">
-                  ${veh.totalEqualizadores * 2} PNEUS
+                  ${veh.totalPneus} PNEUS
                 </span>
               </div>
               <div class="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
@@ -1667,9 +1761,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="flex items-center gap-2 self-end sm:self-auto">
             <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
               <span class="text-[10px] text-slate-400 font-bold">Qtd Veículos:</span>
-              <input type="number" min="1" max="100" value="${veh.qty}" data-vidx="${vehIndex}" class="input-veh-multiplier w-12 bg-slate-900 border border-slate-700 text-center text-xs font-bold text-slate-100 rounded">
+              <input type="number" aria-label="Quantidade de veículos" min="1" max="999" value="${veh.qty}" data-vidx="${vehIndex}" class="input-veh-multiplier w-12 bg-slate-900 border border-slate-700 text-center text-xs font-bold text-slate-100 rounded">
             </div>
 
+            <button type="button" data-edit-vehicle="${escapeHtml(veh.id)}" class="fleet-action">Editar aplicação</button>
+            <button type="button" data-duplicate-vehicle="${escapeHtml(veh.id)}" class="fleet-action">Duplicar</button>
             <button data-toggle-vidx="${vehIndex}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1">
               <span>${veh.collapsed ? '▼ Expandir Peças' : '▲ Recolher'}</span>
             </button>
@@ -1722,130 +1818,71 @@ document.addEventListener('DOMContentLoaded', () => {
       container.appendChild(card);
     });
 
-    // Eventos de Expansão / Recolhimento
-    container.querySelectorAll('[data-toggle-vidx]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const vidx = parseInt(btn.getAttribute('data-toggle-vidx'), 10);
-        state.vehicles[vidx].collapsed = !state.vehicles[vidx].collapsed;
-        recalculateQuote();
-      });
-    });
-
-    // Eventos de Renomear Veículo
-    container.querySelectorAll('.input-veh-name').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const vidx = parseInt(input.getAttribute('data-vidx'), 10);
-        state.vehicles[vidx].name = e.target.value.trim() || `Veículo ${vidx + 1}`;
-        recalculateQuote();
-      });
-    });
-
-    // Eventos de Multiplicador de Veículos
-    container.querySelectorAll('.input-veh-multiplier').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const vidx = parseInt(input.getAttribute('data-vidx'), 10);
-        const val = parseInt(e.target.value, 10);
-        state.vehicles[vidx].qty = val > 0 ? val : 1;
-        recalculateQuote();
-      });
-    });
-
-    // Eventos de Exclusão de Veículo
-    container.querySelectorAll('[data-del-vidx]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const vidx = parseInt(btn.getAttribute('data-del-vidx'), 10);
-        if (confirm(`Remover "${state.vehicles[vidx].name}" da cotação?`)) {
-          state.vehicles.splice(vidx, 1);
-          recalculateQuote();
-          showNotification('Veículo removido.', 'info');
-        }
-      });
-    });
-
-    // Eventos de Quantidade das Peças no Veículo
-    container.querySelectorAll('.btn-veh-qty').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vidx = parseInt(btn.getAttribute('data-vidx'), 10);
-        const iidx = parseInt(btn.getAttribute('data-iidx'), 10);
-        const action = btn.getAttribute('data-action');
-        if (action === 'inc') {
-          state.vehicles[vidx].items[iidx].qty += 1;
-        } else if (action === 'dec') {
-          if (state.vehicles[vidx].items[iidx].qty > 1) {
-            state.vehicles[vidx].items[iidx].qty -= 1;
-          } else {
-            state.vehicles[vidx].items.splice(iidx, 1);
+    // Controls capture stable row identity and the current composition. Detached or
+    // superseded controls cannot address the new occupant of an array position.
+    container.querySelectorAll('button,input').forEach(control => {
+      const id = control.closest('[data-vehicle-id]')?.dataset.vehicleId;
+      const capturedVehicle = state.vehicles.find(vehicle => vehicle.id === id);
+      if (!capturedVehicle) return;
+      const token = quoteVehicleSignature(capturedVehicle);
+      const itemIndex = Number(control.dataset.iidx ?? control.dataset.delItem);
+      const item = Number.isInteger(itemIndex) ? capturedVehicle.items[itemIndex] : null;
+      control.dataset.vehicleId = id;
+      control.addEventListener(control.tagName === 'INPUT' ? 'change' : 'click', async event => {
+        event.stopPropagation();
+        const vehicle = state.vehicles.find(row => row.id === id);
+        if (!control.isConnected || !container.contains(control) || !vehicle || token !== quoteVehicleSignature(vehicle)
+          || (item && vehicle.items[itemIndex] !== item)) return;
+        if (control.hasAttribute('data-edit-vehicle')) return startQuoteVehicle(id);
+        if (control.hasAttribute('data-duplicate-vehicle')) {
+          state.vehicles.forEach(row => { row.collapsed = true; });
+          state.vehicles.push(duplicateQuoteVehicle(vehicle));
+        } else if (control.hasAttribute('data-toggle-vidx')) vehicle.collapsed = !vehicle.collapsed;
+        else if (control.classList.contains('input-veh-name')) {
+          vehicle.name = control.value.trim() || 'Veículo';
+        } else if (control.classList.contains('input-veh-multiplier')) {
+          const qty = Number(control.value);
+          if (!Number.isInteger(qty) || qty < 1 || qty > 999) {
+            showNotification('VALIDAR: quantidade de veículos inteira, de 1 a 999. Valor anterior preservado.', 'warning');
+            return recalculateQuote();
+          }
+          vehicle.qty = qty;
+        } else if (control.hasAttribute('data-del-vidx')) {
+          if (!confirm(`Remover "${vehicle.name}" da cotação?`)) return;
+          state.vehicles.splice(state.vehicles.indexOf(vehicle),1);
+        } else if (control.classList.contains('btn-veh-qty') && item) {
+          if (control.dataset.action === 'inc') item.qty += 1;
+          else if (item.qty > 1) item.qty -= 1;
+          else vehicle.items.splice(itemIndex,1);
+        } else if (control.classList.contains('input-veh-item-qty') && item) {
+          const qty = Number(control.value);
+          if (!Number.isInteger(qty) || qty < 1) {
+            showNotification('VALIDAR: quantidade da peça deve ser um inteiro positivo. Use Remover para excluir.', 'warning');
+            return recalculateQuote();
+          }
+          item.qty = qty;
+        } else if (control.classList.contains('input-veh-item-price') && item) {
+          const price = Number(control.value.replace(',', '.'));
+          if (control.value.trim() && Number.isFinite(price) && price >= 0) item.customPrice = price;
+          else delete item.customPrice;
+        } else if (control.classList.contains('btn-reset-veh-price') && item) delete item.customPrice;
+        else if (control.hasAttribute('data-del-item') && item) vehicle.items.splice(itemIndex,1);
+        else if (control.hasAttribute('data-add-btn-vidx')) {
+          const select = control.closest('.vehicle-card').querySelector('[data-add-select-vidx]');
+          if (!select?.value || !OG_DATA.catalog.some(part => part.code === select.value)) return;
+          const existing = vehicle.items.find(part => part.code === select.value);
+          if (existing) existing.qty += 1;
+          else vehicle.items.push({code:select.value,qty:1,customPrice:null});
+        } else return;
+        if (vehicle.technicalContext) {
+          vehicle.technicalContext.targetVehicleName = vehicle.name;
+          vehicle.technicalContext.qty = vehicle.qty;
+          if (JSON.stringify(vehicle.items) !== JSON.stringify(capturedVehicle.technicalContext.manualItems)) {
+            vehicle.technicalContext.manualItems = JSON.parse(JSON.stringify(vehicle.items));
+            vehicle.technicalContext.manualConfirmed = false;
           }
         }
-        recalculateQuote();
-      });
-    });
-
-    container.querySelectorAll('.input-veh-item-qty').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const vidx = parseInt(input.getAttribute('data-vidx'), 10);
-        const iidx = parseInt(input.getAttribute('data-iidx'), 10);
-        const val = parseInt(e.target.value, 10);
-        if (val > 0) {
-          state.vehicles[vidx].items[iidx].qty = val;
-        } else {
-          state.vehicles[vidx].items.splice(iidx, 1);
-        }
-        recalculateQuote();
-      });
-    });
-
-    // Eventos de Edição de Preço Unitário no Veículo
-    container.querySelectorAll('.input-veh-item-price').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const vidx = parseInt(input.getAttribute('data-vidx'), 10);
-        const iidx = parseInt(input.getAttribute('data-iidx'), 10);
-        const val = parseFloat(e.target.value.replace(',', '.'));
-        if (!isNaN(val) && val >= 0) {
-          state.vehicles[vidx].items[iidx].customPrice = val;
-        } else {
-          delete state.vehicles[vidx].items[iidx].customPrice;
-        }
-        recalculateQuote();
-      });
-    });
-
-    container.querySelectorAll('.btn-reset-veh-price').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vidx = parseInt(btn.getAttribute('data-vidx'), 10);
-        const iidx = parseInt(btn.getAttribute('data-iidx'), 10);
-        delete state.vehicles[vidx].items[iidx].customPrice;
-        recalculateQuote();
-      });
-    });
-
-    container.querySelectorAll('[data-del-item]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vidx = parseInt(btn.getAttribute('data-vidx'), 10);
-        const iidx = parseInt(btn.getAttribute('data-del-item'), 10);
-        state.vehicles[vidx].items.splice(iidx, 1);
-        recalculateQuote();
-      });
-    });
-
-    // Eventos de Adição de Peça no Veículo
-    container.querySelectorAll('[data-add-btn-vidx]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vidx = parseInt(btn.getAttribute('data-add-btn-vidx'), 10);
-        const sel = container.querySelector(`[data-add-select-vidx="${vidx}"]`);
-        if (!sel || !sel.value) return;
-
-        const code = sel.value;
-        const existing = state.vehicles[vidx].items.find(i => i.code === code);
-        if (existing) {
-          existing.qty += 1;
-        } else {
-          state.vehicles[vidx].items.push({ code, qty: 1, customPrice: null });
-        }
-
-        sel.value = '';
+        await persistVehicleComposition().catch(() => {});
         recalculateQuote();
       });
     });
@@ -1882,33 +1919,25 @@ document.addEventListener('DOMContentLoaded', () => {
       tbody.appendChild(tr);
     });
 
-    tbody.querySelectorAll('[data-extra-price-idx]').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const idx = parseInt(input.getAttribute('data-extra-price-idx'), 10);
-        const val = parseFloat(e.target.value.replace(',', '.'));
-        if (!isNaN(val) && val >= 0) {
-          state.extraItems[idx].customPrice = val;
-        } else {
-          delete state.extraItems[idx].customPrice;
-        }
-        recalculateQuote();
-      });
-    });
-
-    tbody.querySelectorAll('[data-extra-qty-idx]').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const idx = parseInt(input.getAttribute('data-extra-qty-idx'), 10);
-        const qty = parseInt(e.target.value, 10);
-        if (qty > 0) state.extraItems[idx].qty = qty;
-        else state.extraItems.splice(idx, 1);
-        recalculateQuote();
-      });
-    });
-
-    tbody.querySelectorAll('[data-del-extra]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.getAttribute('data-del-extra'), 10);
-        state.extraItems.splice(idx, 1);
+    tbody.querySelectorAll('[data-extra-price-idx],[data-extra-qty-idx],[data-del-extra]').forEach(control => {
+      const idx = Number(control.dataset.extraPriceIdx ?? control.dataset.extraQtyIdx ?? control.dataset.delExtra);
+      const entry = state.extraItems[idx];
+      const token = JSON.stringify(entry);
+      control.addEventListener(control.tagName === 'INPUT' ? 'change' : 'click', async () => {
+        if (!control.isConnected || !tbody.contains(control) || state.extraItems[idx] !== entry || token !== JSON.stringify(entry)) return;
+        if (control.hasAttribute('data-extra-price-idx')) {
+          const price = Number(control.value.replace(',', '.'));
+          if (control.value.trim() && Number.isFinite(price) && price >= 0) entry.customPrice = price;
+          else delete entry.customPrice;
+        } else if (control.hasAttribute('data-extra-qty-idx')) {
+          const qty = Number(control.value);
+          if (!Number.isInteger(qty) || qty < 1) {
+            showNotification('VALIDAR: quantidade da peça deve ser um inteiro positivo. Use Remover para excluir.', 'warning');
+            return recalculateQuote();
+          }
+          entry.qty = qty;
+        } else state.extraItems.splice(idx,1);
+        await persistVehicleComposition().catch(() => {});
         recalculateQuote();
       });
     });
@@ -2694,6 +2723,11 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   }
 
   function saveQuoteToHistory(quoteData) {
+    // The export button may have been rendered before an awaited row write.
+    // Snapshot current canonical rows and their current totals together.
+    quoteData = calculateCompleteQuote();
+    state.lastQuoteData = quoteData;
+    persistVehicleComposition();
     const relatedLead = findLeadForClientData(state.client);
     const newQuote = {
       id: 'COT-' + Date.now().toString().slice(-6),
@@ -2777,13 +2811,15 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       replaceDraft: value => { state.consultant = value; },
       build: buildConsolidatedVehiclePieces,
       save: saveTechnicalDraft,
-      openQuote: openTechnicalQuote
+      openQuote: openTechnicalQuote,
+      validateDraft: validQuoteVehicleDraft
     });
   }
 
   async function saveTechnicalDraft(draft, computed, handoff) {
     const lead = draft.leadId ? OG_CRM_SERVICE.getLeadById(state.leads, draft.leadId) : null;
     if (draft.leadId && !lead) throw new Error('O cliente não está disponível no CRM.');
+    if (!validQuoteVehicleDraft(draft)) throw new Error('O veículo foi alterado ou removido. Reabra a aplicação atual antes de salvar.');
     if (handoff && !computed.ready) throw new Error('VALIDAR: aplicação ainda não determinada.');
     const sameQuoteClient = lead && String(findLeadForClientData(state.client)?.id || '') === String(lead.id);
     const client = JSON.parse(JSON.stringify(!lead || sameQuoteClient ? state.client : quoteClientDefaults));
@@ -2814,8 +2850,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     return record;
   }
 
-  function openTechnicalQuote(record) {
+  async function openTechnicalQuote(record) {
     if (record.id !== state.consultant.id || String(record.clientId || '') !== String(state.consultant.leadId || '')) return;
+    if (!validQuoteVehicleDraft(state.consultant)) return;
     const vehicle = record.payload.vehicles[0];
     if (!vehicle) return;
     const lead = record.clientId ? OG_CRM_SERVICE.getLeadById(state.leads, record.clientId) : null;
@@ -2844,6 +2881,13 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     state.vehicles.forEach(item => { item.collapsed = true; });
     if (existing >= 0) state.vehicles[existing] = JSON.parse(JSON.stringify(vehicle));
     else state.vehicles.push(JSON.parse(JSON.stringify(vehicle)));
+    if (state.consultant.editingVehicleId) {
+      state.consultant.editingSnapshot = quoteVehicleSignature(state.vehicles.find(item => item.id === vehicle.id));
+      record.technicalContext.editingSnapshot = state.consultant.editingSnapshot;
+    }
+    const context = JSON.stringify(state.client);
+    await persistVehicleComposition();
+    if (JSON.stringify(state.client) !== context || record.id !== state.consultant.id) return;
     recalculateQuote();
     switchTab('cotacao');
     showNotification('Aplicação revisada aberta na cotação. Nenhuma proposta foi enviada.', 'success');
@@ -3159,9 +3203,13 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         const idx = parseInt(b.getAttribute('data-load'), 10);
         const item = state.history[idx];
         if (item && item.payload) {
-          state.client = item.payload.client || state.client;
-          state.vehicles = item.payload.vehicles || [];
-          state.extraItems = item.payload.extraItems || [];
+          const payload = JSON.parse(JSON.stringify(item.payload));
+          state.client = {...quoteClientDefaults, ...(payload.client || state.client)};
+          state.vehicles = payload.vehicles || [];
+          state.extraItems = payload.extraItems || [];
+          workingQuoteDraftId = null;
+          hydrateQuoteClientInputs();
+          persistVehicleComposition();
           switchTab('cotacao');
           recalculateQuote();
           showNotification('Cotação recuperada com sucesso!', 'success');

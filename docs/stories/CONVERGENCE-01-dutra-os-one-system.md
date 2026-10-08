@@ -388,3 +388,30 @@ QG authorized bounded auth/isolated persistence and primary seed CRM OG dr.ods. 
 - [ ] Verify deployed session, isolated durable volume and real-client end-to-end flows.
 
 Status: BLOCKED for missing primary file and recoverable hosted snapshot; auth local package proceeds independently. File List: apps/sistema-og/{app.js,index.html,server.mjs,server-access-session.cjs,service-worker.js,styles.css,services/access-session-client.js}; scripts/{test_access_session.mjs,test_access_session_browser.mjs,validate.mjs}; package.json; docs/{01-ARQUITETURA.md,handoffs/V3_UNIFICATION_CHECKPOINT.md,runtime/DUTRA_OS_RUNTIME.md,second-brain/sources.jsonl,second-brain/decisions.jsonl,second-brain/cycles.jsonl,second-brain/BRAIN_INDEX.md,second-brain/BRAIN_METRICS.md}; this story.
+
+
+## Stage 7 — Multi-Veículos Premium (QG authorization 2026-10-08)
+
+PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. Scope: existing fleet quotation plus validated technical editor; no Stage8, main/production writes or new engine/store. Git live equality, clean checkout and authenticated normal-hook write preflight PASS before implementation.
+
+| Capability | Canonical owner | Decision |
+|---|---|---|
+| Client | OG_CRM_SERVICE/state.leads and current state.client quote projection | KEEP |
+| Vehicle composition | state.vehicles[].items (per vehicle), stable row id | ADAPT presentation/lifecycle |
+| Technical mappings | OG_DATA, resolveVehicleSupports/buildConsolidatedVehiclePieces | KEEP unchanged |
+| Pricing/totals | resolveItemPrice/calculateCompleteQuote | KEEP unchanged |
+| Technical editing/recovery | state.consultant, operations.quotes technical_draft | ADAPT explicit new/edit target |
+| Quotation history | state.history[].payload | KEEP; clone reopening snapshot |
+| Historical V3 engine/storage | preview-v2 | UX reference only; DO NOT PORT |
+
+Acceptance — implementation/independent QA complete; publication pending:
+- [x] New/edit/duplicate/remove use stable vehicle identities and independent compositions.
+- [x] Quantities multiply unit parts once; consolidated rows retain vehicle provenance.
+- [x] Manual overrides survive sibling edits/recalculation; incomplete inputs remain VALIDAR.
+- [x] Stale controls/async saves cannot update removed or different vehicles/customers.
+- [x] Existing quotation handoff/save/reopen retains complete fleet and client identity.
+- [x] Existing persistence/outbox/offline/reconnect/409/auth/PWA preserved.
+- [x] Fourteen focused regressions, eight viewports, previous stages/full gates and real-client isolated flow PASS.
+- [ ] Checkpoint and durable architectural learning updated; verified integration push and CLEAN checkout.
+
+File list: app.js; index.html; technical-workspace.js; multi-vehicle-workspace.js/.css; service-worker.js asset/precache; package.json; validate.mjs; multi-vehicle unit/browser tests; this story/checkpoint; DUTRA_OS_CONTEXT/AI_HANDOFF/ROADMAP/CHANGELOG; docs01; tasks TODO/DONE; Second Brain sources/decisions/cycles/index/metrics.

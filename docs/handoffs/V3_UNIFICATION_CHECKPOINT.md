@@ -1,5 +1,26 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
+## Current Stage7 — Multi-Veículos Premium (2026-10-08)
+
+STATUS: READY_FOR_PUBLICATION — local implementation/QA complete; final push/live acceptance pending. PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. POST_STAGE7_SHA: containing implementation commit; exact publication/deployment SHA will be recorded after acceptance. Branch: integration/dutra-os-one-system. Authorization: QG Stage7 only; no Stage8/main/production changes.
+
+Owners: client OG_CRM_SERVICE/state.leads with current state.client quote projection; multi-vehicle state.vehicles[].items/qty/id; technical OG_DATA + resolveVehicleSupports/buildConsolidatedVehiclePieces; pricing/cotation calculateCompleteQuote; recovery operations.quotes; saved history state.history[].payload. Engine, price resolver, quote calculator and data.js byte-identical to entry. No second catalog/engine/CRM/store.
+
+Delivered: explicit new vehicle through validated technical editor; independent edit/duplicate/remove by stable IDs; quantities per configuration multiply unit items once; per-vehicle items plus consolidated provenance and native finance/extras; current manual compositions/custom prices survive sibling edits; complete client/fleet/technical snapshot in existing quotation/history. Reopening clones data and hydrates visible client fields. Composition drafts use the existing envelope/outbox and survive refresh/offline.
+
+Async/data recovery: captured nonrecursive row/context signatures reject stale controls or late edits; current outbox is awaited before accepted handoff/card render. Queue failure keeps editing recoverable. Explicit confirmed conflict/server choice preserves a checkpoint, clears only the captured discarded queue atomically, rejects newer work, and restores the selected composition including empty state. Background pulls preserve active work. No reset/storage deletion/migration. Native save snapshots current canonical rows/totals together.
+
+QA: multi-vehicle unit PASS (mature finance11210/card12555.20/revenda9006, qty/clone/context); independent browser14cases PASS including actual503/immediateoutbox/two reloads/native reconnect/409/explicitemptyserverchoice; eight viewports320x568,360x800,390x844,430x932,768x1024,1280x720,1440x900,1920x1080 PASS. Stage3/4/5, technical context/workspace, shell/PWA, auth persistence and sync regressions PASS. Full validation80 gates/release and Brain158 zero warnings; latest publication rerun recorded in closeout below.
+
+Real-client proof: full434-lead private current-pilot snapshot preserved before any publication. Two independent authenticated local fixtures390x844/1440x900 execute real CRM identity→RodotremVolvo×2 + TocoVolvo×3→native explicitly unsent test quote→reload/reopen: stable rows, same client,152pieces/76tires/R$11210.00 PASS. Original two history entries, three operations quotes, all original operations/interactions and backup remain unchanged. No external requests/window.open/page errors/overflow. Private fixtures/snapshots are outside Git.
+
+Temporary bridge: Multi-Veículos→existing state.consultant technical editor→current quotation/history; owner remains current app, no iframe/secondapplication. No responsive proposal redesign. Supplied photos are reference evidence only; runtime tests do not certify physical OG mappings.
+
+Files: app.js; index.html; components/technical-workspace.js and multi-vehicle-workspace.js/.css; service-worker.js asset-only v76/precache; package.json scripts; scripts/validate.mjs; scripts/test_multi_vehicle_workspace.mjs and browser; this checkpoint/story; docs01/contexts/roadmap/changelog/tasks; Brain source/decision/cycle/index/metrics. No data.js, package-lock, dependency, Supabase, auth engine, sync engine or production file changes.
+
+Evidence: /workspace/scratch/stage7/ logs, /tmp/dutra-stage7-multi-qa/ synthetic screenshots/results, /workspace/private/stage7/ recoverable current snapshot and real-fixture proof. Known limits: software/runtime application needs OG physical validation; isolated pilot remote providers remain unavailable; hardware/device certification not claimed. Rollback retains current private export and isolated volume, reverts only Stage7 code/adapter changes to PRE_STAGE7_SHA; never reset or discard user data. Final publication/deployment/clean status appears below only after verification.
+
+
 STAGE: 6 — APLICAÇÃO TÉCNICA PREMIUM
 STATUS: COMPLETE — implementation, local gates, independent QA and real integration publication verified
 UPDATED_AT: 2026-10-06

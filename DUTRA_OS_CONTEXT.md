@@ -140,3 +140,8 @@ Stage 2 is complete on integration/dutra-os-one-system: apps/sistema-og is the s
 ## CONVERGENCE-01 Stage3 continuation boundary
 
 Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outcomes preserve canonical owners. Current status/publication/rollback is recorded in docs/handoffs/DUTRA_OS_ONE_SYSTEM_CHECKPOINT.md. No Stage4 execution or deployment is authorized by this note.
+
+
+## CONVERGENCE-01 Stage7 — autorização atual (2026-10-08)
+
+O QG autorizou Multi-Veículos Premium após Stage6.7 COMPLETE. Base `2797d3db087d774f5ec7350deba1f3c162ad1550`. Owners: state.vehicles, state.consultant/operations.quotes, OG_DATA/buildConsolidatedVehiclePieces e calculateCompleteQuote. Status/evidência/publicação atuais no checkpoint V3_UNIFICATION_CHECKPOINT. Stage8 exige nova autorização; o piloto isolado preserva volume/sessão/dados reais.

@@ -46,6 +46,7 @@
     const data = () => hooks.data();
     const draft = () => hooks.draft();
     const current = () => view(draft(), data(), hooks.build);
+    const targetValid = value => !hooks.validateDraft || hooks.validateDraft(value) !== false;
     const feedback = (message, error = false) => {
       const node = get('technical-feedback');
       node.textContent = message;
@@ -66,16 +67,21 @@
     function chooseVehicle(id) {
       if (busy || !data()?.vehicleConsultantRules?.some(rule => rule.id === id)) return;
       if (Array.isArray(draft().manualItems) && !window.confirm('Trocar o veículo inicia outra aplicação. Os ajustes atuais permanecem no último rascunho salvo. Continuar?')) return render();
-      change(item => { item.selectedVehicleId = id; item.answers = {}; item.targetVehicleName = data().vehicleConsultantRules.find(rule => rule.id === id).name; item.manualItems = null; item.manualConfirmed = false; item.handoffId = null; });
+      change(item => { item.selectedVehicleId = id; item.answers = {}; item.targetVehicleName = data().vehicleConsultantRules.find(rule => rule.id === id).name; item.manualItems = null; item.manualConfirmed = false; });
     }
     function editItems(mutate) {
       const computed = current();
       if (!computed.baseItems.length || !ownerValid()) return;
       const existing = Array.isArray(draft().manualItems) ? draft().manualItems : computed.items;
-      change(item => { item.manualItems = copy(existing); mutate(item.manualItems); item.handoffId = null; });
+      change(item => { item.manualItems = copy(existing); mutate(item.manualItems); });
     }
     async function save(handoff) {
       if (busy || !ownerValid()) return feedback('O cliente não está disponível no CRM. Revise o vínculo.', true);
+      try {
+        if (!targetValid(draft())) return feedback('Este veículo foi alterado ou removido. Reabra a aplicação na cotação.', true);
+      } catch (error) {
+        return feedback(error.message || 'Revise o veículo de origem antes de salvar.', true);
+      }
       const computed = current();
       if (handoff && !computed.ready) return feedback('VALIDAR: revise os dados antes de continuar.', true);
       const savedDraft = copy(draft());
@@ -85,11 +91,11 @@
       feedback('Salvando no armazenamento local…');
       try {
         const record = await hooks.save(savedDraft, computed, handoff);
-        if (signature(draft()) !== token || !ownerValid()) return feedback('Rascunho salvo no contexto original. Revise o contexto atual antes de continuar.', true);
+        if (signature(draft()) !== token || !ownerValid() || !targetValid(savedDraft)) return feedback('Rascunho salvo no contexto original. O veículo ou cliente mudou; reabra a aplicação antes de continuar.', true);
         lastSavedId = record.id;
         dirty = false;
-        feedback(navigator.onLine ? 'Rascunho salvo neste aparelho. A confirmação remota aparece no status global.' : 'Salvo neste aparelho, offline. Sincronização pendente no fluxo atual.');
-        if (handoff && !root.closest('.hidden')) hooks.openQuote(record);
+        feedback(navigator.onLine ? `${savedDraft.editingVehicleId ? 'Revisão do veículo salva' : 'Rascunho salvo'} neste aparelho. A confirmação remota aparece no status global.` : 'Salvo neste aparelho, offline. Sincronização pendente no fluxo atual.');
+        if (handoff && !root.closest('.hidden')) await hooks.openQuote(record);
       } catch (error) {
         feedback(error.message || 'Não foi possível salvar. Os dados desta tela continuam disponíveis.', true);
       } finally {
@@ -142,7 +148,7 @@
       get('technical-reset-manual').addEventListener('click', () => {
         if (busy || !Array.isArray(draft().manualItems)) return;
         if (!window.confirm('Substituir os ajustes manuais pelo cálculo do motor para a configuração atual?')) return;
-        change(item => { item.manualItems = null; item.manualConfirmed = false; item.handoffId = null; });
+        change(item => { item.manualItems = null; item.manualConfirmed = false; });
       });
       get('technical-add-item').addEventListener('click', () => {
         const code = get('technical-add-code').value;
@@ -159,6 +165,9 @@
       root.dataset.state = computed.state;
       root.dataset.leadId = item.leadId || '';
       root.dataset.vehicleId = item.selectedVehicleId || '';
+      root.dataset.editingVehicleId = item.editingVehicleId || '';
+      get('technical-title').textContent = item.editingVehicleId ? 'Revisar veículo da cotação' : 'Adicionar veículo à cotação';
+      get('btn-inject-consultant-to-quote').textContent = item.editingVehicleId ? 'Atualizar veículo na cotação' : 'Adicionar à cotação';
       get('technical-client').innerHTML = `<option value="">Sem cliente vinculado</option>${hooks.leads().map(lead => `<option value="${escape(lead.id)}">${escape(lead.empresa || lead.nome || lead.id)}</option>`).join('')}`;
       get('technical-client').value = item.leadId || '';
       const quoteClient = hooks.quoteClient?.();
@@ -214,7 +223,16 @@
     bind();
     restore({initial:true});
     render();
-    return Object.freeze({render, chooseVehicle, refresh() {
+    return Object.freeze({render, chooseVehicle, start(value) {
+      if (busy || !value || typeof value !== 'object') return false;
+      if (dirty && !window.confirm('O rascunho atual tem alterações não salvas. Abrir outra aplicação?')) return false;
+      hooks.replaceDraft(copy(value));
+      dirty = true;
+      lastSavedId = '';
+      render();
+      feedback(value.editingVehicleId ? 'Editando este veículo da cotação. Revise os ajustes antes de atualizar.' : 'Nova aplicação. Configure e revise as peças antes de adicionar à cotação.');
+      return true;
+    }, refresh() {
       restore(!lastSavedId && !draft().leadId && !draft().selectedVehicleId ? {initial:true} : {});
       render();
     }, isBusy() { return busy; }});
