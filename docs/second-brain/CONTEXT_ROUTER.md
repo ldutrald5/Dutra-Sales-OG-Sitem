@@ -30,7 +30,7 @@ Never freeze dynamic customer data inside a global Skill.
 | code / architecture / refactor | dutra-dev | `AGENTS.md`, scoped architecture docs | incidents + active decisions |
 | execution environment / checkout / Git transport / proxy / toolchain | dutra-environment-guardian + dutra-dev | `.codex/skills/dutra-environment-guardian/SKILL.md`, repository/provider state | relevant incident + active task checkpoint |
 | handoff / later work / Codex credits / manual step-by-step / Action Pack | dutra-collaboration-orchestrator | `.codex/skills/dutra-collaboration-orchestrator/SKILL.md`, latest checkpoint | `docs/handoffs/DUTRA_COLLABORATION_PROTOCOL.md` + scoped domain Skill |
-| Railway / production / logs | dutra-dev + dutra-runtime-operator | runtime skill + live infrastructure | `docs/runtime/DUTRA_OS_RUNTIME.md` |
+| Railway / production / logs / staged deploy approval | dutra-dev + dutra-runtime-operator + dutra-collaboration-orchestrator | runtime skill + live infrastructure + latest checkpoint | `docs/runtime/DUTRA_OS_RUNTIME.md` + related incident |
 | Supabase / schema / Edge Functions | dutra-dev | live Supabase inventory + `supabase/migrations/` + `supabase/functions/` | `INC-SUPABASE-DRIFT-001` + architecture docs |
 | client/account | dutra-crm + dutra-sales | current CRM record, Sales Execution contract | relevant playbook |
 | prospecting / call | dutra-sales + dutra-crm | `knowledge/VENDAS-OG.md`, sales playbook | Call AI docs |
