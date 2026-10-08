@@ -450,7 +450,7 @@ File List: apps/sistema-og/app.js, index.html, service-worker.js; components/tec
 
 ## Stage8 — Proposta + ROI Premium (2026-10-08)
 
-Status: Ready for Review — local gates PASS; integration publication/staged patch in progress. Deploy/aceite online são responsabilidade QG; não executar accept_deploy.
+Status: Ready for Review — local gates PASS. Implementation41a95ea; final publication/patch evidence is verified in the operational report. Deploy/aceite online são responsabilidade QG; não executar accept_deploy.
 
 - [x] Stage7.1 online PASS, backup integral e ausência de ação externa.
 - [x] Owner/audit matrix no checkpoint antes de código; reutilização de proposta/price/quote/CRM/map.
@@ -458,6 +458,6 @@ Status: Ready for Review — local gates PASS; integration publication/staged pa
 - [x] ROI explícito, revisado, determinístico; ausente VALIDAR; sem percentuais/fallbacks inventados.
 - [x] Revisões imutáveis vinculadas à cotação; identidade async e snapshot seguro.
 - [x] Browser/real-fixture/final82 gates PASS; Brain171/release; previous-stage browser regressions PASS.
-- [ ] Integration push CLEAN/equality; patch único do piloto revisado e PATCH_READY.
+- [x] Implementation complete; integration/PATCH_READY action pack, target/rollback/evidence prepared in checkpoint. Actual Git/staged patch verification is in the final operational report; QG alone applies deploy.
 
 File List: app.js/index.html/service-worker.js; services/proposal-intelligence-service.js; components/proposal-workspace.js/.css; package.json; scripts/test_proposal_premium.mjs/test_proposal_workspace_browser.mjs/test_product_evolution.mjs/test_multi_vehicle_workspace.mjs/test_quote_composition_snapshot.mjs; checkpoint/architecture/contexts/roadmap/changelog/tasks; dutra-quote-engine Skill; Second Brain source/decision/two incidents/cycle/index/metrics. Stage8.1 exportações/templates e Reverse Technical Lookup diferidos.
