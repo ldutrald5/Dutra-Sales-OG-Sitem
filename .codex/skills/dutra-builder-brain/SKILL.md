@@ -96,7 +96,8 @@ When the task comes from recovered history, a prior incident, a new durable comm
 13. For live access, hosted runtime, deployment, domains, logs, environment variables, service health or mobile access, route to `.codex/skills/dutra-runtime-operator/SKILL.md` and use live infrastructure tools instead of relying on remembered deployment state.
 14. STANDARD/STRUCTURAL closeout must refresh the human index and metrics, then run the brain checker.
 15. When work must continue later, cross between ChatGPT and Codex, requires manual user steps, or execution credits/tools are constrained, load `.codex/skills/dutra-collaboration-orchestrator/SKILL.md` and leave a reusable Action Pack/checkpoint when useful.
-16. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
+16. If implementation/tests are complete and the only remaining blocker is an external approval-gated runtime action (for example Railway `accept_deploy`), do not restart or repeat the implementation cycle. Route to `dutra-collaboration-orchestrator`, return a compact `PATCH_READY` handoff, and let QG/runtime operator own the authorized action.
+17. End with an explicit next-stage recommendation, not an uncontrolled chain of work.
 
 ## The professional loop
 
