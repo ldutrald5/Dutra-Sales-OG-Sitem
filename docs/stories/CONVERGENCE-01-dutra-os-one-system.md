@@ -427,3 +427,5 @@ Stage7 Git/implementation publication COMPLETE at c8c08924d43d1589b30bd228d765f4
 - [ ] Actual online save→leave→reopen→reload→reopen confirms all identities/configs/items/overrides/contexts/totals and original-record integrity.
 
 Additional files: scripts/test_quote_composition_snapshot.mjs; app.js helper; SW v77; package/validate gate; architecture/changelog/checkpoint/runtime and durable incident/source/cycle. No Stage7.1 implementation.
+
+Online correction033be666 published/CLEAN with81/81 gates. Reviewed one-service Railway patchf01db9c6 remains STAGED after approval tool cancellation; actual live release6af84634 still contains save blocker. Final save/reopen/reload acceptance remains unproven until exact fixed deploy is live; no Stage7.1.
