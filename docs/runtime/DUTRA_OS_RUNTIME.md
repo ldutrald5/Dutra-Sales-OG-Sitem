@@ -228,3 +228,12 @@ Opt-in persistent auth is now online. Original preview PIN unchanged; remember-d
 Runtime banner: Piloto DUTRA OS · Dados reais · Ambiente isolado only when explicit isolation/pilot flags, actual mount/dataDir, validated seed marker/hash and real-source provenance agree. Sync remains actual OK/pending/error/offline/conflict; public last-known isolation metadata supports offline PWA boot, not authentication. External communication/provider writes remain blocked. Call AI UI/manual review works within existing owners; real remote transcription/research/Sales Execution unavailable honestly.
 
 Live390x844/1440x900:20 real entities each, canonical client→Call AI→technical context, one unsent test quotation with exact vehicle/items/quantities, navigation/reload/reconnect/overflow/bootstrap PASS. History now contains original quote plus marked validation quote. Production/V2/V3 remain unchanged. Final documentation/harness closure commits may be newer than the pinned, tested product build; reconnect source deliberately for future authorized code release. Keep routine recoverable exports; do not clear this volume to revert. Stage7 not authorized.
+
+
+## Stage7 pilot publication — pending platform approval (2026-10-08)
+
+- Authorized target remains the existing isolated UXR pilot: service b385d7a3-616c-4c44-82c7-7c9541ba7c45/project d8e7173f-b8d3-4f8a-85e7-33c93d627774/environment e5b1fd77-0460-431c-b886-7be134a5c5f3. URL https://dutra-os-uxr01-preview-production.up.railway.app .
+- Git Stage7 implementation: c8c08924d43d1589b30bd228d765f4f5260dd537 on integration/dutra-os-one-system, verified published/CLEAN.
+- Sole reviewed staged patch b155ce96-83be-4ddc-a8ba-909c2913ae85 changes source.commitSha to that commit. Railway accept_deploy cancelled twice, including after fresh user approval. No build started; do not claim Stage7 is hosted.
+- Live readback remains deployment0c0e06df-e90b-4b6b-9ed4-43c234579b1e SUCCESS, health200/ok, SHA2797d3db087d774f5ec7350deba1f3c162ad1550. Existing isolated500MB volume509ed70c-cdfc-44e9-9eaf-3d0dc144ff2c at/data, secrets and data unchanged.
+- Platform/dashboard must apply that reviewed patch; then verify SUCCESS/exacthealthSHA and guarded two-viewport real-client save/reopen before closing hosted Stage7. Production/V2/V3 remain intact.

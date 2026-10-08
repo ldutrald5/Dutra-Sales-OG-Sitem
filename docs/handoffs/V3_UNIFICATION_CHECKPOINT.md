@@ -2,7 +2,7 @@
 
 ## Current Stage7 — Multi-Veículos Premium (2026-10-08)
 
-STATUS: READY_FOR_PUBLICATION — local implementation/QA complete; final push/live acceptance pending. PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. POST_STAGE7_SHA: containing implementation commit; exact publication/deployment SHA will be recorded after acceptance. Branch: integration/dutra-os-one-system. Authorization: QG Stage7 only; no Stage8/main/production changes.
+STATUS: BLOCKED — implementation/QA/integration publication PASS; pilot deploy cancelled by Railway approval tool. PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. POST_STAGE7_SHA (implementation): `c8c08924d43d1589b30bd228d765f4f5260dd537`; final closure HEAD is the containing documentation commit. Branch: integration/dutra-os-one-system. Authorization: QG Stage7 only; no Stage8/main/production changes.
 
 Owners: client OG_CRM_SERVICE/state.leads with current state.client quote projection; multi-vehicle state.vehicles[].items/qty/id; technical OG_DATA + resolveVehicleSupports/buildConsolidatedVehiclePieces; pricing/cotation calculateCompleteQuote; recovery operations.quotes; saved history state.history[].payload. Engine, price resolver, quote calculator and data.js byte-identical to entry. No second catalog/engine/CRM/store.
 
@@ -19,6 +19,15 @@ Temporary bridge: Multi-Veículos→existing state.consultant technical editor�
 Files: app.js; index.html; components/technical-workspace.js and multi-vehicle-workspace.js/.css; service-worker.js asset-only v76/precache; package.json scripts; scripts/validate.mjs; scripts/test_multi_vehicle_workspace.mjs and browser; this checkpoint/story; docs01/contexts/roadmap/changelog/tasks; Brain source/decision/cycle/index/metrics. No data.js, package-lock, dependency, Supabase, auth engine, sync engine or production file changes.
 
 Evidence: /workspace/scratch/stage7/ logs, /tmp/dutra-stage7-multi-qa/ synthetic screenshots/results, /workspace/private/stage7/ recoverable current snapshot and real-fixture proof. Known limits: software/runtime application needs OG physical validation; isolated pilot remote providers remain unavailable; hardware/device certification not claimed. Rollback retains current private export and isolated volume, reverts only Stage7 code/adapter changes to PRE_STAGE7_SHA; never reset or discard user data. Final publication/deployment/clean status appears below only after verification.
+
+
+Stage7 publication closeout: @devops implementation commit c8c08924d43d1589b30bd228d765f4f5260dd537 published only to integration; normal hooks80/80 PASS, live remote equality and CLEAN verified. Independent architect APPROVE; final browser14/eightviews and real-source isolated flows PASS. No main/V2/V3/#109/#110/production changes.
+
+Pilot publication BLOCKER: reviewed sole non-destructive Railway source.commitSha patch `b155ce96-83be-4ddc-a8ba-909c2913ae85`, service b385d7a3-616c-4c44-82c7-7c9541ba7c45, changes prior pin5ed1518→testedc8c08924. First accept_deploy cancelled; user explicitly approved this exact patch; the second call also returned `Cancelled — the user did not approve this action. No changes were made.` No alternate API/CLI bypass, build, restart or variable/mount change. Patch remains STAGED for platform/dashboard application.
+
+Latest live readback: deployment `0c0e06df-e90b-4b6b-9ed4-43c234579b1e` SUCCESS and public health HTTP200/ok, deployed SHA `2797d3db087d774f5ec7350deba1f3c162ad1550`. Isolated volume509ed70c-cdfc-44e9-9eaf-3d0dc144ff2c remains500MB /data; source patch only. URL https://dutra-os-uxr01-preview-production.up.railway.app remains the daily Stage6.7 pilot, NOT proof of hosted Stage7. Current authenticated backup434leads/twohistory/threeoperationsquotes is preserved privately.
+
+Live Stage7 acceptance: NOT RUN because build did not start. Prepared guarded private live harness requires exact healthc8c, fresh snapshot, one marked unsent quote and no external actions; no live credential read or pilot test writes by that harness. Apply the reviewed patch in the preview-project dashboard, observe SUCCESS/health exactSHA, then execute live two-viewport save/reopen acceptance. Stage7 overall remains BLOCKED until publication/acceptance; Stage8 not authorized.
 
 
 STAGE: 6 — APLICAÇÃO TÉCNICA PREMIUM

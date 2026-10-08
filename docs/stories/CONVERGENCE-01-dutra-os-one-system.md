@@ -412,6 +412,8 @@ Acceptance — implementation/independent QA complete; publication pending:
 - [x] Existing quotation handoff/save/reopen retains complete fleet and client identity.
 - [x] Existing persistence/outbox/offline/reconnect/409/auth/PWA preserved.
 - [x] Fourteen focused regressions, eight viewports, previous stages/full gates and real-client isolated flow PASS.
-- [ ] Checkpoint and durable architectural learning updated; verified integration push and CLEAN checkout.
+- [x] Checkpoint and durable architectural learning updated; verified integration push and CLEAN checkout.
 
 File list: app.js; index.html; technical-workspace.js; multi-vehicle-workspace.js/.css; service-worker.js asset/precache; package.json; validate.mjs; multi-vehicle unit/browser tests; this story/checkpoint; DUTRA_OS_CONTEXT/AI_HANDOFF/ROADMAP/CHANGELOG; docs01; tasks TODO/DONE; Second Brain sources/decisions/cycles/index/metrics.
+
+Stage7 Git/implementation publication COMPLETE at c8c08924d43d1589b30bd228d765f4f5260dd537. Hosted acceptance BLOCKED: Railway tool cancelled reviewed single-service deploy twice even after user approved the exact patch. Existing daily pilot stays on2797d3d; Stage7 live QA NOT RUN. Details/recovery patch ID in checkpoint/runtime manifest; no Stage8.
