@@ -2722,6 +2722,18 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     renderProposalTrackingStatus();
   }
 
+  function captureQuoteCompositionSnapshot() {
+    // Quote history owns its composition, not another copy of CRM/history.
+    // Retain the same fields consumed by reopen and proposal preparation.
+    return JSON.parse(JSON.stringify({
+      activePdfTemplate: state.activePdfTemplate,
+      activeWhatsappFormat: state.activeWhatsappFormat,
+      client: state.client,
+      vehicles: state.vehicles,
+      extraItems: state.extraItems
+    }));
+  }
+
   function saveQuoteToHistory(quoteData) {
     // The export button may have been rendered before an awaited row write.
     // Snapshot current canonical rows and their current totals together.
@@ -2738,7 +2750,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       clientCompany: state.client.empresa || relatedLead?.empresa || '',
       totalValue: quoteData.totalFinalVenda,
       totalPecas: quoteData.totalPecas,
-      payload: JSON.parse(JSON.stringify(state))
+      payload: captureQuoteCompositionSnapshot()
     };
 
     state.history.unshift(newQuote);

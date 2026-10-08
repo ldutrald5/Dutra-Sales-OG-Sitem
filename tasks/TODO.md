@@ -475,3 +475,5 @@ Stage6 autorizada em 2026-10-06 e implementada na integração: apresentação t
 Stage7 Multi-Veículos local implementation/independent QA complete over existing owners. Publish only integration and the existing isolated pilot after final gates; preserve volume/auth/current backup. Stage8 awaits new QG authorization. Current status/evidence in V3_UNIFICATION_CHECKPOINT.
 
 Stage7 integration publication PASS at c8c08924. Pending ONLY reviewed pilot source pin/application and hosted acceptance; Railway approval tool cancelled twice after exact user consent. Apply existing staged patch from checkpoint through platform, preserve isolated volume/data, verify health/build before live QA. Do not Stage8.
+
+Stage7 online gate: prior Railway blocker resolved at6af84634; real acceptance found recursive quote snapshot transport overflow. Bounded fix/tests and pilot repeat pending; retain all user records/private backup. Stage7.1 prohibited until gate closes/new authorization.

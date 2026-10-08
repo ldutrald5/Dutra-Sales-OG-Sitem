@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 161 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 20 |
+| cycle | 21 |
 | decision | 22 |
 | experiment | 1 |
 | idea | 3 |
-| incident | 19 |
+| incident | 20 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 33 |
+| source | 34 |
 
 ## Active decisions
 
@@ -84,6 +84,8 @@ Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
+  Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 - **INC-TECH-ENTRY-CONTEXT-001 — Client-origin technical navigation must carry canonical identity** (resolved/high)
   Client-origin technical navigation switched tabs without selecting the originating canonical lead. The existing technical selector and dirty-draft confirmation now receive that identity from both the sales card and client sheet. No new CRM, context owner or technical engine.
 - **INC-CALLAI-CONTEXT-001 — Late Call AI response or discarded session contaminates active context** (resolved/high)
@@ -98,8 +100,6 @@ Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Remote ACK retires only the exact captured recovery intention atomically; an ACK for old work cannot clear a later durable save or certify current OK.
 - **INC-EXEC-ENV-001 — Structural convergence blocked by missing checkout and unreachable proxy** (resolved/high)
   Structural work must prove its execution route before repository-local implementation. Local Git transport, GitHub provider access and hosted runtime access are separate capabilities; a failure in one must trigger classified fallback rather than repeated retries or false project conclusions.
-- **INC-MEU-DIA-REFRESH-001 — Confirmed Mesa outcome lost on immediate refresh during sync debounce** (resolved/high)
-  A local-first outcome must be recoverable before the UI confirms success or advances. Reuse the canonical outbox instead of waiting for debounced transport.
 
 ## Candidate / planned ideas
 
@@ -163,6 +163,8 @@ Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
   Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
+- **SRC-QUOTE-SNAPSHOT-20261008-001 — Online quotation snapshot transport failure and synthetic replay** (validated/high)
+  Protected live acceptance on6af84634 reached two independent applications/manual review and native quote save. Aggregate next-body minimum5994341bytes exceeded server readBody5000000bytes; isolated exact-baseline repeated native saves reproduce parser rejection at7536106bytes. Customer records/credentials remain private; only synthetic fixtures are versioned.
 - **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
   Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
 - **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
@@ -179,8 +181,6 @@ Generated from 158 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Pre-edit current/V3 matrix and architect/QA reviews support the single apps/sistema-og shell. Full75 gates, eight viewport/13 route browser acceptance and real API sync acknowledgement passed; implementation publication verified at be4b46ce4829ff18d193b6f8dfc34e671b52b8c4. Browser missing online event is explicitly simulated only after real transport proof.
 - **SRC-CONVERGENCE-MEU-DIA-20261005-001 — Stage 3 canonical projection and executed regression evidence** (validated/high)
   Audited canonical queue/NBA/outcome owners before edits. Deterministic projection and eight viewport browser gates passed, including immediate refresh, supported offline outcome, real local reconnect and HTTP409 conflict recovery. Independent architecture and QA approved. Normalized account selection is tested with isolated read fixtures; no external mutation is claimed.
-- **SRC-CONVERGENCE-PROSPECTING-20261005-001 — Canonical prospecting workspace and deterministic recovery evidence** (validated/high)
-  Stage 4 audit and isolated regression execution adapted the current app to premium prospecting without porting V3 engines. Browser evidence exposed stale filtered focus and then an offline reconnect race caused by unresolved optional Service Worker readiness holding the foreground write lock. Both causes were reproduced and protected by actual canonical mutation, remote acknowledgement and conflict review tests.
 
 ## Retrieval workflow
 

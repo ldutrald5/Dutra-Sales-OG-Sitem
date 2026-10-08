@@ -5,6 +5,7 @@
 - Multi-Veículos Premium usa composição e totais existentes, com proveniência por veículo e quantidades multiplicadas uma vez.
 - Novo/editar/duplicar/remover usam IDs estáveis; ajustes manuais e preços de outros veículos permanecem preservados.
 - Snapshot recuperável no envelope/outbox atuais e cópia ao reabrir histórico; proteção contra controles e respostas obsoletos.
+- Novas cotações salvam somente cliente/composição/templates, sem recursão do CRM/histórico que excedia o limite de sync; snapshots antigos preservados e regressão real de transporte/reabertura.
 - Gates, piloto real, publicação e limites no checkpoint; sem motor/store adicional, alteração técnica OG ou Stage8.
 
 ## [Unreleased] — CONVERGENCE-01 Stage6 (COMPLETE; integração publicada, sem deploy)

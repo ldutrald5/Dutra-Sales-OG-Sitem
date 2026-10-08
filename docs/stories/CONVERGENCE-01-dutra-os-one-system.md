@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage6 COMPLETE; implementation, local gates, independent QA and integration-only publication verified on integration/dutra-os-one-system. Entry/rollback: 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage5 COMPLETE and earlier stops are historical; QG authorized only Stage6 on 2026-10-06. Stage7 NOT AUTHORIZED.
+Current execution status: Stage7 online acceptance recovery on integration/dutra-os-one-system. Stage6.7 complete; Stage7 implementation published and hosted at6af84634. Live save reproduced recursive snapshot transport overflow; bounded correction and repeat online gate pending. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage7.1/8 not authorized.
 
 ## Mission
 
@@ -417,3 +417,13 @@ Acceptance — implementation/independent QA complete; publication pending:
 File list: app.js; index.html; technical-workspace.js; multi-vehicle-workspace.js/.css; service-worker.js asset/precache; package.json; validate.mjs; multi-vehicle unit/browser tests; this story/checkpoint; DUTRA_OS_CONTEXT/AI_HANDOFF/ROADMAP/CHANGELOG; docs01; tasks TODO/DONE; Second Brain sources/decisions/cycles/index/metrics.
 
 Stage7 Git/implementation publication COMPLETE at c8c08924d43d1589b30bd228d765f4f5260dd537. Hosted acceptance BLOCKED: Railway tool cancelled reviewed single-service deploy twice even after user approved the exact patch. Existing daily pilot stays on2797d3d; Stage7 live QA NOT RUN. Details/recovery patch ID in checkpoint/runtime manifest; no Stage8.
+
+### Stage7 online gate — bounded snapshot recovery
+
+- [x] Real online two-vehicle/manual application and consolidation reached native save; request exceeded server limit because quote history recursively copied all state.
+- [x] Future payload keeps complete quote composition/templates only; old CRM/history/user records untouched.
+- [x] Actual save/reopen/parser regression covers434synthetic leads, repeated saves and legacy read compatibility; baseline reproduces oversized request.
+- [ ] Fixed integration commit published solely to pilot, verified actual SUCCESS/SHA.
+- [ ] Actual online save→leave→reopen→reload→reopen confirms all identities/configs/items/overrides/contexts/totals and original-record integrity.
+
+Additional files: scripts/test_quote_composition_snapshot.mjs; app.js helper; SW v77; package/validate gate; architecture/changelog/checkpoint/runtime and durable incident/source/cycle. No Stage7.1 implementation.

@@ -237,3 +237,8 @@ Live390x844/1440x900:20 real entities each, canonical client→Call AI→technic
 - Sole reviewed staged patch b155ce96-83be-4ddc-a8ba-909c2913ae85 changes source.commitSha to that commit. Railway accept_deploy cancelled twice, including after fresh user approval. No build started; do not claim Stage7 is hosted.
 - Live readback remains deployment0c0e06df-e90b-4b6b-9ed4-43c234579b1e SUCCESS, health200/ok, SHA2797d3db087d774f5ec7350deba1f3c162ad1550. Existing isolated500MB volume509ed70c-cdfc-44e9-9eaf-3d0dc144ff2c at/data, secrets and data unchanged.
 - Platform/dashboard must apply that reviewed patch; then verify SUCCESS/exacthealthSHA and guarded two-viewport real-client save/reopen before closing hosted Stage7. Production/V2/V3 remain intact.
+
+
+## Stage7 online gate recovery (2026-10-08)
+
+Prior platform approval blocker resolved: isolated UXR deployment e2017b88-b390-4df4-844a-0a32c5b2b8f9 SUCCESS at6af84634ca8e873fef834e850eb74e88c12af1d4, health200/persistent and the same500MB/data volume. No new infrastructure, credentials or mounts. Actual online acceptance reproduced a quote-history whole-state snapshot exceeding the5000000-byte state request limit. A bounded future composition-only snapshot and SW v77 passed local81-gate validation, release gate, Brain161 and native browser regressions before integration-only/pilot publication and repeated live acceptance. Existing CRM/history/user work remain intact in private recoverable backups; no pruning or data migration. Final runtime/readback follows only after SUCCESS and online acceptance. No Stage7.1.
