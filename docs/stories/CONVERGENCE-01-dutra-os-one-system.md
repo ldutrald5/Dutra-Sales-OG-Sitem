@@ -1,6 +1,6 @@
 # CONVERGENCE-01 — DUTRA OS ONE SYSTEM
 
-Current execution status: Stage7 online acceptance recovery on integration/dutra-os-one-system. Stage6.7 complete; Stage7 implementation published and hosted at6af84634. Live save reproduced recursive snapshot transport overflow; bounded correction and repeat online gate pending. Authoritative evidence: docs/handoffs/V3_UNIFICATION_CHECKPOINT.md. Stage7.1/8 not authorized.
+Current execution status: Stage7 COMPLETE / ACCEPTED BY QG; Stage7.1 authorized and implemented over canonical owners, with gates and real pilot acceptance tracked in V3_UNIFICATION_CHECKPOINT. Stage8 not authorized.
 
 ## Mission
 
@@ -429,3 +429,19 @@ Stage7 Git/implementation publication COMPLETE at c8c08924d43d1589b30bd228d765f4
 Additional files: scripts/test_quote_composition_snapshot.mjs; app.js helper; SW v77; package/validate gate; architecture/changelog/checkpoint/runtime and durable incident/source/cycle. No Stage7.1 implementation.
 
 Online correction033be666 published/CLEAN with81/81 gates. Reviewed one-service Railway patchf01db9c6 remains STAGED after approval tool cancellation; actual live release6af84634 still contains save blocker. Final save/reopen/reload acceptance remains unproven until exact fixed deploy is live; no Stage7.1.
+
+
+## Stage7.1 — Mapa técnico Cavalo × Carreta (2026-10-08)
+
+Status: Ready for Review; online acceptance pending verified pilot publication.
+
+- [x] CLEAN entry513b2d82 / remote equality / mandatory c8c08924 +033be666 ancestry and pilot health verified.
+- [x] Owner/data audit closed before implementation; no second engine/catalog/store.
+- [x] Canonical per-position provenance, real rule path and explicit manual VALIDAR; EQ1135 is not fixed to trailer.
+- [x] Read-only Base Técnica over same engine, including independent implemento branch.
+- [x] Multi-vehicle/quote projection and bounded snapshots; unchanged native prices and default quantities.
+- [x] Focused unit/browser: query emits no writes; manual choice, eight viewports, save/reload/reopen, real503/reconnect/409.
+- [x] Full gates82/82/Brain165/release and previous-stage regressions completed.
+- [ ] Integration push, pilot deployment and real tractor/trailer acceptance verified.
+
+File List: apps/sistema-og/app.js, index.html, service-worker.js; components/technical-workspace.js, multi-vehicle-workspace.js, technical-application-map.js/.css; package.json; scripts/validate.mjs, test_technical_application_map.mjs, test_technical_application_map_browser.mjs, test_quote_composition_snapshot.mjs; checkpoint/story/architecture; DUTRA_OS_CONTEXT.md, AI_HANDOFF.md, ROADMAP.md, CHANGELOG.md, tasks/TODO.md +DONE.md; Second Brain source/decision/incident/cycle and generated index/metrics. No data.js, dependency, auth/sync engine, Supabase or production changes.

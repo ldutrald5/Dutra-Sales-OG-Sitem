@@ -1,11 +1,9 @@
 # DUTRA OS — Contexto Canônico
 
-## CONVERGENCE-01 Stage6 — COMPLETE
 
-Aplicação Técnica Premium foi autorizada em 2026-10-06 e implementada no shell único sobre `OG_DATA` e as funções técnicas originais intactas de `app.js`. `state.consultant`, `operations.quotes` e `state.vehicles` continuam sendo os owners; o componente técnico apenas apresenta e valida entradas. Rascunho técnico não registra proposta, envio ou fato comercial. Gates77/Brain148 e QA independente PASS; publicação real somente na integração verificada no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md); Stage7 não está autorizada.
+## CONVERGENCE-01 Stage7.1 — implementação delimitada
 
-> Fonte de verdade para humanos e IAs que trabalham neste repositório.
-> Antes de alterar o produto, leia também `AI_HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md` e `AGENTS.md`.
+Stage7 foi aceita pelo QG, incluindo o hotfix de snapshot e smoke online. Stage7.1 adiciona mapa Cavalo/Carreta e consulta Base Técnica sobre os mesmos owners: OG_DATA, resolveVehicleSupports/buildConsolidatedVehiclePieces, state.consultant/state.vehicles e calculateCompleteQuote. A origem nasce da posição que gerou cada peça; código sozinho não determina aplicação. CONFIRMADO NO MOTOR descreve o software, não certificação física OG; manual/contexto insuficiente ficam VALIDAR. Consulta não cria cotação. Status de gates/publicação/aceite real no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md). Stage8 não autorizada.
 
 ## Missão
 

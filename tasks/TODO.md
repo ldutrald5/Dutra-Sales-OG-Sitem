@@ -477,3 +477,8 @@ Stage7 Multi-Veículos local implementation/independent QA complete over existin
 Stage7 integration publication PASS at c8c08924. Pending ONLY reviewed pilot source pin/application and hosted acceptance; Railway approval tool cancelled twice after exact user consent. Apply existing staged patch from checkpoint through platform, preserve isolated volume/data, verify health/build before live QA. Do not Stage8.
 
 Stage7 online gate: prior Railway blocker resolved at6af84634; real acceptance found recursive quote snapshot transport overflow. Bounded fix/tests and pilot repeat pending; retain all user records/private backup. Stage7.1 prohibited until gate closes/new authorization.
+
+
+## CONVERGENCE-01 — Stage7.1
+
+Em andamento: pacote local Ready for Review; gates82/Brain165/release, mapa/consulta e regressões PASS. Concluir publicação e smoke real somente no piloto. Stage7 aceita pelo QG; bloqueios históricos acima estão superados. Stage8 e Reverse Technical Lookup não implementados.

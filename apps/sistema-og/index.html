@@ -38,6 +38,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="components/app-shell.css">
   <link rel="stylesheet" href="components/technical-workspace.css">
+  <link rel="stylesheet" href="components/technical-application-map.css">
   <link rel="stylesheet" href="components/multi-vehicle-workspace.css">
 </head>
 <body class="dutra-shell bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
@@ -543,6 +544,8 @@
     <div id="tab-guia" class="tab-content hidden">
       <section id="technical-workspace" class="technical-workspace" aria-labelledby="technical-title">
         <header class="technical-header"><div><span class="og-kicker">APLICAÇÃO TÉCNICA · OG</span><h1 id="technical-title">Do veículo à composição certa</h1><p>Configure, revise e leve as peças para a cotação. Dados incompletos permanecem em VALIDAR.</p></div><span class="technical-source">Motor atual · catálogo OG</span></header>
+        <label class="technical-checkbox"><input id="technical-query-mode" type="checkbox">Base Técnica · consultar sem criar cotação</label>
+        <div class="technical-query-controls" aria-label="Parte da aplicação"><button type="button" data-technical-scope="all" aria-pressed="true">Conjunto completo</button><button type="button" data-technical-scope="cavalo" aria-pressed="false">CAVALO / CAMINHÃO</button><button type="button" data-technical-scope="carreta" aria-pressed="false">CARRETA / IMPLEMENTO</button></div>
         <div class="technical-grid">
           <section class="technical-panel technical-context" aria-labelledby="technical-context-title">
             <span class="og-kicker">01 · CONTEXTO</span><h2 id="technical-context-title">Cliente e veículo</h2>
@@ -555,7 +558,7 @@
             <p id="technical-client-context" class="technical-hint">O cliente é o mesmo do CRM. Trabalhar sem vínculo não cria outro cadastro.</p>
           </section>
           <section class="technical-panel technical-configuration" aria-labelledby="technical-config-title"><span class="og-kicker">02 · CONFIGURAÇÃO</span><h2 id="technical-config-title">Confirme o que muda a aplicação</h2><div id="consultant-questions-container"></div><p id="technical-axles" class="technical-hint">Eixos não determinados</p></section>
-          <section class="technical-panel technical-result" aria-labelledby="technical-result-title"><span class="og-kicker">03 · REVISÃO</span><h2 id="technical-result-title">Peças e quantidades</h2><div id="technical-state" class="technical-status" role="status" aria-live="polite"></div><div id="consultant-resolution-container"></div>
+          <section class="technical-panel technical-result" aria-labelledby="technical-result-title"><span class="og-kicker">03 · REVISÃO</span><h2 id="technical-result-title">Peças e quantidades</h2><div id="technical-state" class="technical-status" role="status" aria-live="polite"></div><div id="technical-application-map"></div><div id="consultant-resolution-container"></div>
             <details class="technical-manual-tools"><summary>Adicionar peça do catálogo</summary><div class="technical-add"><label>Peça<select id="technical-add-code"></select></label><label>Por veículo<input id="technical-add-qty" type="number" min="1" step="1" value="1"></label><button id="technical-add-item" type="button">Adicionar peça</button></div></details>
             <div id="technical-manual-review" hidden><label class="technical-checkbox"><input id="technical-confirm-manual" type="checkbox">Revisei os ajustes para esta configuração</label><button id="technical-reset-manual" type="button">Voltar ao cálculo do motor</button><p class="technical-hint">Recalcular não apaga ajustes. A substituição exige confirmação explícita.</p></div>
             <div class="technical-actions"><button id="technical-save-draft" type="button">Salvar rascunho</button><button id="btn-inject-consultant-to-quote" type="button" class="technical-primary" disabled>Continuar na cotação</button></div><p id="technical-feedback" role="status" aria-live="polite">Nenhuma proposta ou contato é registrado ao salvar um rascunho técnico.</p>
@@ -1423,6 +1426,7 @@
   <script src="material-store.js"></script>
   <script src="sales-materials.js"></script>
   <script src="performance-engine.js"></script>
+  <script src="components/technical-application-map.js"></script>
   <script src="components/technical-workspace.js"></script>
   <script src="components/multi-vehicle-workspace.js"></script>
   <script src="runtime-config.js"></script>

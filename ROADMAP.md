@@ -1,10 +1,11 @@
 # DUTRA OS — Roadmap Vivo
 
-## CONVERGENCE-01 — Stage6
 
-Aplicação Técnica Premium autorizada e implementada sobre motor/catalog/owners atuais, com rascunho durável e cotação nativa. Stage6 COMPLETE: gates finais, QA independente e publicação verificada somente na integração; [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) registra o estado exato. Stage7 não autorizada; nenhum merge em main ou deploy de produção.
+## CONVERGENCE-01 — Stage7.1
 
-Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado permanece em `docs/10-ROADMAP.md`.
+Stage7 Multi-Veículos aceita pelo QG. Stage7.1 entrega explicabilidade Cavalo/Carreta e consulta sem cotação com o motor atual. Gates e aceite online permanecem no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md). Sem redesign de proposta, Stage8 ou produção.
+
+Backlog não implementado: **Reverse Technical Lookup** — peça → aplicações/contextos/caminhos conhecidos, com a mesma fonte técnica; exige auditoria futura, sem tabela paralela de compatibilidade.
 
 ## Concluído / consolidado
 

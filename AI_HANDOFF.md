@@ -1,10 +1,9 @@
 # DUTRA OS — AI Handoff
 
-## Handoff atual — Stage6
 
-Leia [o checkpoint atual](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) para owners técnicos, input gate/VALIDAR, edição manual, draft canônico, handoff de cotação e regressões de GET/ACK concorrentes. Stage6 COMPLETE: gates locais, QA independente e publicação real na integração PASS; não iniciar Stage7. Não apresentar o Railway V3 histórico como integração Stage6: a auditoria somente leitura não encontrou preview hospedado da branch de integração.
+## Handoff atual — Stage7.1
 
-Este arquivo existe para que qualquer nova IA, agente ou desenvolvedor consiga continuar o projeto sem reconstruir sua história a partir de chats.
+Stage7 aceita pelo QG; runtime de entrada513b2d82 contém c8c08924 e033be666. [Checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md) registra a auditoria e publicação Stage7.1. Mapa técnico é projeção da posição emitida pelo builder canônico; caminho é reconstruído de regra/contexto mínimos salvos. Não promover foto, inferência ou código da peça a regra física. Preservar snapshots limitados, identidade por veículo, outbox/auth/volume piloto. Não iniciar Stage8.
 
 ## Boot obrigatório
 

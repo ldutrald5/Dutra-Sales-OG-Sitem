@@ -1,0 +1,12 @@
+.application-map{min-width:0;margin:1rem 0;padding:1rem;border:1px solid var(--og-border,#343a40);border-radius:14px;background:#141619;color:#e8e9eb}
+.application-map h3,.application-map h4{font-weight:750;margin:0 0 .65rem}.application-map h4{color:#f5c518;font-size:.85rem;letter-spacing:.04em}.application-map-note{color:#b6bbc3;font-size:.78rem;line-height:1.5;margin-bottom:1rem}
+.application-map-groups{display:grid;gap:1rem}.application-map-groups>section{min-width:0}.application-map details{border:1px solid #3b4048;border-radius:8px;margin:.4rem 0;overflow-wrap:anywhere;background:#1b1e23}
+.application-map summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem;padding:.65rem;min-height:44px;cursor:pointer}.application-map summary small{grid-column:1/-1;color:#c2c5ca;font-size:.72rem}.application-map code{color:#f5c518}.application-map-detail{padding:.75rem;font-size:.8rem;border-top:1px solid #3b4048}.application-map-detail ol{padding-left:1.3rem;line-height:1.65}.application-map-detail p{margin:.5rem 0}.application-map summary:focus-visible{outline:2px solid #f5c518;outline-offset:2px}
+.technical-query-controls{display:flex;gap:.5rem;flex-wrap:wrap;padding:.85rem 0}.technical-query-controls button{padding:.65rem .85rem;min-height:44px;border:1px solid #525962;border-radius:8px;background:#20242a;color:#eee;font-weight:650}.technical-query-controls button[aria-pressed=true]{border-color:#f5c518;color:#f5c518;background:#34301c}.technical-query-controls button:focus-visible{outline:2px solid #f5c518;outline-offset:2px}
+.technical-item-scope{display:block;font-size:.78rem;padding-top:.6rem}.technical-item-scope select{max-width:100%;min-height:44px}.application-map [hidden]{display:none}
+@media(min-width:1100px){.application-map-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media (min-width: 1100px) {
+  .application-map-groups > section:only-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .application-map-groups > section:only-child > h4 { grid-column: 1 / -1; }
+}

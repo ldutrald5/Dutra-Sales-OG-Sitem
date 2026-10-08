@@ -278,3 +278,8 @@ Concluída a implementação delimitada da Aplicação Técnica Premium sobre mo
 ## CONVERGENCE-01 Stage7 — implementation/QA (2026-10-08)
 
 Stable independent configurations, quantity/consolidation, cloned history and existing-envelope/outbox recovery implemented. Mature technical/pricing functions unchanged; focused unit/browser14/eight viewports and full real-source isolated two-viewport native quotation/reopen proof PASS. Integration/live publication is finalized in the checkpoint, not inferred from local tests. No Stage8 or main/production changes.
+
+
+## CONVERGENCE-01 Stage7.1 — pacote local (2026-10-08)
+
+Mapa por origem/posição do único motor, consulta sem gravação, classificação manual VALIDAR e explicação na cotação implementados. Gates82/82/Brain165/release, oito viewports, snapshots limitados e regressões Stages3–7 PASS. Publicação/aceite online delimitados no checkpoint; não inferir COMPLETE de teste local.

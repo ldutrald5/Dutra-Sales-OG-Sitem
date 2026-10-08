@@ -312,3 +312,14 @@ Novo/editar usa o mesmo `state.consultant`, com ID de configuração separado do
 `operations.quotes`, no envelope existente, contém snapshots aditivos `quote_workspace/composition_draft` com cliente, veículos e avulsos. As ações atualizam a outbox existente antes da confirmação de handoff. Recuperação inicial copia o snapshot; pull em segundo plano preserva trabalho ativo. Uma escolha humana explícita de versão do servidor/revisão recupera a composição escolhida, inclusive vazia. Cotações do histórico são copiadas ao reabrir; alterações não modificam o snapshot salvo. Nenhum catálogo, cálculo financeiro, CRM, store ou sync manager adicional.
 
 O histórico captura apenas `client`, `vehicles`, `extraItems`, `activePdfTemplate` e `activeWhatsappFormat`, em cópia profunda. Não inclui outro CRM, envelope operacional ou histórico dentro de cada cotação. Isso evita crescimento recursivo acima do limite de transporte de estado; payloads históricos antigos permanecem legíveis e intactos, sem migração. `clientId` canônico e totais continuam na linha nativa do histórico.
+
+
+## Mapa técnico Cavalo × Carreta — CONVERGENCE-01 Stage7.1
+
+O builder existente registra `{code, qty, position}` nas mesmas chamadas addPiece; posições `dianteiro`, `tracao`, `truck`, `carreta` precedem a consolidação por código. O escopo opcional all/cavalo/carreta apenas projeta esses ramos; all mantém as quantidades anteriores. Resolver, catálogo, preços e fórmula financeira não mudam. Um código pode pertencer a mais de uma posição no mesmo conjunto.
+
+`technical-application-map` somente explica: CONFIRMADO NO MOTOR identifica origem calculada em regra/contexto válidos, não certificação física OG. Caminho usa regra, respostas ativas, libragem e posição reais. Contexto insuficiente/legado ou ajuste manual fica VALIDAR; classificação manual opcional no próprio item não inventa posição. Fotos/tabelas são fontes de auditoria, nunca regra automática.
+
+Consulta usa state.consultant/queryMode e os mesmos hooks, com save/handoff bloqueados também no command boundary. Para implemento, só o ramo independente do conjunto existente é exposto, sem requisitos irrelevantes do cavalo nem novo mapeamento. O snapshot contém scope/manual metadata e contexto mínimo por veículo; regra/caminho são reconstruídos deterministicamente, sem copiar CRM/history/state. Assinaturas de identidade incluem scope. Nome/quantidade de veículos não alteram origem unitária; apenas edição real de items gera manual override.
+
+Owners seguem state.vehicles, operations.quotes/outbox, histórico limitado e calculateCompleteQuote. Projeção de peças/posições e multiplicadores visuais não entra na fórmula de preço. Evidência e limitações no [checkpoint](handoffs/V3_UNIFICATION_CHECKPOINT.md); Reverse Technical Lookup permanece backlog.

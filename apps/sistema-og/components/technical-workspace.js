@@ -13,7 +13,10 @@
     const rule = data?.vehicleConsultantRules?.find(item => item.id === draft.selectedVehicleId);
     const issues = [];
     if (!rule) issues.push('Escolha uma configuração coberta pelo motor.');
-    const questions = (rule?.questions || []).filter(question => !question.showIf || Object.entries(question.showIf).every(([key, value]) => draft.answers?.[key] === value));
+    const applicationScope = draft.applicationScope || 'all';
+    if (!['all','cavalo','carreta'].includes(applicationScope)) issues.push('Escopo técnico a validar.');
+    if (applicationScope === 'carreta' && !rule?.axles?.carreta) issues.push('Escolha um conjunto com eixos de implemento previstos no motor.');
+    const questions = (applicationScope === 'carreta' ? [] : rule?.questions || []).filter(question => !question.showIf || Object.entries(question.showIf).every(([key, value]) => draft.answers?.[key] === value));
     for (const question of questions) {
       if (!question.options.some(option => option.value === draft.answers?.[question.id])) issues.push(question.question);
     }
@@ -22,14 +25,14 @@
     if (!Number.isInteger(Number(draft.qty)) || Number(draft.qty) < 1 || Number(draft.qty) > 999) issues.push('Informe uma quantidade de veículos inteira, entre 1 e 999.');
     if (issues.length) return { state: rule ? 'validate' : 'empty', rule, questions, issues, items: [], baseItems: [], resolution: null, ready: false };
     try {
-      const calculated = build(rule.id, draft.answers || {}, Number(draft.libras), Boolean(draft.includeDianteira));
+      const calculated = build(rule.id, draft.answers || {}, Number(draft.libras), Boolean(draft.includeDianteira), applicationScope);
       const baseItems = calculated.resultList;
       const items = draft.manualItems === null || draft.manualItems === undefined ? baseItems : draft.manualItems;
       if (!Array.isArray(items) || !items.length || items.some(item => !data.catalog.some(part => part.code === item.code) || !Number.isInteger(Number(item.qty)) || Number(item.qty) < 1)) {
         return { state:'validate', rule, questions, issues:['Peças ou quantidades não determinadas. Revise a composição.'], items:[], baseItems, resolution:calculated.resolution, ready:false };
       }
       const manual = Array.isArray(draft.manualItems);
-      return { state:manual ? 'manual' : 'result', rule, questions, issues:manual && !draft.manualConfirmed ? ['Confirme a revisão dos ajustes manuais antes de continuar.'] : [], items, baseItems, resolution:calculated.resolution, ready:!manual || draft.manualConfirmed === true };
+      return { state:manual ? 'manual' : 'result', rule, questions, issues:manual && !draft.manualConfirmed ? ['Confirme a revisão dos ajustes manuais antes de continuar.'] : [], items, baseItems, applicationEntries:calculated.applicationEntries || [], resolution:calculated.resolution, ready:!manual || draft.manualConfirmed === true };
     } catch {
       return { state:'error', rule, questions, issues:['O cálculo não foi concluído. Nenhuma peça foi determinada.'], items:[], baseItems:[], resolution:null, ready:false };
     }
@@ -76,6 +79,7 @@
       change(item => { item.manualItems = copy(existing); mutate(item.manualItems); });
     }
     async function save(handoff) {
+      if (draft().queryMode) return feedback('Base Técnica: consulta sem gravação comercial.');
       if (busy || !ownerValid()) return feedback('O cliente não está disponível no CRM. Revise o vínculo.', true);
       try {
         if (!targetValid(draft())) return feedback('Este veículo foi alterado ou removido. Reabra a aplicação na cotação.', true);
@@ -133,6 +137,18 @@
         if (!lastSavedId) dirty = true;
         render();
       });
+      get('technical-query-mode').addEventListener('change', event => change(item => { item.queryMode = event.target.checked; }));
+      root.querySelectorAll('[data-technical-scope]').forEach(button => button.addEventListener('click', () => {
+        if (busy) return;
+        if (Array.isArray(draft().manualItems) && !window.confirm('Trocar o escopo inicia outra aplicação. Os ajustes atuais permanecem no último rascunho salvo. Continuar?')) return render();
+        change(item => {
+          item.applicationScope = button.dataset.technicalScope;
+          item.manualItems = null; item.manualConfirmed = false;
+          if (item.applicationScope === 'carreta' && !data().vehicleConsultantRules.find(rule => rule.id === item.selectedVehicleId)?.axles?.carreta) {
+            item.selectedVehicleId = ''; item.answers = {};
+          }
+        });
+      }));
       get('technical-vehicle').addEventListener('change', event => chooseVehicle(event.target.value));
       get('technical-name').addEventListener('change', event => change(item => { item.targetVehicleName = event.target.value.trim(); }));
       get('technical-qty').addEventListener('change', event => change(item => { item.qty = Number(event.target.value); }));
@@ -166,8 +182,14 @@
       root.dataset.leadId = item.leadId || '';
       root.dataset.vehicleId = item.selectedVehicleId || '';
       root.dataset.editingVehicleId = item.editingVehicleId || '';
-      get('technical-title').textContent = item.editingVehicleId ? 'Revisar veículo da cotação' : 'Adicionar veículo à cotação';
+      get('technical-title').textContent = item.queryMode ? 'Base Técnica · consulta sem cotação' : item.editingVehicleId ? 'Revisar veículo da cotação' : 'Adicionar veículo à cotação';
       get('btn-inject-consultant-to-quote').textContent = item.editingVehicleId ? 'Atualizar veículo na cotação' : 'Adicionar à cotação';
+      get('technical-query-mode').checked = Boolean(item.queryMode);
+      get('technical-client').closest('label').hidden = Boolean(item.queryMode);
+      root.querySelectorAll('[data-technical-scope]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.technicalScope === (item.applicationScope || 'all'))));
+      get('consultant-include-dianteira').closest('label').hidden = item.applicationScope === 'carreta';
+      const queryMessage = 'Consulta somente leitura: nenhuma cotação, cliente ou atividade é criada.';
+      if (item.queryMode || get('technical-feedback').textContent === queryMessage) get('technical-feedback').textContent = item.queryMode ? queryMessage : '';
       get('technical-client').innerHTML = `<option value="">Sem cliente vinculado</option>${hooks.leads().map(lead => `<option value="${escape(lead.id)}">${escape(lead.empresa || lead.nome || lead.id)}</option>`).join('')}`;
       get('technical-client').value = item.leadId || '';
       const quoteClient = hooks.quoteClient?.();
@@ -176,7 +198,7 @@
         ? 'Vínculo com o cadastro canônico do CRM. O rascunho técnico não registra uma venda ou envio.'
         : quoteName ? `Sem vínculo ao CRM. Cotação atual: ${quoteName}. Continuar usa este contexto manual, sem criar cadastro.`
           : 'Sem cliente vinculado. Trabalhar nesta tela não cria outro cadastro.';
-      get('technical-vehicle').innerHTML = `<option value="">Escolha a configuração</option>${(data()?.vehicleConsultantRules || []).map(rule => `<option value="${escape(rule.id)}">${escape(rule.name)}</option>`).join('')}`;
+      get('technical-vehicle').innerHTML = `<option value="">Escolha a configuração</option>${(data()?.vehicleConsultantRules || []).filter(rule => item.applicationScope !== 'carreta' || rule.axles?.carreta > 0).map(rule => `<option value="${escape(rule.id)}">${escape(rule.name)}</option>`).join('')}`;
       get('technical-vehicle').value = item.selectedVehicleId || '';
       get('technical-name').value = item.targetVehicleName || '';
       get('technical-qty').value = item.qty;
@@ -192,15 +214,18 @@
       });
       const resolution = computed.resolution;
       get('technical-axles').textContent = resolution ? Object.entries(resolution.axlesCount).map(([position,qty]) => `${position}: ${qty}`).join(' · ') : 'Eixos não determinados';
-      get('consultant-resolution-container').innerHTML = computed.items.map((part,index) => `<article data-technical-item data-code="${escape(part.code)}" data-qty="${Number(part.qty)}"><div><span class="technical-code">${escape(part.code)}</span><strong>${escape(data().catalog.find(row => row.code === part.code)?.name || part.code)}</strong><small>${Array.isArray(item.manualItems) ? 'Composição revisada manualmente' : 'Calculado pelo motor atual'} · ${Number(part.qty)} por veículo · ${Number(part.qty) * Number(item.qty)} no total</small></div><div class="technical-item-actions"><label>Peça<select data-technical-code data-index="${index}" aria-label="Substituir ${escape(part.code)}">${data().catalog.map(row => `<option value="${escape(row.code)}" ${row.code === part.code ? 'selected' : ''}>${escape(row.code)} · ${escape(row.name)}</option>`).join('')}</select></label><label>Por veículo<input data-technical-qty data-index="${index}" aria-label="Quantidade ${escape(part.code)}" type="number" min="1" step="1" value="${Number(part.qty)}"></label><button type="button" data-technical-remove data-index="${index}" aria-label="Remover ${escape(part.code)}">Remover</button></div></article>`).join('') || '<p class="technical-empty">Nenhuma peça determinada. Complete ou corrija a configuração; o sistema não inventa itens.</p>';
-      get('consultant-resolution-container').querySelectorAll('[data-technical-code],[data-technical-qty],[data-technical-remove]').forEach(control => {
+      const projection = window.OG_TECHNICAL_APPLICATION_MAP?.model({...computed, draft:item, data:data()});
+      get('technical-application-map').innerHTML = projection ? window.OG_TECHNICAL_APPLICATION_MAP.html(projection) : '';
+      get('consultant-resolution-container').innerHTML = computed.items.map((part,index) => `<article data-technical-item data-code="${escape(part.code)}" data-qty="${Number(part.qty)}"><div><span class="technical-code">${escape(part.code)}</span><strong>${escape(data().catalog.find(row => row.code === part.code)?.name || part.code)}</strong><small>${Array.isArray(item.manualItems) ? 'Composição revisada manualmente' : 'Calculado pelo motor atual'} · ${Number(part.qty)} por veículo · ${Number(part.qty) * Number(item.qty)} no total</small></div><div class="technical-item-actions"><label>Peça<select data-technical-code data-index="${index}" aria-label="Substituir ${escape(part.code)}">${data().catalog.map(row => `<option value="${escape(row.code)}" ${row.code === part.code ? 'selected' : ''}>${escape(row.code)} · ${escape(row.name)}</option>`).join('')}</select></label><label>Por veículo<input data-technical-qty data-index="${index}" aria-label="Quantidade ${escape(part.code)}" type="number" min="1" step="1" value="${Number(part.qty)}"></label><button type="button" data-technical-remove data-index="${index}" aria-label="Remover ${escape(part.code)}">Remover</button></div>${Array.isArray(item.manualItems) ? `<label class="technical-item-scope">Aplicação deste ajuste<select data-manual-scope data-index="${index}" aria-label="Aplicação ${escape(part.code)}">${Object.entries(window.OG_TECHNICAL_APPLICATION_MAP?.scopes || {}).map(([scope,label]) => `<option value="${scope}" ${(part.applicationScope || 'validar') === scope ? 'selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}</article>`).join('') || '<p class="technical-empty">Nenhuma peça determinada. Complete ou corrija a configuração; o sistema não inventa itens.</p>';
+      get('consultant-resolution-container').querySelectorAll('[data-technical-code],[data-technical-qty],[data-technical-remove],[data-manual-scope]').forEach(control => {
         const valid = captured(control);
         control.addEventListener(control.hasAttribute('data-technical-remove') ? 'click' : 'change', () => {
           if (!valid()) return;
           editItems(items => {
             const index = Number(control.dataset.index);
             if (control.hasAttribute('data-technical-remove')) items.splice(index,1);
-            else if (control.hasAttribute('data-technical-code')) items[index].code = control.value;
+            else if (control.hasAttribute('data-manual-scope')) items[index].applicationScope = control.value;
+            else if (control.hasAttribute('data-technical-code')) { items[index].code = control.value; delete items[index].applicationScope; }
             else {
               const quantity = Number(control.value);
               if (!Number.isInteger(quantity) || quantity < 1) return feedback('A quantidade da peça deve ser um inteiro positivo. O valor anterior foi preservado.', true);
@@ -215,9 +240,11 @@
       get('technical-confirm-manual').checked = item.manualConfirmed === true;
       get('technical-reset-manual').disabled = busy || !manual;
       get('technical-add-item').disabled = busy || !computed.baseItems.length;
-      get('btn-inject-consultant-to-quote').disabled = busy || !computed.ready || !ownerValid();
+      get('btn-inject-consultant-to-quote').disabled = busy || item.queryMode || !computed.ready || !ownerValid();
       root.querySelectorAll('input,select,textarea,#technical-save-draft').forEach(control => { control.disabled = busy; });
       root.querySelectorAll('[data-qid],[data-technical-remove]').forEach(control => { control.disabled = busy; });
+      get('technical-save-draft').disabled = busy || Boolean(item.queryMode);
+      root.dataset.queryMode = String(Boolean(item.queryMode));
       root.dataset.busy = String(busy);
     }
     bind();

@@ -41,12 +41,12 @@ function composition() {
     id:`FAKE-VEH-000${index}`, name:`Veículo 000${index}`, clientId:'FAKE-LEAD-0000',
     vehicleTypeId, libras:120, includeDianteira:Boolean(index), qty:index + 2, collapsed:Boolean(index),
     items:[{ code:'EQ-120', qty:index ? 2 : 16, customPrice:index ? 33.5 : 0 },
-      { code:'EQ-1145', qty:2, customPrice:null }],
+      { code:'EQ-1145', qty:2, customPrice:null, applicationScope:'cavalo' }],
     technicalContext:{
       id:`FAKE-TECH-000${index}`, leadId:'FAKE-LEAD-0000', selectedVehicleId:vehicleTypeId,
       answers:{ brand:'volvo', has_reduction:'nao', review:{ reference:`FAKE-RULE-000${index}` } },
       libras:120, includeDianteira:Boolean(index), targetVehicleName:`Veículo 000${index}`, qty:index + 2,
-      notes:`Contexto 000${index}`, handoffId:`FAKE-VEH-000${index}`,
+      notes:`Contexto 000${index}`, applicationScope:'all', handoffId:`FAKE-VEH-000${index}`,
       manualItems:[{ code:'EQ-120', qty:index ? 2 : 16, customPrice:index ? 33.5 : 0 }],
       manualConfirmed:true, rule:{ id:`FAKE-RULE-000${index}`, vehicleTypeId },
       editingVehicleId:`FAKE-VEH-000${index}`, editingSnapshot:`FAKE-SIGNATURE-000${index}`

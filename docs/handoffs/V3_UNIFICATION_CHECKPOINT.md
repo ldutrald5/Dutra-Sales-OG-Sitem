@@ -1,5 +1,38 @@
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
 
+## Current Stage7.1 — Technical application explainability (2026-10-08)
+
+STATUS: IN PROGRESS. PRE_SHA/rollback:513b2d82ad94c4fde608bb461ebb943e209e988f. Git/local/remote CLEAN/equal; c8c08924 and033be666 ancestry PASS. User/QG explicitly accepted Stage7 online save/reload/reopen; independently observed pilot deployment1a561d06-cbd4-49ed-a8e2-0a301bb9506a SUCCESS and health200/persistent at513b2d82, containing both required commits. Historical Stage7 blocker below is superseded. Only Stage7.1 authorized; no Stage8/main/official production.
+
+Audit before implementation:
+
+| Capability | Existing owner/data | Decision |
+|---|---|---|
+| Technical application | OG_DATA + resolveVehicleSupports + buildConsolidatedVehiclePieces | KEEP rules/prices; expose originating position at existing addPiece calls |
+| Part | OG_DATA.catalog; current resultList | KEEP; never classify by code alone |
+| Vehicle | state.vehicles stable IDs / technicalContext | KEEP; minimal scope/manual-classification metadata |
+| Quote | calculateCompleteQuote + bounded history snapshot | KEEP financial formulas/multipliers unchanged |
+| Position | resolution.axlesCount + suporteDianteiro/Tracao/Truck/Carreta | Sufficient for runtime-derived split; provenance currently lost on consolidation |
+| Cavalo/carretas | configured conjunto rules contain both axle groups | Context-based projection; no standalone compatibility table |
+| Physical evidence | runtime rules/test provenance; official OG claims incomplete | Runtime-confirmed != factory-confirmed; source gaps remain VALIDAR |
+| Consultation | existing technical controller/input gate/state.consultant | ADAPT read-only mode, saves/handoff unavailable; no quote/CRM creation |
+| Carreta consultation | existing conjunto resolution has independent trailer position/count | Project only canonical trailer branches, without requiring unrelated tractor answers; label source conjunto |
+| Manual/legacy unknown | items plus optional explicit user application scope | VALIDAR unless user classifies; never infer position from part code |
+
+Bounded design: existing builder records code/qty/position while adding pieces and optionally projects tractor/trailer positions. Default output quantities remain identical. Small read-only map component reconstructs rule/question path and groups positions; no support mapping/price engine/store. Query mode lives in existing draft only and cannot persist commercially. Saved per-vehicle contexts allow deterministic path reconstruction; bounded snapshot retains only composition. Manual choices are item metadata; async identity checks include scope. Future Reverse Technical Lookup deferred; photos do not change rules. Baseline technical/multi/snapshot checks PASS.
+
+Local implementation/QA complete; online Stage7.1 remains NOT RUN until actual deployment. Gates: og:check/lint, full npm test82/82, release gate, Brain165/zero warnings PASS. Technical map unit and browser PASS: same code in truck/trailer, known tractor/trailer/front/traction origins, manual chosen/unknown VALIDAR, stale previous-vehicle scope control inert, no-write consultation, exact default quantities across all rules/libras, native financial totals unchanged, bounded snapshot/reconstruction/save/reload/reopen. Snapshot transport12 saves1835013bytes <5000000; no CRM/history/state recursion. Native503/outbox/reconnect ACK and HTTP409 remain explicit.
+
+Previous-stage regressions PASS: Meu Dia, Prospecting (including empty/stale focus), Call AI13cases, technical workspace/context concurrency, Multi-Vehicle14cases, Shell/PWA, reconnect/review and persistent auth browser. Real-source private local fixture audits20 identities per390x844/1440x900, unchanged original work, quote/reload/reconnect/process restart PASS; this is not hosted Stage7.1 acceptance. Browser timing assertions during concurrent QA were reproduced and passed isolated, without weakened assertions, timeout increases or sync changes.
+
+Viewports:320x568,360x800,390x844,430x932,768x1024,1280x720,1440x900,1920x1080; map/path/manual choice/scroll/overflow/touch PASS. Desktop map uses available width; synthetic390/1440 inspected. Durable regression fix: fleet name/multiplier changes no longer misclassify unchanged unit items as manual. Only real unit-item mutation marks manual composition.
+
+Files: app.js; components/technical-workspace.js, multi-vehicle-workspace.js, new technical-application-map.js/.css; index.html; asset-only SWv78; package.json/validate; new map unit/browser and extended bounded snapshot test; checkpoint/story/architecture; contexts/roadmap/changelog/tasks; Brain source/decision/incident/cycle/index/metrics. No dependencies, data.js/resolveVehicleSupports, financial formula, schema, auth/sync engine or Supabase changes.
+
+Pre-deploy fresh private recoverable snapshot:434leads,3history,19operations.quotes,revision33; full JSON reread equality. Isolated pilot service b385d7a3-616c-4c44-82c7-7c9541ba7c45 / preview project d8e7173f-b8d3-4f8a-85e7-33c93d627774, volume509ed70c-cdfc-44e9-9eaf-3d0dc144ff2c /data unchanged. Git main/V2/V3/#109/#110 refs match entry. Private live harness requires exact verified health SHA, captures fresh backup before any write and rejects original record changes; one explicitly marked unsent test quote, no external requests. Publication/deploy/online result recorded below after verification. Rollback code:513b2d82; preserve current data/volume, never reset user state.
+
+Known gaps: software rule provenance is not factory physical certification; missing/manual positions stay VALIDAR. Implemento consultation is a projection of existing conjunto rules, not a new standalone compatibility database. Provider absence and Reverse Technical Lookup remain deferred. No Stage8 or official production.
+
 ## Current Stage7 — Multi-Veículos Premium (2026-10-08)
 
 STATUS: BLOCKED — online acceptance reproduced oversized recursive quotation snapshots; bounded fix/local gates/integration push PASS; Railway cancelled fixed-pilot apply, live repeat pending. Prior platform deploy blocker was resolved externally. PRE_STAGE7_SHA / rollback: `2797d3db087d774f5ec7350deba1f3c162ad1550`. POST_STAGE7_SHA (implementation): `c8c08924d43d1589b30bd228d765f4f5260dd537`; final closure HEAD is the containing documentation commit. Branch: integration/dutra-os-one-system. Authorization: QG Stage7 only; no Stage8/main/production changes.

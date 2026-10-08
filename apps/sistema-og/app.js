@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const context = vehicle.technicalContext || {};
     return JSON.stringify([
       ...['id','name','qty','vehicleTypeId','libras','includeDianteira','items','clientId'].map(key => vehicle[key]),
-      ...['leadId','answers','notes','manualItems','manualConfirmed'].map(key => context[key])
+      ...['leadId','answers','notes','manualItems','manualConfirmed','applicationScope'].map(key => context[key])
     ]);
   }
 
@@ -1658,7 +1658,11 @@ document.addEventListener('DOMContentLoaded', () => {
     state.lastQuoteData = data;
 
     renderVehicleAccordions(data);
-    window.OG_MULTI_VEHICLE_WORKSPACE?.render(document.getElementById('multi-vehicle-workspace'), data, OG_DATA.catalog);
+    window.OG_MULTI_VEHICLE_WORKSPACE?.render(document.getElementById('multi-vehicle-workspace'), data, OG_DATA.catalog, vehicle => {
+      const draft = { ...(vehicle.technicalContext || {}), selectedVehicleId:vehicle.vehicleTypeId, libras:vehicle.libras, includeDianteira:vehicle.includeDianteira, qty:vehicle.qty };
+      const computed = OG_TECHNICAL_WORKSPACE.view(draft, OG_DATA, buildConsolidatedVehiclePieces);
+      return OG_TECHNICAL_APPLICATION_MAP.model({ ...computed, items:vehicle.items, draft, data:OG_DATA });
+    });
     renderExtraItemsTable(data);
     renderMetrics(data);
     renderFreightQuoteInfo(data);
@@ -1825,6 +1829,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const capturedVehicle = state.vehicles.find(vehicle => vehicle.id === id);
       if (!capturedVehicle) return;
       const token = quoteVehicleSignature(capturedVehicle);
+      const capturedItemsSignature = JSON.stringify(capturedVehicle.items);
       const itemIndex = Number(control.dataset.iidx ?? control.dataset.delItem);
       const item = Number.isInteger(itemIndex) ? capturedVehicle.items[itemIndex] : null;
       control.dataset.vehicleId = id;
@@ -1877,7 +1882,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (vehicle.technicalContext) {
           vehicle.technicalContext.targetVehicleName = vehicle.name;
           vehicle.technicalContext.qty = vehicle.qty;
-          if (JSON.stringify(vehicle.items) !== JSON.stringify(capturedVehicle.technicalContext.manualItems)) {
+          if (JSON.stringify(vehicle.items) !== capturedItemsSignature) {
             vehicle.technicalContext.manualItems = JSON.parse(JSON.stringify(vehicle.items));
             vehicle.technicalContext.manualConfirmed = false;
           }
@@ -2832,6 +2837,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const lead = draft.leadId ? OG_CRM_SERVICE.getLeadById(state.leads, draft.leadId) : null;
     if (draft.leadId && !lead) throw new Error('O cliente não está disponível no CRM.');
     if (!validQuoteVehicleDraft(draft)) throw new Error('O veículo foi alterado ou removido. Reabra a aplicação atual antes de salvar.');
+    if (draft.queryMode) throw new Error('A consulta não cria rascunho ou cotação.');
     if (handoff && !computed.ready) throw new Error('VALIDAR: aplicação ainda não determinada.');
     const sameQuoteClient = lead && String(findLeadForClientData(state.client)?.id || '') === String(lead.id);
     const client = JSON.parse(JSON.stringify(!lead || sameQuoteClient ? state.client : quoteClientDefaults));
@@ -3019,48 +3025,53 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     return result;
   }
 
-  function buildConsolidatedVehiclePieces(vId, answers, libras, includeDianteira) {
+  function buildConsolidatedVehiclePieces(vId, answers, libras, includeDianteira, applicationScope = 'all') {
     const resolution = resolveVehicleSupports(vId, answers);
     const axles = resolution.axlesCount;
     const eqCode = `EQ-${libras}`;
     const eqDiantCode = `EQ-${libras}D`;
 
+    if (!['all', 'cavalo', 'carreta'].includes(applicationScope)) throw new Error('Escopo técnico não determinado');
+    const applicationEntries = [];
     const consolidatedMap = new Map();
-    const addPiece = (code, qty) => {
+    const addPiece = (code, qty, position) => {
+      if (applicationScope === 'carreta' && position !== 'carreta') return;
+      if (applicationScope === 'cavalo' && position === 'carreta') return;
       if (!code || qty <= 0) return;
+      applicationEntries.push({ code, qty, position });
       const current = consolidatedMap.get(code) || 0;
       consolidatedMap.set(code, current + qty);
     };
 
     if (axles.tracao > 0 && resolution.suporteTracao) {
       const qtyConj = axles.tracao * 2;
-      addPiece(eqCode, qtyConj);
-      addPiece(resolution.suporteTracao.code, qtyConj);
-      addPiece('EQ-1040', qtyConj);
-      addPiece('EQ-1043', qtyConj);
+      addPiece(eqCode, qtyConj, 'tracao');
+      addPiece(resolution.suporteTracao.code, qtyConj, 'tracao');
+      addPiece('EQ-1040', qtyConj, 'tracao');
+      addPiece('EQ-1043', qtyConj, 'tracao');
     }
 
     if (axles.truck > 0 && resolution.suporteTruck) {
       const qtyConj = axles.truck * 2;
-      addPiece(eqCode, qtyConj);
-      addPiece(resolution.suporteTruck.code, qtyConj);
-      addPiece('EQ-1040', qtyConj);
-      addPiece('EQ-1043', qtyConj);
+      addPiece(eqCode, qtyConj, 'truck');
+      addPiece(resolution.suporteTruck.code, qtyConj, 'truck');
+      addPiece('EQ-1040', qtyConj, 'truck');
+      addPiece('EQ-1043', qtyConj, 'truck');
     }
 
     if (axles.carreta > 0 && resolution.suporteCarreta) {
       const qtyConj = axles.carreta * 2;
-      addPiece(eqCode, qtyConj);
-      addPiece(resolution.suporteCarreta.code, qtyConj);
-      addPiece('EQ-1040', qtyConj);
-      addPiece('EQ-1043', qtyConj);
+      addPiece(eqCode, qtyConj, 'carreta');
+      addPiece(resolution.suporteCarreta.code, qtyConj, 'carreta');
+      addPiece('EQ-1040', qtyConj, 'carreta');
+      addPiece('EQ-1043', qtyConj, 'carreta');
     }
 
     if (includeDianteira && axles.dianteiro > 0 && resolution.suporteDianteiro) {
       const qtyD = axles.dianteiro * 2;
-      addPiece(eqDiantCode, qtyD);
-      addPiece(resolution.suporteDianteiro.code, qtyD);
-      addPiece('EQ-1041', qtyD);
+      addPiece(eqDiantCode, qtyD, 'dianteiro');
+      addPiece(resolution.suporteDianteiro.code, qtyD, 'dianteiro');
+      addPiece('EQ-1041', qtyD, 'dianteiro');
     }
 
     let resultList = [];
@@ -3068,7 +3079,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       resultList.push({ code, qty, customPrice: null });
     });
 
-    return { resultList, resolution };
+    return { resultList, resolution, applicationEntries };
   }
 
   function renderConsultantEngine() {

@@ -1,5 +1,13 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage7.1
+
+- Mapa Cavalo/Carreta por posição emitida pelo mesmo builder; caminho técnico real, sem classificação por código ou regra OG inventada.
+- Base Técnica somente consulta; seleção de ramo cavalo/implemento, sem criar CRM/cotação. Ajustes manuais recebem classificação explícita e permanecem VALIDAR fisicamente.
+- Multi-Veículos/cotação reconstroem explicação do contexto mínimo preservado; quantidades, preços e snapshots limitados mantidos.
+- Alterar nome/multiplicador de veículo não transforma aplicação calculada em override manual; edição real de itens mantém a revisão.
+- Testes de consulta sem escrita, mesmo código em posições distintas, salvar/reabrir, snapshot, offline/reconnect e HTTP409; publicação e smoke no checkpoint.
+
 ## [Unreleased] — CONVERGENCE-01 Stage7
 
 - Multi-Veículos Premium usa composição e totais existentes, com proveniência por veículo e quantidades multiplicadas uma vez.
