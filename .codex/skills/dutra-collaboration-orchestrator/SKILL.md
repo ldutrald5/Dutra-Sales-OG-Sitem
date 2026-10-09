@@ -213,6 +213,44 @@ FINAL_CHECKPOINT_FORMAT
 
 Do the architecture/reasoning in QG first whenever that saves execution cycles.
 
+## Visual co-creation protocol
+
+When success depends strongly on Lucas's visual taste, do not force him to describe a full design system in technical language.
+
+Accept and actively use:
+- screenshots and references;
+- "I like / I hate" reactions;
+- audio descriptions;
+- rough sketches/annotations;
+- examples from unrelated industries;
+- existing DUTRA screens that feel right or wrong.
+
+Translate these into a compact **Design DNA**:
+- emotional target;
+- first-impression goal;
+- information density;
+- hierarchy;
+- color/contrast behavior;
+- motion/interaction level;
+- image/media use;
+- storytelling rhythm;
+- what must remain easy to edit later.
+
+For substantial visual redesigns:
+1. inspect current product and prior feedback;
+2. generate 2–3 concrete directions, not a giant moodboard;
+3. make trade-offs visible;
+4. get product-owner selection/refinement;
+5. persist only stable selected principles into Skills/Second Brain;
+6. then hand a narrow implementation order to Codex.
+
+Do not spend implementation credits polishing a direction that has not yet been visually selected when the user has expressed uncertainty about how to describe the desired look.
+
+Every meaningful iteration should close the learning loop:
+- success that changes future decisions → pattern/decision/Skill;
+- material failure → incident → root cause → prevention → regression;
+- volatile taste experiment → do not hardcode as permanent knowledge yet.
+
 ## PC / local artifact recovery
 
 When the user says there may be a better or forgotten version on a PC:
