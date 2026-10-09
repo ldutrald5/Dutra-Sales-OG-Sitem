@@ -340,3 +340,8 @@ Referência: DEC-CONVERGENCE-PROPOSAL-001; INC-ROI-IMPLICIT-PREMISES-001; INC-PR
 `OG_PROPOSAL_DOCUMENT` projeta o snapshot imutável em blocos de apresentação; `OG_PROPOSAL_WORKSPACE` e `renderOfficialProposalDocument` reutilizam essa superfície para prévia branca, print/PDF nativo e PNG. Executivo/Técnico/Compacto compartilham o view model. Metadados limitados de apresentação ficam no contrato de proposta existente; revisão visual de uma versão histórica clona apenas o snapshot permitido, mantém cotação/preços/ROI/veículos e prepara nova versão no mesmo `operations.generatedDocuments`. Alterar visibilidade/texto não altera cálculo nem registra envio.
 
 Logo opcional referencia `operations.materials` + `OG_MATERIAL_STORE.localAsset.id`, com associação explícita ao mesmo cliente, aprovação/autorização e SHA-256 do conteúdo. Não existe upload/store paralelo, busca externa ou binário no snapshot. Ausência/alteração usa layout OG com feedback real. PNG usa blocos A4 medidos, 1588×2246 px/página, limite de 24 páginas e download escolhido por página; print/PDF usa os mesmos blocos sem chrome. Tokens capturados invalidam respostas de logo/export após troca de contexto. Decisão: DEC-CONVERGENCE-EXPORT-001.
+
+
+## Impacto OG — Stage8.2
+
+Extensão de apresentação versionada do mesmo OG_PROPOSAL_DOCUMENT/OG_PROPOSAL_INTELLIGENCE. Theme/asset v1 é opt-in; ausência preserva clássico. Mídia conceptual compatível/fallback não define técnica. Documento/PNG/PDF usam o mesmo snapshot; premissas de ROI ativo são legíveis mesmo sem método detalhado. Preços/ROI/CRM/technical engines não mudam. Contrato/testes e rollback: [Implementation](product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md).

@@ -2509,6 +2509,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     if (historical && activeProposalContext.presentationEditing) snapshot = OG_PROPOSAL_INTELLIGENCE.presentationSnapshot(record.snapshot,state.client.proposalPresentation,{now:record.preparedAt});
     if (!snapshot && lead && data.totalPecas > 0) {
       try {
+        // New drafts adopt the approved direction; persisted/historical preferences are never migrated.
+        if (!state.client.proposalPresentation) state.client.proposalPresentation = OG_PROPOSAL_INTELLIGENCE.normalizePresentation({themeId:'impacto-og',themeVersion:1},lead.id);
         snapshot = OG_PROPOSAL_INTELLIGENCE.buildSnapshot({quote:{id:'CURRENT-DRAFT',clientId:lead.id,totalValue:data.totalFinalVenda,totalPecas:data.totalPecas},
           clientId:lead.id,quoteState:captureQuoteCompositionSnapshot(),quoteData:data,applicationMaps:proposalApplicationMaps(data)});
       } catch (error) {feedback = error.message || 'Revise o vínculo do cliente e dos veículos.';}

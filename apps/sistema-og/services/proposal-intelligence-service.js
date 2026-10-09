@@ -129,7 +129,9 @@
     const reference = input.branding;
     const branding = reference && clean(reference.clientId) === clean(clientId) && clean(reference.materialId) && clean(reference.assetId)
       ? {clientId:clean(clientId),materialId:clean(reference.materialId).slice(0,180),assetId:clean(reference.assetId).slice(0,180),version:clean(reference.version).slice(0,40),sha256:/^[a-f0-9]{64}$/.test(reference.sha256 || '') ? reference.sha256 : ''} : null;
-    return {schemaVersion:1,templateId,
+    // Opt-in, pinned presentation revision. Missing/unknown themes retain the legacy document.
+    const impacto = input.themeId === 'impacto-og' && (input.themeVersion == null || input.themeVersion === 1);
+    return {schemaVersion:impacto?2:1,...(impacto?{themeId:'impacto-og',themeVersion:1}:{}),templateId,
       sections:Object.fromEntries(PRESENTATION_SECTIONS.map(key => [key,typeof input.sections?.[key] === 'boolean' ? input.sections[key] : defaults.includes(key)])),
       text:Object.fromEntries(Object.entries(textLimits).map(([key,limit]) => [key,clean(input.text?.[key]).slice(0,limit)])),branding};
   }

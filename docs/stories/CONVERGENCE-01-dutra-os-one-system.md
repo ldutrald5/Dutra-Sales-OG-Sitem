@@ -481,3 +481,17 @@ File List: apps/sistema-og/{app.js,index.html,styles.css,service-worker.js,compo
 Limits/rollback: Chromium emulation only; local logo assets missing on another device yield OG-only. Native PDF requires browser save dialog. PNG24-page cap/explicit downloads; advanced editing/strategic templates/asset upload-replication remain backlog. Roll back code to be83c32 without touching data/volume. No main/official production/PIN/auth/sync/price/ROI rule changes.
 
 Publication: implementationc852001682629da00565f5886ce3a444c20e1abf, normal hooks/remote equality/CLEAN PASS. Pilot patch1fe3f12f-2078-4586-88f3-4aa395c33630 is source-only/non-destructive, no live deploy. Final documentation commit retargets the same patch; exact POST/TARGET SHA verified in operational handoff. @architect/@qa PASS. QG applies, online8.1 acceptance remains pending.
+
+
+## Stage 8.2 — Proposal Experience V2 / Impacto OG (2026-10-09)
+
+Status: Ready for local homologation; final gates in checkpoint. Lucas authorized implementation after approving the final isolated visual package. B/C remain historical; functional Executivo/Técnico/Compacto remain supported. Entry: 8aab52a70ff2bd0b5d9691bb77264485f00df43c. No publication authorized.
+
+- [x] One snapshot-derived renderer: opening, compatible fleet cards, investment and estimated-return highlight.
+- [x] Explicit versioned Impacto preferences; legacy documents unchanged; immutable historical revisions.
+- [x] Bundled conceptual illustrations with topology eligibility and text fallback; scoped authorized logos only.
+- [x] Canonical totals/ROI/technical identity unchanged; premises and limitations visible.
+- [x] Focused regressions, actual PDF/PNG, long pagination, mobile/desktop and final gates.
+- [x] Evidence, checkpoint, cohesive local commits and rollback; ready for user homologation without deploy.
+
+File List: apps/sistema-og/{app.js,styles.css,service-worker.js,components/proposal-document.js,components/proposal-workspace.js,services/proposal-intelligence-service.js,assets/premium/impacto-og-v1/hero.webp,assets/premium/impacto-og-v1/tractor-4x2.png}; scripts/{test_proposal_document.mjs,test_proposal_document_browser.mjs,test_proposal_impacto_browser.mjs}; package.json; approved product review/DNA/prompt/implementation docs; checkpoint/story/architecture/contexts/roadmap/changelog/tasks; quote-engine Skill; Second Brain source/decision/cycle/index/metrics.

@@ -1,5 +1,12 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — Stage8.2 / Impacto OG
+
+- Theme/asset v1 e preferências limitadas/versionadas no renderer existente, sem migrar documentos históricos.
+- Abertura preto/amarelo, card4×2 elegível/fallback, composição/investimento, economia amarela/faixa preta e payback pt-BR.
+- Premissas econômicas visíveis; anexo técnico após narrativa; PDF/PNG canônicos.
+- Cabeçalho de cotação suporta nome longo em320px. Sem fórmulas/preços/dados/auth/sync alterados ou publicação.
+
 ## [Unreleased] — CONVERGENCE-01 Stage8.1
 
 - Prévia branca e print/PDF/PNG compartilham blocos do snapshot; PNG 1588×2246 por página, sem chrome/envio.

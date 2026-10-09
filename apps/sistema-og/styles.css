@@ -1684,3 +1684,8 @@ body.og-dialog-open { overflow: hidden; }
 }
 
 @media print{#official-proposal-print .doc-wrapper,#official-proposal-print .doc-wrapper *{background:#fff!important;color:#19202d!important;border-color:#d1d5db!important}}
+
+/* Proposal context: long client names must fit the quote header on small screens. */
+.quote-client-header-actions{min-width:0;max-width:100%;flex:1}
+.quote-client-header-actions>.client-sheet-inline-link{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+.quote-client-header-actions>span{max-width:100%;overflow-wrap:anywhere;text-align:right}

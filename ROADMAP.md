@@ -1,5 +1,9 @@
 # DUTRA OS — Roadmap Vivo
 
+## Stage8.2 — Impacto OG
+
+A oficial; B/C arquivadas. Pacote implementado para homologação local: abertura → frota/investimento → cenário econômico → anexo técnico. Pendente: avaliação e publicação autorizada separadamente. Proposta narrada por link, assets personalizados autorizados e Reverse Technical Lookup continuam backlog.
+
 ## CONVERGENCE-01 — Stage8.1
 
 Stage8 ONLINE ACCEPTED. Stage8.1 entrega documento branco, PDF nativo, PNG A4 paginado, Executivo/Técnico/Compacto, seções/textos e branding autorizado sobre uma única proposta canônica. Fechamento local e publicação no checkpoint; QG aplica o staged patch. Backlog: editor visual avançado/layouts de grandes contas, upload/replicação de assets por cliente e Reverse Technical Lookup. Não iniciar nova Stage.

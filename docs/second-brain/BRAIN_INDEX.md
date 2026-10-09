@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 174 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 188 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 24 |
-| decision | 25 |
+| cycle | 28 |
+| decision | 27 |
 | experiment | 1 |
-| idea | 3 |
+| idea | 4 |
 | incident | 24 |
 | knowledge | 13 |
 | open_question | 7 |
-| pattern | 23 |
-| source | 37 |
+| pattern | 24 |
+| source | 43 |
 
 ## Active decisions
 
@@ -69,6 +69,10 @@ Generated from 174 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Existing OG_PROPOSAL_INTELLIGENCE/generatedDocuments proposal_tracking owns commercial representation and revisions. Native calculateCompleteQuote/resolveItemPrice owns prices and quantities. Allowlisted snapshot retains vehicle IDs, unit prices, technical scope/path and source-reviewed ROI assumptions. Same unchanged quote can gain a new immutable proposal revision; historical display never reprices against live CRM/catalog. Missing premises stay VALIDAR. One helper serves quote, proposal and current simulator. No new persistence owner or external action.
 - **DEC-CONVERGENCE-EXPORT-001 — One client presentation model for preview, print and paginated PNG** (active/high)
   OG_PROPOSAL_DOCUMENT is a presentation/export adapter over immutable OG_PROPOSAL_INTELLIGENCE snapshots. Templates/visibility/text/logo references do not own prices, ROI, technical classifications or persistence. A visual change to historical data prepares a new canonical revision of the same quote. Local approved customer-authorized logo references are client-scoped and SHA-256 checked; missing/changed assets fall back explicitly. PDF and PNG share semantic blocks, styles and bounded A4 pagination, with captured context validation. Export is not send.
+- **DEC-PROPOSAL-EXPERIENCE-001 — Proposal experience is modular storytelling, not an A4-first report** (active/high)
+  The primary DUTRA OS proposal experience will be built as a configurable sequence of reusable story blocks over one frozen canonical proposal view model. The first screen must communicate the commercial essence in seconds; technical detail remains available progressively. Theme/tokens, block order, visibility, copy and media are presentation configuration, not business logic. PDF/PNG/print are projections of the same model. Gamma may inform interaction/editability patterns but is not a runtime dependency or source of truth.
+- **DEC-PROPOSAL-IMPACTO-001 — Impacto OG is the selected proposal creative direction** (active/high)
+  Use A Impacto OG as the official Stage8.2 Proposal Experience V2 creative direction: short strong opening, clear Cavalo/Carreta composition, and dominant yellow economic value with complementary black eye-inspired band. Archive B/C exploration; retain Stage8.1 functional templates and single canonical proposal/quote/ROI/technical owners. Refinements are reviewed before definitive implementation.
 
 ## Open questions
 
@@ -115,6 +119,8 @@ Generated from 174 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Track recurrence and evidence so repeated real friction promotes an idea while speculative novelty remains backlog.
 - **IDEA-PRODUCT-001 — Company 360 as canonical commercial context surface** (planned/high)
   As Company/Contact become canonical, expose a fast Company 360 view with decision-maker, next action, timeline and quick actions.
+- **IDEA-PROPOSAL-NARRATED-LINK-001 — Proposta personalizada por link com narrativa em áudio** (candidate/medium)
+  Explorar uma apresentação acessível por link a partir da proposta/print, que reconhece a empresa destinatária e conduz uma história comercial com áudio. Consumir a mesma versão canônica congelada da proposta; forma de acesso e narração ainda a definir. Ideia registrada para lembrar depois, sem implementação ou novo serviço autorizado.
 
 ## Validated / active patterns
 
@@ -164,29 +170,31 @@ Generated from 174 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Execution prompts should reference bounded required context, conditional context and explicit do-not-load areas, scaling prompt depth with risk instead of copying the whole project history into each delegation.
 - **PAT-CONVERGENCE-SHELL-QA-001 — Prove shell independence and reconnect with real acknowledgement** (active/high)
   Block domain scripts to verify static shell/error recovery, inject renderer faults to prove other routes remain usable, traverse mobile/tablet/desktop sizes, and require real API acknowledgement after reconnect. When a browser emulator omits the network event, prove transport separately and label explicit event simulation; never mock sync success.
+- **PAT-VISUAL-DIRECTION-001 — Concept first, code second for high-visual product work** (active/high)
+  For high-visual work where user taste materially affects success, first translate screenshots, references, audio, sketches and reactions into a small design DNA and 2–3 concrete visual directions. Let the product owner select/refine a direction before spending implementation credits. Persist only the stable chosen principles; keep experiments cheap and reversible.
 
 ## Recent sources
 
 - **SRC-CONVERGENCE-EXPORT-20261009-001 — Canonical client document export and revision audit** (validated/high)
   Current proposal workspace and print entry reuse frozen proposal_tracking data. Existing operations.materials/localAsset store supports explicitly authorized client association with content fingerprint. Isolated native browser regression verifies three templates, white actual print iframe PDF, paginated raster output with real text/logo pixels, immutable visual revisions, late-context safety and no sends. Private pilot fixtures/assets are not committed.
+- **SRC-PROPOSAL-VISION-20261009-001 — User creative direction for DUTRA proposal experience** (validated/high)
+  The product owner explicitly rejects a conventional information-dense white proposal as the final experience. The desired proposal must be fast to understand, visually distinctive, story-led and emotionally memorable while preserving technical depth behind progressive disclosure. Gamma is a UX benchmark for modular editable storytelling, not a dependency or business-data owner. Content, layout and theme must remain separable so blocks can be reordered, hidden, restyled and evolved without changing quote, technical or ROI engines. Major visual changes should be concepted and selected visually before expensive implementation.
+- **SRC-PROPOSAL-FEEDBACK-20261009-001 — Lucas: três estilos, abertura de impacto e proposta narrada por link** (validated/high)
+  Na primeira revisão da prancha Stage 8.2, Lucas gostou dos três estilos e pediu preservá-los como exemplos/variantes. Solicitou reduzir levemente a área preta atrás do caminhão e dos títulos para revelar mais amarelo e sugerir olho de gato com sutileza; abertura com problema/solução e poucos dados, podendo destacar pneus atendidos; composição Cavalo × Carreta e investimento progressivo do eixo ao conjunto nas camadas seguintes. Pediu personalização com logo do cliente e registro de uma futura proposta acessível por link com apresentação narrada. Citou 2% de diesel, 20% relacionados à economia/vida do pneu e 18 meses; estes valores são premissas mencionadas, não evidência validada nem defaults universais.
+- **SRC-PROPOSAL-V2-20261009-001 — Proposal Experience V2: Lucas clarification and isolated native-model previews** (validated/high)
+  Lucas confirmed 18 months as current lifetime of a new tire and 20% as estimated increase in lifetime. Meanings are resolved without proving universal performance. Audited canonical calculateRoi and snapshot/view-model contracts; produced three isolated visual directions over the same synthetic native quote (2 tractors, 3 trailers, 88 pieces, 44 tires, BRL6490). Synthetic tire price2000 and scoped monthly fuel10000 with20%/18months/2% produce canonical monthly1014.81/year12177.78/payback6.40; unrevised premises return validate/null. No real customer data, production mutation, new owner or publication.
+- **SRC-PROPOSAL-IMPACTO-SELECTED-20261009-001 — Lucas selects Impacto OG and requests tractor/ribbon refinement** (validated/high)
+  Lucas explicitly chose A Impacto OG as best and would discard B/C. Criticized tractor template in composition; praised yellow savings highlight and asked for a complementary black cat-eye-like band. Selection supersedes prior three-way exploration without changing canonical engines, financial assumptions or historical functional templates.
+- **SRC-PROPOSAL-IMPACTO-FINAL-20261009-001 — Lucas official Impacto OG confirmation and isolated final review** (validated/high)
+  Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
+- **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
+  Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
 - **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
   Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
 - **SRC-QUOTE-SNAPSHOT-20261008-001 — Online quotation snapshot transport failure and synthetic replay** (validated/high)
   Protected live acceptance on6af84634 reached two independent applications/manual review and native quote save. Aggregate next-body minimum5994341bytes exceeded server readBody5000000bytes; isolated exact-baseline repeated native saves reproduce parser rejection at7536106bytes. Customer records/credentials remain private; only synthetic fixtures are versioned.
 - **SRC-CONVERGENCE-MAP-20261008-001 — Canonical technical position and bounded explanation audit** (validated/high)
   Audited OG_DATA, resolveVehicleSupports and actual addPiece positions. EQ1135 occurs in truck and trailer in the same rule. Existing canonical builders and snapshot regression support minimal explanation without physical-rule reinterpretation.
-- **SRC-CONVERGENCE-PROPOSAL-20261008-001 — Current proposal and ROI implementation audit** (validated/high)
-  Current app pricing and technical provenance remain canonical. Proposal tracking owner already exists in generatedDocuments. Two UI ROI routines contained implicit tire gain/cycle and incompatible fuel proxies; focused native-engine and snapshot regression now proves explicitly reviewed deterministic scenarios and immutable bounded proposal versions. Full release evidence belongs in the checkpoint.
-- **SRC-CONVERGENCE-REALITY-20261007-001 — Isolated synthetic reality check audit** (validated/high)
-  Stage6.6 audited existing hosted seed, canonical CRM/review/outbox and technical quote handoff. A client technical navigation button opened the workspace without selecting its originating CRM identity. Existing guarded technical client selection is reused; explicit server runtime metadata labels isolated previews without changing sync mode. Synthetic two-viewport regression covers the full handoff and real HTTP503/reconnect behavior.
-- **SRC-PILOT-AUTH-20261007-001 — Pilot auth audit and synthetic session regression** (validated/high)
-  QG recovery approved primary pilot seed CRM OG dr.ods, canonical runtime OG_CRM_SERVICE/state.leads, existing filesystem isolated persistence and signed HttpOnly PIN session. Legacy runtime prompts store raw credential in sessionStorage; concurrent bootstrap 401s can re-prompt. New synthetic tests protect PIN validation, signed-cookie expiry/revocation/restart, no browser PIN store, origin protection, browser reopen and reconnect. Live deployment and real import are not certified by this source.
-- **SRC-PILOT-IMPORT-20261007-001 — Stage 6.7 authorized pilot restore and source import validation** (validated/high)
-  The user-authorized pilot snapshot was validated by the existing backup owner. The bundled workbook reader and canonical CRM import matcher consolidate the primary ODS and safely enrich from the secondary workbook. Original IDs, history and operations are preserved; ambiguous identities remain in private review. Synthetic regression and private-data preparation verify repeated import without duplication. No private customer records or credentials are stored in the Brain.
-- **SRC-CONVERGENCE-CALLAI-20261006-001 — Stage5 canonical Call AI audit and isolated browser validation** (validated/high)
-  Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
-- **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
-  Entry 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8 audit established OG_DATA/app.js technical owners; byte comparison preserved both original technical functions and data. Synthetic VM repros executed real app callbacks and exposed held-GET draft loss, operations-only recovery omission and old-ACK deletion of a newer durable outbox. Real loopback HTTP/IndexedDB browsers protect these boundaries. This source does not certify physical OG application, hosted provider operation or final Stage6 publication.
 
 ## Retrieval workflow
 

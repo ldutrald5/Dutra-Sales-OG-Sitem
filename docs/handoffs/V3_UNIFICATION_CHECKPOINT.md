@@ -1,4 +1,42 @@
+# Stage8.2 — Impacto OG / implementação controlada (2026-10-09)
+
+STATUS: LOCAL_IMPLEMENTATION_READY — homologação de Lucas pendente; **nenhuma publicação autorizada/executada**.
+ENTRY_SHA: `8aab52a70ff2bd0b5d9691bb77264485f00df43c`. Branch integração verificada com remote; WIP criativo aprovado preservado, sem reset.
+IMPLEMENTATION_SHA / POST_SHA: registrar após commit local final. Runtime permanece sem alterações; esta rodada não realizou push/patch/deploy.
+
+Pacote: [Implementation](../product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md); [Design DNA](../product/PROPOSAL_IMPACTO_OG_DESIGN_DNA.md). B/C históricas; templates funcionais intactos. Theme/asset v1 em snapshot limitado; histórico clássico não migra, revisão explícita cria versão. Um renderer para abertura/cards/investimento/economia/anexo/PDF/PNG. Art canônico-conceitual somente4×2/cavalo e esquema3eixos/carreta; demais contextos usam fallback. Nenhum dado técnico vem da ilustração. Preços/ROI/técnica/CRM/owners intactos; premissas/limitações visíveis; pt-BR/6,40meses.
+
+Focused checks PASS: proposal intelligence/premium/document; classic and Impacto integrated browser save/reopen/history/async; actual7-page PDF/PNG1588×2246,16-page layout stress,24-page cap; eight viewports320×568,360×800,390×844,430×932,768×1024,1280×720,1440×900,1920×1080. Nome longo em cabeçalho de cotação corrigido com CSS localizado. JS errors0 / external requests0 / no sends. Meu Dia, proposal workspace, Multi-Veículos, Shell/PWA offline reload and sync/reconnect/503/actual409 browser regressions PASS. General final gates executed: lint/og:check PASS; npm test82/82 PASS (includes release:gate PASS); og:brain:refresh/check188 records/0warnings PASS.
+
+Evidências verificáveis: `/workspace/artifacts/stage82-implementation/impacto/{proposal-print-pages.pdf,proposal-page-1.png,…,proposal-page-7.png,proposal-long-pagination.pdf,proposal-preview.html,mobile-*.png,desktop-*.png,result.json,additional-cases.json}`; clássicos em `../legacy/`, logs em pasta pai. Cenário aprovado sintético, não cliente real/piloto. Investimento6490 / peças88 / pneus44 / ROI1014,81mensal / anual12177,78 / payback6,40;20%ganho de vida18meses e2%diesel são premissas explícitas, nunca resultado comprovado.
+
+Limites: Chromium/emulação e PDF do browser, não dispositivo físico/impressora/Safari. Logo apenas asset local autorizado/fingerprint; fallback OG. Sem mídia genérica que finja representar outras configurações. Proposta narrada por link e asset personalization continuam backlog. Rollback por revert dos commits desta rodada, sem apagar snapshots/IDs/volume/dados; renderer anterior usa clássico para tema desconhecido. MAIN_MODIFIED:NO / OFFICIAL_PRODUCTION_MODIFIED:NO / PILOT_RUNTIME_MODIFIED:NO. Homologar pacote local antes de aprovar publicação separadamente.
+
+---
+
 # DUTRA OS — V3 UNIFICATION CHECKPOINT
+
+## Stage8.2 — official Impacto OG / final review (2026-10-09)
+
+STATUS: **FINAL_PREVIEW_READY / AWAITING_EXPLICIT_IMPLEMENTATION_AUTHORIZATION**. Lucas officially confirmed A; B/C kept as history. Final report `docs/product/PROPOSAL_IMPACTO_OG_FINAL_REVIEW.md`; actual three-section mobile/desktop captures and native audits `/workspace/artifacts/stage82-impacto-final/`. No definitive renderer integration or runtime/publication/data/main changes; prior WIP/artifacts preserved. HEAD remains `8aab52a70ff2bd0b5d9691bb77264485f00df43c`.
+
+Investment6490/88parts/44servedtires and synthetic ROI unchanged; exact prior snapshot7685bytes. Tested media compatibility/fallback for4×2,6×2,6×4,3/4-axle implement and missing scope; no guessed image. A-only320×568,390×844,1440×900, contrast13.67/13.79, no overflow/JS errors/external requests PASS; proposal/document/composition-snapshot regressions PASS. New-theme production PDF/PNG/device testing still pending integration. Visual package recommended for approval; draft minimal plan/rollback prepared, not executed. STOP awaiting explicit implementation authorization.
+
+## Stage8.2 — round3 / Impacto OG selected (2026-10-09)
+
+STATUS: **DIRECTION_SELECTED / REFINED_PREVIEW_READY**. Lucas chose A — Impacto OG; B/C are archived concepts, not active directions. Prior documentation/artifacts preserved. No product code, commercial calculation, data, main, pilot/production, commit/push/deploy changed. Local HEAD `8aab52a70ff2bd0b5d9691bb77264485f00df43c`; online SHA not re-certified.
+
+Refined tractor card (conceptual two-axle4×2 image) and yellow savings highlight with complementary curved black band. `/workspace/artifacts/stage82-impacto-v3/` contains actual mobile/desktop captures, standalone preview and exact previous native snapshot; ZIP `/workspace/artifacts/stage82-impacto-v3-preview.zip`. A-only Chromium320×568,390×844,1440×900 PASS: identity/values/reload/path, no overflow/errors/external requests; images inspected. Native snapshot unchanged7685bytes; economics still illustrative and applicabilityVALIDAR.
+
+Selected DNA and DRAFT future prompt in `docs/product/PROPOSAL_IMPACTO_OG_DESIGN_DNA.md` and `PROPOSAL_IMPACTO_OG_IMPLEMENTATION_PROMPT.md`. Prompt preparation only; no definitive implementation authorized/executed. New tractor/card and ribbon awaiting Lucas visual review; no need to select A/B/C again. Brain source/decision/cycle recorded. Narrated link remains candidate. STOP at refined preview.
+
+## Stage8.2 — Proposal Experience V2 / controlled exploration (2026-10-09)
+
+STATUS: **CONCEPT_PREVIEWS_READY / AWAITING LUCAS REVIEW**. Entry local=remote `8aab52a70ff2bd0b5d9691bb77264485f00df43c`, integration branch. Prior five-file documentation WIP preserved; no app/runtime/price/auth/sync/database changes, commit, push or deploy. Stage8.1 online state not re-certified during this local creative task.
+
+Report: `docs/product/PROPOSAL_EXPERIENCE_V2_REVIEW.md`. Isolated artifacts: `/workspace/artifacts/stage82-v2/`, ZIP `/workspace/artifacts/stage82-v2-preview.zip` — portable selector, A/B/C × opening/composition/return PNGs, mobile/desktop previews, controlled snapshot/ROI audit and browser proof. Same fictional client, canonical2tractors/3trailers/88parts/44tires/R$6490. Existing view model/blocks and native owners reused; no product engine/store. No client logo invented or real data exported.
+
+Lucas confirmed18months=current life of new tire and20%=estimated lifetime increase. Applicability remains to validate. Fictitious tire cost2000/scoped fuel10000 produce native tire814.81+fuel200=monthly1014.81/year12177.78/payback6.40;2% is not universal verified performance. No fabricated axle rate/paired-set price. Snapshot7685bytes; unreviewed premises returnVALIDAR/null. Three focused existing proposal/document/snapshot tests PASS; isolated A/B/C320×844,390×844,1440×900 PASS/no horizontal overflow/JS errors/external requests; screenshots inspected. Chromium file policy required localhost static preview, no bypass; physical-device HTML/product exports not claimed tested. Brain source/cycle/index/metrics updated. Creative selection, economic evidence and implementation/deploy pending. Narrated-link stays candidate; access/consent/retention/voice/image rights documented. STOP before definitive implementation.
 
 ## Current Stage8.1 — Presentation / export (2026-10-09)
 

@@ -35,5 +35,7 @@ Use with `dutra-core`; add `dutra-og-tech` for application/parts and `dutra-sale
 17. "Professional" does not require a generic white report. Distinctive OG presentation may use dark/light section contrast, secondary accents, imagery and expressive hierarchy when selected through the product visual-direction process. Export formats remain readable and deterministic.
 18. Gamma is a UX/editability benchmark only. Do not make canonical proposal generation depend on Gamma or export customer data to external design tools without an explicit future integration decision.
 
+19. A selected creative theme is opt-in/version-pinned in presentation snapshots; never migrate historical visuals during render. New first-party illustration paths are immutable per theme version, topology/context eligible, and use text fallback without invalidating legitimate technical results. Decode/embed media only for temporary exports; never persist binary art or infer engineering from illustrations.
+
 Flow:
 account context → technical engine → pricing/calculation → manual review/override → proposal snapshot → explicit export/send.

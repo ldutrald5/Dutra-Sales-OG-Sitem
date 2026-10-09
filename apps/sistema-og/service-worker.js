@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v80';
+const SW_VERSION = 'v81';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -98,6 +98,8 @@ const SHELL_URLS = [
 ];
 
 const PREFETCH_MEDIA = [
+  '/assets/premium/impacto-og-v1/hero.webp',
+  '/assets/premium/impacto-og-v1/tractor-4x2.png',
   '/assets/premium/optimized/hero-desktop-1280.webp',
   '/assets/premium/optimized/hero-mobile-640.webp',
   '/assets/premium/optimized/produto-og-768.webp',

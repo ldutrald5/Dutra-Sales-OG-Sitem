@@ -36,3 +36,28 @@ assert.ok(JSON.stringify(v2.snapshot).length<16000);for(const bad of ['history',
 assert.deepEqual(JSON.parse(JSON.stringify(v2.snapshot)),v2.snapshot);assert.deepEqual(JSON.parse(JSON.stringify(v2)).snapshot.presentation,presentation);
 assert.match(doc.css,/break-inside:avoid/);assert.match(doc.css,/page-break-after:always/);
 console.log('Proposal document: one view model, three templates, pure visibility/text, unchanged quote/ROI/technical IDs, bounded immutable presentation revisions, scoped logo references, white print and prepared != sent PASS');
+
+// Stage 8.2 is an opt-in presentation revision, not a migration of historical documents.
+const legacyHtml=doc.documentHtml(v1.snapshot,v1);
+const impactoConfig=owner.normalizePresentation({themeId:'impacto-og',themeVersion:1},v1.clientId);
+const impactoSnapshot=owner.presentationSnapshot(v1.snapshot,impactoConfig,{now});
+assert.equal(impactoConfig.schemaVersion,2);assert.equal(impactoConfig.themeVersion,1);
+assert.equal(owner.normalizePresentation({},v1.clientId).schemaVersion,1);
+assert.equal(owner.normalizePresentation({themeId:'impacto-og',themeVersion:999},v1.clientId).themeId,undefined);
+assert.deepEqual(impactoSnapshot.commercial,v1.snapshot.commercial);assert.deepEqual(impactoSnapshot.roi,v1.snapshot.roi);assert.deepEqual(impactoSnapshot.vehicles,v1.snapshot.vehicles);
+const themedHtml=doc.documentHtml(impactoSnapshot,v1,{media:{hero:'',tractor:''}});
+assert.match(themedHtml,/data-theme="impacto-og"/);assert.match(themedHtml,/Sem ilustração compatível/);assert.doesNotMatch(themedHtml,/NaN|undefined/);
+assert.equal(doc.documentHtml(v1.snapshot,v1),legacyHtml);assert.doesNotMatch(legacyHtml,/<article[^>]*data-theme=/);
+assert.equal(doc.mediaKind({vehicleTypeId:'toco_4x2',technicalContext:{applicationScope:'cavalo'}}),'tractor');
+assert.equal(doc.mediaKind({vehicleTypeId:'toco_4x2',technicalContext:{applicationScope:'carreta'}}),'unavailable');
+assert.equal(doc.mediaKind({vehicleTypeId:'bitrem_7eixos',technicalContext:{applicationScope:'cavalo'}}),'unavailable');
+assert.equal(doc.mediaKind({vehicleTypeId:'trucado_carreta3',technicalContext:{applicationScope:'carreta'}}),'trailer');
+assert.equal(doc.mediaKind({vehicleTypeId:'trucado_carreta3'}),'unavailable');
+assert.equal(JSON.stringify(impactoSnapshot).includes('data:image'),false);
+const themedVersion=owner.prepareTrackingDraft(operations,{sourceSnapshot:v2.snapshot,clientId:v2.clientId,quoteId:v2.quoteId,presentation:impactoConfig},{now,operationsModel});
+assert.deepEqual(themedVersion.generatedDocuments.find(d=>d.id===v1.id),v1);assert.equal(themedVersion.generatedDocuments[0].snapshot.presentation.themeId,'impacto-og');
+console.log('Impacto OG: pinned theme, no legacy migration, compatible topology/fallback, bounded immutable presentation revision and unchanged canonical data PASS');
+
+const storyBlocks=doc.viewModel(impactoSnapshot,v1,{media:{hero:'',tractor:''}}).blocks;
+assert.ok(storyBlocks.findIndex(b=>b.section==='roi')<storyBlocks.findIndex(b=>b.section==='application'),'Economics precede exhaustive technical annex');
+assert.ok(storyBlocks.findIndex(b=>b.kind==='vehicle')<storyBlocks.findIndex(b=>b.kind==='investment'),'Composition precedes investment');

@@ -1,5 +1,9 @@
 # DUTRA OS — Contexto Canônico
 
+## Stage8.2 — Impacto OG em homologação local
+
+Direção A aprovada e implementação autorizada. Apresentação versionada no renderer existente; novos drafts sem preferências usam Impacto, versões históricas permanecem clássicas até revisão explícita. Preços/ROI/técnica/CRM intactos. Sem publicação autorizada nesta rodada. Evidência e rollback em docs/product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md.
+
 ## CONVERGENCE-01 Stage8.1 — documento derivado
 
 Stage8 está aceita online no piloto be83c32. Stage8.1 reutiliza o snapshot canônico para Executivo/Técnico/Compacto, prévia branca, PDF/print e PNG paginado. Textos/seções/logo são apresentação versionada; preço/ROI/aplicação e owners permanecem intactos. Logo somente asset local autorizado do mesmo cliente, por referência/fingerprint. Publicação termina em PATCH_READY para o QG; evidência no checkpoint.

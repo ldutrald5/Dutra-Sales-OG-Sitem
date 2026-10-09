@@ -487,3 +487,8 @@ Stage7 online gate: prior Railway blocker resolved at6af84634; real acceptance f
 ## CONVERGENCE-01 — Stage7.1
 
 Bloqueada somente em deploy/aceite online: pacote local Ready for Review, gates82/Brain165/release e push7104685 PASS. Aplicar patch exclusivo do piloto e06e857d e rodar smoke guardado; Railway cancelou apply. Stage7 aceita pelo QG; bloqueios históricos acima estão superados. Stage8 e Reverse Technical Lookup não implementados.
+
+
+## Stage8.2 — homologação Impacto OG
+
+Implementação local autorizada após seleção A; B/C históricas. Pendente avaliação de Lucas, dispositivo físico e aprovação separada de publicação. Não publicar/push/deploy automaticamente. Snapshot/preços/ROI/owners preservados. Pacote/evidência no checkpoint e docs/product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md.

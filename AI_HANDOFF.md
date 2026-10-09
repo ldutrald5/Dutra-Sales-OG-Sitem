@@ -1,5 +1,9 @@
 # DUTRA OS — AI Handoff
 
+## Handoff atual — Stage8.2 / homologação
+
+Implementação controlada autorizada, preservando WIP visual anterior. Impacto OG local no mesmo renderer/exports; mídia4×2/contexto compatível e fallback, histórico/ROI/totais protegidos. Próxima ação: avaliação de Lucas e aprovação separada para qualquer publicação. Não push/deploy/accept_deploy, main ou produção. Estado/testes/commits no checkpoint.
+
 ## Handoff atual — Stage8.1 / QG staged deploy
 
 Entrada be83c32 CLEAN/local=remote e piloto SUCCESS verificados; Stage8 aceita pelo QG. Stage8.1 compartilha documento branco entre prévia/print/PNG e três templates. Revisão visual preserva snapshot histórico, preços/ROI/IDs e cria nova versão pelo owner atual. Assets por referência autorizada/fingerprint; indisponível = OG-only. Próxima ação: QG revisa/aplica o patch único do piloto e faz smoke online; Codex não chama accept_deploy. Status/SHA/limites no checkpoint.
