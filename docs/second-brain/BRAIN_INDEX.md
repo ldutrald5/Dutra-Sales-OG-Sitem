@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 188 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 28 |
+| cycle | 30 |
 | decision | 27 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 24 |
+| incident | 26 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 24 |
-| source | 43 |
+| source | 45 |
 
 ## Active decisions
 
@@ -94,6 +94,10 @@ Generated from 188 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-PROPOSAL-HEADING-ORPHAN-001 — Consecutive technical headings orphan in native proposal export** (resolved/high)
+  Semantic pagination keeps consecutive technical headings with the first substantive block; approved minimal fix does not change calculations.
+- **INC-PROPOSAL-MEDIA-FALLBACK-CONTRAST-001 — Hero missing-media placeholder inherits unreadable white text** (resolved/high)
+  Missing conceptual media keeps a readable explicit placeholder; approved selector correction preserves technical values/DesignDNA.
 - **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
   Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 - **INC-TECH-MULTIPLIER-MANUAL-001 — Fleet multiplier incorrectly reclassified unit application as manual** (resolved/high)
@@ -106,10 +110,6 @@ Generated from 188 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Async publication acknowledgement belongs to its captured original proposal identity.
 - **INC-TECH-ENTRY-CONTEXT-001 — Client-origin technical navigation must carry canonical identity** (resolved/high)
   Client-origin technical navigation switched tabs without selecting the originating canonical lead. The existing technical selector and dirty-draft confirmation now receive that identity from both the sales card and client sheet. No new CRM, context owner or technical engine.
-- **INC-CALLAI-CONTEXT-001 — Late Call AI response or discarded session contaminates active context** (resolved/high)
-  Presentation continuations retain captured account/session/recording/generation; reset/discard invalidates old requests and clears draft metadata/suggestions. No inferred CRM facts are automatic.
-- **INC-CALLAI-RETRY-001 — Local Call AI confirmation preceded normalized command and suppressed retry** (resolved/high)
-  Normalized reviewed command must ACK before confirmed local projection; durable current outbox must complete before success/advance. Failures retain explicit retry without duplicating identity/history.
 
 ## Candidate / planned ideas
 
@@ -189,12 +189,12 @@ Generated from 188 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
 - **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
   Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
+- **SRC-PROPOSAL-HOMOLOGATION-20261009-001 — Frozen Impacto OG homologation with reproducible visual reservations** (validated/high)
+  Rechecked checkpoint5087384 without product fixes or publication. Fresh82/82 gates and native commercial/actual export/offline409 flows passed. PDF heading chains can orphan, and missing hero media uses white-on-light text. Read-only historical quote reproduces total/pieces but lacks canonical client identity; no complete real proposal acceptance claimed.
+- **SRC-PROPOSAL-OPERATIONAL-20261009-001 — Authorized Impacto P2 corrections and authenticated operational acceptance** (validated/high)
+  Lucas prioritized controlled commercial access and authorized only two homologation fixes. Existing renderer now keeps consecutive technical headings with first content and readable missing-media notice. Synthetic native authenticated CRM-to-quote-to-proposal/PDF/PNG/version/logout/login/restart passed. Read-only live pilot audit confirms HTTPS/shared OG PIN/private own volume at be83c32; deployment of updated source requires explicit new approval. No production/customer data writes.
 - **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
   Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
-- **SRC-QUOTE-SNAPSHOT-20261008-001 — Online quotation snapshot transport failure and synthetic replay** (validated/high)
-  Protected live acceptance on6af84634 reached two independent applications/manual review and native quote save. Aggregate next-body minimum5994341bytes exceeded server readBody5000000bytes; isolated exact-baseline repeated native saves reproduce parser rejection at7536106bytes. Customer records/credentials remain private; only synthetic fixtures are versioned.
-- **SRC-CONVERGENCE-MAP-20261008-001 — Canonical technical position and bounded explanation audit** (validated/high)
-  Audited OG_DATA, resolveVehicleSupports and actual addPiece positions. EQ1135 occurs in truck and trailer in the same rule. Existing canonical builders and snapshot regression support minimal explanation without physical-rule reinterpretation.
 
 ## Retrieval workflow
 

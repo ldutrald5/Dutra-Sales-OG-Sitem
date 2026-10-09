@@ -1,3 +1,25 @@
+# Stage8.3.1 — prioridade operacional / homologação privada (2026-10-09)
+
+STATUS: LOCAL_OPERATIONAL_PASS / PRIVATE_RELEASE_APPROVAL_PENDING. ENTRY_SHA`5087384560e6758b2b66109782903ee18d5c74ab`; WIP8.3 preservado. Dois P2 aprovados corrigidos no renderer existente: cadeia de títulos com primeiro conteúdo na mesma página e fallback com contraste8,77:1. Preços, quantidades, ROI, DesignDNA, propostas antigas e owners inalterados. SWv82 para shell atualizado.
+
+Novo browser autenticado: CRM cria/pesquisa empresa FICTÍCIA→ficha→duas aplicações independentes→mesmo ID→quote6490/88peças/44pneus→condições/ROI explícitos→Impacto/v1–v4→PDF7/PNG7→histórico/reload→logout/login→reinício do processo/arquivo durável. Anônimo/revogado401; staleA/B e zero requisições/envios externos. Principal e longa16páginas sem títulos órfãos, cap24 preservado. Auth browser separado: offline real/reconnect/PWA/browserreopen/restart/private-file403/origin403/409 PASS. General final gate: lint/og:check PASS; npm test82/82/release:gate PASS; Brain194/0warnings PASS; classicPDF4/PNG4 e reconnect/503/actual409 atuais PASS.
+
+Live Railway verificado: URL https://dutra-os-uxr01-preview-production.up.railway.app/ ; SUCCESS/1replica6d07fb1a, SHAbe83c32bf4c1c395daafb2a3b7877bbeda467976, health200/persistent. Só volume piloto509ed70c/500MB/data. Base real/auth persistente explicitamente configuradas; sem Supabase write path produtivo. Pilot utiliza PIN compartilhado/equipeOG, não contas isoladas multi-tenant. TLS/login390×844/1440×900 e anon401/privatefiles403 verificados; login real/live write NOT RUN sem sessão/PIN fornecidos. Runtime publicado ainda Stage8, NÃO Impacto.
+
+Report/runbook:[Operational8.3.1](../product/PROPOSAL_IMPACTO_OG_OPERATIONAL_831.md). Artefatos /workspace/artifacts/stage831-operational/. Commit contendo esta seção identifica pacote local; alvo/push/patch exactSHA são registrados no handoff após review. Não aplicar patch histórico1fe3f12f com alvo86027135. Preparar somente sourceSHA do mesmo piloto; usuário exige aprovação antes do deploy. Rollbackruntimebe83c32 preserva volume/dados; nada de reset/seed overwrite. MAIN/OFICIAL/V2/V3:NO. Missão online ainda pendente da autorização/publicação/smoke; não iniciar etapa nova.
+
+---
+
+# Stage 8.3 — Homologação Impacto OG (2026-10-09)
+
+PARECER: **APROVADO COM RESSALVAS** — análise técnica local, publicação não autorizada. Versão congelada: `5087384560e6758b2b66109782903ee18d5c74ab`. Código, preços, Design DNA, dados persistidos e runtime intactos. Nenhum commit/push/deploy desta rodada; somente documentação/Brain pendentes.
+
+Novo gate executado: og:check PASS; npm test **82/82 PASS**, incluindo release:gate; Brain inicial188/0warnings. Impacto/classic exports, proposal workspace e sync browser PASS. Harness externo adicional confirmou navegador realmente offline, revisão local, reconnect/ACK e resolução explícita do409. Casos comerciais nativos: curta2páginas/R$590,00, principal7páginas/R$6.490,00, longa16páginas/R$18.290,00. PDFs e PNGs reais em `/workspace/artifacts/stage83-homologation/`; relatório `docs/product/PROPOSAL_IMPACTO_OG_HOMOLOGATION_83.md`.
+
+Ressalvas reproduzidas, sem correção automática: H83-01/P2 títulos órfãos do anexo na página4; H83-02/P2 aviso de hero sem imagem branco/fundo claro (1,09:1). H83-03/P3 plural/data de apresentação. Backup histórico conferido somente leitura:29peças/R$3.410,00 reproduzidos, hash preservado; cotação sem clientId/leadId e sem proposta gerada, portanto aceite completo com proposta real vinculada NOT RUN. Emulação8viewports/inspeção das imagens pelo assistente; aparelho físico/Safari/impressora/aceite online NOT RUN. Lucas decide autorizar correções mínimas e publicação posterior; não iniciar nova etapa.
+
+---
+
 # Stage8.2 — Impacto OG / implementação controlada (2026-10-09)
 
 STATUS: LOCAL_IMPLEMENTATION_READY — homologação de Lucas pendente; **nenhuma publicação autorizada/executada**.

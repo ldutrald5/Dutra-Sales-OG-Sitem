@@ -30,7 +30,7 @@
 .client-document[data-theme=impacto-og] .impacto-vehicle-card h4{font-size:23px;line-height:1.25;color:#10151c;letter-spacing:-.5px}
 .client-document[data-theme=impacto-og] img.impacto-vehicle-art{display:block;width:100%;height:175px;max-width:none;max-height:none;object-fit:contain}
 .client-document[data-theme=impacto-og] .impacto-trailer{display:block;height:160px;width:100%}
-.client-document[data-theme=impacto-og] .impacto-no-media{padding:22px 12px;background:#f4f5f6;border:1px dashed #b6bec8;color:#3b4655;text-align:center;font-size:12px}
+.client-document[data-theme=impacto-og] .impacto-no-media,.client-document[data-theme=impacto-og] .impacto-opening p.impacto-no-media{padding:22px 12px;background:#f4f5f6;border:1px dashed #b6bec8;color:#3b4655;text-align:center;font-size:12px}
 .client-document[data-theme=impacto-og] .client-investment{background:#ffdf00;border-color:#ffdf00;border-radius:12px}
 .client-document[data-theme=impacto-og] .client-investment strong{font-size:32px;font-weight:900;letter-spacing:-1px}
 .client-document[data-theme=impacto-og] .client-investment p{color:#19202d}
@@ -177,14 +177,14 @@
       const flush=()=>{if(current.length){if(pages.length>=MAX_PAGES)throw new Error(`Documento excede ${MAX_PAGES} páginas. Use Compacto ou reduza seções para exportar.`);pages.push(current);}current=[];body.replaceChildren();};
       const make=b=>{const el=document.createElement('div');el.className='client-block';el.dataset.kind=b.kind;el.dataset.section=b.section||'essential';el.innerHTML=b.html;return el;};
       for(let i=0;i<model.blocks.length;i++){
-        const block=model.blocks[i],el=make(block);body.append(el);
-        let next;
-        if(block.kind==='heading'&&model.blocks[i+1]){next=make(model.blocks[i+1]);body.append(next);}
+        // Keep consecutive titles and their first substantive block on one page.
+        const group=[make(model.blocks[i])];
+        while(model.blocks[i].kind==='heading'&&model.blocks[i+1])group.push(make(model.blocks[++i]));
+        body.append(...group);
         const tooTall=paper.getBoundingClientRect().height>PAGE_HEIGHT;
-        next?.remove();
-        if(tooTall&&current.length){el.remove();flush();body.append(el);}
+        if(tooTall&&current.length){group.forEach(el=>el.remove());flush();body.append(...group);}
         if(paper.getBoundingClientRect().height>PAGE_HEIGHT)throw new Error('Um bloco excede a página. Reduza o texto ou selecione o template Compacto.');
-        current.push(el.outerHTML);
+        current.push(...group.map(el=>el.outerHTML));
       }
       flush();if(pages.length>MAX_PAGES)throw new Error(`Documento excede ${MAX_PAGES} páginas. Use Compacto ou reduza seções para exportar.`);
       return {model,pages:pages.map((blocks,i)=>wrapper(model,`<section class="client-paper-page" style="width:${PAGE_WIDTH}px;min-height:${PAGE_HEIGHT}px;padding:32px">${header(model,options.logo)}<div class="client-page-body">${blocks.join('')}</div>${footer(model,i+1,pages.length)}</section>`))};

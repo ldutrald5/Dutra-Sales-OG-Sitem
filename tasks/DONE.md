@@ -295,3 +295,12 @@ Mapa por origem/posição do único motor, consulta sem gravação, classificaç
 ## Stage8.2 — implementação Impacto OG (homologação/publicação pendentes)
 
 Um renderer versionado, histórico intacto, assets compatíveis/fallback, economia amarela/faixa preta, pt-BR e owners canônicos preservados. PDF/PNG reais e QA no checkpoint e docs/product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md. Sem push, merge, deploy ou dados do piloto alterados; a conclusão é do pacote local, não aceite online.
+
+## Stage8.3 — auditoria local Impacto OG concluída (2026-10-09)
+
+Código5087384 congelado;82/82 gates novos, comparação canônica, exports reais curta/principal/longa,8viewports, offline de navegador e revisão409. Parecer APROVADO COM RESSALVAS; duas P2 abertas, sem correção automática. Referência histórica preservada e lacuna de identidade registrada. Sem commit/push/deploy/envio; publicação continua sob decisão de Lucas. Relatório: docs/product/PROPOSAL_IMPACTO_OG_HOMOLOGATION_83.md.
+
+
+## Stage8.3.1 — local operational acceptance
+
+Approved heading-chain and missing-media contrast fixes preserve canonical calculations/DesignDNA. Executed authenticated CRM UI→company→technical→two vehicles→quote→review→Impacto→realPDF/PNG→immutable revisions→logout/login/restart. Live pilot read-only HTTPS/health/volume/access checks PASS; current SHA remainsbe83c32. Publication/real online login not claimed completed. Evidence and next action in operational831 report/checkpoint.

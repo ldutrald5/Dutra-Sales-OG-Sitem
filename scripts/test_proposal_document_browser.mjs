@@ -5,12 +5,17 @@ import {mkdtemp,readFile,rm,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
+import {randomBytes} from 'node:crypto';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const impacto=process.env.OG_DOCUMENT_THEME==='impacto-og';
+const operational=process.env.OG_DOCUMENT_AUTH_ACCEPTANCE==='1';
+const testPin=randomBytes(12).toString('hex'),testToken=randomBytes(32).toString('hex');
 const dataDir=await mkdtemp(path.join(os.tmpdir(),'dutra-proposal-stage8-'));
 const port=await new Promise(resolve=>{const socket=net.createServer();socket.listen(0,'127.0.0.1',()=>{const port=socket.address().port;socket.close(()=>resolve(port));});});
-const base=`http://127.0.0.1:${port}`;
-const server=spawn(process.execPath,['apps/sistema-og/server.mjs'],{env:{...process.env,OG_HOST:'127.0.0.1',OG_PORT:String(port),OG_DATA_DIR:dataDir,OG_ISOLATED_PILOT:'1'},stdio:'ignore'});
+const base=`http://${operational?'localhost':'127.0.0.1'}:${port}`;
+const startServer=()=>spawn(process.execPath,['apps/sistema-og/server.mjs'],{env:{...process.env,OG_HOST:'127.0.0.1',OG_PORT:String(port),OG_DATA_DIR:dataDir,OG_ISOLATED_PILOT:'1',...(operational?{OG_PERSISTENT_AUTH:'true',OG_ISOLATED_PREVIEW:'true',OG_LOCAL_ACCESS_PIN:testPin,OG_LOCAL_ACCESS_TOKEN:testToken}:{})},stdio:'ignore'});
+let server=startServer();
+const fetch=(url,init={})=>globalThis.fetch(url,{...init,headers:{...init.headers,...(operational&&String(url).startsWith(base+'/api/')?{Authorization:`Bearer ${testToken}`}:{})}});
 let browser;
 try {
   for(let i=0;i<100;i++){try{if((await fetch(base+'/health')).ok)break;}catch{}await new Promise(resolve=>setTimeout(resolve,50));}
@@ -20,7 +25,7 @@ try {
   const seed=supplied || {...empty,leads:[{id:'FAKE-PROPOSAL-A',nome:'Cliente A',empresa:impacto?'Transportadora Horizonte · CENÁRIO ILUSTRATIVO':'Empresa sintética A',status:'contatado',interactions:[]},{id:'FAKE-PROPOSAL-B',nome:'Cliente B',empresa:'Empresa sintética B',status:'contatado',interactions:[]}],history:[]};
   const eligible=seed.leads.filter(lead=>privateFile ? lead.importMeta?.pilotReal===true&&!/^DEMO-/.test(lead.id) : true);
   assert.ok(eligible.length>=2);
-  const [clientA,clientB]=eligible;
+  let [clientA,clientB]=eligible;
   seed.operations ||= {};seed.operations.materials ||= [];
   seed.operations.materials.push({id:'QA-CLIENT-LOGO',clientId:clientA.id,title:'Logo QA sintético autorizado (fixture)',mediaType:'image',status:'approved',audience:'customer_authorized',consentRef:'Autorização sintética de fixture isolada',contentVersion:'qa-1',localAsset:{id:'QA-CLIENT-LOGO',type:'image/png'}});
   const initialHistory=seed.history || [];
@@ -53,7 +58,36 @@ try {
   const operations=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('og_operations_state')));
   const documents=async()=> (await operations()).generatedDocuments.filter(doc=>doc.documentType==='proposal_tracking'&&!originalDocs.some(original=>original.id===doc.id));
   const history=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('og_cotacoes_history')) || []);
-  await page.goto(base+'/#guia');await page.waitForFunction(()=>document.body.dataset.shellReady==='true');await settled();
+  await page.goto(base+'/#guia');
+  const login=async()=>{await page.locator('#access-session-dialog').waitFor({state:'visible'});await page.locator('[name=pin]').fill(testPin);await page.locator('#access-session-dialog button').click();await page.locator('#access-session-dialog').waitFor({state:'hidden'});};
+  if(operational){
+    assert.equal((await globalThis.fetch(base+'/api/state')).status,401);
+    await login();
+    const session=(await context.cookies(base)).find(cookie=>cookie.name==='__Host-og_session');
+    assert.ok(session?.httpOnly&&session.secure&&session.sameSite==='Strict');
+    assert.ok(session.expires>Date.now()/1000+29*86400);
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('og_cloud_access_token')),null);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('og_cloud_access_token')),null);
+  }
+  await page.waitForFunction(()=>document.body.dataset.shellReady==='true');await settled();
+  if(operational){
+    await nav('crm');await page.locator('[data-quick-lead="crm"]').click();
+    await page.locator('#quick-lead-company').fill('Transportadora QA · ORÇAMENTO FICTÍCIO');
+    await page.locator('#quick-lead-contact').fill('Contato fictício');
+    await page.locator('#quick-lead-form button[type=submit]').click();await settled();
+    clientA=await page.evaluate(()=>JSON.parse(localStorage.getItem('og_leads_crm')).find(lead=>lead.empresa==='Transportadora QA · ORÇAMENTO FICTÍCIO'));
+    assert.ok(clientA?.id);
+    await page.locator('#crm-search-input').fill(clientA.empresa);
+    await page.locator(`[data-open-client-sheet="${clientA.id}"]`).first().click();
+    assert.ok(await page.getByText(clientA.empresa,{exact:true}).count());
+    // Re-scope only this artificial test logo fixture; client creation used the native CRM UI.
+    const saved=await(await fetch(base+'/api/state')).json();
+    saved.operations.materials.find(material=>material.id==='QA-CLIENT-LOGO').clientId=clientA.id;
+    const update=await fetch(base+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...saved,baseRevision:saved.revision})});assert.equal(update.status,200);
+    await page.locator('[data-sheet-technical]').click();await page.waitForURL('**/#guia');
+    assert.equal(await page.locator('#technical-client').inputValue(),clientA.id,'Company sheet passes the canonical identity to technical application');
+    await page.reload();await page.waitForFunction(()=>document.body.dataset.shellReady==='true');await settled();
+  }
   await page.locator('#technical-client').selectOption(clientA.id);
   await page.locator('[data-technical-scope="cavalo"]').click();await page.locator('#technical-vehicle').selectOption('toco_4x2');await page.locator('#consultant-libras-select').selectOption('120');await page.locator('#consultant-include-dianteira').uncheck();await page.locator('[data-qid="brand"][data-val="volvo"]').click();await fill('#technical-name','Cavalo · cenário de teste');await fill('#technical-qty',2);
   await page.locator('#btn-inject-consultant-to-quote').click();await page.waitForURL('**/#cotacao');await settled();
@@ -162,6 +196,7 @@ try {
   const printedHtml=await page.evaluate(()=>window.__printDocument);await writeFile(path.join(artifacts,'proposal-export.html'),printedHtml);assert.ok(printedHtml.includes('background:#fff'));assert.ok(!printedHtml.includes('<button'));assert.ok(!printedHtml.includes('og-mobile-nav'));
   const printPage=await context.newPage();await printPage.setContent(printedHtml);await printPage.emulateMedia({media:'print'});await printPage.evaluate(async()=>Promise.all(Array.from(document.images,image=>image.decode())));
   assert.equal(await printPage.locator('.client-paper-page').count(),pages);
+  assert.ok(await printPage.locator('.client-page-body').evaluateAll(bodies=>bodies.every(body=>body.lastElementChild?.dataset.kind!=='heading')),'Export pages keep technical heading chains with substantive content');
   await printPage.pdf({path:path.join(artifacts,'proposal-print-pages.pdf'),format:'A4',printBackground:true,preferCSSPageSize:true});
   const pdfBytes=await readFile(path.join(artifacts,'proposal-print-pages.pdf'));
   assert.equal((pdfBytes.toString('latin1').match(/\/Type\s*\/Page\b/g)||[]).length,pages,'Each logical print page produces exactly one PDF page');
@@ -180,7 +215,12 @@ try {
         cases.push({type,kind:host.querySelector('[data-media-kind]')?.dataset.mediaKind,fallback:!!host.querySelector('[data-media-unavailable]')});
       }
       host.innerHTML=api.documentHtml(record.snapshot,record,{media:{hero:'',tractor:''}});
-      const missing={fallback:!!host.querySelector('[data-media-unavailable]'),total:host.querySelector('[data-proposal-total]').textContent,images:host.querySelectorAll('img').length};
+      const placeholder=host.querySelector('.impacto-opening p.impacto-no-media');
+      const colors=[getComputedStyle(placeholder).color,getComputedStyle(placeholder).backgroundColor].map(color=>color.match(/\d+/g).slice(0,3).map(Number));
+      const luminance=rgb=>rgb.map(value=>{const s=value/255;return s<=.04045?s/12.92:((s+.055)/1.055)**2.4;}).reduce((sum,value,i)=>sum+value*[.2126,.7152,.0722][i],0);
+      const light=colors.map(luminance).sort((a,b)=>b-a);
+      const missing={fallback:!!host.querySelector('[data-media-unavailable]'),total:host.querySelector('[data-proposal-total]').textContent,images:host.querySelectorAll('img').length,heroContrast:(light[0]+.05)/(light[1]+.05)};
+      const missingHtml=host.innerHTML;
       const long=structuredClone(record.snapshot);
       long.presentation.text.observation='Observação comercial de teste de paginação. '.repeat(40);
       // Repeating existing bounded presentation rows stresses pagination without a parallel calculation.
@@ -189,17 +229,22 @@ try {
       host.remove();
       const oversized=structuredClone(long);oversized.vehicles=Array.from({length:40},(_,i)=>({...structuredClone(long.vehicles[i%8]),id:`CAP-${i}`}));
       let cap='';try{api.paginate(oversized,record,{media});}catch(error){cap=error.message;}
-      return {cases,missing,pages:paginated.pages,cap};
+      return {cases,missing,missingHtml,pages:paginated.pages,cap};
     },visualVersion);
     assert.equal(additional.cases[0].kind,'tractor');assert.ok(additional.cases.slice(1).every(item=>item.fallback));
     assert.equal(additional.missing.images,0);assert.match(additional.missing.total,/6.490,00/);
+    assert.ok(additional.missing.heroContrast>=4.5,'Missing hero image notice remains readable');
     assert.ok(additional.pages.length>pages&&additional.pages.length<=24);assert.match(additional.cap,/excede 24 páginas/);
     const longPage=await context.newPage();await longPage.setContent(`<style>${await page.evaluate(()=>OG_PROPOSAL_DOCUMENT.css)}</style>${additional.pages.join('')}`);
     await longPage.evaluate(async()=>Promise.all(Array.from(document.images,image=>image.decode())));
+    assert.ok(await longPage.locator('.client-page-body').evaluateAll(bodies=>bodies.every(body=>body.lastElementChild?.dataset.kind!=='heading')),'Long exports also keep heading chains with substantive content');
     await longPage.pdf({path:path.join(artifacts,'proposal-long-pagination.pdf'),format:'A4',printBackground:true,preferCSSPageSize:true});
     const longPdf=await readFile(path.join(artifacts,'proposal-long-pagination.pdf'));
     assert.equal((longPdf.toString('latin1').match(/\/Type\s*\/Page\b/g)||[]).length,additional.pages.length);
-    await longPage.close();await writeFile(path.join(artifacts,'additional-cases.json'),JSON.stringify({...additional,pages:additional.pages.length},null,2));
+    await longPage.setViewportSize({width:390,height:844});await longPage.setContent(additional.missingHtml);
+    await longPage.locator('.impacto-opening p.impacto-no-media').scrollIntoViewIfNeeded();
+    await longPage.screenshot({path:path.join(artifacts,'missing-image-mobile.png')});
+    await longPage.close();const {missingHtml,...additionalResults}=additional;await writeFile(path.join(artifacts,'additional-cases.json'),JSON.stringify({...additionalResults,pages:additional.pages.length},null,2));
     assert.ok(pixels.some(page=>page.yellow>10000),'Rendered PNG retains yellow identity');
   }
   // Missing and overwritten local assets never silently replace historical branding.
@@ -218,7 +263,23 @@ try {
   await staleText.evaluate(node=>{node.value='STALE TEXT';node.dispatchEvent(new Event('change',{bubbles:true}));});await page.evaluate(()=>{OG_MATERIAL_STORE.get=window.__getOriginal;window.__releaseExport();});
   assert.equal(await root.locator('[data-proposal-client-id]').getAttribute('data-proposal-client-id'),clientB.id);assert.equal(await root.locator('[data-presentation-text="title"]').inputValue(),'');assert.equal(await root.locator('[data-proposal-download-png]').isVisible(),false);
   assert.deepEqual((await documents()).find(d=>d.id===visualVersion.id),visualVersion);assert.deepEqual((await documents()).find(d=>d.id===second.id),preserved);assert.ok(Buffer.byteLength(JSON.stringify(visualVersion.snapshot))<35000);assert.deepEqual(errors,[]);assert.equal(external,0);
-  await writeFile(path.join(artifacts,'result.json'),JSON.stringify({status:'PASS',realFixture:Boolean(privateFile),viewports:8,pages,pixels,investment:visualVersion.snapshot.commercial.totalValue,roiPreserved:true,versionsImmutable:true,theme:impacto?'impacto-og':'classic',externalRequests:external},null,2));
+  if(operational){
+    const session=(await context.cookies(base)).find(cookie=>cookie.name==='__Host-og_session');
+    await page.locator('#access-session-logout').click();await page.locator('#access-session-dialog').waitFor({state:'visible'});
+    assert.equal((await globalThis.fetch(base+'/api/state',{headers:{Cookie:`${session.name}=${session.value}`}})).status,401,'Logout revokes the old session at the server');
+    await login();await settled();await reopen();
+    assert.deepEqual((await documents()).find(doc=>doc.id===visualVersion.id),visualVersion,'Login/reopen preserves the original client, prices, ROI and version');
+    await new Promise(resolve=>{server.once('exit',resolve);server.kill('SIGTERM');});server=startServer();
+    for(let i=0;i<100;i++){try{if((await fetch(base+'/health')).ok)break;}catch{}await new Promise(resolve=>setTimeout(resolve,50));}
+    await page.reload();await page.waitForFunction(()=>document.body.dataset.shellReady==='true');await settled();await reopen();
+    assert.equal(await page.locator('#access-session-dialog:modal').count(),0,'Signed session survives a compatible server restart');
+    const stored=await(await fetch(base+'/api/state')).json();
+    assert.deepEqual(stored.operations.generatedDocuments.find(doc=>doc.id===visualVersion.id),visualVersion,'Durable file store survives restart');
+    const guest=await browser.newContext();assert.equal((await guest.request.get(base+'/api/state')).status(),401);await guest.close();
+    assert.deepEqual(errors,[]);assert.equal(external,0);
+    console.log('Operational browser: authenticated native CRM create/search/sheet → two applications → canonical quote → reviewed Impacto proposal → PDF/PNG → logout/login/reopen → server restart; anonymous/revoked sessions rejected PASS');
+  }
+  await writeFile(path.join(artifacts,'result.json'),JSON.stringify({status:'PASS',realFixture:Boolean(privateFile),operationalAuth:operational,nativeClientCreated:operational,logoutLoginPersistence:operational,serverRestartPersistence:operational,anonymousAndRevokedAccessDenied:operational,viewports:8,pages,pixels,investment:visualVersion.snapshot.commercial.totalValue,roiPreserved:true,versionsImmutable:true,theme:impacto?'impacto-og':'classic',externalRequests:external},null,2));
   console.log(`Proposal export browser ${privateFile?'REAL isolated canonical fixture':'synthetic'}: three templates, scoped/fingerprinted logo, visibility/text, immutable v4/reopen/reload, white PDF, ${pages} PNG pages/pixels, eight views/toast/nav, stale export/client safety and no sends PASS`);
   await context.close();
 } finally {await browser?.close();server.kill('SIGTERM');await rm(dataDir,{recursive:true,force:true});}

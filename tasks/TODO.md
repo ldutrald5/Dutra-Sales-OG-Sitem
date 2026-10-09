@@ -492,3 +492,12 @@ Bloqueada somente em deploy/aceite online: pacote local Ready for Review, gates8
 ## Stage8.2 — homologação Impacto OG
 
 Implementação local autorizada após seleção A; B/C históricas. Pendente avaliação de Lucas, dispositivo físico e aprovação separada de publicação. Não publicar/push/deploy automaticamente. Snapshot/preços/ROI/owners preservados. Pacote/evidência no checkpoint e docs/product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md.
+
+## Stage8.3 — ressalvas de homologação (2026-10-09)
+
+Parecer local APROVADO COM RESSALVAS. Aguardar autorização para H83-01 (títulos órfãos) e H83-02 (contraste do hero sem imagem); propostas mínimas/evidências no relatório de homologação. Não corrigir/publicar automaticamente. Proposta real vinculada e aparelho físico/aceite online ainda pendentes.
+
+
+## Stage8.3.1 — private release approval pending
+
+P2 pagination/fallback fixes approved and locally implemented. Native authenticated synthetic complete quote/proposal/PDF/PNG/versions/restart PASS; actual pilot HTTPS/auth/isolated volume verified read-only. Prepare source-only private release and obtain Lucas authorization before apply; complete online real-PIN/quote persistence smoke then. Shared OG pilot is not a multi-organization account service. Do not start new features.

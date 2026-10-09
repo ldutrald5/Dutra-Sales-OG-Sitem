@@ -495,3 +495,29 @@ Status: Ready for local homologation; final gates in checkpoint. Lucas authorize
 - [x] Evidence, checkpoint, cohesive local commits and rollback; ready for user homologation without deploy.
 
 File List: apps/sistema-og/{app.js,styles.css,service-worker.js,components/proposal-document.js,components/proposal-workspace.js,services/proposal-intelligence-service.js,assets/premium/impacto-og-v1/hero.webp,assets/premium/impacto-og-v1/tractor-4x2.png}; scripts/{test_proposal_document.mjs,test_proposal_document_browser.mjs,test_proposal_impacto_browser.mjs}; package.json; approved product review/DNA/prompt/implementation docs; checkpoint/story/architecture/contexts/roadmap/changelog/tasks; quote-engine Skill; Second Brain source/decision/cycle/index/metrics.
+
+## Stage 8.3 — homologação do checkpoint5087384 (2026-10-09)
+
+Parecer técnico: APROVADO COM RESSALVAS. Não é aprovação de publicação de Lucas. Código e dados preservados.
+
+- [x] Git limpo na entrada, HEAD/remote verificados, instruções e owners auditados.
+- [x] Novos gates82/82, og:check, exports Impacto/classic, versões/isolamento, navegador offline/reconnect e409/revisão.
+- [x] Comparações nativas comerciais, PDFs/PNGs curta2/principal7/longa16páginas e8viewports.
+- [x] Referência histórica real anonimizada e original hash preservado; lacuna de clientId/proposta vinculada registrada.
+- [x] Defeitos H83-01/H83-02 reproduzidos e propostas mínimas, sem modificar produto.
+- [x] Relatório, evidências, checkpoint e Brain de incidentes abertos.
+- [ ] Autorização de Lucas para corrigir/publicar; proposta real vinculada, telefone físico e aceite online.
+
+File List: docs/product/PROPOSAL_IMPACTO_OG_HOMOLOGATION_83.md; docs/handoffs/V3_UNIFICATION_CHECKPOINT.md; esta story; tasks/TODO.md; tasks/DONE.md; docs/second-brain/{sources,incidents,cycles}.jsonl e índices/métricas gerados. Harnesses e evidências somente em /workspace/artifacts/stage83-homologation/, fora do produto/Git. Nenhum arquivo de código ou teste existente alterado.
+
+
+## Stage8.3.1 — authorized P2 fixes and private operational access
+
+- [x] Preserve8.3 WIP/checkpoint; audit live source/auth/own volume/HTTPS and scope commercial privacy.
+- [x] Minimal heading-chain/contrast fixes; unchanged prices/quantities/ROI/owners; shellv82.
+- [x] Native authenticated CRM create/search/sheet→two applications→quote/proposal→versions→actual PDF/PNG→logout/login/restart; no sends/cross-client contamination.
+- [x] Mobile/desktop8views, 16-page layout/24cap, fallbackcontrast8.77 and PDF inspection; existing auth/offline/reconnect/409 browser.
+- [x] Final lint/og:check, npm test82/82 including release gate; Brain194/0warnings; classic export and actualsync503/409 browser PASS.
+- [ ] User approval of private release; deploy and authenticated online commercial acceptance.
+
+File List: apps/sistema-og/components/proposal-document.js; apps/sistema-og/service-worker.js; scripts/test_proposal_document_browser.mjs; scripts/test_proposal_operational_browser.mjs; package.json; docs/product/PROPOSAL_IMPACTO_OG_OPERATIONAL_831.md; docs/runtime/DUTRA_OS_RUNTIME.md; checkpoint; this story; tasks/TODO.md; tasks/DONE.md; Second Brain sources/incidents/cycles and generated index/metrics. Includes preserved8.3 report/documentation; no real pilot data in Git.
