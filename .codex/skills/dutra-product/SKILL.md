@@ -12,6 +12,7 @@ metadata:
 - `ROADMAP.md`
 - `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
 - `docs/03-DESIGN-SYSTEM.md`
+- `docs/product/PROPOSAL_EXPERIENCE_VISION.md` when proposal/client-facing storytelling or high-visual sales surfaces are in scope.
 - relevant Second Brain decisions/patterns/ideas.
 
 ## Principles
