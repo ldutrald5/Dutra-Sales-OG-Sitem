@@ -1,6 +1,6 @@
 # Stage 8.2 — Impacto OG / pacote de homologação
 
-2026-10-09. Lucas autorizou implementação controlada após a revisão final. **Implementado em desenvolvimento; homologação e publicação ainda exigem aprovação final.** Entrada Git: `8aab52a70ff2bd0b5d9691bb77264485f00df43c`, branch `integration/dutra-os-one-system`. WIP criativo anterior preservado. B/C ficam históricas; Executivo/Técnico/Compacto continuam funcionais.
+2026-10-09. Lucas autorizou implementação controlada após a revisão final. **Implementado em desenvolvimento; homologação e publicação ainda exigem aprovação final.** Entrada Git: `8aab52a70ff2bd0b5d9691bb77264485f00df43c`, branch `integration/dutra-os-one-system`. Implementação local: `096c8b68f2ccdfffd07b95cb6d8e1286e899084e`; fechamento documental em commit posterior. WIP criativo anterior preservado. B/C ficam históricas; Executivo/Técnico/Compacto continuam funcionais.
 
 ## Comportamento entregue
 

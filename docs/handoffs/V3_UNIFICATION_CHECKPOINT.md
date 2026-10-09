@@ -2,7 +2,7 @@
 
 STATUS: LOCAL_IMPLEMENTATION_READY — homologação de Lucas pendente; **nenhuma publicação autorizada/executada**.
 ENTRY_SHA: `8aab52a70ff2bd0b5d9691bb77264485f00df43c`. Branch integração verificada com remote; WIP criativo aprovado preservado, sem reset.
-IMPLEMENTATION_SHA / POST_SHA: registrar após commit local final. Runtime permanece sem alterações; esta rodada não realizou push/patch/deploy.
+IMPLEMENTATION_SHA: `096c8b68f2ccdfffd07b95cb6d8e1286e899084e` (commit local com hooks normais PASS). A revisão documental posterior é o commit que contém este checkpoint, verificável por Git. Runtime permanece sem alterações; esta rodada não realizou push/patch/deploy. Working tree CLEAN após o fechamento documental; remote permanece na entrada e não recebeu push.
 
 Pacote: [Implementation](../product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md); [Design DNA](../product/PROPOSAL_IMPACTO_OG_DESIGN_DNA.md). B/C históricas; templates funcionais intactos. Theme/asset v1 em snapshot limitado; histórico clássico não migra, revisão explícita cria versão. Um renderer para abertura/cards/investimento/economia/anexo/PDF/PNG. Art canônico-conceitual somente4×2/cavalo e esquema3eixos/carreta; demais contextos usam fallback. Nenhum dado técnico vem da ilustração. Preços/ROI/técnica/CRM/owners intactos; premissas/limitações visíveis; pt-BR/6,40meses.
 
