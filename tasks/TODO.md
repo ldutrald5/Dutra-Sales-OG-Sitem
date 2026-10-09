@@ -500,4 +500,4 @@ Parecer local APROVADO COM RESSALVAS. Aguardar autorização para H83-01 (títul
 
 ## Stage8.3.1 — private release approval pending
 
-P2 pagination/fallback fixes approved and locally implemented. Native authenticated synthetic complete quote/proposal/PDF/PNG/versions/restart PASS; actual pilot HTTPS/auth/isolated volume verified read-only. Prepare source-only private release and obtain Lucas authorization before apply; complete online real-PIN/quote persistence smoke then. Shared OG pilot is not a multi-organization account service. Do not start new features.
+P2 pagination/fallback fixes approved and locally implemented. Native authenticated synthetic complete quote/proposal/PDF/PNG/versions/restart PASS; actual pilot HTTPS/auth/isolated volume verified read-only. Source-only private release04ad480/patch1fe3f12f prepared/reviewed. Obtain Lucas authorization before apply; complete online real-PIN/quote persistence smoke then. Shared OG pilot is not a multi-organization account service. Do not start new features.

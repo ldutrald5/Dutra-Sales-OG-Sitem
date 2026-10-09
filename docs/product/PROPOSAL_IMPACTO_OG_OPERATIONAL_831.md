@@ -1,6 +1,6 @@
 # Stage8.3.1 — acesso operacional privado / Impacto OG
 
-Estado: correções aprovadas implementadas; homologação local operacional PASS. Atualização do piloto e aceite autenticado online ainda exigem aprovação explícita de Lucas. Não confundir pacote local com versão publicada.
+Estado: **PATCH_READY / LOCAL_OPERATIONAL_PASS**; implementação e source-only patch preparados/revisados. Atualização do piloto e aceite autenticado online ainda exigem aprovação explícita de Lucas. Não confundir pacote local com versão publicada.
 
 Entrada: `5087384560e6758b2b66109782903ee18d5c74ab`, branch `integration/dutra-os-one-system`. WIP documental da homologação8.3 preservado. Não houve reset, mudança de preço, migração ou criação de engine.
 
@@ -63,7 +63,7 @@ Executados: proposal-focused PASS; Impacto browser PASS; sessão server-side/bro
 
 ## Publicação controlada e rollback
 
-Nenhuma infraestrutura nova/variável/volume/banco/domínio precisa mudar. Patch pendente histórico`1fe3f12f-2078-4586-88f3-4aa395c33630` ainda aponta para86027135; não aplicar esse alvo obsoleto. Atualizar somente a sourceSHA desse mesmo serviço para o commit final desta rodada, confirmar diff sem outros recursos e então solicitar autorização explícita antes de apply. Source live é pinned, portanto push da integração não é deploy.
+Nenhuma infraestrutura nova/variável/volume/banco/domínio precisa mudar. Implementação **04ad48077702ae00b2e38e24b58628b42d6d8a26**, commit e push somente da integração PASS, local=remote/CLEAN, hooks normais82/82. O mesmo patch`1fe3f12f-2078-4586-88f3-4aa395c33630` foi retargeted para esse commit, substituindo o alvo obsoleto86027135. Readback Railway: STAGED/non-destructive, apenas source do serviço piloto; repo/branch permanecem iguais, commitSHAbe83c32→04ad480 e limpeza do image:null; nenhuma variável/volume/rede/outro serviço. Nada construído/aplicado. Source live é pinned, portanto push da integração NÃO disparou deploy. Não chamar accept_deploy até autorização explícita de Lucas. Documentação de fechamento pode avançar HEAD sem mudar alvo testado04ad480.
 
 Rollback de runtime: pin novamente **be83c32bf4c1c395daafb2a3b7877bbeda467976**, preservando volume/sessões/estado atual e backup. Rollback dos dois fixes por revert do commit específico, nunca apagar proposta/CRM/history ou reduzir dados atuais a um seed. Código de Stage8.2 continua opt-in/versionado; propostas antigas não migram visualmente.
 

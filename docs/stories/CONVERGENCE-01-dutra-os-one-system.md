@@ -518,6 +518,7 @@ File List: docs/product/PROPOSAL_IMPACTO_OG_HOMOLOGATION_83.md; docs/handoffs/V3
 - [x] Native authenticated CRM create/search/sheet→two applications→quote/proposal→versions→actual PDF/PNG→logout/login/restart; no sends/cross-client contamination.
 - [x] Mobile/desktop8views, 16-page layout/24cap, fallbackcontrast8.77 and PDF inspection; existing auth/offline/reconnect/409 browser.
 - [x] Final lint/og:check, npm test82/82 including release gate; Brain194/0warnings; classic export and actualsync503/409 browser PASS.
+- [x] Implementation04ad480 committed/pushed only integration with normal gates; same Railway patch1fe3f12f source-only target reviewed, non-destructive, no apply.
 - [ ] User approval of private release; deploy and authenticated online commercial acceptance.
 
 File List: apps/sistema-og/components/proposal-document.js; apps/sistema-og/service-worker.js; scripts/test_proposal_document_browser.mjs; scripts/test_proposal_operational_browser.mjs; package.json; docs/product/PROPOSAL_IMPACTO_OG_OPERATIONAL_831.md; docs/runtime/DUTRA_OS_RUNTIME.md; checkpoint; this story; tasks/TODO.md; tasks/DONE.md; Second Brain sources/incidents/cycles and generated index/metrics. Includes preserved8.3 report/documentation; no real pilot data in Git.
