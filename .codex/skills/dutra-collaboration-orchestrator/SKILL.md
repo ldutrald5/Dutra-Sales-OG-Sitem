@@ -240,9 +240,13 @@ For substantial visual redesigns:
 1. inspect current product and prior feedback;
 2. generate 2–3 concrete directions, not a giant moodboard;
 3. make trade-offs visible;
-4. get product-owner selection/refinement;
-5. persist only stable selected principles into Skills/Second Brain;
-6. then hand a narrow implementation order to Codex.
+4. run a lightweight first-impression test when appropriate (for example: 5-second recall, preference + reason, obvious-next-action check);
+5. get product-owner selection/refinement;
+6. persist only stable selected principles into Skills/Second Brain;
+7. tokenize stable choices so global visual change remains cheap;
+8. then hand a narrow implementation order to Codex.
+
+Keep visual critique separate from roadmap expansion: feedback may improve the concept, but unrelated feature ideas return to backlog rather than silently entering the implementation package.
 
 Do not spend implementation credits polishing a direction that has not yet been visually selected when the user has expressed uncertainty about how to describe the desired look.
 
