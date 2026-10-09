@@ -474,8 +474,10 @@ Status: Ready for Review — pacote local PASS; QG aplica o staged patch. Entrad
 - [x] Toast em fluxo do header mobile; desktop amplo/editor lateral; oito viewports sem overflow, controles touch/preview.
 - [x] Contexto real isolado + sintético PASS;82/82, Brain174/0warnings, release e browsers Stages3–8/PWA/503/reconnect/409 PASS.
 - [x] DEC-CONVERGENCE-EXPORT-001/source/cycle e Skill quote-engine atualizados por aprendizado durável.
-- [ ] Commit/push integração e patch único do piloto revisado; entrega PATCH_READY, nunca accept_deploy.
+- [x] Commit/push integração e patch único do piloto revisado; entrega PATCH_READY, nunca accept_deploy.
 
 File List: apps/sistema-og/{app.js,index.html,styles.css,service-worker.js,components/app-shell.css,components/proposal-workspace.js,components/proposal-workspace.css,components/proposal-document.js,services/proposal-intelligence-service.js}; package.json; scripts/{test_proposal_premium.mjs,test_proposal_workspace_browser.mjs,test_proposal_document.mjs,test_proposal_document_browser.mjs}; .codex/skills/dutra-quote-engine/SKILL.md; DUTRA_OS_CONTEXT.md/AI_HANDOFF.md/ROADMAP.md/CHANGELOG.md; docs/01-ARQUITETURA.md; this story/checkpoint; tasks/TODO.md/DONE.md; Second Brain sources/decisions/cycles/index/metrics.
 
 Limits/rollback: Chromium emulation only; local logo assets missing on another device yield OG-only. Native PDF requires browser save dialog. PNG24-page cap/explicit downloads; advanced editing/strategic templates/asset upload-replication remain backlog. Roll back code to be83c32 without touching data/volume. No main/official production/PIN/auth/sync/price/ROI rule changes.
+
+Publication: implementationc852001682629da00565f5886ce3a444c20e1abf, normal hooks/remote equality/CLEAN PASS. Pilot patch1fe3f12f-2078-4586-88f3-4aa395c33630 is source-only/non-destructive, no live deploy. Final documentation commit retargets the same patch; exact POST/TARGET SHA verified in operational handoff. @architect/@qa PASS. QG applies, online8.1 acceptance remains pending.
