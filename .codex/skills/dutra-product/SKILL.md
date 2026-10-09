@@ -13,6 +13,7 @@ metadata:
 - `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
 - `docs/03-DESIGN-SYSTEM.md`
 - `docs/product/PROPOSAL_EXPERIENCE_VISION.md` when proposal/client-facing storytelling or high-visual sales surfaces are in scope.
+- `docs/product/VISUAL_CO_CREATION_PLAYBOOK.md` for any taste-sensitive visual direction, concept selection or design-system evolution.
 - relevant Second Brain decisions/patterns/ideas.
 
 ## Principles
