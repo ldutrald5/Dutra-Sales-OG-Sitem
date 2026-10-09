@@ -14,6 +14,7 @@ metadata:
 - `docs/03-DESIGN-SYSTEM.md`
 - `docs/product/PROPOSAL_EXPERIENCE_VISION.md` when proposal/client-facing storytelling or high-visual sales surfaces are in scope.
 - `docs/product/VISUAL_CO_CREATION_PLAYBOOK.md` for any taste-sensitive visual direction, concept selection or design-system evolution.
+- `docs/prompts/MARKET_RADAR.md` plus the latest `docs/research/MARKET_RADAR_*.md` snapshot when market trends, external benchmarks or forward-looking product direction are in scope.
 - relevant Second Brain decisions/patterns/ideas.
 
 ## Principles
