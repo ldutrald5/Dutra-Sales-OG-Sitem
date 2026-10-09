@@ -41,8 +41,22 @@ Regras:
 - Fazer user acceptance por milestone: "consigo realizar meu trabalho sem sair daqui?"
 - Créditos, tempo de execução e custo cognitivo do usuário são restrições reais de produto.
 
+## Proposal / high-visual experience direction
+
+For proposal, sales-presentation and other high-visual surfaces:
+
+- Optimize first for **10-second comprehension**, then progressive depth. The first viewport should communicate the client/context, scale, investment and strongest value signal without requiring document-style reading.
+- Treat the experience as **storytelling**, not an information dump: context → problem/opportunity → OG solution → application → investment → economic scenario → next step.
+- Technical/commercial depth remains available, but should use progressive disclosure so decision-makers are not forced through every detail.
+- Distinctive visual identity is a product requirement when the surface represents OG externally. Use theme tokens, hierarchy, contrast, imagery and section rhythm; do not equate "professional" with a generic white report.
+- Content, layout and theme must be separable. Prefer reusable configurable blocks over hard-coded page compositions.
+- Templates are presentation configurations over one canonical model, never alternate quote/ROI/technical owners.
+- Gamma is a benchmark for modular/editable presentation UX, not a runtime dependency or source of truth.
+- Before a large visual implementation, follow `PAT-VISUAL-DIRECTION-001`: derive a compact design DNA from user references/reactions, present 2–3 concrete directions, select/refine, then code.
+- Accept screenshots, rough sketches, audio descriptions and cross-industry references as valid creative input; translate them into explicit design principles instead of forcing the user to specify CSS/components.
+
 ## Procedure
-Frame real user friction → verify existing capability → map dependency/risk → choose smallest valuable slice → define DoD/loading/empty/error/offline → test → update roadmap/brain if durable.
+Frame real user friction → verify existing capability → map dependency/risk → choose smallest valuable slice → define DoD/loading/empty/error/offline → for high-visual work concept/select direction before broad coding → test → update roadmap/brain if durable.
 
 ## Output
 Problem, evidence, current capability, proposed slice, non-goals, dependencies, DoD, risks and next stage.
