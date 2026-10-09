@@ -1,3 +1,11 @@
+# Stage8.3.1 — explicit deployment approval / provider handoff (2026-10-09)
+
+STATUS: PATCH_READY / APPROVAL_HANDOFF_REQUIRED. Lucas explicitly approved applying patch`1fe3f12f-2078-4586-88f3-4aa395c33630` only to existing pilotb385d7a3, target`04ad48077702ae00b2e38e24b58628b42d6d8a26`. Immediately re-read live diff: correct same source-only/non-destructive patch, no variables/volume/network/other service changes. Called approval-gated accept_deploy **once**. Tool returned `Cancelled — the user did not approve this action. No changes were made.` Despite user authorization, provider approval layer cancelled; no deployment triggered. Do not treat this as a code/test failure or repeat unchanged action; follow INC-RAILWAY-APPROVAL-HANDOFF-001/runtime Skill.
+
+After refusal: same patch remains STAGED at04ad480; previous deployment6d07fb1a SUCCESS/1replica; health200/ok/persistent and exact liveSHA`be83c32bf4c1c395daafb2a3b7877bbeda467976`; own volume and V2/V3 unchanged. URL https://dutra-os-uxr01-preview-production.up.railway.app/ remains usable at Stage8, not Impacto. Production/main not modified. User authorization is recorded; do not ask Lucas to repeat the same approval. QG/Railway dashboard must apply this exact pending patch through its approval flow, then verify newSUCCESS/04ad480/health and authenticated quote/PDF. No new code or broad QA rerun for this approval boundary. Evidence /workspace/artifacts/stage831-operational/deploy-approval-outcome.json.
+
+---
+
 # Stage8.3.1 — prioridade operacional / homologação privada (2026-10-09)
 
 STATUS: PATCH_READY / PRIVATE_RELEASE_APPROVAL_PENDING. ENTRY_SHA`5087384560e6758b2b66109782903ee18d5c74ab`; WIP8.3 preservado. Dois P2 aprovados corrigidos no renderer existente: cadeia de títulos com primeiro conteúdo na mesma página e fallback com contraste8,77:1. Preços, quantidades, ROI, DesignDNA, propostas antigas e owners inalterados. SWv82 para shell atualizado.

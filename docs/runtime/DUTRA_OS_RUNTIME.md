@@ -260,3 +260,10 @@ Live verified HTTPS https://dutra-os-uxr01-preview-production.up.railway.app/; e
 Public configisolatedPreview/persistentAuth/pilotRealData true; state/session endpoints401 unauthenticated and private .data paths403. PIN prompt mobile390×844/desktop1440×900; current real-PIN login/live write not tested without supplied authorized session. Signed HttpOnly Secure SameSiteStrict30-day session and native CRM→quote→PDF/PNG→logout/login→process restart tested locally on isolated synthetic fixture. Server is shared private OG pilot; no separate-organization tenant ACL. Trusted devices retain local-first data after logout. No Supabase connection/credential change or production data writes.
 
 Approved P2 fixes/Impacto package prepared locally; external publication needs Lucas approval. Same staged patch1fe3f12f-2078-4586-88f3-4aa395c33630 now reviewed/source-only, non-destructive, targets04ad48077702ae00b2e38e24b58628b42d6d8a26 (implementation integration push verified; normal82 hooks). Live remainsbe83c32; no apply/build/deploy. Explicit Lucas approval required before accept_deploy. Do not claim Impacto online yet. Full evidence/access workflow: docs/product/PROPOSAL_IMPACTO_OG_OPERATIONAL_831.md.
+
+
+## Stage8.3.1 — user-approved apply cancelled by approval layer (2026-10-09)
+
+Explicit user approval received for existing-pilot-only patch1fe3f12f/target04ad480. Exact live patch re-read; one accept_deploy attempt returned `Cancelled — the user did not approve this action. No changes were made.` No build/deploy started. Follow runtime Skill/INC-RAILWAY-APPROVAL-HANDOFF-001: no unchanged retries or alternate executor bypass; QG/dashboard approval handoff. Authorization persists; do not ask user to repeat it.
+
+Post-refusal verification: patch remainsSTAGED04ad480, live6d07fb1a SUCCESS1replica atbe83c32; HTTPS/health200/ok/persistent. Own/data volume/V2/V3 intact. Runtime Impacto is NOT deployed; existing URL remains functional. No production/main/auth/secrets/data mutation. Online acceptance of new release is NOT RUN.

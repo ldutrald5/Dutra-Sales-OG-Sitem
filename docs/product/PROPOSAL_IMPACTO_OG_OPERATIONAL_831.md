@@ -68,3 +68,8 @@ Nenhuma infraestrutura nova/variável/volume/banco/domínio precisa mudar. Imple
 Rollback de runtime: pin novamente **be83c32bf4c1c395daafb2a3b7877bbeda467976**, preservando volume/sessões/estado atual e backup. Rollback dos dois fixes por revert do commit específico, nunca apagar proposta/CRM/history ou reduzir dados atuais a um seed. Código de Stage8.2 continua opt-in/versionado; propostas antigas não migram visualmente.
 
 Pendências: aprovação para entrega externa/publicação privada; login/smoke autenticado online pelo usuário ou sessão autorizada; aceite em telefone físico/diálogoPDF usado por Lucas. P3 plural/data permanece backlog conforme homologação8.3; sem redesign. Nenhum acesso multi-conta foi criado. MAIN/PRODUÇÃO OFICIAL/V2/V3 alterados:NO; preços/ROI/CRM/auth/sync architecture alterados:NO. Acesso atual existe, porém missão integral com Impacto online ainda NÃO COMPLETE.
+
+
+## Authorized deploy follow-up
+
+Lucas explicitly approved pilot-only publication of04ad480 through patch1fe3f12f. Live patch was checked again and accept_deploy invoked once; approval layer cancelled with `the user did not approve this action`, no changes made. Confirmed afterward: STAGED patch unchanged, existing deployment SUCCESS and health200 atbe83c32/persistent. This is APPROVAL_HANDOFF_REQUIRED, not implementation failure. No repeated tool attempt/credential change/bypass/new QA. User permission is recorded; next step is QG/panel application of this exact source-only patch and real online acceptance. Current URL still has Stage8; do not promise updated Impacto. Main/official production/volume/data unchanged.
