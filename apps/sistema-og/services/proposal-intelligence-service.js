@@ -114,6 +114,31 @@
     next.manualItems = Array.isArray(context.manualItems) ? context.manualItems.slice(0,100).map(item => ({...safeExtra(item),applicationScope:clean(item.applicationScope) || 'validar'})) : null;
     return next;
   }
+
+  // Presentation is versioned metadata, never a second commercial calculation.
+  const PRESENTATION_TEMPLATES = Object.freeze({
+    executivo:{label:'Executivo',sections:['customer','vehicles','conditions','roi','observations','disclaimer']},
+    tecnico:{label:'Técnico',sections:['customer','vehicles','application','parts','conditions','roi','assumptions','observations','disclaimer']},
+    compacto:{label:'Compacto',sections:['customer','parts','conditions','observations','disclaimer']}
+  });
+  const PRESENTATION_SECTIONS = Object.freeze(['customer','vehicles','application','parts','conditions','roi','assumptions','disclaimer','observations']);
+  function normalizePresentation(input = {}, clientId = '') {
+    const templateId = Object.hasOwn(PRESENTATION_TEMPLATES,input.templateId) ? input.templateId : 'tecnico';
+    const defaults = PRESENTATION_TEMPLATES[templateId].sections;
+    const textLimits = {title:120,introduction:1200,observation:2000,deliveryNote:500,validityText:300,closing:800};
+    const reference = input.branding;
+    const branding = reference && clean(reference.clientId) === clean(clientId) && clean(reference.materialId) && clean(reference.assetId)
+      ? {clientId:clean(clientId),materialId:clean(reference.materialId).slice(0,180),assetId:clean(reference.assetId).slice(0,180),version:clean(reference.version).slice(0,40),sha256:/^[a-f0-9]{64}$/.test(reference.sha256 || '') ? reference.sha256 : ''} : null;
+    return {schemaVersion:1,templateId,
+      sections:Object.fromEntries(PRESENTATION_SECTIONS.map(key => [key,typeof input.sections?.[key] === 'boolean' ? input.sections[key] : defaults.includes(key)])),
+      text:Object.fromEntries(Object.entries(textLimits).map(([key,limit]) => [key,clean(input.text?.[key]).slice(0,limit)])),branding};
+  }
+  function presentationSnapshot(original, presentation, options = {}) {
+    validatePublicSnapshot(original);
+    const snapshot = {...clone(original),preparedAt:iso(options.now),presentation:normalizePresentation(presentation,original.clientId)};
+    validatePublicSnapshot(snapshot);
+    return freeze(snapshot);
+  }
   function safeCalculatedItem(item = {}) {
     return {code:clean(item.code),name:clean(item.name),category:clean(item.category),qty:safeNumber(item.qty),
       priceUnit:safeNumber(item.priceUnit),subtotal:safeNumber(item.subtotal),isCustomPrice:item.isCustomPrice === true};
@@ -156,6 +181,7 @@
       clientId,
       preparedAt,
       templateId: clean(state.activePdfTemplate || input.templateId || 'default'),
+      presentation: normalizePresentation(client.proposalPresentation,clientId),
       client: {
         name: clean(client.nome || quote.clientName),
         company: clean(client.empresa || quote.clientCompany),
@@ -217,7 +243,9 @@
     const model = options.operationsModel;
     if (!model?.migrateOperations || !model?.appendActivity) throw new Error('Operations Model é obrigatório');
     const next = model.migrateOperations(operations);
-    const snapshot = buildSnapshot(input, options);
+    const snapshot = input.sourceSnapshot ? presentationSnapshot(input.sourceSnapshot,input.presentation,options) : buildSnapshot(input, options);
+    if (input.sourceSnapshot && !next.generatedDocuments.some(doc=>doc.documentType === 'proposal_tracking' && doc.clientId === input.sourceSnapshot.clientId && doc.quoteId === input.sourceSnapshot.quoteId && doc.snapshot && snapshotSignature(doc.snapshot) === snapshotSignature(input.sourceSnapshot))) throw new Error('Revisão visual exige uma versão histórica existente');
+    if (input.sourceSnapshot && (clean(input.clientId) !== snapshot.clientId || clean(input.quoteId) !== snapshot.quoteId)) throw new Error('Revisão visual exige a identidade original da proposta');
     const family = next.generatedDocuments.filter(item => item.documentType === 'proposal_tracking' && clean(item.quoteId) === snapshot.quoteId);
     if (family.some(item => clean(item.clientId) !== snapshot.clientId)) throw new Error('Cotação já vinculada a outro cliente');
     const latest = family.sort((a,b) => safeNumber(b.version) - safeNumber(a.version))[0];
@@ -237,8 +265,10 @@
       source: 'quote_history'
     };
     const quoteIndex = next.quotes.findIndex(item => String(item.id) === String(quoteRecord.id));
-    if (quoteIndex >= 0) next.quotes.splice(quoteIndex, 1, quoteRecord);
-    else next.quotes.unshift(quoteRecord);
+    if (!input.sourceSnapshot) {
+      if (quoteIndex >= 0) next.quotes.splice(quoteIndex, 1, quoteRecord);
+      else next.quotes.unshift(quoteRecord);
+    }
 
     const documentRecord = {
       id,
@@ -332,6 +362,7 @@
     recordServerEvent,
     recordUserEvent,
     canPublish,
-    ROI_FIELDS, normalizeRoiAssumptions, calculateRoi, safeTechnicalContext
+    ROI_FIELDS, normalizeRoiAssumptions, calculateRoi, safeTechnicalContext,
+    PRESENTATION_TEMPLATES, PRESENTATION_SECTIONS, normalizePresentation, presentationSnapshot
   };
 }));

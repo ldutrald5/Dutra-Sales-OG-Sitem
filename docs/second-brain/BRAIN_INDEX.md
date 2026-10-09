@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 171 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 174 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 23 |
-| decision | 24 |
+| cycle | 24 |
+| decision | 25 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 24 |
 | knowledge | 13 |
 | open_question | 7 |
 | pattern | 23 |
-| source | 36 |
+| source | 37 |
 
 ## Active decisions
 
@@ -67,6 +67,8 @@ Generated from 171 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Canonical builder emits code/quantity/position and optionally projects existing tractor/trailer branches. Read-only map rebuilds paths from saved minimal per-vehicle scope/context. Manual user scope is not physical confirmation; unknown origin stays VALIDAR. Consulta uses same draft/engine without commercial writes. No code-only classification, compatibility table, store or pricing engine.
 - **DEC-CONVERGENCE-PROPOSAL-001 — Immutable quote-derived proposal revisions with explicit scenario ROI** (active/high)
   Existing OG_PROPOSAL_INTELLIGENCE/generatedDocuments proposal_tracking owns commercial representation and revisions. Native calculateCompleteQuote/resolveItemPrice owns prices and quantities. Allowlisted snapshot retains vehicle IDs, unit prices, technical scope/path and source-reviewed ROI assumptions. Same unchanged quote can gain a new immutable proposal revision; historical display never reprices against live CRM/catalog. Missing premises stay VALIDAR. One helper serves quote, proposal and current simulator. No new persistence owner or external action.
+- **DEC-CONVERGENCE-EXPORT-001 — One client presentation model for preview, print and paginated PNG** (active/high)
+  OG_PROPOSAL_DOCUMENT is a presentation/export adapter over immutable OG_PROPOSAL_INTELLIGENCE snapshots. Templates/visibility/text/logo references do not own prices, ROI, technical classifications or persistence. A visual change to historical data prepares a new canonical revision of the same quote. Local approved customer-authorized logo references are client-scoped and SHA-256 checked; missing/changed assets fall back explicitly. PDF and PNG share semantic blocks, styles and bounded A4 pagination, with captured context validation. Export is not send.
 
 ## Open questions
 
@@ -165,6 +167,8 @@ Generated from 171 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CONVERGENCE-EXPORT-20261009-001 — Canonical client document export and revision audit** (validated/high)
+  Current proposal workspace and print entry reuse frozen proposal_tracking data. Existing operations.materials/localAsset store supports explicitly authorized client association with content fingerprint. Isolated native browser regression verifies three templates, white actual print iframe PDF, paginated raster output with real text/logo pixels, immutable visual revisions, late-context safety and no sends. Private pilot fixtures/assets are not committed.
 - **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
   Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
 - **SRC-QUOTE-SNAPSHOT-20261008-001 — Online quotation snapshot transport failure and synthetic replay** (validated/high)
@@ -183,8 +187,6 @@ Generated from 171 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Audited current app/client/gateway/transcription/Whisper/review owners, reproduced stale A response and normalized failed-save retry suppression with synthetic fixtures, then exercised explicit review, asynchronous ownership, durable outbox and actual local HTTP ACK/503/409 in isolated browsers. No hosted provider or customer data was exercised.
 - **SRC-CONVERGENCE-TECH-20261006-001 — Stage6 canonical technical audit and deterministic state-loss evidence** (validated/high)
   Entry 7c6d68ef3b2101feb41063a6f3c39adce09eb2d8 audit established OG_DATA/app.js technical owners; byte comparison preserved both original technical functions and data. Synthetic VM repros executed real app callbacks and exposed held-GET draft loss, operations-only recovery omission and old-ACK deletion of a newer durable outbox. Real loopback HTTP/IndexedDB browsers protect these boundaries. This source does not certify physical OG application, hosted provider operation or final Stage6 publication.
-- **SRC-CONVERGENCE-STAGE1-20261005-001 — CONVERGENCE-01 Stage 1 merge and current-SHA replay evidence** (validated/high)
-  Merge fd99210ca81a4374377f4353e7a402b45679a23c preserves Stage 0 functional core and canonical Supabase while integrating V3 ancestry and exact preview files. Local validation passed 75/75; workflow 37252679945 proved two clean canonical replays and structural parity with zero drift/gaps and deterministic fingerprint 7f0c31d8de86892d48afb2bf9e4a6d0d36e293aab94d105344a5526241d959a9.
 
 ## Retrieval workflow
 

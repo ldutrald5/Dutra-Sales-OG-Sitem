@@ -60,3 +60,5 @@
 @media print {
   .dutra-shell #nav-tabs-container, .dutra-shell .og-mobile-nav, .dutra-shell .shell-feedback, .dutra-shell .shell-skip { display: none !important; }
 }
+/* Mobile feedback occupies header flow instead of obscuring content/navigation. */
+@media(max-width:1023px){.dutra-shell .brand-header>.og-toast{position:static;inset:auto;max-width:none;margin:0 12px 8px;max-height:100px;overflow:auto;box-shadow:none;transform:none!important;transition:opacity .2s ease}.dutra-shell .brand-header>.og-toast .og-toast-copy{font-weight:650}}

@@ -1,5 +1,10 @@
 # DUTRA OS — Contexto Canônico
 
+## CONVERGENCE-01 Stage8.1 — documento derivado
+
+Stage8 está aceita online no piloto be83c32. Stage8.1 reutiliza o snapshot canônico para Executivo/Técnico/Compacto, prévia branca, PDF/print e PNG paginado. Textos/seções/logo são apresentação versionada; preço/ROI/aplicação e owners permanecem intactos. Logo somente asset local autorizado do mesmo cliente, por referência/fingerprint. Publicação termina em PATCH_READY para o QG; evidência no checkpoint.
+
+
 ## CONVERGENCE-01 Stage8 — proposta derivada da cotação
 
 Stage7.1 foi aceita online no piloto, preservando cliente/veículos/split/valores após reload. Stage8 reutiliza OG_PROPOSAL_INTELLIGENCE em operations.generatedDocuments para versões imutáveis; preço continua em calculateCompleteQuote/resolveItemPrice. ROI usa premissas explicitamente informadas, com fonte e revisão; ausência = VALIDAR. Publicação termina em PATCH_READY para QG. Status/evidência no [checkpoint](docs/handoffs/V3_UNIFICATION_CHECKPOINT.md).

@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const owner=require('../apps/sistema-og/services/proposal-intelligence-service.js');
+const doc=require('../apps/sistema-og/components/proposal-document.js');
+const operationsModel=require('../apps/sistema-og/operations-model.js');
+const now='2026-10-09T10:00:00Z';
+const vehicles=[{id:'TRACTOR-ID',name:'Cavalo Volvo',vehicleTypeId:'toco_4x2',qty:2,items:[{code:'EQ1135',qty:2}],technicalContext:{leadId:'REAL-ID'}},{id:'TRAILER-ID',name:'Carreta',vehicleTypeId:'trucado_carreta3',qty:3,items:[{code:'EQ1135',qty:6}],technicalContext:{leadId:'REAL-ID'}}];
+const input={quote:{id:'QUOTE-ID',clientId:'REAL-ID',totalValue:220,totalPecas:22},clientId:'REAL-ID',quoteState:{client:{empresa:'Cliente autorizado',nome:'Contato',cnpj:'',proposalTerms:{notes:'Nota comercial original'}},vehicles,extraItems:[]},quoteData:{totalFinalVenda:220,totalPecas:22,totalPneus:44,totalConjuntos:5,subtotalProdutos:220,taxaCartaoValor:0,parcelas:2,valorParcela:110,vehicles:vehicles.map(v=>({...v,unitSubtotal:v.items[0].qty*10,totalSubtotal:v.items[0].qty*10*v.qty,totalPneus:0,calculatedItems:[{...v.items[0],name:'Suporte',priceUnit:10,subtotal:v.items[0].qty*10}]})),extraItems:[]},applicationMaps:Object.fromEntries(vehicles.map((v,i)=>[v.id,{rows:[{code:'EQ1135',name:'Suporte',qty:v.items[0].qty,scope:i?'carreta':'cavalo',position:i?'eixo_implemento':'tracao',status:'runtime',origin:'calculated',path:[i?'Carreta':'Cavalo','Regra canônica']}]}]))};
+let operations=owner.prepareTrackingDraft({},input,{now,operationsModel});
+const original=structuredClone(operations),v1=operations.generatedDocuments[0];
+for(const templateId of ['executivo','tecnico','compacto']){
+ const config=owner.normalizePresentation({templateId},'REAL-ID');const projected=owner.presentationSnapshot(v1.snapshot,config,{now});
+ assert.deepEqual(projected.commercial,v1.snapshot.commercial);assert.deepEqual(projected.roi,v1.snapshot.roi);assert.deepEqual(projected.vehicles,v1.snapshot.vehicles);
+ const model=doc.viewModel(projected,v1);assert.equal(model.presentation.templateId,templateId);assert.equal(model.snapshot.commercial.totalValue,220);
+ const html=doc.documentHtml(projected,v1);assert.match(html,/R\$\s*220,00/);assert.match(html,/background:white/);assert.doesNotMatch(html,/<button|<nav|<input|<script|https?:\/\//);
+}
+const config=owner.normalizePresentation({templateId:'tecnico',sections:{roi:false,assumptions:true,application:false,parts:false},text:{title:'<img src=x onerror=alert(1)>',introduction:'x'.repeat(5000)},branding:{clientId:'WRONG',materialId:'M',assetId:'A'}},'REAL-ID');
+assert.equal(config.text.introduction.length,1200);assert.equal(config.branding,null);
+const html=doc.documentHtml(v1.snapshot,v1,{presentation:config});assert.doesNotMatch(html,/data-proposal-roi-status|data-proposal-scope|data-proposal-part|Premissas e método/);assert.match(html,/&lt;img/);
+assert.match(doc.documentHtml(v1.snapshot,v1),/CAVALO \/ CAMINHÃO[\s\S]*CARRETA \/ IMPLEMENTO/);assert.match(doc.documentHtml(v1.snapshot,v1),/ROI · VALIDAR/);
+const readable=doc.documentHtml(v1.snapshot,v1);assert.ok(!readable.includes(' · TRACTOR-ID'));assert.match(readable,/data-proposal-vehicle-id="TRACTOR-ID"/);
+const trailerView=structuredClone(v1.snapshot);trailerView.vehicles=[{...trailerView.vehicles[1],includeDianteira:true,technicalContext:{...trailerView.vehicles[1].technicalContext,applicationScope:'carreta'}}];assert.doesNotMatch(doc.documentHtml(trailerView,v1),/Com dianteira|Sem dianteira/,'Trailer-only summary omits inapplicable tractor-front option');
+const presentation=owner.normalizePresentation({templateId:'compacto',text:{title:'Orçamento revisado'},sections:{roi:false}},'REAL-ID');
+operations=owner.prepareTrackingDraft(operations,{sourceSnapshot:v1.snapshot,clientId:v1.clientId,quoteId:v1.quoteId,presentation},{now:'2026-10-09T11:00:00Z',operationsModel});
+const v2=operations.generatedDocuments[0];assert.equal(v2.version,2);assert.equal(v2.quoteId,v1.quoteId);assert.notEqual(v2.id,v1.id);assert.deepEqual(operations.generatedDocuments.find(d=>d.id===v1.id),v1);assert.deepEqual(operations.quotes,original.quotes,'Visual revision never changes saved quote');
+assert.deepEqual(v2.snapshot.vehicles,v1.snapshot.vehicles);assert.deepEqual(v2.snapshot.roi,v1.snapshot.roi);assert.deepEqual(v2.snapshot.commercial,v1.snapshot.commercial);assert.equal(v2.snapshot.presentation.templateId,'compacto');
+const repeat=owner.prepareTrackingDraft(operations,{sourceSnapshot:v2.snapshot,clientId:v2.clientId,quoteId:v2.quoteId,presentation},{now:'2026-10-09T12:00:00Z',operationsModel});assert.deepEqual(repeat.generatedDocuments,operations.generatedDocuments);
+assert.throws(()=>owner.prepareTrackingDraft(operations,{sourceSnapshot:v1.snapshot,clientId:'WRONG',quoteId:v1.quoteId,presentation},{now,operationsModel}),/identidade/);
+assert.throws(()=>owner.prepareTrackingDraft(operations,{sourceSnapshot:{...v1.snapshot,commercial:{...v1.snapshot.commercial,totalValue:999}},clientId:v1.clientId,quoteId:v1.quoteId,presentation},{now,operationsModel}),/histórica existente/);
+assert.equal(v2.status,'internal_draft');assert.ok(!operations.activityEvents.some(e=>e.type==='proposal.sent'));
+const material={id:'M',title:'Logo autorizado',clientId:'REAL-ID',mediaType:'image',status:'approved',audience:'customer_authorized',consentRef:'Autorização explícita de teste',localAsset:{id:'ASSET'},contentVersion:'1'};
+assert.equal(doc.logoCandidates([material],'REAL-ID').length,1);assert.equal(doc.logoCandidates([material],'WRONG').length,0);assert.equal(doc.logoCandidates([{...material,status:'draft'}],'REAL-ID').length,0);
+assert.equal(doc.logoCandidates([{...material,audience:'internal'}],'REAL-ID').length,0);
+assert.ok(JSON.stringify(v2.snapshot).length<16000);for(const bad of ['history','operations','state','leads'])assert.ok(!Object.hasOwn(v2.snapshot,bad));
+assert.deepEqual(JSON.parse(JSON.stringify(v2.snapshot)),v2.snapshot);assert.deepEqual(JSON.parse(JSON.stringify(v2)).snapshot.presentation,presentation);
+assert.match(doc.css,/break-inside:avoid/);assert.match(doc.css,/page-break-after:always/);
+console.log('Proposal document: one view model, three templates, pure visibility/text, unchanged quote/ROI/technical IDs, bounded immutable presentation revisions, scoped logo references, white print and prepared != sent PASS');

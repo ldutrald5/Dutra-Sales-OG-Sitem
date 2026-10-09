@@ -461,3 +461,21 @@ Status: Ready for Review — local gates PASS. Implementation41a95ea; final publ
 - [x] Implementation complete; integration/PATCH_READY action pack, target/rollback/evidence prepared in checkpoint. Actual Git/staged patch verification is in the final operational report; QG alone applies deploy.
 
 File List: app.js/index.html/service-worker.js; services/proposal-intelligence-service.js; components/proposal-workspace.js/.css; package.json; scripts/test_proposal_premium.mjs/test_proposal_workspace_browser.mjs/test_product_evolution.mjs/test_multi_vehicle_workspace.mjs/test_quote_composition_snapshot.mjs; checkpoint/architecture/contexts/roadmap/changelog/tasks; dutra-quote-engine Skill; Second Brain source/decision/two incidents/cycle/index/metrics. Stage8.1 exportações/templates e Reverse Technical Lookup diferidos.
+
+
+## Stage8.1 — Proposta / orçamento: apresentação e exportação (2026-10-09)
+
+Status: Ready for Review — pacote local PASS; QG aplica o staged patch. Entrada be83c32 verificada CLEAN/local=remote; Stage8 ONLINE aceita pelo QG/usuário, health exato/persistente. Sem repetir Stage8.
+
+- [x] Uma projeção de snapshot com Executivo/Técnico/Compacto, textos e seções; preços, ROI e classificação intactos.
+- [x] Documento branco/prévia/native print/PDF e PNG paginado compartilham representação/estilos; artefatos PDF e pixels PNG inspecionados.
+- [x] Logo por referência autorizada/fingerprint do mesmo cliente, sem busca/binário no snapshot; ausência/alteração = OG-only explícito.
+- [x] Preferências limitadas/nova revisão no owner atual, história imutável e identidade async protegida; exportar não registra envio.
+- [x] Toast em fluxo do header mobile; desktop amplo/editor lateral; oito viewports sem overflow, controles touch/preview.
+- [x] Contexto real isolado + sintético PASS;82/82, Brain174/0warnings, release e browsers Stages3–8/PWA/503/reconnect/409 PASS.
+- [x] DEC-CONVERGENCE-EXPORT-001/source/cycle e Skill quote-engine atualizados por aprendizado durável.
+- [ ] Commit/push integração e patch único do piloto revisado; entrega PATCH_READY, nunca accept_deploy.
+
+File List: apps/sistema-og/{app.js,index.html,styles.css,service-worker.js,components/app-shell.css,components/proposal-workspace.js,components/proposal-workspace.css,components/proposal-document.js,services/proposal-intelligence-service.js}; package.json; scripts/{test_proposal_premium.mjs,test_proposal_workspace_browser.mjs,test_proposal_document.mjs,test_proposal_document_browser.mjs}; .codex/skills/dutra-quote-engine/SKILL.md; DUTRA_OS_CONTEXT.md/AI_HANDOFF.md/ROADMAP.md/CHANGELOG.md; docs/01-ARQUITETURA.md; this story/checkpoint; tasks/TODO.md/DONE.md; Second Brain sources/decisions/cycles/index/metrics.
+
+Limits/rollback: Chromium emulation only; local logo assets missing on another device yield OG-only. Native PDF requires browser save dialog. PNG24-page cap/explicit downloads; advanced editing/strategic templates/asset upload-replication remain backlog. Roll back code to be83c32 without touching data/volume. No main/official production/PIN/auth/sync/price/ROI rule changes.

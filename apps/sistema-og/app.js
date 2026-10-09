@@ -1162,16 +1162,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Seletor de Modelo de PDF
-    const pdfTemplateSelect = document.getElementById('pdf-template-selector');
-    if (pdfTemplateSelect) {
-      pdfTemplateSelect.addEventListener('change', (e) => {
-        state.activePdfTemplate = e.target.value;
-        persistVehicleComposition();
-        recalculateQuote();
-        showNotification(`Modelo de proposta alterado para: ${pdfTemplateSelect.options[pdfTemplateSelect.selectedIndex].text}`, 'info');
-      });
-    }
   }
 
   function resolveItemPrice(itemCode, customPrice, importedItem = {}) {
@@ -2014,16 +2004,9 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // =========================================================================
 
   function renderOfficialProposalDocument(quoteData) {
-    const docEl = document.getElementById('official-proposal-print');
-    if (!docEl) return;
-
-    if (state.activePdfTemplate === 'vendruscolo') {
-      docEl.innerHTML = buildVendruscoloPdfHtml(quoteData);
-    } else if (state.activePdfTemplate === 'lorentrans') {
-      docEl.innerHTML = buildLorentransPdfHtml(quoteData);
-    } else {
-      docEl.innerHTML = buildMultiVehicleRoiPdfHtml(quoteData);
-    }
+    // Linked proposals use the snapshot surface; preserve unlinked manual quote print.
+    const surface=document.getElementById('official-proposal-print');
+    if (surface) surface.innerHTML=findLeadForClientData(state.client) ? '' : buildVendruscoloPdfHtml(quoteData);
   }
 
   /**
@@ -2474,6 +2457,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       template:state.activePdfTemplate,
       clientId:findLeadForClientData(state.client)?.id || null,
       proposalTerms:state.client.proposalTerms || {},
+      proposalPresentation:OG_PROPOSAL_INTELLIGENCE.normalizePresentation(state.client.proposalPresentation,findLeadForClientData(state.client)?.id),
       roiAssumptions:OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(state.client.roiAssumptions),
       total:Number(quoteData.totalFinalVenda || 0),
       pieces:Number(quoteData.totalPecas || 0),
@@ -2522,19 +2506,29 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const historical = Boolean(record && activeProposalContext.viewOnly);
     const sentConfirmed = Boolean(record && state.operations.activityEvents.some(event => event.proposalId === record.id && OG_PROPOSAL_INTELLIGENCE.normalizeProposalEventType(event.type) === 'proposal.sent'));
     let snapshot = historical ? record.snapshot : null;
+    if (historical && activeProposalContext.presentationEditing) snapshot = OG_PROPOSAL_INTELLIGENCE.presentationSnapshot(record.snapshot,state.client.proposalPresentation,{now:record.preparedAt});
     if (!snapshot && lead && data.totalPecas > 0) {
       try {
         snapshot = OG_PROPOSAL_INTELLIGENCE.buildSnapshot({quote:{id:'CURRENT-DRAFT',clientId:lead.id,totalValue:data.totalFinalVenda,totalPecas:data.totalPecas},
           clientId:lead.id,quoteState:captureQuoteCompositionSnapshot(),quoteData:data,applicationMaps:proposalApplicationMaps(data)});
       } catch (error) {feedback = error.message || 'Revise o vínculo do cliente e dos veículos.';}
     }
+    if (historical && activeProposalContext.presentationEditing) feedback='Prévia da revisão visual. Prepare para salvar uma nova versão; preços e ROI originais preservados.';
     OG_PROPOSAL_WORKSPACE.render(document.getElementById('proposal-workspace'),{
-      identity:proposalIdentity(),snapshot,record:historical ? record : null,historical,feedback,sentConfirmed,
+      identity:proposalIdentity(),snapshot,record:historical ? record : null,historical,feedback,sentConfirmed,presentationEditing:Boolean(historical && activeProposalContext.presentationEditing),
+      presentation:OG_PROPOSAL_INTELLIGENCE.normalizePresentation(snapshot?.presentation,snapshot?.clientId),
+      materials:state.operations.materials,logos:OG_PROPOSAL_DOCUMENT.logoCandidates(state.operations.materials,lead?.id),
       canPrepare:Boolean(lead && data.totalPecas > 0 && validProposalClient(lead)),terms:state.client.proposalTerms || {},
       assumptions:OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(state.client.roiAssumptions),
       documents:(state.operations.generatedDocuments || []).filter(doc => doc.documentType === 'proposal_tracking' && String(doc.clientId) === String(lead?.id)).slice(0,30)
     },{
       identity:proposalIdentity,
+      document:html => {document.getElementById('official-proposal-print').innerHTML=html;},
+      presentation:value => {
+        state.client.proposalPresentation=OG_PROPOSAL_INTELLIGENCE.normalizePresentation(value,snapshot?.clientId);
+        if (activeProposalContext?.viewOnly) activeProposalContext.presentationEditing=true;
+        persistVehicleComposition();recalculateQuote();
+      },
       term:(key,value) => {state.client.proposalTerms = {...state.client.proposalTerms,[key]:value}; if (activeProposalContext) activeProposalContext.viewOnly = false; persistVehicleComposition(); recalculateQuote();},
       assumptions:value => {state.client.roiAssumptions = OG_PROPOSAL_INTELLIGENCE.normalizeRoiAssumptions(value); if (activeProposalContext) activeProposalContext.viewOnly = false; persistVehicleComposition(); recalculateQuote();},
       prepare:prepareActiveProposal,
@@ -2546,7 +2540,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         recalculateQuote();
       }
     });
-    if (historical && snapshot.representationVersion === 2) document.getElementById('official-proposal-print').innerHTML = OG_PROPOSAL_WORKSPACE.documentHtml(snapshot,record,{sentConfirmed});
+    if (snapshot) document.getElementById('official-proposal-print').innerHTML = OG_PROPOSAL_WORKSPACE.documentHtml(snapshot,historical ? record : null,{sentConfirmed});
   }
 
   function validProposalClient(lead) {
@@ -2562,6 +2556,16 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   function prepareActiveProposal() {
     const lead = findLeadForClientData(state.client);
     if (!lead || !state.vehicles.length || !validProposalClient(lead)) return showNotification('Revise o cliente e a composição antes de preparar.', 'error');
+    const source = proposalDocumentForContext();
+    if (source && activeProposalContext.viewOnly && activeProposalContext.presentationEditing) {
+      try {
+        state.operations = OG_PROPOSAL_INTELLIGENCE.prepareTrackingDraft(state.operations,{sourceSnapshot:source.snapshot,clientId:source.clientId,quoteId:source.quoteId,presentation:state.client.proposalPresentation},{operationsModel:OG_OPERATIONS_MODEL});
+        const prepared=state.operations.generatedDocuments.filter(doc=>doc.documentType==='proposal_tracking'&&doc.quoteId===source.quoteId).sort((a,b)=>b.version-a.version)[0];
+        activeProposalContext={quoteId:source.quoteId,proposalId:prepared.id,clientId:source.clientId,signature:proposalDraftSignature(calculateCompleteQuote()),viewOnly:true};
+        state.client.proposalPresentation=prepared.snapshot.presentation;saveOperationsToStorage();recalculateQuote();
+        return showNotification(`Versão visual ${prepared.version} preparada. Valores originais preservados.`, 'success');
+      } catch(error) {return showNotification(error.message||'Não foi possível preparar a revisão visual.','error');}
+    }
     const quote = state.history.find(item => item.id === activeProposalContext?.quoteId && String(item.clientId) === String(lead.id));
     const data = calculateCompleteQuote();
     if (!quote || !sameSavedQuoteComposition(quote) || quote.totalValue !== data.totalFinalVenda) {
@@ -2762,7 +2766,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
 
     if (btnPrint) {
       btnPrint.onclick = () => {
-        window.print();
+        const print=document.getElementById('proposal-workspace')._printProposal;
+        if (print) print(); else window.print();
       };
     }
 
@@ -3287,6 +3292,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           if (documentRecord?.snapshot?.representationVersion === 2) {
             state.client.proposalTerms = {paymentTerms:documentRecord.snapshot.commercial.paymentTerms,validUntil:documentRecord.snapshot.commercial.validUntil,notes:documentRecord.snapshot.commercial.notes};
             state.client.roiAssumptions = documentRecord.snapshot.roi?.assumptions;
+            state.client.proposalPresentation = documentRecord.snapshot.presentation;
           }
           activeProposalContext = documentRecord ? {quoteId:item.id,proposalId:documentRecord.id,clientId:item.clientId,signature:proposalDraftSignature(calculateCompleteQuote()),viewOnly:true} : null;
           switchTab('cotacao');
@@ -9246,7 +9252,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     copy.textContent = String(msg || '');
 
     toast.append(dot, copy);
-    document.body.appendChild(toast);
+    document.querySelectorAll('.og-toast').forEach(previous=>previous.remove());
+    const feedbackHost=window.matchMedia('(max-width:1023px)').matches ? document.querySelector('.brand-header') : null;
+    (feedbackHost || document.body).appendChild(toast);
 
     setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
     setTimeout(() => {

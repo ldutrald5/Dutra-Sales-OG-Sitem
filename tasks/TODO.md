@@ -1,5 +1,8 @@
 # Backlog do Sistema OG
 
+Stage8.1 — pacote local PASS/Ready for Review; entrega staged/PATCH_READY. Próxima ação QG: revisar/aplicar somente piloto e smoke; não ampliar escopo. Stage8 aceita online.
+
+
 Stage8 — concluída localmente / Ready for Review; handoff PATCH_READY para aplicação/aceite QG. QG aplica patch/aceite online; Stage8.1 backlog exportação/templates, sem implementação.
 
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.

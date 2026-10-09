@@ -1,12 +1,21 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CONVERGENCE-01 Stage8.1
+
+- Prévia branca e print/PDF/PNG compartilham blocos do snapshot; PNG 1588×2246 por página, sem chrome/envio.
+- Executivo/Técnico/Compacto, seções opcionais, textos comerciais e logo autorizado por referência/fingerprint.
+- Nova revisão visual mantém preços, ROI, aplicação, cliente e veículos; versões antigas ficam imutáveis.
+- Toast mobile ocupa fluxo do cabeçalho; desktop usa editor lateral e documento amplo.
+- Sem dependências novas, alterações de fórmulas, auth, sync ou dados do piloto. Deploy é staged/PATCH_READY, aplicado pelo QG.
+
+
 ## [Unreleased] — CONVERGENCE-01 Stage8
 
 - Stage7.1 aceita online no piloto: cliente real, Cavalo/Carreta, mesmos IDs/peças/valores após salvar/reload/reabrir; nenhum envio externo.
 - Proposta Premium no shell atual, com veículos/split/caminho técnico, condições e versões imutáveis sobre a cotação e preço existentes.
 - ROI único no owner de proposta: premissas com valor/unidade/fonte/revisão/data; sem ganho universal ou payback inventado. Cotação, proposta e simulador usam a mesma fórmula.
 - Publicação assíncrona vinculada ao documento original; contexto incompatível rejeita gravação; snapshots não copiam CRM/history/state.
-- Stage8.1 exportação/templates permanece backlog. Entrega Stage8 termina em PATCH_READY; aplicação/aceite online pelo QG ainda não executados.
+- Registro da entrega Stage8: PATCH_READY. Aplicação e aceite online posteriormente confirmados pelo QG; Stage8.1 agora entregue localmente conforme entrada atual.
 
 
 ## [Unreleased] — CONVERGENCE-01 Stage7.1

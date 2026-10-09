@@ -7,6 +7,7 @@ const proposal = require('../apps/sistema-og/services/proposal-intelligence-serv
 const operationsModel = require('../apps/sistema-og/operations-model.js');
 const technical = require('../apps/sistema-og/components/technical-workspace.js');
 const applicationMap = require('../apps/sistema-og/components/technical-application-map.js');
+require('../apps/sistema-og/components/proposal-document.js');
 const workspace = require('../apps/sistema-og/components/proposal-workspace.js');
 const app = fs.readFileSync('apps/sistema-og/app.js','utf8');
 const dataVm = vm.createContext({});

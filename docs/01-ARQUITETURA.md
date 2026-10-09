@@ -333,3 +333,10 @@ ROI foi consolidado das duas rotinas UI para calculateRoi no serviço existente.
 O editor comercial persiste opcionais em state.client dentro do rascunho/cotação existente. Callbacks capturam identidade da composição; save rejeita vínculo veículo/cliente incompatível antes de mutar histórico. Resposta de publicação procura o documento original por IDs e snapshot, nunca a seleção atual. Assets locais seguem precache; auth/outbox/reconnect/409 e schema são preservados. Não existe novo provider, engine ou store. Exportações refinadas são Stage8.1.
 
 Referência: DEC-CONVERGENCE-PROPOSAL-001; INC-ROI-IMPLICIT-PREMISES-001; INC-PROPOSAL-LATE-CONTEXT-001. Testes: proposal_premium e proposal_workspace_browser, além de snapshot/quote regressions. Rollback remove a representação e volta ao código de entrada preservando dados/volume e revisões aditivas.
+
+
+## Documento Premium — CONVERGENCE-01 Stage8.1
+
+`OG_PROPOSAL_DOCUMENT` projeta o snapshot imutável em blocos de apresentação; `OG_PROPOSAL_WORKSPACE` e `renderOfficialProposalDocument` reutilizam essa superfície para prévia branca, print/PDF nativo e PNG. Executivo/Técnico/Compacto compartilham o view model. Metadados limitados de apresentação ficam no contrato de proposta existente; revisão visual de uma versão histórica clona apenas o snapshot permitido, mantém cotação/preços/ROI/veículos e prepara nova versão no mesmo `operations.generatedDocuments`. Alterar visibilidade/texto não altera cálculo nem registra envio.
+
+Logo opcional referencia `operations.materials` + `OG_MATERIAL_STORE.localAsset.id`, com associação explícita ao mesmo cliente, aprovação/autorização e SHA-256 do conteúdo. Não existe upload/store paralelo, busca externa ou binário no snapshot. Ausência/alteração usa layout OG com feedback real. PNG usa blocos A4 medidos, 1588×2246 px/página, limite de 24 páginas e download escolhido por página; print/PDF usa os mesmos blocos sem chrome. Tokens capturados invalidam respostas de logo/export após troca de contexto. Decisão: DEC-CONVERGENCE-EXPORT-001.

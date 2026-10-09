@@ -1674,3 +1674,13 @@ body.og-dialog-open { overflow: hidden; }
 #access-session-dialog button { background:#ffd600; color:#111; border-radius:8px; }
 #access-session-dialog [role=status] { overflow-wrap:anywhere; }
 #access-session-logout { background:transparent; color:inherit; border:1px solid #777; border-radius:6px; padding:4px 12px; }
+/* Client document is the sole print surface, including browser Ctrl+P. */
+@media print{
+  body.dutra-shell{background:#fff!important;color:#19202d!important;padding:0!important;margin:0!important}
+  body.dutra-shell>*:not(#official-proposal-print){display:none!important}
+  body.dutra-shell>#official-proposal-print{display:block!important;padding:0!important;background:#fff!important;color:#19202d!important;width:100%!important;margin:0!important}
+  #official-proposal-print .client-document{background:#fff!important;color:#19202d!important;padding:0!important;border:0!important}
+  #official-proposal-print header,#official-proposal-print footer{display:flex!important}
+}
+
+@media print{#official-proposal-print .doc-wrapper,#official-proposal-print .doc-wrapper *{background:#fff!important;color:#19202d!important;border-color:#d1d5db!important}}

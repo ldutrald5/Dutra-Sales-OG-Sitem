@@ -81,7 +81,7 @@ try {
     await page.setViewportSize({width,height});await root.scrollIntoViewIfNeeded();
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${width}: no horizontal overflow`);
     assert.equal(await root.locator('[data-proposal-vehicle-id]').count(),2);
-    const detail=root.locator('[data-proposal-scope="carreta"] details').first();await detail.locator('summary').click();assert.match(await detail.textContent(),/Regra do motor: trucado_carreta3/);await detail.locator('summary').click();
+    const detail=root.locator('[data-application-scope="carreta"]').first();assert.ok(await detail.isVisible());assert.match(await detail.textContent(),/Regra do motor: trucado_carreta3/);
     if(artifacts)await page.screenshot({path:path.join(artifacts,`${width}x${height}.png`)});
   }
   if (!privateFile) {
