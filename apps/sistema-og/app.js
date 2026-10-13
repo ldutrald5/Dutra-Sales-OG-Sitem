@@ -1047,7 +1047,14 @@ document.addEventListener('DOMContentLoaded', () => {
       || records.sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
     if (!record || (record.clientId && !OG_CRM_SERVICE.getLeadById(state.leads, record.clientId))) return;
     const payload = JSON.parse(JSON.stringify(record.payload));
-    state.client = {...quoteClientDefaults, ...payload.client};
+    if (record.clientId && [payload.client?.clientId,payload.client?.leadId].filter(Boolean).some(id=>String(id)!==String(record.clientId))) return showNotification('Rascunho preservado: o cliente interno diverge do proprietário. Revise a identidade.','warning');
+    const client = {...quoteClientDefaults, ...payload.client, ...(record.clientId ? {clientId:String(record.clientId)} : {})};
+    const identity = OG_CRM_SERVICE.resolveClientIdentity(state.leads,client);
+    if (['CONFLICT','AMBIGUOUS'].includes(identity.status) || (record.clientId && identity.status !== 'MATCH')
+      || payload.vehicles.some(vehicle=>[vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id=>String(id)!==String(identity.lead?.id || '')))) {
+      return showNotification('Rascunho com identidade incompatível preservado. Escolha a empresa correta antes de continuar.','warning');
+    }
+    state.client = client;
     state.vehicles = payload.vehicles;
     state.extraItems = payload.extraItems || [];
     workingQuoteDraftId = record.id;
@@ -1055,6 +1062,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function persistVehicleComposition() {
+    if (!validProposalClient(findLeadForClientData(state.client),{allowReviewDraft:true})) return Promise.resolve(null);
     workingQuoteDraftId ||= `FLEET-DRAFT-${crypto.randomUUID()}`;
     const previous = state.operations.quotes.find(item => item.id === workingQuoteDraftId);
     const now = new Date().toISOString();
@@ -1243,7 +1251,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const reader = new FileReader();
+      const owner = JSON.stringify(state.client);
+      const draftId = workingQuoteDraftId;
       reader.onload = (event) => {
+        if (owner !== JSON.stringify(state.client) || draftId !== workingQuoteDraftId) return;
         state.quoteImportImageBase64 = event.target.result;
         if (status) status.textContent = `Imagem “${file.name}” pronta para leitura.`;
       };
@@ -1263,20 +1274,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnRead) btnRead.addEventListener('click', async () => {
       if (!state.quoteImportImageBase64) return showNotification('Selecione a foto do orçamento primeiro.', 'warning');
+      const owner = JSON.stringify(state.client);
+      const image = state.quoteImportImageBase64;
+      const draftId = workingQuoteDraftId;
       btnRead.disabled = true;
       if (status) status.textContent = 'Lendo os itens da imagem...';
       try {
         if (typeof Tesseract === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
         const worker = await Tesseract.createWorker('por');
         await worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
-        const tableImage = await cropQuoteTableImage(state.quoteImportImageBase64);
+        const tableImage = await cropQuoteTableImage(image);
         const result = await worker.recognize(tableImage);
         await worker.terminate();
+        if (owner !== JSON.stringify(state.client) || image !== state.quoteImportImageBase64 || draftId !== workingQuoteDraftId) return;
         if (textArea) textArea.value = result.data.text;
         parseImportedQuote(result.data.text);
         if (status) status.textContent = 'Texto reconhecido. Confira os itens identificados abaixo.';
       } catch (error) {
-        if (status) status.textContent = 'Não foi possível ler a imagem. Cole o texto manualmente e tente novamente.';
+        if (owner === JSON.stringify(state.client) && draftId === workingQuoteDraftId && status) status.textContent = 'Não foi possível ler a imagem. Cole o texto manualmente e tente novamente.';
         console.error(error);
       } finally {
         btnRead.disabled = false;
@@ -2006,7 +2021,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   function renderOfficialProposalDocument(quoteData) {
     // Linked proposals use the snapshot surface; preserve unlinked manual quote print.
     const surface=document.getElementById('official-proposal-print');
-    if (surface) surface.innerHTML=findLeadForClientData(state.client) ? '' : buildVendruscoloPdfHtml(quoteData);
+    if (surface) surface.innerHTML=!validProposalClient(findLeadForClientData(state.client)) || findLeadForClientData(state.client) ? '' : buildVendruscoloPdfHtml(quoteData);
   }
 
   /**
@@ -2479,13 +2494,26 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     });
   }
 
+  function validHistoricalProposal(record, clientId) {
+    const snapshot = record?.snapshot;
+    if (!clientId || !snapshot || String(record.clientId) !== String(clientId) || String(snapshot.clientId) !== String(clientId)
+      || String(snapshot.quoteId) !== String(record.quoteId)) return false;
+    const identity = OG_CRM_SERVICE.resolveClientIdentity(state.leads,{...snapshot.client,clientId,empresa:snapshot.client?.company});
+    if (identity.status !== 'MATCH') return false;
+    if (snapshot.presentation?.branding?.clientId && String(snapshot.presentation.branding.clientId) !== String(clientId)) return false;
+    return !(snapshot.vehicles || []).some(vehicle=>[vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id=>String(id)!==String(clientId)));
+  }
+
   function proposalDocumentForContext() {
     if (!activeProposalContext?.proposalId) return null;
-    return (state.operations.generatedDocuments || []).find(item =>
+    const matches = (state.operations.generatedDocuments || []).filter(item =>
       item.documentType === 'proposal_tracking'
       && String(item.id) === String(activeProposalContext.proposalId)
       && String(item.quoteId) === String(activeProposalContext.quoteId)
-    ) || null;
+    );
+    const lead = findLeadForClientData(state.client);
+    return matches.length === 1 && String(activeProposalContext.clientId) === String(lead?.id || '')
+      && validHistoricalProposal(matches[0],lead?.id) ? matches[0] : null;
   }
 
   function proposalApplicationMaps(data) {
@@ -2506,8 +2534,12 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const historical = Boolean(record && activeProposalContext.viewOnly);
     const sentConfirmed = Boolean(record && state.operations.activityEvents.some(event => event.proposalId === record.id && OG_PROPOSAL_INTELLIGENCE.normalizeProposalEventType(event.type) === 'proposal.sent'));
     let snapshot = historical ? record.snapshot : null;
-    if (historical && activeProposalContext.presentationEditing) snapshot = OG_PROPOSAL_INTELLIGENCE.presentationSnapshot(record.snapshot,state.client.proposalPresentation,{now:record.preparedAt});
-    if (!snapshot && lead && data.totalPecas > 0) {
+    if (!validProposalClient(lead)) {
+      snapshot = null;
+      feedback = 'Identidade ou aplicação incompatível. Escolha a empresa correta e revise a composição antes de salvar ou exportar.';
+    }
+    if (historical && activeProposalContext.presentationEditing && validProposalClient(lead)) snapshot = OG_PROPOSAL_INTELLIGENCE.presentationSnapshot(record.snapshot,state.client.proposalPresentation,{now:record.preparedAt});
+    if (!snapshot && lead && data.totalPecas > 0 && validProposalClient(lead)) {
       try {
         // New drafts adopt the approved direction; persisted/historical preferences are never migrated.
         if (!state.client.proposalPresentation) state.client.proposalPresentation = OG_PROPOSAL_INTELLIGENCE.normalizePresentation({themeId:'impacto-og',themeVersion:1},lead.id);
@@ -2515,7 +2547,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           clientId:lead.id,quoteState:captureQuoteCompositionSnapshot(),quoteData:data,applicationMaps:proposalApplicationMaps(data)});
       } catch (error) {feedback = error.message || 'Revise o vínculo do cliente e dos veículos.';}
     }
-    if (historical && activeProposalContext.presentationEditing) feedback='Prévia da revisão visual. Prepare para salvar uma nova versão; preços e ROI originais preservados.';
+    if (historical && activeProposalContext.presentationEditing && validProposalClient(lead)) feedback='Prévia da revisão visual. Prepare para salvar uma nova versão; preços e ROI originais preservados.';
     OG_PROPOSAL_WORKSPACE.render(document.getElementById('proposal-workspace'),{
       identity:proposalIdentity(),snapshot,record:historical ? record : null,historical,feedback,sentConfirmed,presentationEditing:Boolean(historical && activeProposalContext.presentationEditing),
       presentation:OG_PROPOSAL_INTELLIGENCE.normalizePresentation(snapshot?.presentation,snapshot?.clientId),
@@ -2537,7 +2569,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       current:() => {if (activeProposalContext) activeProposalContext.viewOnly = false; recalculateQuote();},
       open:id => {
         const selected = state.operations.generatedDocuments.find(doc => doc.documentType === 'proposal_tracking' && doc.id === id && String(doc.clientId) === String(lead?.id));
-        if (!selected) return;
+        if (!selected || !validHistoricalProposal(selected,lead?.id)) return showNotification('Proposta preservada: identidade histórica incompatível exige revisão.','warning');
         activeProposalContext = {quoteId:selected.quoteId,proposalId:selected.id,clientId:selected.clientId,viewOnly:true,signature:''};
         recalculateQuote();
       }
@@ -2545,8 +2577,13 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     if (snapshot) document.getElementById('official-proposal-print').innerHTML = OG_PROPOSAL_WORKSPACE.documentHtml(snapshot,historical ? record : null,{sentConfirmed});
   }
 
-  function validProposalClient(lead) {
-    return !state.vehicles.some(vehicle => [vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id => String(id) !== String(lead?.id || '')));
+  function validProposalClient(lead, options = {}) {
+    if (state.client.identityReviewRequired) return false;
+    const identity = OG_CRM_SERVICE.resolveClientIdentity(state.leads, state.client);
+    if (['CONFLICT','AMBIGUOUS'].includes(identity.status)) return false;
+    if ((state.client.clientId || state.client.leadId) && identity.status !== 'MATCH') return false;
+    if (lead && String(identity.lead?.id || '') !== String(lead.id)) return false;
+    return !state.vehicles.some(vehicle => (!options.allowReviewDraft && vehicle.clientReviewRequired) || [vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id => String(id) !== String(lead?.id || '')));
   }
 
   function sameSavedQuoteComposition(quote) {
@@ -2749,15 +2786,20 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const btnPublish = document.getElementById('btn-publish-proposal');
 
     const handleCopySend = (type) => {
+      if (!validProposalClient(findLeadForClientData(state.client))) return showNotification('Revise a identidade e a aplicação antes de exportar.','error');
+      const identity = proposalIdentity();
+      const phone = state.client.telefone || '';
       const text = generateWhatsappText(quoteData, type);
       navigator.clipboard.writeText(text).then(() => {
+        if (identity !== proposalIdentity()) return;
         showNotification(`Mensagem (${type.toUpperCase()}) copiada para o WhatsApp!`, 'success');
-        let phoneClean = (state.client.telefone || '').replace(/\D/g, '');
+        let phoneClean = phone.replace(/\D/g, '');
         if (phoneClean.length >= 10) {
           if (!phoneClean.startsWith('55')) phoneClean = '55' + phoneClean;
           window.open(`https://api.whatsapp.com/send?phone=${phoneClean}&text=${encodeURIComponent(text)}`, '_blank');
         }
       }).catch(() => {
+        if (identity !== proposalIdentity()) return;
         alert('Texto gerado:\n\n' + text);
       });
     };
@@ -2768,6 +2810,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
 
     if (btnPrint) {
       btnPrint.onclick = () => {
+        if (!validProposalClient(findLeadForClientData(state.client))) return showNotification('Revise a identidade e a aplicação antes de exportar.','error');
         const print=document.getElementById('proposal-workspace')._printProposal;
         if (print) print(); else window.print();
       };
@@ -2802,8 +2845,12 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const relatedLead = findLeadForClientData(state.client);
     if (!validProposalClient(relatedLead)) {showNotification('Os veículos pertencem a outro cliente. Reabra o contexto correto antes de salvar.', 'error'); return null;}
     persistVehicleComposition();
+    let quoteId;
+    do {quoteId = `COT-${crypto.randomUUID()}`;} while (state.history.some(item=>String(item.id)===quoteId)
+      || state.operations.quotes.some(item=>String(item.id)===quoteId)
+      || state.operations.generatedDocuments.some(item=>String(item.quoteId)===quoteId));
     const newQuote = {
-      id: 'COT-' + Date.now().toString().slice(-6),
+      id: quoteId,
       date: new Date().toISOString(),
       clientId: relatedLead?.id || null,
       clientInternalCode: relatedLead?.internalCode || null,
@@ -2825,7 +2872,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
           { operationsModel:OG_OPERATIONS_MODEL }
         );
         const proposalDocument = (state.operations.generatedDocuments || []).find(item =>
-          item.documentType === 'proposal_tracking' && String(item.quoteId) === String(newQuote.id)
+          item.documentType === 'proposal_tracking' && String(item.quoteId) === String(newQuote.id) && validHistoricalProposal(item,relatedLead.id)
         );
         activeProposalContext = proposalDocument ? { quoteId:newQuote.id, proposalId:proposalDocument.id, clientId:relatedLead.id, signature:proposalDraftSignature(quoteData) } : null;
         saveOperationsToStorage();
@@ -2896,12 +2943,15 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     if (!validQuoteVehicleDraft(draft)) throw new Error('O veículo foi alterado ou removido. Reabra a aplicação atual antes de salvar.');
     if (draft.queryMode) throw new Error('A consulta não cria rascunho ou cotação.');
     if (handoff && !computed.ready) throw new Error('VALIDAR: aplicação ainda não determinada.');
-    const sameQuoteClient = lead && String(findLeadForClientData(state.client)?.id || '') === String(lead.id);
-    const client = JSON.parse(JSON.stringify(!lead || sameQuoteClient ? state.client : quoteClientDefaults));
+    const currentIdentity = OG_CRM_SERVICE.resolveClientIdentity(state.leads,state.client);
+    const sameQuoteClient = lead && String(currentIdentity.lead?.id || '') === String(lead.id) && currentIdentity.status === 'MATCH';
+    const unlinkedQuote = !lead && currentIdentity.status === 'NONE' && !state.client.clientId && !state.client.leadId && !state.client.identityReviewRequired;
+    const client = JSON.parse(JSON.stringify(sameQuoteClient || unlinkedQuote ? state.client : quoteClientDefaults));
     if (lead) {
       for (const field of ['nome','empresa','cnpj','ie','socioAdmin','telefone','cidadeUf','internalCode']) client[field] = lead[field] || '';
       client.segmentId = lead.segmentId || quoteClientDefaults.segmentId;
       if (!sameQuoteClient) { client.tier = quoteClientDefaults.tier; client.paymentMethod = quoteClientDefaults.paymentMethod; }
+      client.clientId = String(lead.id);
     }
     const technicalContext = JSON.parse(JSON.stringify(draft));
     const vehicle = computed.ready ? {
@@ -2911,6 +2961,7 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
       technicalContext, clientId:lead?.id || null
     } : null;
     const previous = state.operations.quotes.find(item => item.id === draft.id && item.source === 'technical_workspace');
+    if (previous && String(previous.clientId || '') !== String(lead?.id || '')) throw new Error('O rascunho pertence a outro cliente. Inicie uma aplicação vinculada à empresa atual.');
     const now = new Date().toISOString();
     const record = { id:draft.id, source:'technical_workspace', status:'technical_draft',
       clientId:lead?.id || null, createdAt:previous?.createdAt || now, updatedAt:now,
@@ -2932,6 +2983,8 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     if (!vehicle) return;
     const lead = record.clientId ? OG_CRM_SERVICE.getLeadById(state.leads, record.clientId) : null;
     if (record.clientId && !lead) return;
+    if ([record.payload.client?.clientId,record.payload.client?.leadId,vehicle.clientId,vehicle.technicalContext?.leadId].filter(Boolean).some(id=>String(id)!==String(record.clientId || ''))) return showNotification('Cliente do rascunho diverge do contexto técnico. Nenhuma composição foi transferida.','error');
+    if (lead && OG_CRM_SERVICE.resolveClientIdentity(state.leads,{...record.payload.client,clientId:lead.id}).status !== 'MATCH') return showNotification('Identidade do contexto técnico incompatível. Reabra a empresa correta.','error');
     const currentLead = findLeadForClientData(state.client);
     const identity = client => JSON.stringify(['internalCode','cnpj','telefone','empresa','nome'].map(key => String(client[key] || '').trim()));
     const differentClient = record.clientId
@@ -2943,9 +2996,13 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const vehicleSignature = item => JSON.stringify(['name','qty','vehicleTypeId','libras','includeDianteira','items'].map(key => item[key]));
     if (existing >= 0 && vehicleSignature(state.vehicles[existing]) !== vehicleSignature(vehicle)
       && !confirm('Atualizar este veículo com a composição revisada? Os ajustes atuais de nome, quantidade, configuração e peças serão substituídos.')) return;
-    if (differentClient) { state.vehicles = []; state.extraItems = []; }
+    if (differentClient && lead && !await transitionQuoteClient(lead,{confirmed:true,preserveTechnicalDraft:true})) return;
+    if (differentClient && !lead) {
+      state.vehicles = []; state.extraItems = []; activeProposalContext = null; workingQuoteDraftId = null;
+      state.quoteImportImageBase64 = null; state.quoteImportItems = [];
+    }
     // Identity is replaced as a whole; billing from a different customer is not inherited.
-    state.client = { ...quoteClientDefaults, ...record.payload.client };
+    state.client = { ...quoteClientDefaults, ...record.payload.client, ...(lead ? {clientId:String(lead.id)} : {}) };
     if (lead) {
       for (const field of ['nome','empresa','cnpj','ie','socioAdmin','telefone','cidadeUf','internalCode']) state.client[field] = lead[field] || '';
       state.client.segmentId = lead.segmentId || quoteClientDefaults.segmentId;
@@ -3148,29 +3205,16 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
   // =========================================================================
 
   function findLeadForClientData(client = {}) {
-    const digits = value => String(value || '').replace(/\D/g, '');
-    const text = value => String(value || '').trim().toLocaleLowerCase('pt-BR');
-    const cnpj = digits(client.cnpj);
-    const phone = digits(client.telefone);
-    const code = text(client.internalCode);
-    const company = text(client.empresa);
-    const strong = state.leads.filter(lead =>
-      (code && text(lead.internalCode) === code) ||
-      (cnpj.length === 14 && digits(lead.cnpj) === cnpj) ||
-      (phone.length >= 10 && digits(lead.telefone) === phone)
-    );
-    if (strong.length === 1) return strong[0];
-    if (strong.length > 1) return null;
-    if (!company) return null;
-    const byCompany = state.leads.filter(lead => text(lead.empresa || lead.nome) === company);
-    return byCompany.length === 1 ? byCompany[0] : null;
+    const identity = OG_CRM_SERVICE.resolveClientIdentity(state.leads, client);
+    return identity.status === 'MATCH' ? identity.lead : null;
   }
 
   function resolveHistoryLead(item) {
     if (!item) return null;
     if (item.clientId) {
-      const direct = OG_CRM_SERVICE.getLeadById(state.leads, item.clientId);
-      if (direct) return direct;
+      if ([item.payload?.client?.clientId,item.payload?.client?.leadId].filter(Boolean).some(id=>String(id)!==String(item.clientId))) return null;
+      const identity = OG_CRM_SERVICE.resolveClientIdentity(state.leads,{...(item.payload?.client || {empresa:item.clientCompany,internalCode:item.clientInternalCode}),clientId:item.clientId});
+      return identity.status === 'MATCH' ? identity.lead : null;
     }
     return findLeadForClientData(item.payload?.client || {
       empresa: item.clientCompany,
@@ -3198,10 +3242,32 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
     const bindInput = (id, key) => {
       const el = document.getElementById(id);
       if (!el) return;
+      let originalClient = null;
+      if (key === 'empresa') el.addEventListener('focus',()=>{originalClient=JSON.parse(JSON.stringify(state.client));});
       el.addEventListener('input', (e) => {
+        const owner = findLeadForClientData(state.client);
+        if (owner && !state.client.clientId) state.client.clientId = String(owner.id);
+        if (key === 'empresa' && originalClient?.empresa) state.client.identityReviewRequired = Boolean(originalClient.identityReviewRequired) || e.target.value.trim() !== String(originalClient.empresa).trim();
         state.client[key] = e.target.value;
         refreshQuoteClientSheetAccess();
         recalculateQuote();
+      });
+      if (key === 'empresa') el.addEventListener('change',async () => {
+        const company = el.value.trim();
+        if (!originalClient?.empresa || company === String(originalClient.empresa).trim()) return;
+        const pending = JSON.stringify(captureQuoteCompositionSnapshot());
+        const candidates = OG_CRM_SERVICE.findPossibleDuplicates(state.leads,{empresa:company});
+        let target = candidates.length === 1 ? candidates[0] : null;
+        if (candidates.length > 1) {
+          const id = await requestCommercialChoice('quote-identity-review','Escolher a empresa da cotação','Nomes semelhantes não confirmam identidade. Escolha um cadastro ou cancele sem gravar.',
+            [{value:'cancel',label:'Cancelar'},...candidates.map(lead=>({value:String(lead.id),label:`${lead.empresa || lead.nome} · ID ${lead.id} · ${lead.internalCode || lead.cidadeUf || ''}`}))],'data-quote-identity');
+          if (id && id !== 'cancel' && candidates.filter(lead=>String(lead.id)===id).length === 1) target=OG_CRM_SERVICE.getLeadById(state.leads,id);
+        }
+        if (pending !== JSON.stringify(captureQuoteCompositionSnapshot())) return;
+        const changed = (target || !candidates.length) && await transitionQuoteClient(target,target ? {} : {manualCompany:company});
+        if (!changed && pending === JSON.stringify(captureQuoteCompositionSnapshot())) {
+          state.client=originalClient;hydrateQuoteClientInputs();recalculateQuote();
+        }
       });
     };
 
@@ -3283,14 +3349,23 @@ Dimensões por volume: ${est.dim.comprimento}x${est.dim.largura}x${est.dim.altur
         const idx = parseInt(b.getAttribute('data-load'), 10);
         const item = state.history[idx];
         if (item && item.payload) {
+          const relatedLead = resolveHistoryLead(item);
           const payload = JSON.parse(JSON.stringify(item.payload));
-          state.client = {...quoteClientDefaults, ...(payload.client || state.client)};
+          if (item.clientId && [payload.client?.clientId,payload.client?.leadId].filter(Boolean).some(id=>String(id)!==String(item.clientId))) return showNotification('Histórico preservado: identidades incompatíveis exigem revisão antes de carregar.','warning');
+          state.client = {...quoteClientDefaults, ...(payload.client || {}), ...(item.clientId ? {clientId:item.clientId} : {})};
           state.vehicles = payload.vehicles || [];
           state.extraItems = payload.extraItems || [];
+          state.quoteImportImageBase64 = null; state.quoteImportItems = []; state.lastQuoteData = null;
+          state.consultant = emptyTechnicalDraft(relatedLead?.id || ''); state.selectedLeadId = relatedLead?.id || null;
+          for (const id of ['quote-ocr-file','quote-ocr-text']) {const input=document.getElementById(id);if(input)input.value='';}
+          const importStatus=document.getElementById('quote-ocr-status');if(importStatus)importStatus.textContent='';
+          renderQuoteImportPreview();
           workingQuoteDraftId = null;
           hydrateQuoteClientInputs();
           persistVehicleComposition();
-          const documentRecord = (state.operations.generatedDocuments || []).filter(doc => doc.documentType === 'proposal_tracking' && String(doc.quoteId) === String(item.id)).sort((a,b) => Number(b.version) - Number(a.version))[0];
+          const documents = (state.operations.generatedDocuments || []).filter(doc => doc.documentType === 'proposal_tracking' && String(doc.quoteId) === String(item.id));
+          const documentRecord = documents.filter(doc=>validHistoricalProposal(doc,relatedLead?.id)).sort((a,b) => Number(b.version) - Number(a.version))[0];
+          if (documents.some(doc=>!validHistoricalProposal(doc,relatedLead?.id))) showNotification('Versão com identidade incompatível preservada no histórico e excluída deste contexto.','warning');
           if (documentRecord?.snapshot?.representationVersion === 2) {
             state.client.proposalTerms = {paymentTerms:documentRecord.snapshot.commercial.paymentTerms,validUntil:documentRecord.snapshot.commercial.validUntil,notes:documentRecord.snapshot.commercial.notes};
             state.client.roiAssumptions = documentRecord.snapshot.roi?.assumptions;
@@ -3754,7 +3829,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function createQuickLeadId() {
-    return `LEAD-${Date.now().toString(36).toUpperCase()}`;
+    return OG_CRM_SERVICE.createLeadId(state.leads);
   }
 
   function openQuickLead(origin = 'crm') {
@@ -3862,16 +3937,71 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
   }
 
-  function openDeskQuote(lead) {
-    // Adopt the existing quote owner and client fields; opening is not delivery.
-    for (const [field, id] of Object.entries({ nome:'client-name', empresa:'client-company', cnpj:'client-cnpj', telefone:'client-phone', cidadeUf:'client-city' })) {
-      state.client[field] = lead[field] || '';
-      const input = document.getElementById(id);
-      if (input) input.value = state.client[field];
+  function requestCommercialChoice(id, title, detail, choices, attribute) {
+    if (document.getElementById(id)) return Promise.resolve(null);
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.className = 'fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4';
+    modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-labelledby',`${id}-title`);
+    modal.innerHTML = `<div class="clean-card p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto"><h2 id="${id}-title" class="text-lg font-bold text-amber-300">${escapeHtml(title)}</h2><p class="text-sm text-slate-300 mt-3 mb-4">${escapeHtml(detail)}</p><div class="flex flex-col gap-3">${choices.map(choice=>`<button type="button" ${attribute}="${escapeHtml(choice.value)}" class="og-button og-button-secondary text-left">${escapeHtml(choice.label)}</button>`).join('')}</div></div>`;
+    document.body.appendChild(modal);
+    return new Promise(resolve => {
+      const finish = value => {closeAppDialog(modal);modal.remove();resolve(value);};
+      modal.addEventListener('click',event=>{const button=event.target.closest(`[${attribute}]`);if(button)finish(button.getAttribute(attribute));else if(event.target===modal)finish(null);});
+      modal.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();finish(null);}});
+      bindAppDialog(modal);openAppDialog(modal,{initialFocus:`[${attribute}="cancel"]`});
+    });
+  }
+
+  async function transitionQuoteClient(lead, options = {}) {
+    const target = options.manualCompany ? {id:'',empresa:options.manualCompany} : OG_CRM_SERVICE.getLeadById(state.leads, lead?.id);
+    if (!target) return false;
+    if (target.id && state.leads.filter(item=>String(item.id)===String(target.id)).length !== 1) {
+      showNotification('Identificador de empresa ambíguo. Nenhum contexto foi transferido.','error');
+      return false;
     }
-    state.client.segmentId = lead.segmentId || 'transportadora';
-    switchTab('cotacao');
+    const targetSignature = JSON.stringify(OG_QUOTE_CLIENT_CONTEXT.clientForLead(target,quoteClientDefaults));
+    const previous = findLeadForClientData(state.client);
+    if (target.id && String(previous?.id || '') === String(target.id) && validProposalClient(previous)) {
+      state.client.clientId = String(target.id);
+      return true;
+    }
+    const signature = JSON.stringify(captureQuoteCompositionSnapshot());
+    const unsaved = Boolean(state.vehicles.length || state.extraItems.length || state.client.proposalTerms || state.client.roiAssumptions || state.client.observacoes)
+      && !state.history.some(item=>JSON.stringify(item.payload) === signature);
+    let choice = 'clean';
+    if (unsaved && !options.confirmed) {
+      choice = await requestCommercialChoice('quote-client-transition','Mudar empresa da cotação',
+        `Abrir ${target.empresa || target.nome}? O contexto comercial atual não será transferido. O histórico salvo permanece intacto. Peças reaproveitadas exigem nova revisão, sem preços negociados.`,
+        [{value:'cancel',label:'Cancelar e manter o contexto atual'},{value:'clean',label:'Iniciar cotação limpa para esta empresa'},{value:'reuse',label:'Reaproveitar somente a composição técnica para revisar'}],'data-quote-transition');
+      if (!choice || choice === 'cancel') return false;
+    }
+    if (signature !== JSON.stringify(captureQuoteCompositionSnapshot())) return false;
+    if (target.id && (state.leads.filter(item=>String(item.id)===String(target.id)).length !== 1
+      || targetSignature !== JSON.stringify(OG_QUOTE_CLIENT_CONTEXT.clientForLead(OG_CRM_SERVICE.getLeadById(state.leads,target.id) || {},quoteClientDefaults)))) return false;
+    const vehicles = choice === 'reuse' ? OG_QUOTE_CLIENT_CONTEXT.independentTechnicalVehicles(state.vehicles,target.id,OG_DATA,prefix=>`${prefix}-${crypto.randomUUID()}`) : [];
+    const extras = choice === 'reuse' ? OG_QUOTE_CLIENT_CONTEXT.independentTechnicalItems(state.extraItems) : [];
+    state.client = OG_QUOTE_CLIENT_CONTEXT.clientForLead(target,quoteClientDefaults);
+    state.vehicles = vehicles; state.extraItems = extras;
+    state.activePdfTemplate = 'vendruscolo'; state.activeWhatsappFormat = 'simples';
+    activeProposalContext = null; workingQuoteDraftId = null; state.lastQuoteData = null;
+    state.quoteImportImageBase64 = null; state.quoteImportItems = [];
+    for (const id of ['quote-ocr-file','quote-ocr-text']) {const input=document.getElementById(id);if(input)input.value='';}
+    const importStatus=document.getElementById('quote-ocr-status');if(importStatus)importStatus.textContent='';
+    renderQuoteImportPreview();
+    if (!options.preserveTechnicalDraft) state.consultant = emptyTechnicalDraft(target.id);
+    state.selectedLeadId = target.id || null;
+    hydrateQuoteClientInputs();
     recalculateQuote();
+    if (choice === 'reuse') showNotification('Composição independente copiada. Abra cada aplicação e confirme a revisão para salvar. Dados comerciais anteriores foram removidos.','warning');
+    await persistVehicleComposition();
+    return String(state.client.clientId || '') === String(target.id);
+  }
+
+  async function openDeskQuote(lead) {
+    if (!await transitionQuoteClient(lead)) return;
+    closeClientSheet(); closeCommandCenter();
+    switchTab('cotacao'); recalculateQuote();
   }
 
   function renderDayMission(view) {
@@ -4611,24 +4741,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       state.callAI.returnTab = returnTab;
       switchTab('call-ai');
     });
-    overlay.querySelector('[data-sheet-quote]')?.addEventListener('click', () => {
-      state.client.nome = lead.nome || '';
-      state.client.empresa = lead.empresa || '';
-      state.client.cnpj = lead.cnpj || '';
-      state.client.telefone = lead.telefone || '';
-      state.client.cidadeUf = lead.cidadeUf || '';
-      state.client.segmentId = lead.segmentId || 'transportadora';
-      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-      setVal('client-name', state.client.nome);
-      setVal('client-company', state.client.empresa);
-      setVal('client-cnpj', state.client.cnpj);
-      setVal('client-phone', state.client.telefone);
-      setVal('client-city', state.client.cidadeUf);
-      refreshQuoteClientSheetAccess();
-      closeClientSheet();
-      switchTab('cotacao');
-      recalculateQuote();
-    });
+    overlay.querySelector('[data-sheet-quote]')?.addEventListener('click', () => openDeskQuote(OG_CRM_SERVICE.getLeadById(state.leads,lead.id)));
 
     form.addEventListener('change', event => {
       if (event.target.name === 'status') {
@@ -5550,6 +5663,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     const runLeadAction = (lead, action) => {
       if (!lead) return;
+      if (action === 'quote') return openDeskQuote(lead);
       state.selectedLeadId = lead.id;
       if (action === 'whatsapp') {
         closeCommandCenter();
@@ -5569,24 +5683,6 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         if (callLead()?.id !== lead.id) return;
         state.callAI.returnTab = returnTab;
         switchTab('call-ai');
-      }
-      if (action === 'quote') {
-        state.client.nome = lead.nome || '';
-        state.client.empresa = lead.empresa || '';
-        state.client.cnpj = lead.cnpj || '';
-        state.client.telefone = lead.telefone || '';
-        state.client.cidadeUf = lead.cidadeUf || '';
-        state.client.segmentId = lead.segmentId || 'transportadora';
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-        setVal('client-name', state.client.nome);
-        setVal('client-company', state.client.empresa);
-        setVal('client-cnpj', state.client.cnpj);
-        setVal('client-phone', state.client.telefone);
-        setVal('client-city', state.client.cidadeUf);
-        refreshQuoteClientSheetAccess();
-        closeCommandCenter();
-        switchTab('cotacao');
-        return recalculateQuote();
       }
       if (action === 'communication') {
         state.communication.selectedLeadId = lead.id;
@@ -5645,13 +5741,25 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     render();
     input.focus();
     overlay.addEventListener('click', event => { if (event.target === overlay) closeCommandCenter(); });
-    overlay.querySelector('#command-natural').addEventListener('click', () => {
+    overlay.querySelector('#command-natural').addEventListener('click', async () => {
       const parsed = OG_PROSPECT_PARSER.parseNaturalCommand(input.value);
       if (!parsed.company) return showNotification('Não consegui identificar a empresa. Revise o comando.', 'warning');
       const summary = `Empresa: ${parsed.company}\nContato: ${parsed.contact || 'não identificado'}\nResultado: ${parsed.result || 'não identificado'}\nPróxima ação: ${parsed.suggestedAction || 'não identificada'}\nConfiança: ${parsed.confidence}`;
       if (!window.confirm(`${summary}\n\nSalvar esta interpretação?`)) return;
-      let lead = OG_CRM_SERVICE.findPossibleDuplicates(state.leads, { empresa: parsed.company })[0];
-      if (!lead) { lead = OG_CRM_SERVICE.createProspect({ empresa: parsed.company, nome: parsed.contact, sourceChannel: 'command_center' }); state.leads.unshift(lead); }
+      const candidates = OG_CRM_SERVICE.findPossibleDuplicates(state.leads, { empresa: parsed.company });
+      const candidateIdentity = candidate => JSON.stringify([candidate.id,candidate.empresa,candidate.internalCode,candidate.cidadeUf,candidate.cnpj]);
+      const candidateSignatures = new Map(candidates.map(candidate=>[String(candidate.id),candidateIdentity(candidate)]));
+      let lead = null;
+      if (candidates.length) {
+        const selected = await requestCommercialChoice('command-identity-review','Confirmar a empresa do registro',
+          'A interpretação do texto não confirma a identidade. Escolha o cadastro correto; cancelar não grava nenhuma interação.',
+          [{value:'cancel',label:'Cancelar sem gravar'},...candidates.map(candidate=>({value:String(candidate.id),label:[candidate.empresa||candidate.nome,`ID ${candidate.id}`,candidate.internalCode&&`Código ${candidate.internalCode}`,candidate.cidadeUf,candidate.cnpj&&`CNPJ …${String(candidate.cnpj).replace(/\D/g,'').slice(-4)}`].filter(Boolean).join(' · ')}))],'data-command-identity');
+        if (!selected || selected === 'cancel' || !candidates.some(candidate=>String(candidate.id)===selected)) return;
+        lead = OG_CRM_SERVICE.getLeadById(state.leads,selected);
+        if (state.leads.filter(candidate=>String(candidate.id)===selected).length !== 1) return showNotification('ID duplicado: revise os cadastros antes de registrar. Nada foi gravado.','error');
+        if (!lead || candidateSignatures.get(selected) !== candidateIdentity(lead) || input.value !== parsed.commandText) return showNotification('O contexto mudou. Revise o comando e a identidade antes de gravar.','warning');
+      }
+      if (!lead) { lead = OG_CRM_SERVICE.createProspect({ empresa: parsed.company, nome: parsed.contact, sourceChannel: 'command_center' },{id:OG_CRM_SERVICE.createLeadId(state.leads)}); state.leads.unshift(lead); }
       if (parsed.result) OG_INTERACTION_SERVICE.recordResult(lead, parsed.result, input.value);
       if (parsed.suggestedAction) OG_INTERACTION_SERVICE.setNextAction(lead, parsed.suggestedAction, parsed.followUpAt);
       saveLeadsToStorage();
@@ -5871,15 +5979,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
 
     if (btnProcessImport && textareaImport) {
-      btnProcessImport.addEventListener('click', () => {
+      btnProcessImport.addEventListener('click', async () => {
         const rawText = textareaImport.value.trim();
         if (!rawText) return;
-        const count = parseAndAddLeads(rawText);
-        textareaImport.value = '';
-        if (modalImport) closeAppDialog(modalImport, { restoreFocus: false });
-        saveLeadsToStorage();
-        renderLeadsTable();
-        showNotification(`${count} leads importados com sucesso!`, 'success');
+        try { await parseAndAddLeads(rawText); } catch(error) {showNotification(error.message || 'Não foi possível preparar a revisão.','error');}
       });
     }
 
@@ -6460,25 +6563,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
 
     const applyQuoteBtn = inspector.querySelector('#btn-apply-lead-quote');
     if (applyQuoteBtn) {
-      applyQuoteBtn.addEventListener('click', () => {
-        state.client.nome = lead.nome || '';
-        state.client.empresa = lead.empresa || '';
-        state.client.cnpj = lead.cnpj || '';
-        state.client.telefone = lead.telefone || '';
-        state.client.cidadeUf = lead.cidadeUf || '';
-        state.client.segmentId = lead.segmentId || 'transportadora';
-
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-        setVal('client-name', state.client.nome);
-        setVal('client-company', state.client.empresa);
-        setVal('client-cnpj', state.client.cnpj);
-        setVal('client-phone', state.client.telefone);
-        setVal('client-city', state.client.cidadeUf);
-
-        switchTab('cotacao');
-        recalculateQuote();
-        showNotification(`Dados de ${lead.empresa || lead.nome} aplicados!`, 'success');
-      });
+      applyQuoteBtn.addEventListener('click', () => openDeskQuote(OG_CRM_SERVICE.getLeadById(state.leads,lead.id)));
     }
 
     const deleteLeadBtn = inspector.querySelector('#btn-delete-lead-single');
@@ -6599,15 +6684,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
 
     if (btnImportOcrLeads && ocrExtractedTextarea) {
-      btnImportOcrLeads.addEventListener('click', () => {
+      btnImportOcrLeads.addEventListener('click', async () => {
         const text = ocrExtractedTextarea.value.trim();
         if (!text) return alert('Nenhum texto para importar.');
-        const count = parseAndAddLeads(text);
-        saveLeadsToStorage();
-        renderLeadsTable();
-        const modalImport = document.getElementById('modal-import-leads');
-        if (modalImport) modalImport.classList.add('hidden');
-        showNotification(`${count} leads transcritos e importados!`, 'success');
+        try { await parseAndAddLeads(text); } catch(error) {showNotification(error.message || 'Não foi possível preparar a revisão.','error');}
       });
     }
 
@@ -6656,7 +6736,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!candidates.length) return '';
     const recommendation = OG_SPREADSHEET_IMPORT.recommendDecision(item);
     if (candidates.length === 1) return `<input type="hidden" data-sheet-row="${item.row.sourceRow}" data-sheet-target value="${escapeHtml(candidates[0].leadId)}"><small class="spreadsheet-target-note">Alvo: ${escapeHtml(candidates[0].company || candidates[0].leadId)} · ${escapeHtml((candidates[0].reasons || []).join(' + '))}</small>`;
-    return `<label class="spreadsheet-row-decision">Cliente existente<select data-sheet-row="${item.row.sourceRow}" data-sheet-target>${candidates.map(candidate => `<option value="${escapeHtml(candidate.leadId)}" ${candidate.leadId === recommendation.targetLeadId ? 'selected' : ''}>${escapeHtml(candidate.company || candidate.leadId)} · ${escapeHtml((candidate.reasons || []).join(' + '))}</option>`).join('')}</select></label>`;
+    return `<label class="spreadsheet-row-decision">Cliente existente<select data-sheet-row="${item.row.sourceRow}" data-sheet-target><option value="">Escolha o cadastro correto</option>${candidates.map(candidate => `<option value="${escapeHtml(candidate.leadId)}">${escapeHtml(candidate.company || candidate.leadId)} · ID ${escapeHtml(candidate.leadId)} · ${escapeHtml(OG_CRM_SERVICE.getLeadById(state.leads,candidate.leadId)?.cidadeUf || '')}</option>`).join('')}</select></label>`;
   }
 
   function renderCrmExcelReview(preview) {
@@ -6679,7 +6759,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         : item.status === 'UNCHANGED'
           ? '<span class="spreadsheet-muted">Já está igual à base</span>'
           : `<div class="spreadsheet-decision-stack">${recommendationNote}<label class="spreadsheet-row-decision">Ação<select data-sheet-row="${item.row.sourceRow}" data-sheet-action>${spreadsheetActionOptions(item)}</select></label>${spreadsheetCandidateSelector(item)}${item.changes?.length ? `<details class="spreadsheet-field-review"><summary>Revisar ${item.changes.length} campo(s)</summary><div class="spreadsheet-field-list">${item.changes.map(change => `<label class="spreadsheet-field"><span><b>${escapeHtml(change.label || change.field)}</b><small>Sistema: ${escapeHtml(change.current || 'vazio')}</small><small>Planilha: ${escapeHtml(change.incoming || 'vazio')}</small></span><select data-sheet-row="${item.row.sourceRow}" data-sheet-field="${escapeHtml(change.field)}">${spreadsheetDecisionOptions(change)}</select></label>`).join('')}</div></details>` : ''}</div>`;
-      return `<tr><td>${item.row.sourceRow}</td><td><b>${escapeHtml(item.row.company || item.row.primaryContact || '—')}</b><small>${escapeHtml(item.row.externalCode || item.row.document || item.row.phone || '')}</small></td><td><span class="spreadsheet-state" data-state="${item.status}">${escapeHtml(spreadsheetStatusLabel(item.status))}</span><small>${escapeHtml(item.reason)}</small></td><td>${escapeHtml(match)}</td><td>${actions}</td></tr>`;
+      const identityReview = item.status === 'POSSIBLE_DUPLICATE' ? `<label class="spreadsheet-row-decision"><input type="checkbox" data-sheet-row="${item.row.sourceRow}" data-sheet-identity-confirmed>Revisei os identificadores; confirmo a decisão e o cadastro escolhido</label>` : '';
+      return `<tr><td>${item.row.sourceRow}</td><td><b>${escapeHtml(item.row.company || item.row.primaryContact || '—')}</b><small>${escapeHtml(item.row.externalCode || item.row.document || item.row.phone || '')}</small></td><td><span class="spreadsheet-state" data-state="${item.status}">${escapeHtml(spreadsheetStatusLabel(item.status))}</span><small>${escapeHtml(item.reason)}</small></td><td>${escapeHtml(match)}</td><td>${actions}${identityReview}</td></tr>`;
     }).join('');
   }
 
@@ -6691,6 +6772,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (input.dataset.sheetAction !== undefined) decisions[row].action = input.value;
       if (input.dataset.sheetTarget !== undefined) decisions[row].targetLeadId = input.value;
       if (input.dataset.sheetField) decisions[row].fields[input.dataset.sheetField] = input.value;
+      if (input.dataset.sheetIdentityConfirmed !== undefined) decisions[row].identityConfirmed = input.checked;
     });
     return decisions;
   }
@@ -6812,7 +6894,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const input=document.getElementById('crm-excel-file');
     const panel=document.getElementById('crm-excel-preview-panel');
     trigger?.addEventListener('click',()=>input.click());
-    document.getElementById('crm-excel-close')?.addEventListener('click',()=>panel.classList.add('hidden'));
+    document.getElementById('crm-excel-close')?.addEventListener('click',()=>{crmExcelReview=null;panel.classList.add('hidden');});
 
     input?.addEventListener('change',async()=>{
       const file=input.files?.[0];
@@ -6908,12 +6990,10 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       const selectedActions=Object.values(decisions).filter(decision=>decision.action==='create'||decision.action==='update').length;
       if(!selectedActions)return showNotification('Escolha pelo menos uma linha para criar ou atualizar.','info');
 
-      const result=OG_SPREADSHEET_IMPORT.applyPreview(
-        crmExcelReview.preview,
-        state.leads,
-        decisions,
-        {idFactory:(row,index)=>`LEAD-SHEET-${Date.now().toString(36).toUpperCase()}-${index}`,now:new Date().toISOString()}
-      );
+      let result;
+      try {
+        result=OG_SPREADSHEET_IMPORT.applyPreview(crmExcelReview.preview,state.leads,decisions,{now:new Date().toISOString()});
+      } catch(error) {return showNotification(error.message || 'Revise a identidade de cada linha. Nenhuma alteração foi gravada.','error');}
       if(!result.applied)return showNotification('As decisões escolhidas não geraram alteração na base.','info');
 
       const created=result.audit.filter(item=>item.type==='spreadsheet_client_created').length;
@@ -6989,56 +7069,33 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     return results.length > 0 ? results.join('\n') : rawText;
   }
 
-  function parseAndAddLeads(rawText) {
-    const lines = rawText.split(/\r?\n/);
-    let addedCount = 0;
-
-    lines.forEach(line => {
-      line = line.trim();
-      if (!line || line.startsWith('Nome,') || line.startsWith('Empresa,')) return;
-
-      let parts = line.split(/[;,|\t]/);
-      if (parts.length < 2) parts = line.split(/ - /);
-
-      let nome = '';
-      let empresa = '';
-      let telefone = '';
-      let cnpj = '';
-      let cidadeUf = '';
-      let segmento = 'transportadora';
-
-      const cnpjMatch = line.match(/\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}/);
-      if (cnpjMatch) cnpj = cnpjMatch[0];
-
-      const phoneMatch = line.match(/\(?\d{2}\)?\s?9?\d{4}-?\d{4}/);
-      if (phoneMatch) telefone = phoneMatch[0].replace(/\D/g, '');
-
-      if (parts.length >= 2) {
-        nome = parts[0].trim();
-        empresa = parts[1] ? parts[1].trim() : '';
-        if (parts[2] && !telefone) telefone = parts[2].replace(/\D/g, '');
-        if (parts[3]) cidadeUf = parts[3].trim();
-      } else {
-        nome = line.slice(0, 35);
-      }
-
-      state.leads.unshift(normalizeLead({
-        id: 'LEAD-' + (state.leads.length + addedCount + 101),
-        nome: nome || 'Contato',
-        empresa: empresa || nome,
-        telefone: telefone || '',
-        cnpj: cnpj || '',
-        cidadeUf: cidadeUf || '',
-        segmentId: segmento,
-        status: 'novo',
-        observacoes: 'Cadastrado em ' + new Date().toLocaleDateString('pt-BR'),
-        createdDate: new Date().toISOString()
-      }));
-
-      addedCount++;
-    });
-
-    return addedCount;
+  async function parseAndAddLeads(rawText) {
+    // Legacy text/OCR is an input adapter to the existing spreadsheet review.
+    // Parsing never writes leads, interactions, IDs or an outbox entry.
+    const workbook = OG_SPREADSHEET_IMPORT.csvToWorkbook(rawText);
+    let source = OG_SPREADSHEET_IMPORT.detectTabularSources(workbook)[0];
+    if (!source?.mapping?.company && source?.mapping?.company !== 0) {
+      const lines = workbook.sheets.CSV || [];
+      const headers = ['Empresa','Contato','Telefone','CNPJ','Email','Cidade','Observações'];
+      const rows = lines.map(parts => {
+        const parsed = OG_PROSPECT_PARSER.parseLine(parts.join(';'));
+        const email = parts.find(part => OG_CRM_SERVICE.emailIdentity(part)) || '';
+        // Headerless legacy format is Contact;Company;Phone;City.
+        return [parts.length > 1 ? parts[1] : parts[0], parts.length > 1 ? parts[0] : '', parsed.telefone || '', parsed.cnpj || '', email, parts[3] || '', ''];
+      });
+      workbook.sheets.CSV = [headers,...rows];
+      source = OG_SPREADSHEET_IMPORT.detectTabularSources(workbook)[0];
+    }
+    if (!source) return showNotification('Não foi possível reconhecer os campos. Revise o texto antes de importar.','warning');
+    const digest = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawText));
+    const hash = Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,12);
+    crmExcelReview = {workbook,sources:[source],source,hash,fileName:'Texto / OCR revisado',analyzedAt:new Date().toISOString(),preview:[],rows:[],mapping:source.mapping};
+    renderCrmImportSheetPicker([source]); renderCrmImportMapping(source); refreshCrmImportPreview(source.mapping);
+    closeAppDialog(document.getElementById('modal-import-leads'),{restoreFocus:false});
+    const panel = document.getElementById('crm-excel-preview-panel');
+    panel.classList.remove('hidden'); panel.scrollIntoView({behavior:'smooth',block:'start'});
+    showNotification('Texto preparado para revisão. Nenhum cadastro foi gravado.','info');
+    return crmExcelReview.rows.length;
   }
 
   // =========================================================================

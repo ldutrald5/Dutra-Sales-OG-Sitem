@@ -10,6 +10,9 @@
   const compact=value=>norm(value).replace(/\s+/g,'');
   const codeKey=value=>{const raw=String(value??'').trim().replace(/\s+/g,'');if(!raw)return'';if(/^\d+$/.test(raw))return String(Number.parseInt(raw,10));return compact(raw);};
   const clean=value=>String(value??'').trim();
+  const crm=root.OG_CRM_SERVICE||(typeof require==='function'?require('./crm-service.js'):null);
+  const emailIdentity=value=>crm.emailIdentity(value);
+  const phoneIdentity=value=>crm.phoneIdentity(value);
 
   function inferConversationStageFromNotes(value){
     const text=norm(value);
@@ -212,19 +215,29 @@
     return rows.slice(source.headerRow+1).map((values,index)=>rowFromValues(values,mapping,source.headerRow+2+index)).filter(row=>Object.values(row).some(value=>String(value??'').trim()));
   }
 
-  function leadPhones(lead){return[lead?.telefone,...(Array.isArray(lead?.additionalPhones)?lead.additionalPhones.map(item=>typeof item==='string'?item:item?.phone):[])].map(digits).filter(Boolean);}
+  function leadPhones(lead){return[lead?.telefone,...(Array.isArray(lead?.additionalPhones)?lead.additionalPhones.map(item=>typeof item==='string'?item:item?.phone):[])].map(phoneIdentity).filter(Boolean);}
+  const documentKey=value=>{const key=digits(value);return key.length===11||key.length===14?key:'';};
+  // Bounded approval evidence: identity fields only, never CRM/history snapshots.
+  function identitySignature(lead){return JSON.stringify({id:clean(lead.id),company:clean(lead.empresa||lead.nome),aliases:[lead.legalName,lead.razaoSocial,lead.nomeFantasia].map(clean),code:codeKey(lead.internalCode||lead.externalCode),cnpj:documentKey(lead.cnpj),cpf:documentKey(lead.cpf),phones:[...new Set(leadPhones(lead))].sort(),email:emailIdentity(lead.email)});}
+  function assessCandidateIdentity(row,lead,leads){
+    const doc=documentKey(row.document);
+    // Numeric OG-code equivalence is the existing spreadsheet contract (0012 = 12).
+    const identities=leads.map(item=>({...item,internalCode:codeKey(item.internalCode||item.externalCode)}));
+    return crm.resolveClientIdentity(identities,{clientId:lead.id,empresa:row.company||row.legalName,internalCode:codeKey(row.externalCode),cnpj:doc.length===14?doc:'',cpf:doc.length===11?doc:'',telefone:row.phone,email:row.email});
+  }
+  function previewCandidate(candidate){return{leadId:candidate.leadId,company:candidate.lead.empresa||candidate.lead.nome||'',reasons:candidate.reasons,identitySignature:identitySignature(candidate.lead)};}
   function candidateMatches(row,leads=[]){
-    const code=codeKey(row.externalCode),doc=digits(row.document),phone=digits(row.phone),email=norm(row.email),company=norm(row.company||row.legalName),city=norm(row.city);
+    const code=codeKey(row.externalCode),doc=documentKey(row.document),phone=phoneIdentity(row.phone),email=emailIdentity(row.email),company=norm(row.company||row.legalName),city=norm(row.city);
     const candidates=[];
     for(const lead of leads){
       const reasons=[];
       if(code&&codeKey(lead.internalCode||lead.externalCode)===code)reasons.push('Código OG');
-      if(doc&&digits(lead.cnpj||lead.cpf)===doc)reasons.push('CNPJ/CPF');
+      if(doc&&[documentKey(lead.cnpj),documentKey(lead.cpf)].includes(doc))reasons.push('CNPJ/CPF');
       if(phone&&leadPhones(lead).includes(phone))reasons.push('Telefone');
-      if(email&&norm(lead.email)===email)reasons.push('E-mail');
+      if(email&&emailIdentity(lead.email)===email)reasons.push('E-mail');
       const strong=reasons.length>0;
-      if(!strong&&company&&norm(lead.empresa||lead.nome)===company&&city&&norm(lead.cidadeUf)===city)reasons.push('Empresa + cidade');
-      if(reasons.length)candidates.push({lead,leadId:lead.id,reasons,strong,confidence:strong?'high':'low'});
+      if(!strong&&company&&norm(lead.empresa||lead.nome)===company)reasons.push(city&&norm(lead.cidadeUf)===city?'Empresa + cidade':'Empresa (revisar identidade)');
+      if(reasons.length){const identity=assessCandidateIdentity(row,lead,leads);candidates.push({lead,leadId:lead.id,reasons,strong,identityStatus:identity.status,identityReason:identity.reason,confidence:strong&&identity.status==='MATCH'?'high':'low'});}
     }
     return candidates;
   }
@@ -233,12 +246,13 @@
     const candidates=candidateMatches(row,leads);
     if(candidates.length!==1)return null;
     const item=candidates[0];
+    if(!item.strong||item.identityStatus!=='MATCH')return null;
     return{lead:item.lead,key:item.reasons[0]==='Código OG'?'external_code':item.reasons[0]==='CNPJ/CPF'?'document':item.reasons[0]==='Telefone'?'phone':item.reasons[0]==='E-mail'?'email':'name_city',confidence:item.confidence};
   }
 
   function incomingIdentityKeys(row){
     const keys=[];
-    const code=codeKey(row.externalCode),doc=digits(row.document),phone=digits(row.phone),email=norm(row.email);
+    const code=codeKey(row.externalCode),doc=documentKey(row.document),phone=phoneIdentity(row.phone),email=emailIdentity(row.email);
     if(code)keys.push('code:'+code);if(doc)keys.push('doc:'+doc);if(phone)keys.push('phone:'+phone);if(email)keys.push('email:'+email);
     return keys;
   }
@@ -247,7 +261,8 @@
     const changes=[];
     for(const def of FIELD_DEFS){
       const currentValue=def.current(lead)||'',incomingValue=def.incoming(row)||'';
-      if(String(incomingValue).trim()&&norm(currentValue)!==norm(incomingValue))changes.push({field:def.key,label:def.label,current:currentValue,incoming:incomingValue,protected:Boolean(def.protected)});
+      const compare=def.key==='email'?emailIdentity:def.key==='phone'?phoneIdentity:norm;
+      if(String(incomingValue).trim()&&compare(currentValue)!==compare(incomingValue))changes.push({field:def.key,label:def.label,current:currentValue,incoming:incomingValue,protected:Boolean(def.protected)});
     }
     return changes;
   }
@@ -260,11 +275,11 @@
       const candidates=candidateMatches(row,leads);
       const hasIdentity=Boolean(clean(row.company)||clean(row.externalCode)||digits(row.document)||digits(row.phone)||norm(row.email));
       if(!hasIdentity)return{row,status:'INVALID',reason:'Sem empresa, código, documento, telefone ou e-mail',changes:[],candidates:[]};
-      if(repeatedKeys.length)return{row,status:'POSSIBLE_DUPLICATE',reason:'Identificador repetido dentro da própria planilha',changes:[],candidates:candidates.map(c=>({leadId:c.leadId,company:c.lead.empresa||c.lead.nome||'',reasons:c.reasons}))};
+      if(repeatedKeys.length)return{row,status:'POSSIBLE_DUPLICATE',reason:'Identificador repetido dentro da própria planilha',changes:[],candidates:candidates.map(previewCandidate)};
       if(candidates.length===0)return{row,status:'NEW',reason:'Nenhum cliente atual corresponde aos identificadores',changes:FIELD_DEFS.map(def=>({field:def.key,label:def.label,current:'',incoming:def.incoming(row)||'',protected:Boolean(def.protected)})).filter(item=>String(item.incoming).trim()),candidates:[]};
-      if(candidates.length>1||!candidates[0].strong)return{row,status:'POSSIBLE_DUPLICATE',reason:candidates.length>1?'Mais de um cliente atual corresponde':'Correspondência fraca; revise antes de decidir',changes:candidates.length===1?changeSet(row,candidates[0].lead):[],matchedLeadId:candidates.length===1?candidates[0].leadId:null,candidates:candidates.map(c=>({leadId:c.leadId,company:c.lead.empresa||c.lead.nome||'',reasons:c.reasons}))};
+      if(candidates.length>1||!candidates[0].strong||candidates[0].identityStatus!=='MATCH')return{row,status:'POSSIBLE_DUPLICATE',reason:candidates.length>1?'Mais de um cliente atual corresponde':candidates[0].identityStatus!=='MATCH'?candidates[0].identityReason:'Correspondência fraca; revise antes de decidir',changes:candidates.length===1?changeSet(row,candidates[0].lead):[],matchedLeadId:candidates.length===1?candidates[0].leadId:null,candidates:candidates.map(previewCandidate)};
       const matched=candidates[0],changes=changeSet(row,matched.lead),protectedChanges=changes.filter(change=>change.protected);
-      return{row,matchedLeadId:matched.leadId,matchKey:matched.reasons.join(' + '),confidence:matched.confidence,changes,status:protectedChanges.length?'CONFLICT':changes.length?'SAFE_UPDATE':'UNCHANGED',reason:protectedChanges.length?'Há histórico/observação protegida para revisar':changes.length?`Correspondência por ${matched.reasons.join(' + ')}`:'Registro já está igual',candidates:[{leadId:matched.leadId,company:matched.lead.empresa||matched.lead.nome||'',reasons:matched.reasons}]};
+      return{row,matchedLeadId:matched.leadId,matchKey:matched.reasons.join(' + '),confidence:matched.confidence,changes,status:protectedChanges.length?'CONFLICT':changes.length?'SAFE_UPDATE':'UNCHANGED',reason:protectedChanges.length?'Há histórico/observação protegida para revisar':changes.length?`Correspondência por ${matched.reasons.join(' + ')}`:'Registro já está igual',candidates:[previewCandidate(matched)]};
     });
   }
 
@@ -355,18 +370,33 @@
 
   function applyPreview(items,leads=[],decisions={},options={}){
     const now=options.now||new Date().toISOString(),next=JSON.parse(JSON.stringify(leads)),audit=[];
+    const originalIds=next.map(lead=>clean(lead.id));
+    if(originalIds.some(id=>!id)||new Set(originalIds).size!==originalIds.length)throw new Error('CRM contém IDs ausentes ou duplicados. Revise a identidade antes de importar.');
+    const rowKeys=items.map(item=>clean(item.row?.sourceRow));
+    if(rowKeys.some(key=>!key)||new Set(rowKeys).size!==rowKeys.length)throw new Error('Linhas da importação sem identidade única. Gere o preview novamente.');
     for(const item of items){
       const rowKey=String(item.row.sourceRow),rowDecision=decisions[rowKey]||{},action=rowDecision.action||'ignore';
       if(item.status==='INVALID'||action==='ignore'||action==='review')continue;
+      const currentCandidates=candidateMatches(item.row,next);
+      const needsReview=item.status==='POSSIBLE_DUPLICATE'||currentCandidates.length>1||currentCandidates.some(candidate=>!candidate.strong||candidate.identityStatus!=='MATCH');
+      if(needsReview&&rowDecision.identityConfirmed!==true)throw new Error(`Linha ${rowKey}: identidade ambígua requer confirmação explícita. Nenhum registro foi gravado.`);
       if(action==='create'||action==='import'){
-        const id=(options.idFactory||((row,index)=>`LEAD-SHEET-${Date.now()}-${index}`))(item.row,audit.length),lead=newLeadFromRow(item.row,id,now);
+        if(currentCandidates.length&&rowDecision.identityConfirmed!==true)throw new Error(`Linha ${rowKey}: cliente já identificado; atualize ou revise a identidade. Nenhum registro foi gravado.`);
+        const candidateKeys=candidates=>candidates.map(candidate=>`${clean(candidate.leadId)}:${candidate.identitySignature}`).sort();
+        if(JSON.stringify(candidateKeys(item.candidates||[]))!==JSON.stringify(candidateKeys(currentCandidates.map(previewCandidate))))throw new Error(`Linha ${rowKey}: candidatos mudaram desde o preview. Gere o preview novamente.`);
+        const id=crm.createLeadId(next,{prefix:'LEAD-SHEET',now,idFactory:options.idFactory?()=>options.idFactory(item.row,audit.length):undefined}),lead=newLeadFromRow(item.row,id,now);
         next.push(lead);audit.push({type:'spreadsheet_client_created',leadId:id,sourceRow:item.row.sourceRow,changedFields:Object.keys(lead)});continue;
       }
       if(action!=='update')continue;
       const targetId=rowDecision.targetLeadId||item.matchedLeadId;
       const lead=next.find(value=>String(value.id)===String(targetId));
-      if(!lead)continue;
-      const changes=item.changes?.length?item.changes:changeSet(item.row,lead),changedFields=[];
+      if(!lead)throw new Error(`Linha ${rowKey}: cliente de destino não existe mais. Gere o preview novamente.`);
+      const approvedCandidate=item.candidates?.find(candidate=>String(candidate.leadId)===String(targetId));
+      if(!approvedCandidate?.identitySignature||approvedCandidate.identitySignature!==identitySignature(lead))throw new Error(`Linha ${rowKey}: identidade do destino mudou desde o preview. Gere o preview novamente.`);
+      if(needsReview&&!rowDecision.targetLeadId)throw new Error(`Linha ${rowKey}: escolha explicitamente o cliente de destino.`);
+      if(!currentCandidates.some(candidate=>String(candidate.leadId)===String(targetId)))throw new Error(`Linha ${rowKey}: destino incompatível com os identificadores. Gere o preview novamente.`);
+      if(item.matchedLeadId&&String(item.matchedLeadId)!==String(targetId)&&rowDecision.identityConfirmed!==true)throw new Error(`Linha ${rowKey}: cliente diferente do preview requer revisão.`);
+      const changes=changeSet(item.row,lead),changedFields=[];
       for(const change of changes){
         const explicit=rowDecision.fields?.[change.field];
         const decision=explicit?normalizeDecision(explicit):(change.protected?'keep':'excel');

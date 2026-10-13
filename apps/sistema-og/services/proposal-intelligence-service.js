@@ -170,6 +170,9 @@
     if (quote.clientId && clean(quote.clientId) !== clientId) throw new Error('Cliente da proposta diverge da cotação');
 
     const client = state.client || input.client || {};
+    if (client.identityReviewRequired) throw new Error('Identidade da empresa exige revisão antes de preparar');
+    if ([client.clientId,client.leadId].filter(Boolean).some(id => clean(id) !== clientId)) throw new Error('Cliente do contexto diverge da proposta');
+    if ((state.vehicles || []).some(vehicle => vehicle.clientReviewRequired)) throw new Error('Revise a aplicação reaproveitada antes de preparar a proposta');
     const preparedAt = iso(options.now);
     const data = input.quoteData;
     if (data && Math.abs(safeNumber(data.totalFinalVenda) - safeNumber(quote.totalValue)) > 0.000001) throw new Error('Total da proposta diverge da cotação');

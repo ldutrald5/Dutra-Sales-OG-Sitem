@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import crm from '../apps/sistema-og/services/crm-service.js';
 import { execFileSync } from 'node:child_process';
 
 // CONVERGENCE-01 Stage 7: use only synthetic business records and the real
@@ -102,10 +103,10 @@ function runtime(source, requireSnapshot = true) {
   };
   const calculatorResult = { totalFinalVenda:12345.67, totalPecas:152,
     vehicles:plain(state.vehicles), extraItems:plain(state.extraItems), totalConjuntos:5 };
-  let tick = 0;
+  let tick = 0, uuid = 0;
   class SyntheticDate extends Date {
     constructor(...args) { super(...(args.length ? args : [Date.UTC(2026, 9, 8, 12) + tick++])); }
-    static now() { return Date.UTC(2026, 9, 8, 12) + tick++; }
+    static now() { return Date.UTC(2026, 9, 8, 12); }
   }
   const proposal = { prepareTrackingDraft(operations, input) {
     assert.equal(input.quoteState, input.quote.payload, 'Proposal callback receives the native saved snapshot');
@@ -119,9 +120,9 @@ function runtime(source, requireSnapshot = true) {
   const context = vm.createContext({
     state, Date:SyntheticDate, Buffer, serverRevision:7, workingQuoteDraftId:null, activeProposalContext:null,
     quoteClientDefaults:plain(composition().client),
-    crypto:{ randomUUID:() => '00000000-0000-4000-8000-000000000000' },
+    crypto:{ randomUUID:() => '00000000-0000-4000-8000-' + String(++uuid).padStart(12,'0') },
     window:{ OG_PROPOSAL_INTELLIGENCE:proposal }, OG_PROPOSAL_INTELLIGENCE:proposal, OG_OPERATIONS_MODEL:{},
-    OG_CRM_SERVICE:{ getLeadById:(rows, id) => rows.find(row => row.id === id) },
+    OG_CRM_SERVICE:crm,
     OG_SYNC_BRIDGE:{ queueState(payload) { calls.queue.push(bytes(payload)); return Promise.resolve(); } },
     localStorage:{ setItem:(key, value) => calls.storage.set(key, value) },
     calculateCompleteQuote() { calls.calculator++; return plain(calculatorResult); },
@@ -131,11 +132,12 @@ function runtime(source, requireSnapshot = true) {
     renderProposalTrackingStatus() {}, renderProposalWorkspace() {}, proposalApplicationMaps:() => ({}), proposalDraftSignature:() => 'FAKE-PROPOSAL-SIGNATURE-0000',
     formatMoney:value => String(value), escapeHtml:value => String(value),
     hydrateQuoteClientInputs() { calls.hydrated++; }, recalculateQuote() { calls.recalculated++; },
+    emptyTechnicalDraft:leadId=>({leadId}),renderQuoteImportPreview() {},
     switchTab(tab) { calls.tabs.push(tab); },
     document:{ getElementById:id => id === 'history-container' ? container : null, createElement:() => ({}) },
     console:{ error(error) { throw error; } }
   });
-  const names = ['currentSyncPayload', 'findLeadForClientData', 'resolveHistoryLead', 'validProposalClient',
+  const names = ['currentSyncPayload', 'findLeadForClientData', 'resolveHistoryLead', 'validProposalClient', 'validHistoricalProposal',
     'persistVehicleComposition', 'saveQuoteToHistory', 'renderHistory'];
   if (requireSnapshot) names.push('captureQuoteCompositionSnapshot');
   vm.runInContext(`'use strict';\n${names.map(name => extractFunction(source, name)).join('\n')}\n${extractFunction(server, 'readBody')}`, context);
@@ -230,6 +232,7 @@ if (baselineMode) {
   assert.deepEqual(JSON.parse(calls.storage.get('og_cotacoes_history')), plain(state.history));
   assert.ok(sizes.at(-1) - initialSize < saves * (bytes(expectedComposition) + 2000), 'Transport grows by bounded new rows rather than copied CRM/history');
   assert.equal(state.history.length, oldHistory.length + saves);
+  assert.equal(new Set(state.history.slice(0,saves).map(item=>item.id)).size,saves,'New quote IDs remain unique even with a constant millisecond clock');
   assert.ok(state.history.length < 50, 'Normal retention is not reached');
   oldHistory.forEach((row, index) => {
     assert.equal(state.history[saves + index], row, 'Existing history row identity is preserved');
@@ -245,7 +248,7 @@ if (baselineMode) {
   state.vehicles = [];
   state.extraItems = [];
   reopen(0);
-  assert.deepEqual(plain(state.client), expectedComposition.client, 'Actual reopen restores full saved client');
+  assert.deepEqual(plain(state.client), {...expectedComposition.client,clientId:'FAKE-LEAD-0000'}, 'Actual reopen restores saved fields and binds the explicit historical owner without rewriting it');
   assert.deepEqual(plain(state.vehicles), expectedComposition.vehicles, 'Actual reopen restores both stable rows, rules, manual review, quantities and custom prices');
   assert.deepEqual(plain(state.extraItems), expectedComposition.extraItems);
   assert.notEqual(state.client, originalClient);
@@ -254,7 +257,7 @@ if (baselineMode) {
   state.extraItems[0].qty = 99;
   assert.equal(JSON.stringify(state.history[0]), savedJSON, 'Editing a reopened quote cannot mutate its saved snapshot');
   reopen(saves);
-  assert.deepEqual(plain(state.client), expectedComposition.client, 'Legacy whole-state history still reopens through existing client fields');
+  assert.deepEqual(plain(state.client), {...expectedComposition.client,clientId:'FAKE-LEAD-0000'}, 'Legacy history restores saved fields and its explicit owner');
   assert.deepEqual(plain(state.vehicles), expectedComposition.vehicles);
   assert.deepEqual(plain(state.extraItems), expectedComposition.extraItems);
   assert.equal(state.leads, leadsOwner, 'Legacy reopen preserves the CRM owner');

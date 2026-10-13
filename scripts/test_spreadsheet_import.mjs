@@ -87,8 +87,9 @@ assert.equal(duplicatePreview[1].status,'POSSIBLE_DUPLICATE');
 
 const updateSource=[{sourceRow:2,externalCode:'99',company:'Empresa A atualizada',phone:'44911111111'}];
 const updatePreview=service.preview(updateSource,existing);
-assert.equal(updatePreview[0].status,'SAFE_UPDATE');
-const updated=service.applyPreview(updatePreview,existing,{'2':{action:'update'}},{now:'2026-09-27T12:00:00.000Z'});
+assert.equal(updatePreview[0].status,'POSSIBLE_DUPLICATE','identificador forte não autoriza renomear outra empresa');
+assert.throws(()=>service.applyPreview(updatePreview,existing,{'2':{action:'update'}},{now:'2026-09-27T12:00:00.000Z'}),/confirmação explícita/);
+const updated=service.applyPreview(updatePreview,existing,{'2':{action:'update',targetLeadId:'A',identityConfirmed:true}},{now:'2026-09-27T12:00:00.000Z'});
 assert.equal(updated.leads[0].empresa,'Empresa A atualizada');
 assert.equal(updated.leads.length,2);
 
@@ -105,7 +106,9 @@ const newRecommendation=service.recommendDecision(genericPreview[0]);
 assert.equal(newRecommendation.action,'create');
 assert.equal(newRecommendation.needsReview,false);
 
-const safeUpdateRecommendation=service.recommendDecision(updatePreview[0]);
+const safeUpdatePreview=service.preview([{sourceRow:2,externalCode:'99',company:'Empresa A',phone:'44911111111',city:'Maringá / PR'}],existing);
+assert.equal(safeUpdatePreview[0].status,'SAFE_UPDATE','enriquecimento coerente permanece automático');
+const safeUpdateRecommendation=service.recommendDecision(safeUpdatePreview[0]);
 assert.equal(safeUpdateRecommendation.action,'update');
 assert.equal(safeUpdateRecommendation.targetLeadId,'A');
 
@@ -128,7 +131,7 @@ const uniquePlan=service.recommendedDecisionMap([
   {...ambiguous[0],row:{...ambiguous[0].row,sourceRow:24}}
 ]);
 assert.equal(uniquePlan['21'].action,'create');
-assert.equal(uniquePlan['22'].action,'update');
+assert.equal(uniquePlan['22'].action,'ignore');
 assert.equal(uniquePlan['23'].action,'update');
 assert.equal(uniquePlan['23'].fields.notes,'keep');
 assert.equal(uniquePlan['24'].action,'ignore');
@@ -136,10 +139,10 @@ assert.equal(uniquePlan['24'].action,'ignore');
 const recommendationSummary=service.summarizeRecommendations([
   genericPreview[0],updatePreview[0],preview[0],ambiguous[0]
 ]);
-assert.equal(recommendationSummary.ready,3);
+assert.equal(recommendationSummary.ready,2);
 assert.equal(recommendationSummary.create,1);
-assert.equal(recommendationSummary.update,2);
-assert.equal(recommendationSummary.manualReview,1);
+assert.equal(recommendationSummary.update,1);
+assert.equal(recommendationSummary.manualReview,2);
 
 const appSource=fs.readFileSync(new URL('../apps/sistema-og/app.js',import.meta.url),'utf8');
 const htmlSource=fs.readFileSync(new URL('../apps/sistema-og/index.html',import.meta.url),'utf8');
