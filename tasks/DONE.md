@@ -304,3 +304,11 @@ Código5087384 congelado;82/82 gates novos, comparação canônica, exports reai
 ## Stage8.3.1 — local operational acceptance
 
 Approved heading-chain and missing-media contrast fixes preserve canonical calculations/DesignDNA. Executed authenticated CRM UI→company→technical→two vehicles→quote→review→Impacto→realPDF/PNG→immutable revisions→logout/login/restart. Live pilot read-only HTTPS/health/volume/access checks PASS; current SHA remainsbe83c32. Publication/real online login not claimed completed. Evidence and next action in operational831 report/checkpoint.
+
+## TASK-P0-A — integridade comercial (2026-10-13)
+
+- Transição explícita A→B; contexto limpo/cancelamento/reuso técnico revisado; guardas de persistência/proposta/exportação e resultados assíncronos.
+- Importação única por preview/revisão, comparação canônica de email/DDI, IDs únicos, revisão de ambiguidades e aplicação atômica.
+- Homônimos exigem identidade explícita; histórico/snapshot não cruza owners e novas cotações usam IDs únicos.
+- 83/83 gates, 19 casos novos no Chromium isolado, regressões de CRM/proposta/histórico/auth/PWA/offline/reconnect/409 e PDF/PNG reais. Não é aceite online ou em aparelho físico.
+- Sem push/merge/deploy/schema/dados reais. Detalhes/rollback na [story P0-A](../docs/stories/P0-A-commercial-identity-integrity.md).
