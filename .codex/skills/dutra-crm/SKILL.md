@@ -26,6 +26,17 @@ metadata:
 ## Procedure
 Inspect canonical owner → identify mutation contract → validate identity → apply explicit confirmed fields only → create activity/next action → test alternate UI paths.
 
+## Commercial identity integrity
+
+- Reuse `OG_CRM_SERVICE.resolveClientIdentity` before binding quote/customer data; a possible duplicate is only a review candidate.
+- Client changes use the explicit quote transition: clean context by default; cancel leaves it intact; technical-only reuse strips negotiated prices, notes, ROI, media and prior IDs and requires review.
+- Persist/prepare/export only when displayed company, canonical IDs and vehicle/document owners agree. Historical snapshots never acquire another client by name fallback.
+- Text/OCR and spreadsheets use the same preview/matcher/review. Apply to a cloned batch, validate every selected identity, then commit; cancellation or stale identity means no partial write.
+- Reuse typed `emailIdentity`/`phoneIdentity`: email punctuation/provider aliases stay distinct; strip Brazil DDI only for a structurally valid complete Brazilian number. Comparison does not rewrite raw source fields.
+- Generate IDs independently of collection size with `createLeadId`; reject missing/duplicate existing IDs and changed bounded identity signatures before applying reviewed imports.
+- Confirm interpreted commands and target company separately. Never choose the first homonym; duplicate IDs or identity changes while reviewing block writes.
+- Historical documents require matching quote ID, record owner and snapshot owner before copying terms/ROI/branding. Preserve incompatible old records for review without automatic migration.
+
 ## Output
 Canonical entities affected, confirmed facts, state transition, next action, dedupe/provenance considerations and tests.
 

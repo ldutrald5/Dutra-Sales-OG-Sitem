@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 30 |
+| cycle | 31 |
 | decision | 27 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 26 |
+| incident | 30 |
 | knowledge | 13 |
-| open_question | 7 |
-| pattern | 24 |
-| source | 45 |
+| open_question | 8 |
+| pattern | 25 |
+| source | 47 |
 
 ## Active decisions
 
@@ -86,6 +86,8 @@ Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
   The shared technical engine and parity tests exist, but fallback/duplicated decision paths must be inventoried and removed before single-source status can be declared.
 - **OQ-V3-OFFLINE-ACCEPT-001 — Manual offline/reconnect acceptance on real authenticated browser** (open/high)
   Automated sync/idempotency gates pass, but the real-browser flow of edit offline, close/reopen, reconnect, replay and reload still requires manual acceptance evidence.
+- **Q-MANUS-RPC-HOMOLOGATION-001 — Does the Manus RPC pass the complete canonical database contract?** (open/medium)
+  Before any authorized database package, validate partial unique-index inference, both concurrent externalId paths, full command idempotency, session races and an executable function rollback. Current isolated author test does not establish full-schema/live acceptance.
 
 ## Open / active incidents
 
@@ -94,6 +96,14 @@ Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-QUOTE-CLIENT-TRANSITION-001 — Partial client bridges retain another account’s commercial context** (resolved/high)
+  The quote client transition must replace identity and commercial context together before persistence.
+- **INC-CRM-IMPORT-IDENTITY-001 — Legacy imports bypass review and identity-safe comparison** (resolved/high)
+  Existing spreadsheet preview/review owns all text and file import paths; comparison keys are typed, and apply is atomic.
+- **INC-COMMAND-HOMONYM-001 — Natural command writes to first homonym** (resolved/high)
+  Confirmation of interpretation never confirms which canonical company receives a write.
+- **INC-QUOTE-HISTORICAL-IDENTITY-001 — Historical quote lookup imports a foreign proposal snapshot** (resolved/high)
+  A historical document must agree on quote, record owner, snapshot owner and current canonical client before its commercial data is consumed.
 - **INC-PROPOSAL-HEADING-ORPHAN-001 — Consecutive technical headings orphan in native proposal export** (resolved/high)
   Semantic pagination keeps consecutive technical headings with the first substantive block; approved minimal fix does not change calculations.
 - **INC-PROPOSAL-MEDIA-FALLBACK-CONTRAST-001 — Hero missing-media placeholder inherits unreadable white text** (resolved/high)
@@ -102,14 +112,6 @@ Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 - **INC-TECH-MULTIPLIER-MANUAL-001 — Fleet multiplier incorrectly reclassified unit application as manual** (resolved/high)
   Quote row presentation changes must not mutate unit technical origin.
-- **INC-RAILWAY-APPROVAL-HANDOFF-001 — Repeated Railway approval refusal wasted Codex cycles** (resolved/high)
-  A staged Railway deploy refusal caused by an approval boundary must be handed from Codex to QG instead of retried as if it were a code or runtime defect.
-- **INC-ROI-IMPLICIT-PREMISES-001 — Unsupported implicit ROI gains and invented fallback payback** (resolved/high)
-  An economic scenario must not promote example gains or absent inputs into confirmed savings.
-- **INC-PROPOSAL-LATE-CONTEXT-001 — Late publication response could target the newly selected proposal** (resolved/high)
-  Async publication acknowledgement belongs to its captured original proposal identity.
-- **INC-TECH-ENTRY-CONTEXT-001 — Client-origin technical navigation must carry canonical identity** (resolved/high)
-  Client-origin technical navigation switched tabs without selecting the originating canonical lead. The existing technical selector and dirty-draft confirmation now receive that identity from both the sales card and client sheet. No new CRM, context owner or technical engine.
 
 ## Candidate / planned ideas
 
@@ -172,9 +174,15 @@ Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Block domain scripts to verify static shell/error recovery, inject renderer faults to prove other routes remain usable, traverse mobile/tablet/desktop sizes, and require real API acknowledgement after reconnect. When a browser emulator omits the network event, prove transport separately and label explicit event simulation; never mock sync success.
 - **PAT-VISUAL-DIRECTION-001 — Concept first, code second for high-visual product work** (active/high)
   For high-visual work where user taste materially affects success, first translate screenshots, references, audio, sketches and reactions into a small design DNA and 2–3 concrete visual directions. Let the product owner select/refine a direction before spending implementation credits. Persist only the stable chosen principles; keep experiments cheap and reversible.
+- **PAT-COMMERCIAL-IDENTITY-REVIEW-001 — Resolve, review, then mutate canonical client context** (validated/high)
+  Use canonical ownership checks, explicit client transitions and bounded approval signatures; keep old records intact when ownership is ambiguous.
 
 ## Recent sources
 
+- **SRC-P0A-COMMERCIAL-INTEGRITY-20261013-001 — P0-A commercial identity regressions** (validated/high)
+  Synthetic reproductions at baseline 9f2d33a confirm quote A/B context contamination, legacy import duplication/ID reuse, punctuation-colliding email matching and first-homonym command writes. Corrective local code and executed regression scripts establish prevention; no runtime/data publication.
+- **SRC-MANUS-REPLAY-20261013-001 — Manus public replay reviewed independently** (validated/medium)
+  Public replay final SQL targets remote Sales Execution on baseline 9f2d33a. Author logs show PostgreSQL tests in a minimal fixture; static review identifies a partial-index mismatch and concurrency/idempotency gaps. No SQL applied or tests reexecuted here.
 - **SRC-CONVERGENCE-EXPORT-20261009-001 — Canonical client document export and revision audit** (validated/high)
   Current proposal workspace and print entry reuse frozen proposal_tracking data. Existing operations.materials/localAsset store supports explicitly authorized client association with content fingerprint. Isolated native browser regression verifies three templates, white actual print iframe PDF, paginated raster output with real text/logo pixels, immutable visual revisions, late-context safety and no sends. Private pilot fixtures/assets are not committed.
 - **SRC-PROPOSAL-VISION-20261009-001 — User creative direction for DUTRA proposal experience** (validated/high)
@@ -191,10 +199,6 @@ Generated from 194 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
 - **SRC-PROPOSAL-HOMOLOGATION-20261009-001 — Frozen Impacto OG homologation with reproducible visual reservations** (validated/high)
   Rechecked checkpoint5087384 without product fixes or publication. Fresh82/82 gates and native commercial/actual export/offline409 flows passed. PDF heading chains can orphan, and missing hero media uses white-on-light text. Read-only historical quote reproduces total/pieces but lacks canonical client identity; no complete real proposal acceptance claimed.
-- **SRC-PROPOSAL-OPERATIONAL-20261009-001 — Authorized Impacto P2 corrections and authenticated operational acceptance** (validated/high)
-  Lucas prioritized controlled commercial access and authorized only two homologation fixes. Existing renderer now keeps consecutive technical headings with first content and readable missing-media notice. Synthetic native authenticated CRM-to-quote-to-proposal/PDF/PNG/version/logout/login/restart passed. Read-only live pilot audit confirms HTTPS/shared OG PIN/private own volume at be83c32; deployment of updated source requires explicit new approval. No production/customer data writes.
-- **SRC-CONVERGENCE-FLEET-20261008-001 — Stage7 canonical multi-vehicle audit and regression** (validated/high)
-  Stage7 audit traces the active catalog/technical/pricing functions and quantity semantics to the current application. Unit and browser regression use existing callbacks, native quote history and real loopback HTTP/IndexedDB. Private pilot records and supplied catalog photographs are not copied into the Brain; runtime tests do not certify physical OG applications.
 
 ## Retrieval workflow
 

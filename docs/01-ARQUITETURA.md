@@ -345,3 +345,11 @@ Logo opcional referencia `operations.materials` + `OG_MATERIAL_STORE.localAsset.
 ## Impacto OG — Stage8.2
 
 Extensão de apresentação versionada do mesmo OG_PROPOSAL_DOCUMENT/OG_PROPOSAL_INTELLIGENCE. Theme/asset v1 é opt-in; ausência preserva clássico. Mídia conceptual compatível/fallback não define técnica. Documento/PNG/PDF usam o mesmo snapshot; premissas de ROI ativo são legíveis mesmo sem método detalhado. Preços/ROI/CRM/technical engines não mudam. Contrato/testes e rollback: [Implementation](product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md).
+
+## P0-A — contrato de integridade comercial (2026-10-13)
+
+Owner preservado: `OG_CRM_SERVICE / state.leads`. O resolver canônico diferencia MATCH/NONE/AMBIGUOUS/CONFLICT; candidatos de deduplicação não autorizam vínculo ou gravação. O helper puro `quote-client-context-service.js` só constrói um contexto limpo ou composição técnica para revisão; não calcula aplicação/preços nem persiste dados.
+
+Entradas de cotação convergem para transição explícita. Preview/revisão de planilhas recebe também texto/OCR; aprovação carrega apenas assinatura mínima de identidade, revalidada antes da aplicação atômica. Documentos históricos são consumidos somente quando seus owners/snapshot/cotação concordam. Registros incoerentes permanecem intactos para revisão.
+
+Testes e limites: [story P0-A](stories/P0-A-commercial-identity-integrity.md). Esta correção é local; não muda autenticação, sincronização, schema, preços ou runtime. Análise de SQL externo do Manus não autoriza sua aplicação.

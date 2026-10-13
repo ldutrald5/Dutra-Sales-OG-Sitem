@@ -1,5 +1,13 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — P0-A / integridade comercial (2026-10-13)
+
+- Troca de empresa limpa o contexto comercial, com cancelamento e reaproveitamento técnico sujeito a revisão explícita; guardas impedem identidades incompatíveis na cotação/proposta/exportação.
+- Texto/OCR legado reutiliza preview/revisão; e-mails mantêm pontuação, DDI brasileiro é estrutural, IDs não dependem do tamanho da lista e imports são atômicos/idempotentes.
+- Command Center exige escolha canônica para homônimos e recusa identidade obsoleta/ID duplicado.
+- IDs novos de cotação são únicos; documentos históricos incompatíveis não transferem condições/ROI/branding. Registros antigos permanecem intactos.
+- Regressões locais: 83/83 gates e 19 casos browser de integridade, PDF real; nenhuma publicação, migração ou alteração de cálculo/preço/dado real.
+
 ## [Unreleased] — Stage8.2 / Impacto OG
 
 - Theme/asset v1 e preferências limitadas/versionadas no renderer existente, sem migrar documentos históricos.
