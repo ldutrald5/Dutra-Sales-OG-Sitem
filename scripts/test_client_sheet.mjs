@@ -98,7 +98,8 @@ assert.match(app,/data-command-lead.*openClientSheet/s,'Command Center deve abri
 assert.match(app,/function resolveHistoryLead\(item\)/,'Histórico deve resolver identidade do cliente');
 assert.match(app,/clientId:\s*relatedLead\?\.id/,'novas cotações devem preservar clientId no histórico');
 assert.match(app,/function refreshQuoteClientSheetAccess\(\)/,'Cotação deve resolver cliente ativo para acesso à ficha');
-assert.match(app,/cnpj\.length === 14/,'resolução transversal por CNPJ exige identificador completo');
+assert.equal(crm.resolveClientIdentity([{id:'DOCUMENT',empresa:'Empresa documento',cnpj:'12345678000190'}],{cnpj:'12345678000190'}).lead.id,'DOCUMENT','resolução transversal aceita CNPJ completo');
+assert.equal(crm.resolveClientIdentity([{id:'PARTIAL',empresa:'Empresa parcial',cnpj:'12345678'}],{cnpj:'12345678'}).status,'NONE','CNPJ incompleto não estabelece identidade canônica');
 assert.match(app,/reconciliation-main.*data-open-client-sheet/s,'Reconciliação deve permitir abrir ficha do lead');
 assert.match(html,/id="quote-open-client-sheet"/,'Cotação deve mostrar acesso contextual à ficha');
 assert.match(css,/\.client-sheet-inline-link/,'estilo de acesso transversal à ficha ausente');

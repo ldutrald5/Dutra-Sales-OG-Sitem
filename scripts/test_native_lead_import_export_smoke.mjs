@@ -66,7 +66,7 @@ assert.equal(summary.duplicateCount,2,'uma atualização protegida + uma duplici
 
 const [newItem,updateItem,duplicateItem]=preview;
 assert.equal(newItem.status,'NEW');
-assert.equal(updateItem.status,'CONFLICT');
+assert.equal(updateItem.status,'POSSIBLE_DUPLICATE','mudança de nome deve exigir revisão de identidade');
 assert.equal(updateItem.matchedLeadId,'SMOKE-EXIST-1');
 assert.equal(duplicateItem.status,'POSSIBLE_DUPLICATE');
 assert.equal(duplicateItem.candidates.length,2,'conflito deve mostrar os dois clientes candidatos');
@@ -76,6 +76,7 @@ const decisions={
   [String(updateItem.row.sourceRow)]:{
     action:'update',
     targetLeadId:'SMOKE-EXIST-1',
+    identityConfirmed:true,
     fields:{notes:'keep'}
   },
   [String(duplicateItem.row.sourceRow)]:{action:'ignore',fields:{}}

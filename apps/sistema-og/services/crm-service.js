@@ -46,7 +46,7 @@
   function normalizeLead(lead = {}) {
     return {
       ...lead,
-      id: lead.id || `LEAD-${Date.now().toString(36).toUpperCase()}`,
+      id: lead.id || createLeadId(),
       empresa: clean(lead.empresa || lead.nome),
       nome: clean(lead.nome),
       telefone: digits(lead.telefone),
@@ -88,8 +88,39 @@
     };
   }
 
-  // Deterministic identity comparison only; a match requires user review, never overwrite.
-  const phoneIdentity = value => { const key = digits(value); return key.length > 11 && key.startsWith('55') ? key.slice(2) : key; };
+  // Comparison keys never rewrite the stored address/number. E-mail comparison is
+  // case-insensitive, but punctuation and provider aliases remain distinct.
+  const emailIdentity = value => {
+    const key = clean(value).toLowerCase();
+    return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(key) ? key : '';
+  };
+  const brazilDdds = new Set('11 12 13 14 15 16 17 18 19 21 22 24 27 28 31 32 33 34 35 37 38 41 42 43 44 45 46 47 48 49 51 53 54 55 61 62 63 64 65 66 67 68 69 71 73 74 75 77 79 81 82 83 84 85 86 87 88 89 91 92 93 94 95 96 97 98 99'.split(' '));
+  const isBrazilNationalPhone = key => brazilDdds.has(key.slice(0, 2)) &&
+    ((key.length === 10 && /^[2-5]\d{7}$/.test(key.slice(2))) ||
+     (key.length === 11 && /^9\d{8}$/.test(key.slice(2))));
+  const phoneIdentity = value => {
+    const key = digits(value), national = key.slice(2);
+    return (key.length === 12 || key.length === 13) && key.startsWith('55') && isBrazilNationalPhone(national) ? national : key;
+  };
+  const documentIdentity = (value, length) => { const key = digits(value); return key.length === length ? key : ''; };
+  const leadPhoneIdentities = lead => [...new Set([lead?.telefone, ...(Array.isArray(lead?.additionalPhones) ? lead.additionalPhones.map(item => typeof item === 'string' ? item : item?.phone) : [])].map(phoneIdentity).filter(Boolean))];
+  let generatedIdSequence = 0;
+  function createLeadId(leads = [], options = {}) {
+    const existing = new Set(leads.map(lead => clean(lead?.id)));
+    if (typeof options.idFactory === 'function') {
+      const id = clean(options.idFactory());
+      if (!id || existing.has(id)) throw new Error('ID de cliente ausente ou já utilizado. Nenhum registro foi gravado.');
+      return id;
+    }
+    const prefix = clean(options.prefix) || 'LEAD';
+    const time = new Date(options.now || Date.now()).getTime().toString(36).toUpperCase();
+    let id;
+    do {
+      const entropy = typeof globalThis.crypto?.randomUUID === 'function' ? globalThis.crypto.randomUUID() : (++generatedIdSequence).toString(36).toUpperCase();
+      id = `${prefix}-${time}-${entropy}`;
+    } while (existing.has(id));
+    return id;
+  }
   const domainIdentity = value => {
     if (!clean(value)) return '';
     try { return new URL(/^https?:\/\//i.test(clean(value)) ? clean(value) : 'https://' + clean(value)).hostname.toLowerCase().replace(/^www\./, ''); }
@@ -99,21 +130,64 @@
   function findPossibleDuplicates(leads, prospect) {
     const companyKey = comparable(prospect.empresa);
     const phoneKey = phoneIdentity(prospect.telefone);
-    const emailKey = clean(prospect.email).toLowerCase();
+    const emailKey = emailIdentity(prospect.email);
     const domainKey = domainIdentity(prospect.website || prospect.site);
     const idKey = clean(prospect.id);
-    const cnpjKey = digits(prospect.cnpj);
+    const cnpjKey = documentIdentity(prospect.cnpj, 14);
+    const cpfKey = documentIdentity(prospect.cpf, 11);
     const codeKey = comparable(prospect.internalCode || prospect.codigo);
     return (leads || []).filter(item => {
       const lead = normalizeLead(item);
       return (idKey && clean(lead.id) === idKey) ||
-        (phoneKey && [lead.telefone, ...lead.additionalPhones.map(item => item.phone)].some(value => phoneIdentity(value) === phoneKey)) ||
-        (emailKey && clean(lead.email).toLowerCase() === emailKey) ||
+        (phoneKey && leadPhoneIdentities(lead).includes(phoneKey)) ||
+        (emailKey && emailIdentity(lead.email) === emailKey) ||
         (domainKey && domainIdentity(lead.website || lead.site) === domainKey) ||
-        (cnpjKey && digits(lead.cnpj) === cnpjKey) ||
+        (cnpjKey && documentIdentity(lead.cnpj, 14) === cnpjKey) ||
+        (cpfKey && documentIdentity(lead.cpf, 11) === cpfKey) ||
         (codeKey && comparable(lead.internalCode) === codeKey) ||
         (companyKey && comparable(lead.empresa) === companyKey);
     });
+  }
+
+  // A possible duplicate is a review candidate, not permission to write. Quote
+  // linking additionally requires every supplied identity to agree with one lead.
+  function resolveClientIdentity(leads = [], client = {}) {
+    const result = (status, candidateIds = [], reason = '', lead = null) => ({ status, lead, candidateIds, reason });
+    const ids = [...new Set([client.clientId, client.leadId].map(clean).filter(Boolean))];
+    if (ids.length > 1) return result('CONFLICT', ids, 'Identificadores de cliente incompatíveis.');
+    const companyIdentity = value => clean(value).replace(/\s+/g, ' ').toLocaleLowerCase('pt-BR');
+    const company = companyIdentity(client.empresa || client.company || client.clientCompany);
+    const definitions = [
+      ['Código OG', comparable(client.internalCode || client.codigo), lead => comparable(lead.internalCode || lead.codigo)],
+      ['CNPJ', documentIdentity(client.cnpj, 14), lead => [documentIdentity(lead.cnpj, 14)]],
+      ['CPF', documentIdentity(client.cpf, 11), lead => [documentIdentity(lead.cpf, 11)]],
+      ['Telefone', phoneIdentity(client.telefone || client.phone), lead => leadPhoneIdentities(lead)],
+      ['E-mail', emailIdentity(client.email), lead => emailIdentity(lead.email)]
+    ].filter(([, key]) => key).map(([label, key, read]) => [label, key, lead => { const values = read(lead); return (Array.isArray(values) ? values : [values]).filter(Boolean); }]);
+    const namesMatch = lead => [lead.empresa, lead.legalName, lead.razaoSocial, lead.nomeFantasia, !lead.empresa && lead.nome]
+      .some(name => company && companyIdentity(name) === company);
+    let candidates = [];
+    if (ids.length) {
+      candidates = leads.filter(lead => clean(lead.id) === ids[0]);
+      if (!candidates.length) return result('NONE', ids, 'Cliente identificado não existe no CRM atual.');
+    } else {
+      candidates = leads.filter(lead => definitions.some(([, key, read]) => read(lead).includes(key)));
+      if (!candidates.length) {
+        candidates = leads.filter(namesMatch);
+        if (candidates.length > 1) return result('AMBIGUOUS', candidates.map(lead => lead.id), 'Há empresas homônimas; escolha o ID correto.');
+      }
+    }
+    if (!candidates.length) return result('NONE', [], 'Nenhum cliente identificado.');
+    if (candidates.length > 1) return result(ids.length ? 'AMBIGUOUS' : 'CONFLICT', candidates.map(lead => lead.id), 'Mais de uma identidade corresponde aos dados informados.');
+    const lead = candidates[0];
+    if (company && !namesMatch(lead)) return result('CONFLICT', [lead.id], 'Empresa exibida não corresponde ao cliente identificado.');
+    for (const [label, key, read] of definitions) {
+      if (read(lead).length && !read(lead).includes(key)) return result('CONFLICT', [lead.id], `${label} não corresponde ao cliente identificado.`);
+      const others = leads.filter(item => clean(item.id) !== clean(lead.id) && read(item).includes(key));
+      const explicitlySelectedSharedContact = ids.length === 1 && ['Telefone', 'E-mail'].includes(label) && read(lead).includes(key);
+      if (others.length && !explicitlySelectedSharedContact) return result('CONFLICT', [lead.id, ...others.map(item => item.id)], `${label} também identifica outra empresa.`);
+    }
+    return result('MATCH', [lead.id], 'Identidade canônica consistente.', lead);
   }
 
   function createProspect(input, options = {}) {
@@ -121,7 +195,7 @@
     if (!empresa) throw new Error('Empresa é obrigatória');
     const now = options.now || new Date().toISOString();
     return normalizeLead({
-      id: options.id || `LEAD-${Date.now().toString(36).toUpperCase()}`,
+      id: options.id || createLeadId(options.leads || [], { now }),
       empresa,
       nome: clean(input.nome),
       telefone: digits(input.telefone),
@@ -216,5 +290,5 @@
     return (leads || []).find(lead => String(lead.id) === String(id)) || null;
   }
 
-  return { normalizeLead, findPossibleDuplicates, createProspect, getLeadById, searchableText, matchesSearch, findInternalCodeConflict, updateLeadProfile, diffProfile };
+  return { normalizeLead, findPossibleDuplicates, createProspect, getLeadById, searchableText, matchesSearch, findInternalCodeConflict, updateLeadProfile, diffProfile, emailIdentity, phoneIdentity, createLeadId, resolveClientIdentity };
 }));
