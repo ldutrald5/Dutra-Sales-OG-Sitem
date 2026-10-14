@@ -32,6 +32,8 @@ Fechar o ciclo depois do ganho da venda sem criar base paralela:
 
 ## Frentes estruturais permanentes
 
+- Arena opcional (PR #118): integracao local e testes Python preparados; merge aguarda checks/auditoria npm e garantia de que nao acionara deploy. Validacao de `/arena` no Claude Code real fica separada e depende de orcamento autorizado. Evidencias: `docs/audits/2026-10-14-arena-validation.md`.
+
 - Sincronizar release, GitHub e Railway com commit identificável.
 - Preservar volume/dados e melhorar backup/restauração.
 - Fortalecer autenticação/permissões antes de uso multiusuário amplo.

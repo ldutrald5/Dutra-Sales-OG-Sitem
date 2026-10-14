@@ -1,5 +1,16 @@
 # DUTRA OS — AI Handoff
 
+## Handoff Arena - PR #118 (2026-10-14)
+
+Leia `docs/CHATGPT_ARENA_WORKFLOW.md`, story `docs/stories/ARENA-01-integracao-segura.md` e `docs/audits/2026-10-14-arena-validation.md`.
+Arena e opcional para Claude Code; no ChatGPT usar somente metodologia de revisao.
+Nao disparar torneio por insatisfacao, mencao ou integracao. Mostrar plano/custo e obter confirmacao de orcamento antes de iniciar.
+Registrar teto monetario numerico, story e ledger; verificar/reservar custo antes de cada wave/retry/final. Hard stop sem saldo verificavel. CLI nao mede cobranca; custo desconhecido exige limite externo efetivo antes do dispatch.
+Python: `python -m unittest discover -s .claude/tests -v`; simula agentes, nao comprova `/arena` real nem isolamento de modelos.
+Somente orquestrador altera estado local confiavel; prompts nao sao sandbox.
+Nao fazer merge enquanto auditoria de dependencias/checks estiverem falhando ou merge puder disparar deploy Railway, proibido nesta entrega.
+Nao executar auditoria live com escrita, deploy ou torneio para "concluir" este PR.
+
 Este arquivo existe para que qualquer nova IA, agente ou desenvolvedor consiga continuar o projeto sem reconstruir sua história a partir de chats.
 
 ## Boot obrigatório

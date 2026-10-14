@@ -1,5 +1,11 @@
 # Entregas existentes
 
+## ARENA-01 - Implementacao local validada (2026-10-14)
+
+Skill MIT adaptada, suite Python isolada do restante de `.claude`, politica nos briefs e CI Python.
+30 testes Python e suite Node/gates locais aprovados; dependencias npm e risco de autodeploy impedem concluir merge.
+Esta entrada registra o incremento validado, nao o aceite completo da story. Evidencias: `docs/audits/2026-10-14-arena-validation.md`.
+
 Este registro descreve capacidades já presentes no código. Não substitui testes de aceite nem implica que os módulos estejam completos.
 
 | Referência | Entrega comprovável | Evidência principal |

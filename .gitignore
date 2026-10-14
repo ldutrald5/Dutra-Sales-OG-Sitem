@@ -44,3 +44,7 @@ Thumbs.db
 *.bak
 *.orig
 *~
+
+# Arena tournament artifacts (potentially sensitive task data)
+.arena/
+**/.arena/

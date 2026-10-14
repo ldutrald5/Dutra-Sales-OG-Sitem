@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -8,14 +8,14 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 |---|---:|
 | anti_pattern | 12 |
 | cycle | 9 |
-| decision | 12 |
+| decision | 13 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 9 |
 | knowledge | 9 |
 | open_question | 5 |
 | pattern | 17 |
-| source | 18 |
+| source | 19 |
 
 ## Active decisions
 
@@ -43,6 +43,8 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
   All prioritization surfaces must delegate to the same deterministic score contract, and all next-action flows must use the same central mutation/normalization contracts instead of reimplementing weights, fallbacks or context rules per UI.
 - **DEC-INTEL-COMPILER-001 — Extend Builder Brain as the DUTRA operational knowledge layer** (active/high)
   The existing Builder Brain remains the canonical durable evidence/decision layer; domain Skills stay thin and route to scoped context, stable domain guidance lives in existing knowledge/docs, dynamic account facts stay in CRM/runtime, and material bugs enter an incident collection with regression linkage.
+- **DEC-ARENA-118-001 — Arena is optional, explicitly budgeted and proposal-only** (active/high)
+  Keep Arena as a local Claude Code tool and ChatGPT review method, without product data ownership. Explicit request, approved numeric spending ceiling and story precede runs; reserve verifiable maximum cost before every wave/retry/final and stop without capacity. Sanitized references only; judges do not execute submissions; prompts do not certify a sandbox. Merge requires green checks and no forbidden autodeploy.
 
 ## Open questions
 
@@ -127,6 +129,8 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-ARENA-118-001 — Arena PR 118 local validation and upstream provenance** (validated/high)
+  Upstream MIT blobs verified against df07b8e; local Python and Node checks passed; dependency audit and possible main autodeploy block merge.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
   Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
 - **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
@@ -145,8 +149,6 @@ Generated from 95 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
 - **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
   OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
-- **SRC-CIC01-001 — CIC-01 Next Best Action + Score Explicável closeout** (implemented/high)
-  CIC-01 consolidated explainable prioritization and next-action context around shared deterministic contracts, then passed final audit before closeout on PR #23 without introducing a second score, queue or agenda.
 
 ## Retrieval workflow
 

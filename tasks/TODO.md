@@ -1,5 +1,12 @@
 # Backlog do Sistema OG
 
+## ARENA-01 - Integracao segura da Arena
+
+- **Status:** bloqueada para merge; implementacao local validada.
+- **Story:** `docs/stories/ARENA-01-integracao-segura.md`.
+- **Bloqueios:** auditoria npm em dependencias existentes, checks remotos e risco de autodeploy Railway ao merge em main.
+- **Evidencia:** `docs/audits/2026-10-14-arena-validation.md`.
+
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.
 
 ## TASK-001 — Mesa de Vendas: estrutura base
