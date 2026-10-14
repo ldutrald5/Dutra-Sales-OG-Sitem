@@ -1,6 +1,6 @@
-"""Tests for skills/arena/bracket.py. Standard library only.
+"""Tests for .claude/skills/arena/bracket.py. Standard library only.
 
-    python3 -m unittest discover -s tests -v
+    python3 -m unittest discover -s .claude/tests -v
 
 The headline test drives a full 100-agent tournament through the real command
 line with random winners and checks it ends with exactly one survivor.
@@ -17,8 +17,8 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
-SKILL = os.path.join(REPO, "skills", "arena")
+CLAUDE_ROOT = os.path.dirname(HERE)
+SKILL = os.path.join(CLAUDE_ROOT, "skills", "arena")
 BRACKET = os.path.join(SKILL, "bracket.py")
 sys.path.insert(0, SKILL)
 
@@ -389,15 +389,19 @@ class Guards(TempDir):
     def test_templates_are_all_in_skill_md(self):
         self.assertEqual(sorted(B.load_templates()), sorted(B.TEMPLATES))
 
-    def test_no_em_dashes_anywhere(self):
-        for root, dirs, files in os.walk(REPO):
+    def test_no_em_dashes_in_arena_sources(self):
+        # Upstream style applies to Arena, not unrelated project skills/docs.
+        paths = [os.path.abspath(__file__)]
+        for root, dirs, files in os.walk(SKILL):
             dirs[:] = [x for x in dirs if x not in (".git", "__pycache__")]
             for name in files:
-                path = os.path.join(root, name)
-                with open(path, encoding="utf-8", errors="ignore") as fh:
-                    text = fh.read()
-                self.assertNotIn(EM_DASH, text, "em dash in %s" % os.path.relpath(path, REPO))
-                self.assertNotIn(EN_DASH, text, "en dash in %s" % os.path.relpath(path, REPO))
+                if name.endswith((".py", ".md", ".json")):
+                    paths.append(os.path.join(root, name))
+        for path in paths:
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+            self.assertNotIn(EM_DASH, text, "em dash in %s" % path)
+            self.assertNotIn(EN_DASH, text, "en dash in %s" % path)
 
 
 if __name__ == "__main__":

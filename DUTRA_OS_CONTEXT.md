@@ -1,5 +1,12 @@
 # DUTRA OS — Contexto Canônico
 
+## Arena como ferramenta opcional de engenharia
+
+A integracao do PR #118 mantem Arena em `.claude/skills/arena/`, com aviso MIT original.
+Ela nao adiciona servico ao produto, entidade comercial ou segunda memoria. Claude Code pode usar o torneio mediante solicitacao explicita e confirmacao de custo; ChatGPT usa a metodologia de revisao sem alegar execucao nativa.
+Participantes recebem somente contexto sanitizado e propoem mudancas sem aplicar, enviar ou publicar. Vencedor exige revisao e testes; prompts nao substituem controle de permissoes.
+Contrato, proveniencia e limites: `docs/CHATGPT_ARENA_WORKFLOW.md`. Validacoes/bloqueios do pacote: `docs/audits/2026-10-14-arena-validation.md`. Nao implica merge, deploy ou certificacao de Claude Code.
+
 > Fonte de verdade para humanos e IAs que trabalham neste repositório.
 > Antes de alterar o produto, leia também `AI_HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md` e `AGENTS.md`.
 
