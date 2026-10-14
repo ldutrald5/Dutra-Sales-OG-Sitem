@@ -73,3 +73,15 @@ Parecer independente @qa apos correcoes: PASS limitado a revisao estatica da int
 Publicar ajustes apenas na branch do PR, atualizar descricao e manter rascunho enquanto bloqueado. Sem merge, deploy ou release. Rollback: reverter commits da integracao; nao remover automaticamente artefatos privados `.arena/` ou dados do produto. Proximo passo: corrigir dependencias em PR dedicado, obter checks verdes e verificar mecanismo que evite autodeploy antes de merge. Certificar Claude Code real separadamente com task sanitizado e orcamento autorizado.
 
 Artefatos locais de execucao ficam fora do commit: `arena-node-validation.log`, `arena-npm-audit.json` e `arena-audit-gate.log` no diretorio pai do checkout. `npm audit --audit-level=high` terminou exit=1. O PR/CI e a tabela acima sao as evidencias compartilhadas; logs locais sao complementares.
+
+## Evidencia GitHub publicada
+
+Revisao de codigo publicada: `acf83dbc554e4ab4dd1fef9eecfa221836360de0`; commits documentais subsequentes preservam essa revisao de codigo. PR #118 atualizado, corpo relido e rascunho mantido. Push sem force exclusivamente na branch do PR.
+
+- [Arena Python CI / arena-tests](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/38638071911/job/116106250896): completed / success.
+- [Package 00R CI / verify](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/38638072048/job/116106252908): completed / failure. Checkout, instalacao, integridade lockfile, validate, brain e seguranca passaram. Unica etapa falha: npm audit --audit-level=high; release gate isolado seguinte skipped. Nao declarar CI totalmente verde.
+- Python local reexecutado apos correcoes finais: 30 PASS, 13.600s; brain 97 registros PASS e intelligence PASS.
+- Revisao independente @qa: PASS limitado apos corrigir teto numerico de custo/hard stop por wave/retry e instrucao contraditoria do juiz. Nao certifica Claude Code/modelos reais nem remove bloqueios de merge.
+- Varredura de linhas adicionadas versus origin/main por cinco padroes de credenciais (private key, GitHub token, AWS access key, sb_secret >=20 e sk- >=32): PASS, sem imprimir valores. Nao constitui auditoria exaustiva de segredos.
+
+Nenhum merge, deploy, configuracao Railway ou mudanca de producao. Bloqueios npm audit e potencial autodeploy de main continuam ativos.

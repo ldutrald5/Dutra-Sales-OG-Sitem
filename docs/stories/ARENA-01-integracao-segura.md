@@ -11,7 +11,7 @@ Nao inclui torneio real, deploy, banco ou mudancas comerciais.
 - [x] Alinhar skill e prompts com invocacao explicita, custo e limites DUTRA.
 - [x] Executar testes Python, lint, suite Node, brain, seguranca e gate de release.
 - [x] Registrar resultados reais e atualizar contexto/handoff/auditoria.
-- [ ] Atualizar PR e verificar checks do commit publicado.
+- [x] Atualizar PR e verificar checks do commit publicado (Arena PASS; verify FAIL apenas npm audit; rascunho mantido).
 - [ ] Merge apenas com validacao completa e ausencia de deploy automatico.
 
 ## File list
