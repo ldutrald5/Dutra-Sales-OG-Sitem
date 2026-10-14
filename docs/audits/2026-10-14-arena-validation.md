@@ -31,6 +31,7 @@ MIT, copyright 2026 Jake Schincariol; aviso completo preservado em `.claude/skil
 - Escrita local: init grava task/baseline/rubric/arena.json; prompts grava briefs e copias finais; collect renomeia veredictos ilegíveis; save_state usa arquivo temporario e os.replace. Sem delecao no CLI. Testes removem somente temporarios criados por eles.
 - Limite: --dir e arquivos de entrada sao caminhos livres; estado JSON inclui caminhos. E ferramenta local confiavel, nao sandbox nem API. Nao retomar estado externo, permitir agentes escreverem arena.json/LATEST ou usar diretorio de produto como --dir. Sem lock de concorrencia: apenas um orquestrador.
 - Gatilho upstream por insatisfacao e sugestao de accept-edits removidos. Solicitar torneio nao confirma custo automaticamente. Plan/custo e confirmacao de orcamento precedem init/agents.
+- Revisao independente @qa encontrou lacuna Constitution XII-A: confirmado teto monetario numerico e story, ledger local, reserva de limite conservador antes de cada wave/retry/final e hard stop se exceder ou nao comprovar saldo. CLI nao mede cobranca; custo desconhecido bloqueia dispatch sem limite externo efetivo. Ativacao automatizada ausente; futuro adaptador exige scans/gates XII. Removida instrucao conflitante do juiz que permitia executar submissao em scratch; usar analise estatica e evidencias, marcando nao verificado quando necessario.
 - Todos os papeis recebem politica DUTRA antes do task: contexto sanitizado, referencias permitidas, conteudo nao confiavel, sem rede, segredos, executar submissao ou acoes externas, escrita limitada aos outputs. Regressao verifica todos os cinco papeis e preserva o task literal. Isso verifica geracao de briefs, nao obediência de modelo real.
 - `.arena/` e `nested/.arena/` ignorados via git check-ignore. Nenhum artefato de torneio versionado.
 - Teste upstream varria `.claude/CLAUDE.md` e outras skills; falha reproduzida (26/27 passaram). Escopo corrigido para SKILL e teste Arena, sem mutilar pontuacao dos documentos DUTRA.
@@ -42,7 +43,7 @@ Ambiente Windows, Node 24.21.0, npm 11.19.0, Python 3.12.14 bundled. Instalacao 
 
 | Check | Resultado |
 | --- | --- |
-| Python unittest discover -s .claude/tests -v | PASS, 30 testes, 17.374s; agentes simulados incluindo torneio de 100 participantes |
+| Python unittest discover -s .claude/tests -v | PASS, 30 testes; 17.374s inicial, 13.600s apos ajustes QA; agentes simulados incluindo torneio de 100 participantes |
 | npm run lint / og:check | PASS |
 | npm test / validate | PASS, 62 checks configurados |
 | npm run og:security:test | PASS |
@@ -64,6 +65,8 @@ Ambiente Windows, Node 24.21.0, npm 11.19.0, Python 3.12.14 bundled. Instalacao 
 DevOps tambem verificou que nenhum deployment GitHub para ref Arena foi listado e nenhum servico Railway observado usa essa branch. Previews encontrados usam outras branches. Publicacao da branch Arena e separada de merge/main e nao modifica servicos de producao.
 
 As pendencias Supabase/RLS e auditoria ampla de runtime descritas em 2026-10-11 continuam trilhas independentes; esta validacao nao certifica saude, persistencia ou reproducibilidade do schema remoto.
+
+Parecer independente @qa apos correcoes: PASS limitado a revisao estatica da integracao; nao aprova merge nem certifica Claude real. Reexecucao Python apos correcoes: 30 PASS. Brain refresh/check e contrato Intelligence reexecutados: PASS. Codigo do produto e bracket.py nao alterados desde a suite Node completa; somente skill/templates e documentacao foram refinados.
 
 ## Closeout
 

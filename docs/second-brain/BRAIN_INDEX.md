@@ -44,7 +44,7 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
 - **DEC-INTEL-COMPILER-001 — Extend Builder Brain as the DUTRA operational knowledge layer** (active/high)
   The existing Builder Brain remains the canonical durable evidence/decision layer; domain Skills stay thin and route to scoped context, stable domain guidance lives in existing knowledge/docs, dynamic account facts stay in CRM/runtime, and material bugs enter an incident collection with regression linkage.
 - **DEC-ARENA-118-001 — Arena is optional, explicitly budgeted and proposal-only** (active/high)
-  Keep Arena as a local Claude Code tool and ChatGPT review method, without product data ownership. Explicit request and budget confirmation precede runs; sanitized references only; prompt restrictions do not certify a sandbox. Merge requires green checks and no forbidden autodeploy.
+  Keep Arena as a local Claude Code tool and ChatGPT review method, without product data ownership. Explicit request, approved numeric spending ceiling and story precede runs; reserve verifiable maximum cost before every wave/retry/final and stop without capacity. Sanitized references only; judges do not execute submissions; prompts do not certify a sandbox. Merge requires green checks and no forbidden autodeploy.
 
 ## Open questions
 

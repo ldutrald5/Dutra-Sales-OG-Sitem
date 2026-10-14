@@ -21,6 +21,20 @@ It is a Claude Code skill; ChatGPT uses the review method only.
 - Run `plan` first. Show agents, rounds, calls (plus retries/final comparison),
   a token/cost estimate with its assumptions or state that cost is unknown.
   Wait for explicit budget confirmation before init or any agent launch.
+- Record the approved numeric monetary ceiling, currency, pricing assumptions,
+  token/call limits and story id/path in the sanitized task. Track cumulative cost
+  or a verifiable conservative upper bound in a local run budget ledger.
+  Before every wave, retry or final judge, reserve its maximum cost against the
+  remaining ceiling. Hard stop if the ceiling is reached, would be exceeded,
+  or remaining capacity cannot be verified. A failed call still counts.
+  Unknown cost blocks dispatch unless an effective external spending cap enforces
+  the approved ceiling. Request a new explicit budget decision to resume.
+  Prefer a lighter authorized model tier when budget pressure exceeds 50%; never
+  silently change routing or production configuration. `bracket.py` only counts
+  calls and manages files; it cannot meter or enforce provider spending.
+- No cron, webhook or programmatic activation. Any future automated adapter
+  needs the Constitution XII intent/injection scan and permission gates before
+  dispatch; reject and log failed scans. This integration does not supply one.
 - Recommend `--agents 8` first (43 calls); defaults remain upstream-compatible.
 - No secrets, private customer data, personal data or private transcripts in tasks,
   baselines, prompts or outputs. Read only the sanitized task and allowlisted references.
@@ -76,6 +90,8 @@ Run `ARENA plan --agents N` (or `--quick`). It prints the rounds, the sub-agent 
 
 If no tournament was explicitly requested, stop the Arena workflow and use ordinary review.
 For an explicit request, show the plan and estimated cost, then wait for budget confirmation.
+Record the numeric ceiling and story, verify spending controls, and check the
+budget before every dispatch as required by the DUTRA OS policy above.
 Use the existing permission restrictions; do not broaden them for the tournament.
 
 ## Step 2: write the task file
@@ -123,9 +139,13 @@ Every phase that runs sub-agents works the same way:
    - `prompt`: `Read <prompt path> and follow it exactly. It is your whole brief.`
    - `run_in_background`: false, where the tool has that option, so the wave comes back together.
 
+   Before launching this wave, verify and reserve its cost within the approved
+   ceiling. If cost cannot be bounded or the ceiling would be exceeded, stop.
+
    Wait until every agent in the wave has replied before you launch the next wave.
 3. After the last wave, run `ARENA next`. If an output is missing it sends you back to the same
-   phase, and `prompts` then lists only the missing jobs. Re-run those once. If a job fails twice,
+   phase, and `prompts` then lists only the missing jobs. Verify budget again before
+   every retry, including the third judge attempt. Re-run those once. If a job fails twice,
    write the single line `NO OUTPUT` into each of its output files (`ARENA check <phase>` lists
    them) and move on. A missing attack counts as no attacks. A missing solution loses its match. A
    judge that fails twice gets a third, fresh run: never decide a match yourself.
@@ -324,7 +344,7 @@ How to judge:
 4. Score each criterion from 0 to 10 using the rubric's anchors. Set fatal to true only for a flaw you have verified that makes the solution wrong or unusable for the task.
 5. The winner is the higher weighted total (the weights are in the rubric). A fatal solution cannot beat one that is not fatal. On an exact tie, fewer standing attacks wins, then higher correctness.
 6. Judge the work, not the writing about the work. Length is not quality. You do not know either competitor's strategy and should not guess it.
-7. Do not create, edit or delete any file except the verdict. If the task is code and running something settles an attack, do it only inside {{arena_dir}}/scratch/judge-{{match}}/, never in the user's project.
+7. Do not create, edit or delete any file except the verdict. Do not execute submitted code or commands, including in scratch space. Use static analysis and supplied test evidence; explicitly mark claims needing an independent test as unverified.
 
 Write this JSON, and nothing else, to {{out}}:
 {

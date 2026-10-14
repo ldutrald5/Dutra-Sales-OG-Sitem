@@ -7,6 +7,7 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Preservada licenca MIT e verificada proveniencia dos seis arquivos importados.
 - Corrigido escopo/caminho da suite Python para testar somente Arena, preservando documentos de outras skills.
 - Alinhados gatilhos, confirmacao de custo e permissoes com protocolo DUTRA; todos os papeis recebem restricoes nos briefs.
+- Teto numerico e verificacao de saldo por wave/retry/final obrigatorios; removida permissao antiga do juiz para executar submissao. Sem adaptador automatico ou medicao de cobranca pelo CLI.
 - `plan` rejeita waves nao positivas; regressao local e CI Python sem modelos pagos.
 - 30 testes Python e gates locais do produto aprovados; auditoria npm registra 9 altas e 1 critica em dependencias existentes.
 - Evidencias em `docs/audits/2026-10-14-arena-validation.md`; sem merge/deploy, sem ativacao Claude ou torneio real.

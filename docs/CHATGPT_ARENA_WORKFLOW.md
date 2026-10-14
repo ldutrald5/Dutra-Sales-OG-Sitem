@@ -16,6 +16,8 @@ Origem: [Jakeschincariol/arena-skill](https://github.com/Jakeschincariol/arena-s
 
 - Invocação **somente sob solicitação** do usuário; nunca iniciar torneios automaticamente.
 - Antes de rodar, executar `plan`, mostrar custo estimado com premissas (ou custo desconhecido) e pedir confirmação do orçamento. Para uso econômico, começar com `--agents 8` (43 chamadas); 16 agentes: 91 chamadas; 100 agentes: 595 chamadas. Baseline exige mais uma chamada final e falhas podem exigir retries. Não confundir chamadas com tokens cobrados. Menção à Arena, integração e pedido de retry não autorizam torneio.
+- Constitution XII: registrar teto monetário numérico/currency, premissas de preços, limites de tokens/chamadas e story no task sanitizado. Acompanhar custo acumulado ou limite superior conservador verificável em ledger local; reservar custo máximo antes de cada wave, retry e juiz final. Parar se atingir/exceder teto ou não puder verificar saldo. Falhas também consomem orçamento. Custo desconhecido bloqueia dispatch sem limite externo efetivo de gasto. `bracket.py` não mede nem limita cobrança do provedor.
+- Não há ativação por cron/webhook/programa nesta entrega. Futuro adaptador automatizado exige scans de intenção/injeção e gates de permissão da Constitution XII antes do dispatch; rejeitar/logar falhas.
 - Para problemas simples, preferir revisão direta ou 2–3 hipóteses concorrentes sem criar torneio.
 - Não incluir tokens, chaves, segredos, transcrições privadas ou dados pessoais no task file `.arena/`.
 - Os participantes propõem soluções; não executam deploys, migrações, escrita no CRM ou ações externas.
