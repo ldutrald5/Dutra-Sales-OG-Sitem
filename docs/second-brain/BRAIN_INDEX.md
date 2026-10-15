@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 99 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -8,14 +8,14 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
 |---|---:|
 | anti_pattern | 12 |
 | cycle | 9 |
-| decision | 13 |
+| decision | 14 |
 | experiment | 1 |
 | idea | 3 |
 | incident | 9 |
 | knowledge | 9 |
 | open_question | 5 |
 | pattern | 17 |
-| source | 19 |
+| source | 20 |
 
 ## Active decisions
 
@@ -45,6 +45,8 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   The existing Builder Brain remains the canonical durable evidence/decision layer; domain Skills stay thin and route to scoped context, stable domain guidance lives in existing knowledge/docs, dynamic account facts stay in CRM/runtime, and material bugs enter an incident collection with regression linkage.
 - **DEC-SEC-DEPS-20261015-001 — Apply official dependency patches without hiding residual findings** (active/high)
   Keep AIOX5.4.1, Wrangler4.135.0 and original audit gate. Pin Miniflare Sharp0.35.5 and lock Handlebars4.7.10; keep unpatched braces advisory blocking merge rather than downgrade blindly, override incompatible majors or vendor an unaudited parser.
+- **DEC-SEC-GLOB-02-001 — Replace observed sync glob contract instead of forking braces** (active/high)
+  Use an explicitly named local DUTRA sync adapter over existing glob10.5.0 and scoped Chokidar4.0.3, preserving tested AIOX5.4.1 consumers. Audit both dependency trees; detect upstream installer rebootstrap drift. No universal fast-glob API or global AIOX security claim.
 
 ## Open questions
 
@@ -131,6 +133,8 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-SEC-DEPS-20261015-001 — Dependency audit and official patch validation** (validated/high)
   Main5255dc5 audit10 (9high1critical); official compatible Handlebars4.7.10 and Miniflare Sharp0.35.5 patches reduce to6high0critical. Native image/AST/renderer/runtime regressions and63 validation checks pass; braces has no published patch.
+- **SRC-SEC-GLOB-02-001 — AIOX consumer inventory and differential glob validation** (validated/high)
+  AIOX5.4.1 uses sync glob in four consumers and directory-only Chokidar watcher.33 baseline cases, real consumers/watcher and root/nested clean install/audits pass locally after replacing the vulnerable dependency chain.
 - **SRC-INTEL-RECOVERY-001 — DUTRA OS recovered conversation knowledge audit** (validated/medium)
   Recovered master conversation and technical handoff preserve historical decisions, bugs, playbooks and prior V3 migration context; they are evidence inputs but do not override current tested main or validated OG sources.
 - **SRC-INTEL-MAIN-001 — Live GitHub main audit for Intelligence Compiler** (validated/high)
@@ -147,8 +151,6 @@ Generated from 97 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Package 05R merged through PR #9 after final CI, establishing a dry-run-first, human-approved and checkpointed path from legacy lead identity to canonical Company/Contact, with stale-plan revalidation and selective rollback safeguards.
 - **SRC-PKG06R-001 — Package 06R secure HTTPS preview runtime** (implemented/high)
   Package 06R published a protected Railway HTTPS preview and verified the live service, domain, healthcheck and deployed main commit while explicitly retaining filesystem persistence as non-canonical preview storage.
-- **SRC-OG18-001 — OG-18 smart Leads & Transcrição implementation** (implemented/high)
-  OG-18 adds a deterministic smart lead queue over the existing state.leads source of truth, with separate conversation state, commercial status, origin and priority dimensions plus responsive filtering and client-sheet editing.
 
 ## Retrieval workflow
 

@@ -1,5 +1,11 @@
 # Backlog do Sistema OG
 
+## SEC-GLOB-02 - Substituicao da cadeia braces
+
+- **Status:** em andamento, validacao final/CI da branch sobre PR119.
+- **Story:** `docs/stories/SEC-GLOB-02-substituicao-cadeia-braces.md`.
+- Audits locais root/nested zero; nao altera status da main/PR119 automaticamente. Sem merge/deploy.
+
 ## SEC-DEPS-01 - Remediar dependencias que bloqueiam CI/Arena
 
 - **Status:** bloqueada para aceite integral/merge pela cadeia braces sem patch oficial; patches disponiveis implementados para revisao.

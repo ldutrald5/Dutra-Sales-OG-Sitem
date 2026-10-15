@@ -1,0 +1,46 @@
+name: AIOX glob compatibility
+on:
+  pull_request:
+    paths:
+      - 'package*.json'
+      - '.npmrc'
+      - '.aiox-core/**'
+      - 'tools/fast-glob-compat/**'
+      - 'scripts/test_glob_compat.mjs'
+      - 'scripts/fixtures/glob-compat-baseline.json'
+      - '.github/workflows/glob-compat-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'package*.json'
+      - '.npmrc'
+      - '.aiox-core/**'
+      - 'tools/fast-glob-compat/**'
+      - 'scripts/test_glob_compat.mjs'
+      - 'scripts/fixtures/glob-compat-baseline.json'
+      - '.github/workflows/glob-compat-ci.yml'
+permissions:
+  contents: read
+jobs:
+  glob-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            .aiox-core/package-lock.json
+      - run: npm ci
+      - run: npm ci --ignore-scripts
+        working-directory: .aiox-core
+      - run: git diff --exit-code -- package-lock.json .aiox-core/package-lock.json
+      - run: npm run og:glob-compat:test
+        env:
+          DUTRA_REQUIRE_STANDALONE: '1'
+      - run: npm audit --audit-level=high
+      - run: npm audit --audit-level=high
+        working-directory: .aiox-core

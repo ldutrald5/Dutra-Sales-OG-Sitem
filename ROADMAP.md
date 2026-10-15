@@ -32,6 +32,8 @@ Fechar o ciclo depois do ganho da venda sem criar base paralela:
 
 ## Frentes estruturais permanentes
 
+- SEC-GLOB-02: substituicao da cadeia vulneravel de ferramentas validada em branch; exigir CI e manter manifestos locais apos rebootstrap AIOX. Nenhum merge/deploy autorizado.
+
 - Sincronizar release, GitHub e Railway com commit identificável.
 - Preservar volume/dados e melhorar backup/restauração.
 - Fortalecer autenticação/permissões antes de uso multiusuário amplo.

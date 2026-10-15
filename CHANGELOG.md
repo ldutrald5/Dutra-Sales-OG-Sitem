@@ -2,6 +2,12 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] - SEC-GLOB-02 (2026-10-15)
+
+- Substituida cadeia braces/micromatch por adapter DUTRA sync sobre glob existente e Chokidar4 scoped no AIOX, sem mudar consumidores/produto.
+- Adicionados33casos de referencia, testes reais de consumidores/watcher/standalone e CI Linux para root/nested.
+- Audits locais root/nested retornam zero; limites e rebootstrap upstream documentados no ADR-SEC-GLOB-02. Sem merge/deploy.
+
 ## [Unreleased] - SEC-DEPS-01 (2026-10-15)
 
 - Handlebars transitivo atualizado de 4.7.9 para 4.7.10; Sharp de Miniflare atualizado de 0.35.4 para 0.35.5 por override restrito, preservando AIOX/Wrangler.
