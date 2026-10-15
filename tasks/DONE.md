@@ -1,5 +1,11 @@
 # Entregas existentes
 
+## SEC-DEPS-01 - Incremento de remediacao, ainda sem aceite integral
+
+- Patches Handlebars 4.7.10 e Sharp 0.35.5 aplicados em branch dedicada; reproduzida/rejeitada injecao AST em teste sem efeitos externos.
+- Integrados testes dos consumidores reais; nenhuma mudanca de produto ou producao.
+- Este registro nao encerra a story: audit residual braces e risco de autodeploy impedem merge. Evidencias em `docs/audits/2026-10-15-dependency-security-validation.md`.
+
 Este registro descreve capacidades já presentes no código. Não substitui testes de aceite nem implica que os módulos estejam completos.
 
 | Referência | Entrega comprovável | Evidência principal |
