@@ -1,5 +1,12 @@
 # DUTRA OS — Contexto Canônico
 
+## Dependencias de ferramentas AIOX
+
+SEC-GLOB-02 preserva AIOX5.4.1 e substitui somente a cadeia de busca/observacao
+pelos contratos testados: adapter DUTRA sync sobre glob10.5.0 e Chokidar4.0.3.
+Isso nao muda CRM, produto ou donos de dados. Alcance, reinstalacao upstream e
+limites: `docs/architecture/ADR-SEC-GLOB-02.md` e auditoria correspondente.
+
 > Fonte de verdade para humanos e IAs que trabalham neste repositório.
 > Antes de alterar o produto, leia também `AI_HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md` e `AGENTS.md`.
 

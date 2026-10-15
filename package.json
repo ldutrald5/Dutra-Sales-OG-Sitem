@@ -95,10 +95,12 @@
     "og:sales-execution:test": "node scripts/test_sales_execution_adapter.mjs && node scripts/test_sales_execution_gateway.mjs",
     "og:call-intelligence:test": "node scripts/test_call_intelligence_gateway.mjs && node scripts/test_call_intelligence_contract.mjs && node scripts/test_local_whisper_contract.mjs",
     "og:intelligence:test": "node scripts/test_intelligence_compiler_contract.mjs",
-    "og:dependency-security:test": "node scripts/test_dependency_security.mjs"
+    "og:dependency-security:test": "node scripts/test_dependency_security.mjs",
+    "og:glob-compat:test": "node scripts/test_glob_compat.mjs"
   },
   "devDependencies": {
     "aiox-core": "5.4.1",
+    "fast-glob": "file:tools/fast-glob-compat",
     "husky": "^9.1.7",
     "wrangler": "^4.135.0"
   },
@@ -110,6 +112,10 @@
     "undici": "7.30.0",
     "miniflare": {
       "sharp": "0.35.5"
+    },
+    "@aiox-squads/core": {
+      "chokidar": "4.0.3",
+      "fast-glob": "$fast-glob"
     }
   },
   "packageManager": "npm@11.19.0"

@@ -1,5 +1,10 @@
 # Entregas existentes
 
+## SEC-GLOB-02 - Evidencia local, publicacao/CI a confirmar
+
+- Adapter original, consumer/watcher tests e audits root/nested sem braces/micromatch.
+- Auditoria: `docs/audits/2026-10-15-glob-compat-validation.md`. Registro nao implica merge, deploy ou correcao de instalacoes upstream globais.
+
 ## SEC-DEPS-01 - Incremento de remediacao, ainda sem aceite integral
 
 - Patches Handlebars 4.7.10 e Sharp 0.35.5 aplicados em branch dedicada; reproduzida/rejeitada injecao AST em teste sem efeitos externos.

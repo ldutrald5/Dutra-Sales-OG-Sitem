@@ -13,7 +13,7 @@
     "commander": "^12.1.0",
     "diff": "^5.2.0",
     "execa": "^5.1.1",
-    "fast-glob": "^3.3.3",
+    "fast-glob": "file:../tools/fast-glob-compat",
     "fs-extra": "^11.3.0",
     "glob": "^10.4.4",
     "highlight.js": "^11.9.0",

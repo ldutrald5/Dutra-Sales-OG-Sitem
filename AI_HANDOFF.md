@@ -1,5 +1,14 @@
 # DUTRA OS — AI Handoff
 
+## Ferramentas glob AIOX - SEC-GLOB-02
+
+Antes de reinstalar/atualizar AIOX, ler `docs/architecture/ADR-SEC-GLOB-02.md`.
+Adapter local suporta somente o contrato sync inventariado; root/nested usam
+install-links=true e manifestos revisados. Instalador upstream pode restaurar
+dependencias antigas. Apos rebootstrap, reaplicar manifestos e executar audits
+nas duas arvores e `npm run og:glob-compat:test`. Nao confundir adapter com nova
+versao oficial fast-glob nem certificar instalacao global. Sem merge/deploy implicito.
+
 Este arquivo existe para que qualquer nova IA, agente ou desenvolvedor consiga continuar o projeto sem reconstruir sua história a partir de chats.
 
 ## Boot obrigatório

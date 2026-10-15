@@ -1,0 +1,202 @@
+{
+  "provenance": {
+    "package": "fast-glob",
+    "version": "3.3.3",
+    "purpose": "Differential expectations generated against temporary 3.3.3 baseline; no baseline dependency required at test time"
+  },
+  "snapshots": {
+    "tool-resolver-order": [
+      "a/tool.yaml",
+      "z/tool.yaml",
+      "a/deep/tool.yaml",
+      "z/deep/tool.yaml"
+    ],
+    "tool-resolver-all-yaml": [
+      "a/deep/tool.yaml",
+      "a/tool.yaml",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "entity-registry-brace-exts": [
+      "a/deep/tool.yaml",
+      "a/one.js",
+      "a/tool.yaml",
+      "a/two.mjs",
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "elicitation-story": [
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md"
+    ],
+    "enterprise-dot-unique": [
+      ".hidden.md",
+      "a/.secret.yaml",
+      "a/deep/tool.yaml",
+      "a/one.js",
+      "a/tool.yaml",
+      "a/two.mjs",
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "negative-patterns": [
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "ignore": [
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "dot-false": [
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md"
+    ],
+    "dot-true": [
+      ".hidden.md",
+      "a/.secret.yaml",
+      "a/deep/tool.yaml",
+      "a/tool.yaml",
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "absolute": [
+      "a/deep/tool.yaml",
+      "a/tool.yaml",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "cwd": [
+      "deep/tool.yaml",
+      "tool.yaml"
+    ],
+    "duplicates-order": [
+      "a/tool.yaml",
+      "z/tool.yaml",
+      "a/deep/tool.yaml",
+      "z/deep/tool.yaml"
+    ],
+    "missing-dir": [],
+    "directories": [
+      "a",
+      "a/deep",
+      "a/deep/tool.yaml",
+      "a/one.js",
+      "a/tool.yaml",
+      "a/two.mjs",
+      "docs",
+      "docs/stories",
+      "docs/stories/deep",
+      "docs/stories/deep/other.md",
+      "docs/stories/deep/story-012.md",
+      "docs/stories/story-002.md",
+      "top.md",
+      "top.yaml",
+      "z",
+      "z/deep",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "symlink-follow": [
+      "linked/deep/tool.yaml",
+      "linked/tool.yaml"
+    ],
+    "symlink-no-follow": [
+      "a/deep/tool.yaml",
+      "a/tool.yaml",
+      "top.yaml",
+      "z/deep/tool.yaml",
+      "z/tool.yaml"
+    ],
+    "real-registry:.aiox-core/development/tasks": {
+      "count": 218,
+      "sha256": "d4e43a1e15bf18ada84c0b8688136034c5762b39cc77316cf3419f9ef603d0cc"
+    },
+    "real-registry:.aiox-core/product/templates": {
+      "count": 52,
+      "sha256": "c79e9ad6ab5227db5722ae974f64ff44b908838e2c99eeb2526dfa5706bc6ffc"
+    },
+    "real-registry:.aiox-core/development/scripts": {
+      "count": 69,
+      "sha256": "03e29ca224ea4d9d4977657c3de922444c7a49268ded1e2dc02280902f506780"
+    },
+    "real-registry:.aiox-core/core": {
+      "count": 280,
+      "sha256": "a7e2fa404b81c27f60999375ed517877c8e278dd42d9b8bf4c89d663909cec4e"
+    },
+    "real-registry:.aiox-core/development/agents": {
+      "count": 22,
+      "sha256": "1044414df34945ade3ef845c829bf32583d2520381891617f3c6bb62d6e7cf95"
+    },
+    "real-registry:.aiox-core/development/checklists": {
+      "count": 5,
+      "sha256": "a6b5162d7461126cbd11ee3c061a8ff009382731c386f0f4381fe7c2fe83de4c"
+    },
+    "real-registry:.aiox-core/data": {
+      "count": 18,
+      "sha256": "213ac9c9500f323431bd2be4bce0b8ad8cc209e9e94744558e75c19d02a94e2b"
+    },
+    "real-registry:.aiox-core/development/workflows": {
+      "count": 14,
+      "sha256": "6eea87cb3f0f889b7e0c72db4ad5a749885c83cd030b024cd28e8db72477d242"
+    },
+    "real-registry:.aiox-core/core/utils": {
+      "count": 3,
+      "sha256": "f73763343ac4e74a9faa59c22275757fe8bbccf9ed7e000747a591f9ab762637"
+    },
+    "real-registry:.aiox-core/development/tools": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "real-registry:.aiox-core/infrastructure/scripts": {
+      "count": 113,
+      "sha256": "437966dd5ac06b5feee7b143771fe90e8ea41fa46424fd1570bd3067053e09fb"
+    },
+    "real-registry:.aiox-core/infrastructure/tools": {
+      "count": 15,
+      "sha256": "ce5e77e44eb7814ed793aec935c4cc7243434c13ed5e6ecb951bc0f5093804d6"
+    },
+    "real-registry:.aiox-core/product/checklists": {
+      "count": 16,
+      "sha256": "9627427ec024ed18768e939bc61b9e64ed342abc8d388ba73dc08d468672593f"
+    },
+    "real-registry:.aiox-core/product/data": {
+      "count": 16,
+      "sha256": "e7c10cccbd9af15f5b0a7e70183b69dd5b001f226d6e801997af6ddefb8941c0"
+    },
+    "real-registry:.aiox-core/core/docs": {
+      "count": 5,
+      "sha256": "03654894ea2edac3e6bb07c22f19427e276939b6f453f08b9bd6969093bd9cc1"
+    },
+    "real-tools:.aiox-core/infrastructure/tools": [],
+    "real-tools:.aiox-core/development/tools": []
+  }
+}

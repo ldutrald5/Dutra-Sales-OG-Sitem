@@ -1,5 +1,7 @@
 # Arquitetura
 
+Ferramentas AIOX / substituicao da cadeia glob: `docs/architecture/ADR-SEC-GLOB-02.md` (escopo desenvolvimento, sem alterar arquitetura comercial).
+
 > Proteção, sincronização, backups e restauração: consulte `docs/12-PROTECAO-E-SINCRONIZACAO.md`.
 
 ## Diagnóstico atual
