@@ -82,3 +82,15 @@ Logs locais fora do Git, no diretorio pai: `security-audit-before.json`, `securi
 Aprendizado duravel: SRC-SEC-DEPS-20261015-001 e DEC-SEC-DEPS-20261015-001 no Builder Brain. Indices/metricas atualizados. Este pacote nao altera protocolo comercial, dono de dados ou arquitetura do produto; contexto/handoff canonicos permanecem validos, e a continuidade especifica esta nesta auditoria/story.
 
 Parecer independente @qa: PASS limitado aos patches/regressao, sem aprovacao de merge. Reexecutou a regressao com sucesso, confirmou a mesma instancia Handlebars no renderer/core e verificou diff semantico de 28 entradas de lockfile, todas restritas a Handlebars/Sharp/@img. Nenhum novo bug acionavel identificado. Nao certifica outras plataformas nativas nem saude de producao. Story atualizada com Ready for Review parcial, AC5 aberto, 63 checks PASS e brain97.
+
+## Evidencia GitHub publicada
+
+PR separado e rascunho: [#119](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/pull/119). Revisao tecnica `eea86df9a40f0f439f5058a94cb4f392c1c6e4b2`; commits documentais posteriores nao alteram dependencias ou regressao. Push sem force; pre-push executou validate completo com 63 checks PASS, sem bypass.
+
+- [contract](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/38726742190/job/116394361355): completed/success.
+- [contract](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/38726742081/job/116394360788): completed/success.
+- [verify](https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/actions/runs/38726742110/job/116394361101): completed/failure, unica etapa falha npm audit --audit-level=high. Validate, lockfile, brain e seguranca PASS; etapa release gate isolada posterior skipped. Nao declarar todos checks verdes.
+
+@qa reexecutou regressao dos consumidores PASS limitado. @architect recomenda patches oficiais e bloqueio residual. Varredura das linhas adicionadas versus origin/main por cinco padroes de credenciais (private key/GitHub token/AWS/sb_secret>=20/sk->=32) PASS, sem imprimir conteudo; cobertura limitada, nao auditoria exaustiva.
+
+AC11/publicacao concluido, AC5 aberto: seis high/zero critical na branch de remediacao. PR #118 nao recebe estes patches ate integracao deliberada. Nenhum merge/deploy ou mudanca de producao/configuracao Railway.

@@ -33,7 +33,7 @@ Origem: autorização do usuário para prosseguir com a correção dos bloqueios
 - [x] AC8 — Validar regressões dos consumidores de dependências significativamente alteradas, sobretudo processamento de imagens (`sharp`), templates (`handlebars`) e expansão de padrões (`braces`), conforme usos encontrados. Adicionar teste somente quando proteja contrato relevante.
 - [x] AC9 — Revisar compatibilidade/licenças das alterações relevantes e registrar riscos residuais, proveniência e rollback na auditoria.
 - [x] AC10 — Atualizar checklist/File List desta story, auditoria, changelog e tarefas; atualizar Second Brain apenas para aprendizado durável, com proveniência e refresh/check quando aplicável.
-- [ ] AC11 — Obter revisão/veredito de @qa e encaminhar a @devops para PR separado; registrar link e SHA final sem merge/deploy.
+- [x] AC11 — Obter revisão/veredito de @qa e encaminhar a @devops para PR separado; registrar link e SHA final sem merge/deploy.
 
 ## Plano de execução
 
@@ -41,7 +41,7 @@ Origem: autorização do usuário para prosseguir com a correção dos bloqueios
 - [x] Aplicar uma correção pequena por cadeia e inspecionar o diff do lockfile.
 - [x] Reinstalar com `npm ci`, repetir audit e testar consumidores afetados.
 - [x] Executar gates do repositório e registrar evidências que possam ser repetidas.
-- [ ] Consolidar documentação, revisar e publicar somente o PR de correção.
+- [x] Consolidar documentação, revisar e publicar somente o PR de correção.
 
 ## Evidências e rollback
 
@@ -72,3 +72,5 @@ Inicial, prevista; confirmar os arquivos realmente alterados na conclusão:
 
 - 2026-10-15 — @sm criou a story a partir da autorização recebida, de `AGENTS.md`, da Constitution, do Context Router e dos comandos existentes em `package.json`. Nenhum teste executado ou pacote alterado na preparação.
 - 2026-10-15 — Patches oficiais disponiveis aplicados; npm ci/lint/63checks/release/brain PASS. AC5 permanece aberto: braces sem patched version, seis pacotes high na cadeia. Arquiteto rejeitou downgrade/fork improvisado e supressao de gate. Nao declarar story concluida ou CI verde.
+
+Publicacao: PR #119 https://github.com/ldutrald5/Dutra-Sales-OG-Sitem/pull/119, revisao tecnica eea86df9a40f0f439f5058a94cb4f392c1c6e4b2; commits posteriores somente documentais. Checks lidos: contracts PASS; verify FAIL apenas npm audit. AC5 permanece aberto. Sem merge/deploy.
