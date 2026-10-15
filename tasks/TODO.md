@@ -1,5 +1,12 @@
 # Backlog do Sistema OG
 
+## SEC-DEPS-01 - Remediar dependencias que bloqueiam CI/Arena
+
+- **Status:** bloqueada para aceite integral/merge pela cadeia braces sem patch oficial; patches disponiveis implementados para revisao.
+- **Story:** `docs/stories/SEC-DEPS-01-auditoria-dependencias.md`.
+- **Evidencia:** `docs/audits/2026-10-15-dependency-security-validation.md`.
+- Auditoria atual: 6 high / 0 critical; gate integral preservado, sem deploy.
+
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.
 
 ## TASK-001 — Mesa de Vendas: estrutura base

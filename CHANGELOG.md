@@ -2,6 +2,13 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] - SEC-DEPS-01 (2026-10-15)
+
+- Handlebars transitivo atualizado de 4.7.9 para 4.7.10; Sharp de Miniflare atualizado de 0.35.4 para 0.35.5 por override restrito, preservando AIOX/Wrangler.
+- Adicionado teste de regressao de AST/renderer e pipeline nativo de imagens/Miniflare a validate.
+- Auditoria reduzida de 9 high/1 critical para 6 high/0 critical; braces sem patch continua bloqueando CI e merge.
+- Evidencias e limites em `docs/audits/2026-10-15-dependency-security-validation.md`. Sem deploy ou mudanca de producao.
+
 ## [Unreleased] — DUTRA Intelligence Compiler V1
 
 - Estendido o Builder Brain existente em vez de criar uma segunda memória paralela.
