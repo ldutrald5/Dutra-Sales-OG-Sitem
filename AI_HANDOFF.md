@@ -1,5 +1,9 @@
 # DUTRA OS — AI Handoff
 
+## Handoff — Marketing Skills V1 / somente local
+
+Pacote autorizado na branch `chore/og-marketing-skills-integration`, base `ea63126`. Skills opcionais em `.agents/skills/`, somente invocação explícita e rascunho. Não configurar providers, publicar, gastar, fazer scraping, enviar mídia, ler contatos privados ou escrever no CRM. Grill Me resolve grilling por arquivo, Higgsfield encerra no handoff. Evidências e limites de teste: [story](docs/stories/OG-MARKETING-SKILLS-V1.md). Um commit local permitido; push/PR/deploy continuam fora do escopo.
+
 ## Handoff atual — Stage8.2 / homologação
 
 Implementação controlada autorizada, preservando WIP visual anterior. Impacto OG local no mesmo renderer/exports; mídia4×2/contexto compatível e fallback, histórico/ROI/totais protegidos. Próxima ação: avaliação de Lucas e aprovação separada para qualquer publicação. Não push/deploy/accept_deploy, main ou produção. Estado/testes/commits no checkpoint.

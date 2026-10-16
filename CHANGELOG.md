@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — Marketing Skills V1 (2026-10-16)
+
+- Doze entradas locais opcionais em `.agents/skills/`: entrevista/revisão, nove capacidades Instagram em rascunho e handoff documental Higgsfield; fontes MIT fixadas e atribuídas.
+- Sem scripts de fornecedores, dependências novas, providers configurados, ações externas ou acoplamento ao CRM. As 33 skills anteriores permanecem intactas.
+- Contratos, teste contextual fictício, limites por host e ensaio de rollback registrados em `docs/stories/OG-MARKETING-SKILLS-V1.md`. Nenhum push/deploy autorizado.
+
 ## [Unreleased] — P0-A / integridade comercial (2026-10-13)
 
 - Troca de empresa limpa o contexto comercial, com cancelamento e reaproveitamento técnico sujeito a revisão explícita; guardas impedem identidades incompatíveis na cotação/proposta/exportação.

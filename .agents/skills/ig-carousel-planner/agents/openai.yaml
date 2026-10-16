@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Carrosséis"
+  short_description: "Estruture slides e legenda sem gerar nem enviar mídia."
+  default_prompt: "Use $ig-carousel-planner para planejar um carrossel em rascunho com os fatos fornecidos, sem gerar imagens nem publicar."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Hashtags"
+  short_description: "Sugira tags relevantes com incertezas explícitas."
+  default_prompt: "Use $ig-hashtag-strategist para sugerir hashtags pertinentes ao texto fornecido. Marque volumes e status não verificados."
+policy:
+  allow_implicit_invocation: false

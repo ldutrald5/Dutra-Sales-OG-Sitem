@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 206 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 31 |
-| decision | 27 |
+| cycle | 32 |
+| decision | 28 |
 | experiment | 1 |
 | idea | 4 |
 | incident | 30 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 47 |
+| source | 48 |
 
 ## Active decisions
 
@@ -73,6 +73,8 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
   The primary DUTRA OS proposal experience will be built as a configurable sequence of reusable story blocks over one frozen canonical proposal view model. The first screen must communicate the commercial essence in seconds; technical detail remains available progressively. Theme/tokens, block order, visibility, copy and media are presentation configuration, not business logic. PDF/PNG/print are projections of the same model. Gamma may inform interaction/editability patterns but is not a runtime dependency or source of truth.
 - **DEC-PROPOSAL-IMPACTO-001 — Impacto OG is the selected proposal creative direction** (active/high)
   Use A Impacto OG as the official Stage8.2 Proposal Experience V2 creative direction: short strong opening, clear Cavalo/Carreta composition, and dominant yellow economic value with complementary black eye-inspired band. Archive B/C exploration; retain Stage8.1 functional templates and single canonical proposal/quote/ROI/technical owners. Refinements are reviewed before definitive implementation.
+- **DEC-MARKETING-SKILLS-V1-001 — Optional explicit draft-only marketing skills preserve core owners** (active/high)
+  Keep new standalone textual skills in .agents/skills, leaving existing .codex contracts and product owners unchanged. Grill Me resolves grilling by real local file read or honest manual fallback. Instagram operates on authorized supplied material only; humanizer preserves facts, citations and limitations. Higgsfield is an original documentary handoff without editor connector claims. No provider runtime, secrets, paid operations, private contacts, CRM writes or publication. Markdown flags do not enforce tool permissions. Native host discovery and provider operation need separate evidence and authorization.
 
 ## Open questions
 
@@ -179,6 +181,8 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-MARKETING-SKILLS-V1-20261016 — Pinned upstream skill verification and local textual adaptation** (validated/high)
+  Official Matt49dd158d and Instagram6a124481 commit/tree/blob identities and MIT notices were reverified. Local contract and contextual fictional smoke were executed without providers or product data; artifact/evidence paths and boundaries are recorded in the integration story.
 - **SRC-P0A-COMMERCIAL-INTEGRITY-20261013-001 — P0-A commercial identity regressions** (validated/high)
   Synthetic reproductions at baseline 9f2d33a confirm quote A/B context contamination, legacy import duplication/ID reuse, punctuation-colliding email matching and first-homonym command writes. Corrective local code and executed regression scripts establish prevention; no runtime/data publication.
 - **SRC-MANUS-REPLAY-20261013-001 — Manus public replay reviewed independently** (validated/medium)
@@ -197,8 +201,6 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
 - **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
   Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
-- **SRC-PROPOSAL-HOMOLOGATION-20261009-001 — Frozen Impacto OG homologation with reproducible visual reservations** (validated/high)
-  Rechecked checkpoint5087384 without product fixes or publication. Fresh82/82 gates and native commercial/actual export/offline409 flows passed. PDF heading chains can orphan, and missing hero media uses white-on-light text. Read-only historical quote reproduces total/pieces but lacks canonical client identity; no complete real proposal acceptance claimed.
 
 ## Retrieval workflow
 

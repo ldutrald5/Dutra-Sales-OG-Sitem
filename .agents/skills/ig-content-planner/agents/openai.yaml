@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Planejamento editorial"
+  short_description: "Monte calendário textual adequado à capacidade da equipe."
+  default_prompt: "Use $ig-content-planner para montar um calendário editorial em rascunho com minha capacidade de produção, sem agendar posts."
+policy:
+  allow_implicit_invocation: false

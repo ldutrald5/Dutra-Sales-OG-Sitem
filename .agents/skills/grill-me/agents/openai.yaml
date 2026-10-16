@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill Me — DUTRA"
+  short_description: "Entrevista crítica em rascunho, sem execução"
+  default_prompt: "Use $grill-me para revisar esta ideia em DRAFT_ONLY, uma pergunta por vez, sem executar o plano nem ações externas."
+policy:
+  allow_implicit_invocation: false

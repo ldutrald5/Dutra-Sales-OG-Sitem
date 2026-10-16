@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Revisão de voz"
+  short_description: "Revise clareza preservando fatos, fontes e voz do autor."
+  default_prompt: "Use $ig-humanizer em modo auditoria para revisar o texto fornecido, preservando fontes, limitações e meu estilo. Não publique nem salve perfil."
+policy:
+  allow_implicit_invocation: false

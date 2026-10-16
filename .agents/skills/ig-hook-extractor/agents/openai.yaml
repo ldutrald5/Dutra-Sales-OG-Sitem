@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Análise de aberturas"
+  short_description: "Analise estruturas fornecidas sem alegar viralidade."
+  default_prompt: "Use $ig-hook-extractor para analisar a abertura do material colado e criar um molde original, sem buscar URLs ou atribuir desempenho não comprovado."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,527 @@
+{
+  "schemaVersion": 1,
+  "integrationId": "OG-MARKETING-SKILLS-V1",
+  "revision": 1,
+  "mode": "DRAFT_ONLY",
+  "implicitInvocation": false,
+  "externalActionsEnabled": false,
+  "runtimeDependencies": [],
+  "baseSha": "ea63126b5b1d105fe06011c60ee592f2074e6c1c",
+  "branch": "chore/og-marketing-skills-integration",
+  "verifiedDate": "2026-10-16",
+  "sources": [
+    {
+      "repository": "mattpocock/skills",
+      "commit": "49dd158d1076134a641b33efb035946536778336",
+      "tree": "3ce485319972aae46dec0c2ac34cf4a7f28f7414",
+      "license": "MIT",
+      "copyright": "2026 Matt Pocock",
+      "localLicense": ".agents/third-party-licenses/mattpocock-skills.MIT.txt",
+      "verification": "Official Git commit/tree queried; fetched files matched Git blob SHA-1; SHA-256 recorded. No upstream code executed.",
+      "files": [
+        {
+          "path": "LICENSE",
+          "git_blob_sha1": "f1dd2c09108dde1a5f56097cee8461b3ea834499",
+          "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+          "bytes": 1068,
+          "source_url": "https://raw.githubusercontent.com/mattpocock/skills/49dd158d1076134a641b33efb035946536778336/LICENSE"
+        },
+        {
+          "path": "skills/productivity/grill-me/SKILL.md",
+          "git_blob_sha1": "3947ff9c4ad980d14fc07fccbf659d47c114e81d",
+          "sha256": "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637",
+          "bytes": 157,
+          "source_url": "https://raw.githubusercontent.com/mattpocock/skills/49dd158d1076134a641b33efb035946536778336/skills/productivity/grill-me/SKILL.md"
+        },
+        {
+          "path": "skills/productivity/grill-me/agents/openai.yaml",
+          "git_blob_sha1": "4d6fb0c746c5d21364dce5d0cf8c51eab9712e7b",
+          "sha256": "c061e39c3e0f9d865fb1b97556d485704af2a8a58f4b8221a8917a5c2074a32b",
+          "bytes": 137,
+          "source_url": "https://raw.githubusercontent.com/mattpocock/skills/49dd158d1076134a641b33efb035946536778336/skills/productivity/grill-me/agents/openai.yaml"
+        },
+        {
+          "path": "skills/productivity/grilling/SKILL.md",
+          "git_blob_sha1": "df69d9936880cd3314c28858c6c52f48db23b856",
+          "sha256": "befdff1e27a1dfe2a294d5871169ac1afe16d983911daa4f32627514a48c1e15",
+          "bytes": 2049,
+          "source_url": "https://raw.githubusercontent.com/mattpocock/skills/49dd158d1076134a641b33efb035946536778336/skills/productivity/grilling/SKILL.md"
+        },
+        {
+          "path": "skills/productivity/grilling/agents/openai.yaml",
+          "git_blob_sha1": "ddbdb96139c0c1dfe6bca698f39d0465674b8a39",
+          "sha256": "1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b",
+          "bytes": 113,
+          "source_url": "https://raw.githubusercontent.com/mattpocock/skills/49dd158d1076134a641b33efb035946536778336/skills/productivity/grilling/agents/openai.yaml"
+        }
+      ]
+    },
+    {
+      "repository": "sergebulaev/instagram-skills",
+      "commit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "tree": "4c23b9e79f7c25f96ef67b63b2e9ce6096be950c",
+      "license": "MIT",
+      "copyright": "2026 Sergey Bulaev",
+      "localLicense": ".agents/third-party-licenses/instagram-skills.MIT.txt",
+      "verification": "Official Git commit/tree queried; fetched files matched Git blob SHA-1; SHA-256 recorded. No upstream code executed.",
+      "files": [
+        {
+          "path": "LICENSE",
+          "git_blob_sha1": "6170859542913d403316ed4556e43d6f31d97512",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "bytes": 1070
+        },
+        {
+          "path": "references/hashtag-strategy.md",
+          "git_blob_sha1": "f02c1d3d28c60bc37fd16373972bb00d783f1079",
+          "sha256": "7c10834e0144dc2a80fe6721ef9918ce91c5cc168337e99f8b0c63e390511183",
+          "bytes": 4548
+        },
+        {
+          "path": "references/hook-formulas.md",
+          "git_blob_sha1": "f8bedafa2fb3a7d6a1c8368a96a2a3a9a10e1f90",
+          "sha256": "b42fa3d65f4fd0d1eeadeb60d12c1dabae218116085eae4611302c6e4acc8a52",
+          "bytes": 11722
+        },
+        {
+          "path": "references/untrusted-content.md",
+          "git_blob_sha1": "df806e5aaa698badacb1a3a0c9f1991eaea5fdb4",
+          "sha256": "f2832159bae4a772eab24f98a2478ffdbee16e346907d142ddb5d2a62b78ed48",
+          "bytes": 2988
+        },
+        {
+          "path": "references/voice-rules.md",
+          "git_blob_sha1": "29f6247c44a7e5ba908de8b6333ef2ca03293724",
+          "sha256": "5990c58bab2f1afa893f38dc7a30a4b19cfa107ea4bcb3fc11a29fe238945a91",
+          "bytes": 5528
+        },
+        {
+          "path": "skills/ig-audience-insights/SKILL.md",
+          "git_blob_sha1": "740ea63c37c8367969e5cf283b9ea63737da0e68",
+          "sha256": "c48bcef8add9ecd3589349aadddcf68cd83156e1e2cc78bc7e36d0a072a9a383",
+          "bytes": 6289
+        },
+        {
+          "path": "skills/ig-caption-writer/SKILL.md",
+          "git_blob_sha1": "40c9c6832af7b82f32a6b1aa9ef11ce37fd28cd7",
+          "sha256": "d8d2f5732d2ab9555843a2e384b5f9d1970fcbb418a18927ab98caf344526989",
+          "bytes": 6919
+        },
+        {
+          "path": "skills/ig-caption-writer/references/caption-checklist.md",
+          "git_blob_sha1": "5312f29f34e7b9caa26c7f4db3721d1bd2e940f7",
+          "sha256": "96eae3773105436058dbfc6c1b4fd9cbe359acc95efefcc00766a0943bae916f",
+          "bytes": 3092
+        },
+        {
+          "path": "skills/ig-carousel-planner/SKILL.md",
+          "git_blob_sha1": "aa76c685ec0fec555046ac163e93a5d0b915d3a2",
+          "sha256": "d08b53023f5cc19f10299b323018b04a693afb88fe318fe63660b52faceb0c1b",
+          "bytes": 7548
+        },
+        {
+          "path": "skills/ig-carousel-planner/references/slide-architecture.md",
+          "git_blob_sha1": "0fd059ea17da3d8cb03b2d6d9e9bc607522c810e",
+          "sha256": "2f023be7465bff488f0551326c48ba2b932ed3affb8fae53e3c9d5919a8a45aa",
+          "bytes": 3458
+        },
+        {
+          "path": "skills/ig-content-planner/SKILL.md",
+          "git_blob_sha1": "093335f5e5df83825f0327f309d1232dbedab432",
+          "sha256": "f945145265b921220d3a89cda917cde27706b6caae3fef0160f60df25e084ec3",
+          "bytes": 5895
+        },
+        {
+          "path": "skills/ig-content-planner/references/example-week.md",
+          "git_blob_sha1": "3067b37f3f9b5ec0383caeaca79a4f69fff18719",
+          "sha256": "62a8885737e3499bbe3bd709f076554564a6e1d4549a8e27b29598cd255dc126",
+          "bytes": 3076
+        },
+        {
+          "path": "skills/ig-content-planner/references/pillars-framework.md",
+          "git_blob_sha1": "71d2a714b23caadb1234d96c6dc27efbf1e95134",
+          "sha256": "7e42b6ae43d558ef56d6d0b4c08bc9d3655f2f6285a99648094b3f28e4a0daa3",
+          "bytes": 2632
+        },
+        {
+          "path": "skills/ig-hashtag-strategist/SKILL.md",
+          "git_blob_sha1": "4dd0cc897b8ad7bfbb663496d3b006d97db156a6",
+          "sha256": "07dafa7511c102d25cf2f77a7b8f54d5be723e3764bab5d76a5f8521fbb72128",
+          "bytes": 4511
+        },
+        {
+          "path": "skills/ig-hashtag-strategist/references/sourcing-tactics.md",
+          "git_blob_sha1": "a42e59cf91d5b83f15874b93fd89bf1c11494e3a",
+          "sha256": "7e7bb22511359618d8282624a11496ef83136a05cdfef69cb43eb74e91674b05",
+          "bytes": 2217
+        },
+        {
+          "path": "skills/ig-hook-extractor/SKILL.md",
+          "git_blob_sha1": "911527a214590768b7c43a70e8d630bc4da5a5c5",
+          "sha256": "3934e8510138f3a6453c3ba3d7d299ecc99a366353a94c424b0d7f3ac80f0e32",
+          "bytes": 5057
+        },
+        {
+          "path": "skills/ig-hook-extractor/references/classification-rules.md",
+          "git_blob_sha1": "1a80900b261bf4ffda647cfc53e8222eca20e6df",
+          "sha256": "b85c07d7fc58fdd0ae632d4272c0a6f160d3a73c5d309de78cca5b0382fdc89a",
+          "bytes": 3328
+        },
+        {
+          "path": "skills/ig-hook-extractor/references/examples.md",
+          "git_blob_sha1": "97a038d29ece89897d47724c7f24279bd7a5d2c0",
+          "sha256": "fc06191a275abfa89c9d7c04ded24e089dfeaf1eabde08a3e6ea4ddd4444889f",
+          "bytes": 3824
+        },
+        {
+          "path": "skills/ig-humanizer/SKILL.md",
+          "git_blob_sha1": "b1560ca77e5069f0a1bc3cfbdc03dc4fedd2ac36",
+          "sha256": "afc1d4d5428c11c27cb37f494bf5f188b0b038db47cd4d58c83389ac628ce5ae",
+          "bytes": 16128
+        },
+        {
+          "path": "skills/ig-humanizer/references/audit-checklist.md",
+          "git_blob_sha1": "49ea0db0be413c1e04ec40ae82bc764db05b35a8",
+          "sha256": "d3ae4f851b7a28cfe29efd359d0cf0b57fe95bd7e9f4d60dd418b63b1e4b81fd",
+          "bytes": 4133
+        },
+        {
+          "path": "skills/ig-humanizer/references/examples.md",
+          "git_blob_sha1": "368f93cb527fd7ae2f2457bd0bdd63dd4402ba49",
+          "sha256": "bbc27a266001c9104c0913342445ba6e7df94dfc3495b15be512ca55f13dbf0a",
+          "bytes": 3427
+        },
+        {
+          "path": "skills/ig-humanizer/references/scrub-rules.md",
+          "git_blob_sha1": "99c7ba21f383e4ac7c7c00a033f05186eb53047b",
+          "sha256": "7a5b5ca830118dc121cdf5cfe0b96e06293bc3d4b4c52f5485cd85f7c595723c",
+          "bytes": 22483
+        },
+        {
+          "path": "skills/ig-humanizer/sub-skills/illustration.md",
+          "git_blob_sha1": "65cf9f4473cb26546cfee9f070438873e732688a",
+          "sha256": "e5f7273ae505c4eab4c7559a3b59e9e82bfedf7911c626cca0d8f66a7c1126fc",
+          "bytes": 3795
+        },
+        {
+          "path": "skills/ig-humanizer/sub-skills/post-audit.md",
+          "git_blob_sha1": "19fb0ae7d83f6a852f04ede883aecbe2c86189f2",
+          "sha256": "6257fec2773f5d80a6a2005cdaa4a7e8969cac23ecca8e5a5c02a77f2a224ac5",
+          "bytes": 5445
+        },
+        {
+          "path": "skills/ig-humanizer/sub-skills/voice-profile.md",
+          "git_blob_sha1": "d1d2e20aeb44eb3193be3f1a403a579bc65deb16",
+          "sha256": "ba3a9aa358b418b48dc00a64415adb29a9b06ac23856f8265974286ee3a8f0a1",
+          "bytes": 2346
+        },
+        {
+          "path": "skills/ig-profile-optimizer/SKILL.md",
+          "git_blob_sha1": "d17a51d1c0d39fb17b9f794fcc2360190123e92f",
+          "sha256": "851157308bee1e5288fa550af20aa11a2f4780992000a09de350ab586a8e62ee",
+          "bytes": 6681
+        },
+        {
+          "path": "skills/ig-repurposer/SKILL.md",
+          "git_blob_sha1": "76a28eb0baf10a66fa813ca50e5eccb369967e4d",
+          "sha256": "92acb84fb4453e01162eea8b322c95ecf4beee428056a4125cfa8ea0ef493bf9",
+          "bytes": 8703
+        }
+      ]
+    },
+    {
+      "provider": "Higgsfield",
+      "modelId": "ad_multiplier",
+      "immutableProviderRelease": null,
+      "integration": "original_documental_handoff_only",
+      "referenceDate": "2026-10-16",
+      "providerAvailabilityClaim": "NOT_TESTED_IN_EDITOR",
+      "providerOperationsEnabled": false,
+      "termsUrl": "https://higgsfield.ai/terms-of-use-agreement",
+      "privacyUrl": "https://higgsfield.ai/privacy-policy"
+    }
+  ],
+  "skills": [
+    {
+      "name": "grill-me",
+      "path": ".agents/skills/grill-me/SKILL.md",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "grilling",
+      "path": ".agents/skills/grilling/SKILL.md",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-audience-insights",
+      "path": ".agents/skills/ig-audience-insights/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-caption-writer",
+      "path": ".agents/skills/ig-caption-writer/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-carousel-planner",
+      "path": ".agents/skills/ig-carousel-planner/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-content-planner",
+      "path": ".agents/skills/ig-content-planner/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-hashtag-strategist",
+      "path": ".agents/skills/ig-hashtag-strategist/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-hook-extractor",
+      "path": ".agents/skills/ig-hook-extractor/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-humanizer",
+      "path": ".agents/skills/ig-humanizer/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "independently authored, preserving citations/limitations; no upstream uncertain-provenance humanizer passages copied"
+    },
+    {
+      "name": "ig-profile-optimizer",
+      "path": ".agents/skills/ig-profile-optimizer/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "ig-repurposer",
+      "path": ".agents/skills/ig-repurposer/SKILL.md",
+      "sourceCommit": "6a124481d0ebe9b6d3ac1323ed2a2abc40c7e1d7",
+      "adaptation": "bounded textual adaptation; no upstream runtime/scripts"
+    },
+    {
+      "name": "og-ad-multiplier-handoff",
+      "path": ".agents/skills/og-ad-multiplier-handoff/SKILL.md",
+      "sourceCommit": null,
+      "adaptation": "original documentation; no provider bundle copied"
+    }
+  ],
+  "preservedSkills": [
+    {
+      "path": ".codex/skills/aiox-analyst/SKILL.md",
+      "name": "aiox-analyst",
+      "sha256": "cefa8b6bfbcbf19d109b317fd0e2c2e6f94e9295a74977212f6e4816f1ace6ad"
+    },
+    {
+      "path": ".codex/skills/aiox-architect/SKILL.md",
+      "name": "aiox-architect",
+      "sha256": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962"
+    },
+    {
+      "path": ".codex/skills/aiox-data-engineer/SKILL.md",
+      "name": "aiox-data-engineer",
+      "sha256": "c97b81fc2599852b32cf391957ed084df24241814050f962724c35f78448bba4"
+    },
+    {
+      "path": ".codex/skills/aiox-dev/SKILL.md",
+      "name": "aiox-dev",
+      "sha256": "5a9a1dddb456cf05429f995cd4d192a00a47b0b23e46331d02eb7048c2b6a9e8"
+    },
+    {
+      "path": ".codex/skills/aiox-devops/SKILL.md",
+      "name": "aiox-devops",
+      "sha256": "aebb30f558db1e446e6dcfe5e64f87ec7b79eb3246b37cd60fcb828230fece06"
+    },
+    {
+      "path": ".codex/skills/aiox-master/SKILL.md",
+      "name": "aiox-master",
+      "sha256": "42fde2abef44df3732ce2e9fab65ae7b40cf7acab78156a898858dfadab675de"
+    },
+    {
+      "path": ".codex/skills/aiox-pm/SKILL.md",
+      "name": "aiox-pm",
+      "sha256": "c1efb26c9027a0b9150995e8092b007b06e57ace75164ff8db02ca0a3aa343f9"
+    },
+    {
+      "path": ".codex/skills/aiox-po/SKILL.md",
+      "name": "aiox-po",
+      "sha256": "7e4b06e70fd44658f3a9abb7b20ec0e8a31a2cb41ccddc0ec784c56cb41acff4"
+    },
+    {
+      "path": ".codex/skills/aiox-qa/SKILL.md",
+      "name": "aiox-qa",
+      "sha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99"
+    },
+    {
+      "path": ".codex/skills/aiox-sm/SKILL.md",
+      "name": "aiox-sm",
+      "sha256": "380b80b502f96889ea189c0a1f6836dd7353bdb6c20a59f0945914d16599c937"
+    },
+    {
+      "path": ".codex/skills/aiox-squad-creator/SKILL.md",
+      "name": "aiox-squad-creator",
+      "sha256": "21cd4b327cd968bb98b4572ce4e900ba51db67fd2a23fa4cee2310417d38e5a8"
+    },
+    {
+      "path": ".codex/skills/aiox-ux-design-expert/SKILL.md",
+      "name": "aiox-ux-design-expert",
+      "sha256": "2aab08e49e4afc4bb789fac255f4c451099138a0b81b70464259b35a29e19e4c"
+    },
+    {
+      "path": ".codex/skills/dutra-builder-brain/SKILL.md",
+      "name": "dutra-builder-brain",
+      "sha256": "4faad7eeb4bd1e5d7c598188958ab068c65f1ba2c786167c84210adb6a9c7e31"
+    },
+    {
+      "path": ".codex/skills/dutra-call-intelligence/SKILL.md",
+      "name": "dutra-call-intelligence",
+      "sha256": "a25b55b7a1781dbc0caa7422f78d6daa16d4abd8006d55d8839ed1eda565adfd"
+    },
+    {
+      "path": ".codex/skills/dutra-collaboration-orchestrator/SKILL.md",
+      "name": "dutra-collaboration-orchestrator",
+      "sha256": "46a078fb9e961a5746808efb305ea8a5774b772cf1aea0e86bf4d0651c7bcdd6"
+    },
+    {
+      "path": ".codex/skills/dutra-content-studio/SKILL.md",
+      "name": "dutra-content-studio",
+      "sha256": "3490972cf594fb0298b2adb376fa42c8eb5d622ddd68fcd1cbe883e3e5af7d73"
+    },
+    {
+      "path": ".codex/skills/dutra-core/SKILL.md",
+      "name": "dutra-core",
+      "sha256": "98672eb298af7fdc24a855c263105889de1b4711de3795238e936555f15d568b"
+    },
+    {
+      "path": ".codex/skills/dutra-crm/SKILL.md",
+      "name": "dutra-crm",
+      "sha256": "90c4bb762afc5c1932a1d3aad4acc441d17e8770b0d4321f51e4c970bd910526"
+    },
+    {
+      "path": ".codex/skills/dutra-dev/SKILL.md",
+      "name": "dutra-dev",
+      "sha256": "688e725dc261a3c01eb8e929e00c2fc6bc5082fdb6f3ecfbbc561c6f512a7e89"
+    },
+    {
+      "path": ".codex/skills/dutra-environment-guardian/SKILL.md",
+      "name": "dutra-environment-guardian",
+      "sha256": "dc875c5e9e6a74f219201df5e0ce7d0da15c80952f61742f281b42b3e54beb96"
+    },
+    {
+      "path": ".codex/skills/dutra-fleet/SKILL.md",
+      "name": "dutra-fleet",
+      "sha256": "b47b87438838590903376697bef943642468bade50fdc5af4d20e61385354d0b"
+    },
+    {
+      "path": ".codex/skills/dutra-minimal-change/SKILL.md",
+      "name": "dutra-minimal-change",
+      "sha256": "d9a96c5d278249bfb6a82c1e38774fcace74d9a693f7a3ada344c74daaa11567"
+    },
+    {
+      "path": ".codex/skills/dutra-og-tech/SKILL.md",
+      "name": "dutra-og-tech",
+      "sha256": "c9429673b94a35459d693fb890da46fd0f3f131f533761de903f24c75879de6b"
+    },
+    {
+      "path": ".codex/skills/dutra-product/SKILL.md",
+      "name": "dutra-product",
+      "sha256": "75792f503f403008228d8524f192cec3b98aba7f412e75167462bc7bb9b54ea6"
+    },
+    {
+      "path": ".codex/skills/dutra-prompt-architect/SKILL.md",
+      "name": "dutra-prompt-architect",
+      "sha256": "70dd4d6415b2bca565cc1671539b08eaeee9b95b3b2c5905e1d5b8ef32c4bfb3"
+    },
+    {
+      "path": ".codex/skills/dutra-prospect-intelligence/SKILL.md",
+      "name": "dutra-prospect-intelligence",
+      "sha256": "8d263b0bde3938236a49759e0aa958534d8da7d4f26779779e336845a673a2a4"
+    },
+    {
+      "path": ".codex/skills/dutra-qa-guardian/SKILL.md",
+      "name": "dutra-qa-guardian",
+      "sha256": "1220d4e6ea2b2dd985a3213774bdcc5fe7385246cc94a8c5d11946c705774e84"
+    },
+    {
+      "path": ".codex/skills/dutra-quote-engine/SKILL.md",
+      "name": "dutra-quote-engine",
+      "sha256": "66a201dab6130c1d3c8ad1b611bd4002a9f1fe5cf563a2071f062fb4b620a046"
+    },
+    {
+      "path": ".codex/skills/dutra-runtime-operator/SKILL.md",
+      "name": "dutra-runtime-operator",
+      "sha256": "e277d27c21098428ba5894063a2e79df4395910c41f74813045b71e91429eeba"
+    },
+    {
+      "path": ".codex/skills/dutra-sales/SKILL.md",
+      "name": "dutra-sales",
+      "sha256": "3d8d695783933d2be86667a7eaf5f16b5aa9885caf8ce85da96183e25172b194"
+    },
+    {
+      "path": ".codex/skills/dutra-video-studio/SKILL.md",
+      "name": "dutra-video-studio",
+      "sha256": "0a8df5b289c0630fcf47b7088fbab68745f95243f26c5065d0888a21cdc99ee7"
+    },
+    {
+      "path": ".codex/skills/dutra-voice-studio/SKILL.md",
+      "name": "dutra-voice-studio",
+      "sha256": "7b1c92ca018bf483d88ae18cf8e0dc3534e68dd71f60aa0b350e24a5525dbf20"
+    },
+    {
+      "path": ".codex/skills/dutra-web-research/SKILL.md",
+      "name": "dutra-web-research",
+      "sha256": "f1983cdd214177289f82a17675dfc142ae9d9f3859eb5314d8f06f8132e3e618"
+    }
+  ],
+  "newFiles": [
+    ".agents/skills/grill-me/SKILL.md",
+    ".agents/skills/grill-me/agents/openai.yaml",
+    ".agents/skills/grilling/SKILL.md",
+    ".agents/skills/grilling/agents/openai.yaml",
+    ".agents/skills/ig-audience-insights/SKILL.md",
+    ".agents/skills/ig-audience-insights/agents/openai.yaml",
+    ".agents/skills/ig-caption-writer/SKILL.md",
+    ".agents/skills/ig-caption-writer/agents/openai.yaml",
+    ".agents/skills/ig-carousel-planner/SKILL.md",
+    ".agents/skills/ig-carousel-planner/agents/openai.yaml",
+    ".agents/skills/ig-content-planner/SKILL.md",
+    ".agents/skills/ig-content-planner/agents/openai.yaml",
+    ".agents/skills/ig-hashtag-strategist/SKILL.md",
+    ".agents/skills/ig-hashtag-strategist/agents/openai.yaml",
+    ".agents/skills/ig-hook-extractor/SKILL.md",
+    ".agents/skills/ig-hook-extractor/agents/openai.yaml",
+    ".agents/skills/ig-humanizer/SKILL.md",
+    ".agents/skills/ig-humanizer/agents/openai.yaml",
+    ".agents/skills/ig-profile-optimizer/SKILL.md",
+    ".agents/skills/ig-profile-optimizer/agents/openai.yaml",
+    ".agents/skills/ig-repurposer/SKILL.md",
+    ".agents/skills/ig-repurposer/agents/openai.yaml",
+    ".agents/skills/og-ad-multiplier-handoff/SKILL.md",
+    ".agents/skills/og-ad-multiplier-handoff/agents/openai.yaml",
+    ".agents/third-party-licenses/instagram-skills.MIT.txt",
+    ".agents/third-party-licenses/mattpocock-skills.MIT.txt",
+    "docs/integrations/HIGGSFIELD_AD_MULTIPLIER_HANDOFF.md",
+    "docs/integrations/MARKETING_SKILLS_ADAPTERS.md",
+    "docs/integrations/marketing-skills.sources.json",
+    "docs/stories/OG-MARKETING-SKILLS-V1.md",
+    "scripts/test_marketing_skills_contract.mjs",
+    "tests/fixtures/marketing-skills/activation-cases.json"
+  ],
+  "hostEvidence": {
+    "nativeCodexDiscovery": "NOT_TESTED",
+    "Cursor": "NOT_TESTED",
+    "VSCode": "NOT_TESTED",
+    "ChatGPTPluginInstall": "NOT_PERFORMED",
+    "contextualActivation": "see story and external evidence; not autodiscovery"
+  },
+  "rollback": "Remove only newFiles in a disposable fixture; any existing Brain/doc deltas need reviewed git revert. Never delete shared skill roots or commercial storage."
+}

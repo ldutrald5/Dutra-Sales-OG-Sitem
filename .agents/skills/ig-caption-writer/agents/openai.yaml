@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Legendas"
+  short_description: "Crie legendas em rascunho com fatos rastreáveis."
+  default_prompt: "Use $ig-caption-writer para criar uma legenda em rascunho a partir dos fatos que eu fornecer, com um CTA e sem publicar."
+policy:
+  allow_implicit_invocation: false

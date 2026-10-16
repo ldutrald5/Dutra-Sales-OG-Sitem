@@ -1,0 +1,6 @@
+interface:
+  display_name: "OG Ad Multiplier — Briefing"
+  short_description: "Handoff textual, sem upload ou créditos"
+  default_prompt: "Use $og-ad-multiplier-handoff para preparar um briefing fictício DRAFT_ONLY com variantes ordenadas e pendências, sem chamar o provedor."
+policy:
+  allow_implicit_invocation: false
