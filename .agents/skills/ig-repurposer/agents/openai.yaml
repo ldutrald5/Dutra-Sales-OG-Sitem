@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Reaproveitamento editorial"
+  short_description: "Adapte conteúdo autorizado preservando fatos e autoria."
+  default_prompt: "Use $ig-repurposer para adaptar o conteúdo autorizado que eu fornecer ao Instagram, preservando fatos, fontes e ressalvas, sem publicar."
+policy:
+  allow_implicit_invocation: false

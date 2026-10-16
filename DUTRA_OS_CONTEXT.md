@@ -1,5 +1,9 @@
 # DUTRA OS — Contexto Canônico
 
+## Marketing Skills V1 — camada opcional de agentes
+
+As entradas novas em `.agents/skills/` são adaptadores textuais explícitos em DRAFT_ONLY, separados do produto e das 33 skills existentes. Os owners Content/Video/Prompt continuam canônicos; sem publicação, APIs, scraping, gastos ou acesso implícito ao CRM. Contrato, fontes fixadas, limites de host e rollback: [Marketing Skills](docs/integrations/MARKETING_SKILLS_ADAPTERS.md).
+
 ## Stage8.2 — Impacto OG em homologação local
 
 Direção A aprovada e implementação autorizada. Apresentação versionada no renderer existente; novos drafts sem preferências usam Impacto, versões históricas permanecem clássicas até revisão explícita. Preços/ROI/técnica/CRM intactos. Sem publicação autorizada nesta rodada. Evidência e rollback em docs/product/PROPOSAL_IMPACTO_OG_IMPLEMENTATION.md.

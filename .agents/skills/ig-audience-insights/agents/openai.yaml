@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Leitura de audiência"
+  short_description: "Analise métricas fornecidas, sem coleta externa."
+  default_prompt: "Use $ig-audience-insights para analisar somente os dados fictícios ou autorizados que eu fornecer. Entregue um rascunho, sem coleta externa."
+policy:
+  allow_implicit_invocation: false

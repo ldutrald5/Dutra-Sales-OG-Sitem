@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grilling — DUTRA"
+  short_description: "Revise decisões sem iniciar implementação"
+  default_prompt: "Use $grilling para testar meu plano em DRAFT_ONLY, até cinco rodadas, uma pergunta por vez, sem rede ou ações externas."
+policy:
+  allow_implicit_invocation: false

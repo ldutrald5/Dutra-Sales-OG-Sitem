@@ -1,0 +1,6 @@
+interface:
+  display_name: "Instagram · Revisão de perfil"
+  short_description: "Avalie perfil fornecido, sem acesso ou alteração de conta."
+  default_prompt: "Use $ig-profile-optimizer para auditar somente o perfil que eu fornecer e propor melhorias em rascunho, sem acessar nem editar a conta."
+policy:
+  allow_implicit_invocation: false
