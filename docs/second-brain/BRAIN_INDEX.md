@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 206 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 209 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 32 |
+| cycle | 33 |
 | decision | 28 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 30 |
+| incident | 31 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 48 |
+| source | 49 |
 
 ## Active decisions
 
@@ -95,6 +95,8 @@ Generated from 206 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **INC-XLSX-REPAIR-001 — Excel repaired generated workbook structures** (active/medium)
   A historical generated workbook opened with Excel recovery that removed an AutoFilter/table and a worksheet formula; the exact original serialization defect is not conclusively proven by recovered evidence.
+- **INC-CI-UNPATCHED-TRANSITIVE-001 — Compatible dependency patches leave an unpatched Braces chain in AIOX** (open/high)
+  A reduced vulnerability count and green behavioral tests do not clear the global security gate. Preserve the failing audit and require a verified upstream fix or an explicit scoped risk decision.
 
 ## Recent resolved incidents
 
@@ -181,6 +183,8 @@ Generated from 206 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CI121-DEPENDENCIES-20261017 — Official advisories, npm resolution and isolated reproduction of PR121 CI failure** (validated/high)
+  The unchanged V1/base lock reproduces 9 high and 1 critical. Compatible official Handlebars 4.7.10 and Wrangler 4.151.1 / Miniflare 5.20261012.1-beta / Sharp 0.35.5 reduce audit to 6 high and 0 critical. Braces 3.0.3 has no published patch and remains reachable through AIOX 5.4.1. See sanitized report for advisories, commands and exact limits.
 - **SRC-MARKETING-SKILLS-V1-20261016 — Pinned upstream skill verification and local textual adaptation** (validated/high)
   Official Matt49dd158d and Instagram6a124481 commit/tree/blob identities and MIT notices were reverified. Local contract and contextual fictional smoke were executed without providers or product data; artifact/evidence paths and boundaries are recorded in the integration story.
 - **SRC-P0A-COMMERCIAL-INTEGRITY-20261013-001 — P0-A commercial identity regressions** (validated/high)
@@ -199,8 +203,6 @@ Generated from 206 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas explicitly chose A Impacto OG as best and would discard B/C. Criticized tractor template in composition; praised yellow savings highlight and asked for a complementary black cat-eye-like band. Selection supersedes prior three-way exploration without changing canonical engines, financial assumptions or historical functional templates.
 - **SRC-PROPOSAL-IMPACTO-FINAL-20261009-001 — Lucas official Impacto OG confirmation and isolated final review** (validated/high)
   Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
-- **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
-  Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
 
 ## Retrieval workflow
 

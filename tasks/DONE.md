@@ -1,5 +1,7 @@
 # Entregas existentes
 
+CI-121 — patches compatíveis de Handlebars e Sharp (via Wrangler/Miniflare) e smoke de seis consumidores reais executados isoladamente. Instalação normal preservou lockfile. Audit residual permanece bloqueado em seis high por Braces; não equivale a release ou aceite de risco. Detalhes e regressões na story/relatório CI-121; PR #121 preservado.
+
 Stage8.1 — apresentação/exportação implementada sobre owners atuais: três templates, branco/PDF/PNG, assets autorizados, revisões imutáveis e UX mobile/desktop. Evidência local e publicação no checkpoint; não implica deploy/aceite online8.1.
 
 

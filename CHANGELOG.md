@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — CI-121 / remediação parcial (2026-10-17)
+
+- Lockfile: Handlebars 4.7.10 e cadeia oficial Wrangler 4.151.1 / Miniflare 5.20261012.1-beta / Sharp 0.35.5, com binários associados; sem alterar ranges, AIOX ou overrides.
+- Smoke sintético dos consumidores reais e instalação normal isolada/reproduzível; nenhuma alteração de produto, dados, providers ou workflows.
+- Audit: 9 high + 1 critical → 6 high + 0 critical. Braces continua sem patch oficial: segurança BLOQUEADA, sem exceção aceita. Evidências em `docs/audits/CI_121_DEPENDENCY_REMEDIATION.md`; PR #121 preservado.
+
 ## [Unreleased] — Marketing Skills V1 (2026-10-16)
 
 - Doze entradas locais opcionais em `.agents/skills/`: entrevista/revisão, nove capacidades Instagram em rascunho e handoff documental Higgsfield; fontes MIT fixadas e atribuídas.

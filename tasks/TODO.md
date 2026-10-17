@@ -1,5 +1,11 @@
 # Backlog do Sistema OG
 
+## CI-121 — dependências / bloqueio residual
+
+- **Status:** bloqueada para liberação; remediação parcial em branch/Draft independentes do PR #121.
+- **Pendência:** Braces via AIOX não tem versão corrigida oficial. Não aplicar `--force`, downgrade ou supressão do audit. Aguardar fix compatível verificado ou decisão explícita de risco, sem exceção presumida.
+- **Evidência:** `docs/stories/CI-121-DEPENDENCY-REMEDIATION.md` e `docs/audits/CI_121_DEPENDENCY_REMEDIATION.md`.
+
 Stage8.1 — pacote local concluído/PATCH_READY; patch exclusivo do piloto revisado, aplicação pendente pelo QG. Próxima ação QG: revisar/aplicar somente piloto e smoke; não ampliar escopo. Stage8 aceita online.
 
 
