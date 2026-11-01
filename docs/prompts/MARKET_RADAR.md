@@ -17,6 +17,25 @@ Scan only what is relevant to DUTRA OS and OG:
 9. design systems / visual storytelling / interaction trends
 10. security / privacy / auth patterns for AI-assisted apps
 
+## Project baseline before every monthly comparison
+
+Before classifying opportunities, read the current repository state on the active integration branch:
+- DUTRA_OS_CONTEXT.md
+- ROADMAP.md
+- latest docs/handoffs/*CHECKPOINT*.md or current stage checkpoint
+- relevant current product vision / skill files for the top candidate areas
+- previous docs/research/MARKET_RADAR_*.md snapshot
+
+For every capability, distinguish:
+- implemented locally;
+- under homologation;
+- staged / awaiting approval;
+- live in the pilot;
+- live in official production;
+- backlog / not implemented.
+
+Do not treat an old research recommendation as current if the project has already implemented or superseded it. Do not claim live deployment from a local implementation or a checkpoint without a fresh runtime check. Compare priority against the latest roadmap and unresolved release gates before proposing new scope.
+
 ## Source priority
 
 Prefer:
