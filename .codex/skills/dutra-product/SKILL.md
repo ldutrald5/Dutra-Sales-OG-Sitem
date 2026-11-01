@@ -10,6 +10,7 @@ metadata:
 ## Load
 - `DUTRA_OS_CONTEXT.md`
 - `ROADMAP.md`
+- the latest relevant `docs/handoffs/*CHECKPOINT*.md` before making claims about implementation, homologation, staged patches, pilot deployment or production status.
 - `docs/product/DUTRA_OS_PRODUCT_DIRECTIVE_2026-09-28.md`
 - `docs/03-DESIGN-SYSTEM.md`
 - `docs/product/PROPOSAL_EXPERIENCE_VISION.md` when proposal/client-facing storytelling or high-visual sales surfaces are in scope.
@@ -57,6 +58,10 @@ For proposal, sales-presentation and other high-visual surfaces:
 - Gamma is a benchmark for modular/editable presentation UX, not a runtime dependency or source of truth.
 - Before a large visual implementation, follow `PAT-VISUAL-DIRECTION-001`: derive a compact design DNA from user references/reactions, present 2–3 concrete directions, select/refine, then code.
 - Accept screenshots, rough sketches, audio descriptions and cross-industry references as valid creative input; translate them into explicit design principles instead of forcing the user to specify CSS/components.
+
+## Current-state and release-status discipline
+
+Before proposing new scope, reconcile the current context, roadmap and latest relevant checkpoint. Explicitly distinguish implemented locally, under homologation, staged/awaiting approval, live in the pilot, live in official production, and backlog. Never infer deployment from a local commit or a staged patch; perform a fresh runtime check before making a live-status claim. Prefer completing an existing release gate over opening a parallel feature when the dependency is still unresolved.
 
 ## Procedure
 Frame real user friction → verify existing capability → map dependency/risk → choose smallest valuable slice → define DoD/loading/empty/error/offline → for high-visual work concept/select direction before broad coding → test → update roadmap/brain if durable.
