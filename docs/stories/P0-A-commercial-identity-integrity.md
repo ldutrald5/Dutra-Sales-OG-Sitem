@@ -52,3 +52,27 @@ Replay compartilhado efetivamente lido; entrega mais recente é SQL remoto Sales
 ## Rollback
 
 Reverter os commits P0-A quando identificados; preservar todo estado persistido e documentos. Não resetar trabalho de terceiros nem executar limpeza de storage. Base anterior registrada acima, sem alteração de runtime.
+
+
+## P0-A-RACE-RESOLUTION-01 — 2026-11-07
+
+Entry candidate: `246df6193140946a8d295a64f03b8b56d5f37198`. Local branch: `qa/p0-a-race-resolution-20261107`. The existing P0-A cherry-picks (`bce84959779cbaf352c5c1f2bf0f310d0f7c7203`, `246df6193140946a8d295a64f03b8b56d5f37198`) remain ancestors, retaining the original SHA references in their messages; integration documents remain unchanged; no remote mutation, real data, dependency or financial rule change.
+
+- [x] Bounded deterministic regression of actual app functions, fixed Date and synthetic records: baseline **1 PASS / 10 FAIL**, patched **11 PASS**. Expected RED output is retained, not counted as a passing gate.
+- [x] Canonical checked lead allocation replaces timestamp/index bulk IDs; existing UUID activity helper replaces repeated clock/hash/row event IDs. Source hash and row remain audit metadata.
+- [x] Text/file review generations invalidate earlier work and prior decisions on new input or close; stale success/error/finally cannot replace the newer review or reopen cancellation.
+- [x] Actual server/browser controlled GET and PUT response gates: **5 PASS**, including delete ACK, same-company reimport, stale GET rejection, newer intent surviving delayed old ACK, reload and unchanged survivor history.
+- [x] Existing commercial helper now waits for the intended preview company, preserving all assertions. Diagnostic fixture attempts that observed an older preview or used hidden mobile batch controls are retained as failed attempts, not product PASS.
+- [x] `npm test`: **84/84 command gates PASS**, including syntax, identity, quote/snapshot, persistence, Brain, release and pinned AIOX config. Final browsers: commercial **19 PASS**, sync/reconnect/503/409 **5 PASS**, export **PASS** (real synthetic PDF and PNG).
+- [x] Bubblewrap source read-only, private filesystem/data, cleared environment, capabilities dropped, no default route/uplink, loopback functional, native Chromium online status; external IPv4 rejected. No fake `navigator.onLine`, arbitrary sleeps or weakened assertions.
+- [x] SW v84 refreshes the corrected shell; IndexedDB/outbox, client storage and server sync contracts remain unchanged.
+
+**Historical-cause limitation:** demonstrated preview/ID/audit defects can explain a missing newly imported client or misleading observation, but the exact original `createdAfterDelete` execution has no complete causal trace. It is not declared resolved retrospectively.
+
+**Decision:** GO conditioned for remote integration review of this local patch, preserving the P0-A package and checking the remote baseline before incorporation. Not an authorization for deploy or real automated writes. Residual risk: medium for attribution of the unreproduced historical event; low for the specific controlled interleavings tested, without a statistical failure-rate claim. Multi-tab/crash interleavings, other intake paths, production recovery and P0-B authorization remain outside this proof.
+
+**Added/changed files:** `app.js`, `service-worker.js`, `scripts/test_delete_import_races.mjs`, `scripts/test_delete_import_races_browser.mjs`, `scripts/test_commercial_identity_browser.mjs`, `package.json`, `scripts/validate.mjs`, this story, `docs/second-brain/{sources,incidents}.jsonl` and generated Brain index/metrics; task status notes only. No source-of-truth migration.
+
+Evidence: `/workspace/artifacts/P0-A-RACE-RESOLUTION-01-20261107/RELATORIO.md`, logs, controlled-response timeline and isolation probes. Incident: `INC-CRM-IMPORT-GENERATION-001`; source: `SRC-P0A-RACE-20261107-001`.
+
+Rollback: revert only the local race-resolution commit on a later authorized integration; do not reset either original P0-A commit, delete storage, reuse IDs or migrate historical records. This patch changes no persisted schema and has no deployed runtime to roll back.

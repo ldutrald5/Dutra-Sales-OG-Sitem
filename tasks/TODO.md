@@ -508,3 +508,7 @@ P2 pagination/fallback fixes approved and locally implemented. Native authentica
 - **Escopo:** F01/F02, email/DDI, homônimos e snapshot histórico; owners existentes preservados.
 - **Evidência:** [story](../docs/stories/P0-A-commercial-identity-integrity.md), 83/83 gates e browser sintético 19 casos.
 - **Próxima ação:** revisar pacote/commits locais; qualquer push/deploy ou P0-B requer nova autorização. SQL externo Manus permanece análise futura, sem aplicação.
+
+## P0-A-RACE-RESOLUTION-01 (2026-11-07)
+
+Local race fix and bounded QA complete; GO conditioned for remote integration review only. No push/deploy. See [P0-A story](../docs/stories/P0-A-commercial-identity-integrity.md). Historical execution attribution and P0-B/independent recovery remain unproven.

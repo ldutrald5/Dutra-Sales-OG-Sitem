@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -11,11 +11,11 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | decision | 27 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 30 |
+| incident | 31 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 47 |
+| source | 48 |
 
 ## Active decisions
 
@@ -96,6 +96,8 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-CRM-IMPORT-GENERATION-001 — Stale import reviews and colliding import identities** (resolved/high)
+  Import reviews belong to a cancellable request generation; canonical record and activity IDs cannot be timestamps/row positions or repeated source hashes alone.
 - **INC-QUOTE-CLIENT-TRANSITION-001 — Partial client bridges retain another account’s commercial context** (resolved/high)
   The quote client transition must replace identity and commercial context together before persistence.
 - **INC-CRM-IMPORT-IDENTITY-001 — Legacy imports bypass review and identity-safe comparison** (resolved/high)
@@ -110,8 +112,6 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Missing conceptual media keeps a readable explicit placeholder; approved selector correction preserves technical values/DesignDNA.
 - **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
   Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
-- **INC-TECH-MULTIPLIER-MANUAL-001 — Fleet multiplier incorrectly reclassified unit application as manual** (resolved/high)
-  Quote row presentation changes must not mutate unit technical origin.
 
 ## Candidate / planned ideas
 
@@ -179,6 +179,8 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-P0A-RACE-20261107-001 — Bounded deterministic delete/import investigation** (validated/high)
+  Actual app functions tested with synthetic records and fixed Date; pre-fix failures prove stale preview completion, timestamp/index IDs and source-hash audit-event collisions. Native browser transport gates cover stale reads and delayed acknowledgements. Historical failing execution cause remains unproven.
 - **SRC-P0A-COMMERCIAL-INTEGRITY-20261013-001 — P0-A commercial identity regressions** (validated/high)
   Synthetic reproductions at baseline 9f2d33a confirm quote A/B context contamination, legacy import duplication/ID reuse, punctuation-colliding email matching and first-homonym command writes. Corrective local code and executed regression scripts establish prevention; no runtime/data publication.
 - **SRC-MANUS-REPLAY-20261013-001 — Manus public replay reviewed independently** (validated/medium)
@@ -197,8 +199,6 @@ Generated from 203 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
 - **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
   Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
-- **SRC-PROPOSAL-HOMOLOGATION-20261009-001 — Frozen Impacto OG homologation with reproducible visual reservations** (validated/high)
-  Rechecked checkpoint5087384 without product fixes or publication. Fresh82/82 gates and native commercial/actual export/offline409 flows passed. PDF heading chains can orphan, and missing hero media uses white-on-light text. Read-only historical quote reproduces total/pieces but lacks canonical client identity; no complete real proposal acceptance claimed.
 
 ## Retrieval workflow
 

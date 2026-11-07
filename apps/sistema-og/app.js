@@ -5225,14 +5225,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     // Plan the entire batch against an evolving copy; no partial write on ambiguity.
     const planned = state.leads.slice();
     const imported = []; const linked = [];
-    for (const [index, row] of selected.entries()) {
+    for (const row of selected) {
       const matches = OG_CRM_SERVICE.findPossibleDuplicates(planned, row);
       if (row.importAction === 'import') {
         if (matches.length && !window.confirm(`Possível duplicidade: ${row.empresa} coincide com ${matches.map(item => item.empresa).join(', ')}. Criar OUTRO registro mesmo assim? Cancele para usar/revisar o existente.`)) return;
         const lead = OG_CRM_SERVICE.createProspect({ ...row, nome: row.contato,
           sourceChannel: row.sourceChannel || 'Lista', observacoes: row.observacao,
           importMeta: { source: 'bulk_inbox', importedAt: now, reviewedBy: 'user', verification: 'imported_not_independently_confirmed' }
-        }, { id: `LEAD-${Date.now().toString(36).toUpperCase()}-${index}`, now });
+        }, { leads: planned, now });
         planned.unshift(lead); imported.push(lead);
       } else {
         const target = matches.find(item => String(item.id) === String(row.duplicateId));
@@ -5249,7 +5249,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     }
     button.disabled = true;
     state.leads = planned;
-    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:`EVT-BULK-${Date.now().toString(36).toUpperCase()}`, type:'prospects.bulk_imported', at:now, count:imported.length, linkedIds:linked, ignoredCount:rows.length-selected.length, source:'bulk_inbox' });
+    state.operations = OG_OPERATIONS_MODEL.appendActivity(state.operations, { id:newLibraryId('evt'), type:'prospects.bulk_imported', at:now, count:imported.length, linkedIds:linked, ignoredCount:rows.length-selected.length, source:'bulk_inbox' });
     saveLeadsToStorage(); saveOperationsToStorage();
     try { await OG_SYNC_BRIDGE.queueState(currentSyncPayload()); }
     catch (_) { showNotification('CRM salvo neste aparelho; recuperação de sync pendente. Aguarde antes de recarregar.', 'warning'); return; }
@@ -6698,6 +6698,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   let crmExcelReview = null;
+  let crmExcelReviewGeneration = 0;
+
+  function beginCrmImportReview() {
+    crmExcelReview = null;
+    const apply = document.getElementById('crm-excel-apply');
+    if (apply) apply.disabled = true;
+    const trigger = document.getElementById('btn-crm-excel-preview');
+    if (trigger) { trigger.disabled = false; trigger.textContent = '⬆ Importar planilha'; }
+    return ++crmExcelReviewGeneration;
+  }
 
   function spreadsheetDecisionOptions(change) {
     const selected = change.protected ? 'keep' : 'excel';
@@ -6894,11 +6904,12 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const input=document.getElementById('crm-excel-file');
     const panel=document.getElementById('crm-excel-preview-panel');
     trigger?.addEventListener('click',()=>input.click());
-    document.getElementById('crm-excel-close')?.addEventListener('click',()=>{crmExcelReview=null;panel.classList.add('hidden');});
+    document.getElementById('crm-excel-close')?.addEventListener('click',()=>{beginCrmImportReview();panel.classList.add('hidden');trigger.disabled=false;trigger.textContent='⬆ Importar planilha';input.value='';});
 
     input?.addEventListener('change',async()=>{
       const file=input.files?.[0];
       if(!file)return;
+      const generation=beginCrmImportReview();
       trigger.disabled=true;
       trigger.textContent='Lendo planilha…';
       try{
@@ -6908,6 +6919,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         const workbook=/\.csv$/i.test(file.name)
           ? OG_SPREADSHEET_IMPORT.csvToWorkbook(await file.text())
           : await OG_SPREADSHEET_IMPORT.readArrayBuffer(bytes,{name:file.name,type:file.type,size:file.size});
+        if(generation!==crmExcelReviewGeneration)return;
         const sources=OG_SPREADSHEET_IMPORT.detectTabularSources(workbook);
         if(!sources.length)throw new Error('Nenhuma aba com clientes reconhecível foi encontrada.');
         const source=sources.length===1?sources[0]:null;
@@ -6932,12 +6944,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
         panel.classList.remove('hidden');
         panel.scrollIntoView({behavior:'smooth',block:'start'});
       }catch(error){
-        crmExcelReview=null;
-        showNotification(error.message||'Não foi possível ler a planilha.','error');
+        if(generation===crmExcelReviewGeneration){crmExcelReview=null;showNotification(error.message||'Não foi possível ler a planilha.','error');}
       }finally{
-        trigger.disabled=false;
-        trigger.textContent='⬆ Importar planilha';
-        input.value='';
+        if(generation===crmExcelReviewGeneration){trigger.disabled=false;trigger.textContent='⬆ Importar planilha';input.value='';}
       }
     });
 
@@ -7003,9 +7012,9 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if(!window.confirm(`Confirmar importação?\n\nCriar: ${created}\nAtualizar: ${updated}\nCampos alterados: ${changedFields}\nDuplicidades mantidas fora: ${manualIgnored}\n\nHistórico/observações protegidos continuam preservados por padrão. A base atual do DUTRA OS continuará sendo a fonte mestre.`))return;
 
       state.leads=result.leads.map(lead=>normalizeLead(lead));
-      result.audit.forEach((item,index)=>{
+      result.audit.forEach(item=>{
         state.operations=OG_OPERATIONS_MODEL.appendActivity(state.operations,{
-          id:`sheet_${crmExcelReview.hash}_${item.sourceRow}_${index}`,
+          id:newLibraryId('evt'),
           type:item.type,
           at:new Date().toISOString(),
           clientId:item.leadId,
@@ -7070,6 +7079,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   async function parseAndAddLeads(rawText) {
+    const generation = beginCrmImportReview();
     // Legacy text/OCR is an input adapter to the existing spreadsheet review.
     // Parsing never writes leads, interactions, IDs or an outbox entry.
     const workbook = OG_SPREADSHEET_IMPORT.csvToWorkbook(rawText);
@@ -7089,6 +7099,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     if (!source) return showNotification('Não foi possível reconhecer os campos. Revise o texto antes de importar.','warning');
     const digest = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawText));
     const hash = Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,12);
+    if (generation !== crmExcelReviewGeneration) return 0;
     crmExcelReview = {workbook,sources:[source],source,hash,fileName:'Texto / OCR revisado',analyzedAt:new Date().toISOString(),preview:[],rows:[],mapping:source.mapping};
     renderCrmImportSheetPicker([source]); renderCrmImportMapping(source); refreshCrmImportPreview(source.mapping);
     closeAppDialog(document.getElementById('modal-import-leads'),{restoreFocus:false});

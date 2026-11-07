@@ -312,3 +312,7 @@ Approved heading-chain and missing-media contrast fixes preserve canonical calcu
 - Homônimos exigem identidade explícita; histórico/snapshot não cruza owners e novas cotações usam IDs únicos.
 - 83/83 gates, 19 casos novos no Chromium isolado, regressões de CRM/proposta/histórico/auth/PWA/offline/reconnect/409 e PDF/PNG reais. Não é aceite online ou em aparelho físico.
 - Sem push/merge/deploy/schema/dados reais. Detalhes/rollback na [story P0-A](../docs/stories/P0-A-commercial-identity-integrity.md).
+
+## P0-A-RACE-RESOLUTION-01 (2026-11-07)
+
+Local race fix and bounded QA complete; GO conditioned for remote integration review only. No push/deploy. See [P0-A story](../docs/stories/P0-A-commercial-identity-integrity.md). Historical execution attribution and P0-B/independent recovery remain unproven.
