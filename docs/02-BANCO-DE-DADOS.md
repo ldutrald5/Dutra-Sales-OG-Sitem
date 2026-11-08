@@ -57,3 +57,25 @@ Relações futuras usam `companyId` como raiz. Nenhuma migration desse modelo es
 - Índices/consultas para crescimento do volume.
 
 Contrato detalhado e plano aditivo: [Fundação de Operações](architecture/og-operations-foundation.md).
+
+
+## P0-CRM-PERSISTENCE-RECOVERY-01 — contrato local, não publicado
+
+Em 08/11/2026, P0-A foi incorporado à integração em `7519e4a1330cea9bccd983f4fb1cebb40a4dc982`, sem deploy. A proteção abaixo é uma implementação local posterior, ainda não publicada.
+
+O owner continua sendo o estado existente; `server-state-store.cjs` é somente a fronteira de filesystem do `server.mjs`. `GET/PUT /api/state` mantêm o contrato válido e revision-authoritative409. JSON inválido, falha de leitura/escrita e ausência após observação/inicialização retornam 503 sanitizado. Inicialização vazia só ocorre com arquivo ausente e sem evidência anterior reconhecida; não há auto-restore nem base vazia como fallback para corrupção.
+
+Cada substituição guarda `shared-state.json.backup` no formato v1 de OG_DATA_SAFETY, com revisão/data anterior e checksum SHA-256; a gravação para se não for possível criar/verificar essa cópia. `shared-state.json.initialized` registra inicialização; temporários não são aceitos como estado. Escrita usa arquivo exclusivo600, fsync e rename no mesmo diretório, sem prometer sobrevivência a power loss. Mantém-se uma cópia anterior; ela é do mesmo volume e **não é backup independente**. Snapshots IndexedDB e seus contratos continuam intactos. Nenhum arquivo histórico é mesclado, remapeado ou migrado automaticamente.
+
+Comando local de operador, somente com paths explicitamente selecionados e autorização de dados apropriada:
+
+```bash
+npm run og:state:recovery -- export --source-dir /tmp/og-fonte-ficticia --backup-file /tmp/og-portatil-ficticio.json --confirm-local
+npm run og:state:recovery -- restore --backup-file /tmp/og-portatil-ficticio.json --target-dir /tmp/og-destino-ficticio --confirm-local
+```
+
+Os caminhos acima são exemplos, não diretórios reais de produção. O export não sobrescreve arquivo existente. O restore valida o envelope/checksum quando presente, preserva IDs/revisão e recusa destino com dados diferentes; repetição idêntica é no-op. Backups v1 antigos sem checksum são aceitos por escolha explícita, sem alegar integridade criptográfica ou autenticidade. O comando recusa ambiente hospedado/produtivo e não tem destino padrão. Não altera volume/configuração nem restaura no servidor ativo.
+
+Procedimento seguro: preservar original e cópias; exportar para local separado; verificar backup; testar restore em diretório descartável; conferir identidades, relações e revisões; pedir autorização específica antes de qualquer recuperação real. Falha parcial deixa evidências/marcadores para revisão; não apagá-los para forçar inicialização vazia. `/health` continua liveness; falha da API de estado não significa que o processo esteja morto.
+
+Limites: prova de recuperação apenas entre diretórios locais isolados, sem prova de off-host/Railway. Não há coordenação de múltiplos processos escritores nem garantia universal contra exclusão externa de todos os arquivos/marcadores; legado sem marcador só ganha evidência durável no primeiro write protegido. Esses limites não autorizam migração de banco ou ampliação de acesso. Testes/evidências e rollback: [story](stories/P0-CRM-PERSISTENCE-RECOVERY-01.md).

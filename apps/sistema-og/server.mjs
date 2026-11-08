@@ -12,10 +12,10 @@ const proposalStore = require('./server-proposal-store.cjs');
 const salesExecutionGateway = require('./server-sales-execution-gateway.cjs');
 const callIntelligenceGateway = require('./server-call-intelligence-gateway.cjs');
 const { createAccessSessions } = require('./server-access-session.cjs');
+const { createStateStore } = require('./server-state-store.cjs');
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.OG_DATA_DIR ? path.resolve(process.env.OG_DATA_DIR) : path.join(root, '.data');
-const dataFile = path.join(dataDir, 'shared-state.json');
 const knowledgeFile = path.join(dataDir, 'knowledge', 'index.json');
 const proposalStoreFile = path.join(dataDir, 'public-proposals.json');
 const port = Number(process.env.OG_PORT || 4321);
@@ -43,6 +43,7 @@ const types = {
 };
 
 fs.mkdirSync(dataDir, { recursive: true });
+const stateStore = createStateStore(dataDir);
 const accessSessions = process.env.OG_PERSISTENT_AUTH === 'true'
   ? createAccessSessions({ dataDir, secret: process.env.OG_SESSION_SECRET || localAccessToken, pin: localAccessPin })
   : null;
@@ -100,12 +101,8 @@ function sendJson(res, status, value) {
 }
 
 function readSharedState() {
-  try {
-    const stored = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-    return { ...stored, operations: operationsModel.migrateOperations(stored.operations || {}) };
-  } catch {
-    return { revision: 0, updatedAt: null, leads: [], history: [], operations: operationsModel.createEmptyOperations() };
-  }
+  const stored = stateStore.read();
+  return { ...stored, operations: operationsModel.migrateOperations(stored.operations || {}) };
 }
 
 function isBearerAuthorized(req) {
@@ -233,9 +230,7 @@ function searchKnowledge(body) {
 }
 
 function writeSharedState(next) {
-  const temporary = `${dataFile}.tmp`;
-  fs.writeFileSync(temporary, JSON.stringify(next, null, 2));
-  fs.renameSync(temporary, dataFile);
+  stateStore.write(next);
 }
 
 function cleanArray(value, max) {
@@ -605,7 +600,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/api/state' && req.method === 'GET') {
-    return sendJson(res, 200, readSharedState());
+    try { return sendJson(res, 200, readSharedState()); }
+    catch { return sendJson(res, 503, { error:'state_storage_unavailable', message:'Armazenamento do CRM indisponível. Preserve os dados e revise a recuperação.' }); }
   }
 
   if (url.pathname === '/api/state' && req.method === 'PUT') {
@@ -638,6 +634,7 @@ const server = http.createServer(async (req, res) => {
       writeSharedState(next);
       return sendJson(res, 200, next);
     } catch (error) {
+      if (error.code === 'STATE_STORAGE_UNAVAILABLE') return sendJson(res, 503, { error:'state_storage_unavailable', message:error.message });
       return sendJson(res, 400, { error: error.message });
     }
   }

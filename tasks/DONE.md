@@ -316,3 +316,8 @@ Approved heading-chain and missing-media contrast fixes preserve canonical calcu
 ## P0-A-RACE-RESOLUTION-01 (2026-11-07)
 
 Local race fix and bounded QA complete; GO conditioned for remote integration review only. No push/deploy. See [P0-A story](../docs/stories/P0-A-commercial-identity-integrity.md). Historical execution attribution and P0-B/independent recovery remain unproven.
+
+
+## P0-CRM-PERSISTENCE-RECOVERY-01 — local (2026-11-08)
+
+P0-A remoto agora7519e4a, sem deploy. Proteção de leitura/escrita e recuperação explícita implementada localmente; conferir gates/status na [story](../docs/stories/P0-CRM-PERSISTENCE-RECOVERY-01.md). Nenhum push desta proteção autorizado. Homologação de armazenamento hospedado/off-host continua pendente; backlog visual permanece separado e não implementado.

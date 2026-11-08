@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {spawn} from 'node:child_process';
-import {mkdtemp,rm,mkdir} from 'node:fs/promises';
+import {mkdtemp,rm,mkdir,readFile,writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import net from 'node:net';
@@ -53,6 +53,14 @@ try{
  await page.waitForTimeout(800);assert.ok(puts-beforeFailure<=2,'503 must not cause infinite request retry');
  rejectPut=false;await context.setOffline(true);await context.setOffline(false);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');assert.equal(await queued(),null);assert.equal((await remote()).leads.find(x=>x.id==='QA-RECONNECT').nextAction,'QA keep pending under503');
  console.log('HTTP503 preserves pending/never fake OK/no request loop; later real reconnect publishes PASS');
+ // Actual storage corruption produces server 503; no route-fabricated status here.
+ const durableFile=path.join(dataDir,'shared-state.json'),durableBefore=await readFile(durableFile),corruptBytes='{"revision":';
+ await writeFile(durableFile,corruptBytes);const storageQueueBefore=await page.evaluate(()=>window.__qaQueueCompleted);await outcome('QA actual storage failure retained');
+ await page.waitForFunction(n=>window.__qaQueueCompleted>=n+2,storageQueueBefore);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='offline');assert.ok(await queued());assert.equal(await readFile(durableFile,'utf8'),corruptBytes);assert.equal(await page.evaluate(async()=>(await fetch('/api/state')).status),503);assert.notEqual(await page.locator('#og-sync-status').getAttribute('data-mode'),'ok');
+ if(artifacts)await page.screenshot({path:path.join(artifacts,'real-storage-503.png')});
+ // Explicit repair of this synthetic fixture only, then genuine reconnect.
+ await writeFile(durableFile,durableBefore);await context.setOffline(true);await context.setOffline(false);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');assert.equal(await queued(),null);assert.equal((await remote()).leads.find(x=>x.id==='QA-RECONNECT').nextAction,'QA actual storage failure retained');
+ console.log('Actual corrupted storage returns503, preserves outbox/bytes and publishes only after explicit fixture repair+ACK PASS');
  await page.evaluate(async()=>{const state=await(await fetch('/api/state')).json();state.leads.find(x=>x.id==='QA-RECONNECT').nextAction='QA concurrent other device';const r=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});if(!r.ok)throw Error('remote concurrency fixture setup failed');});
  await outcome('QA local conflict retained');await page.waitForFunction(()=>Boolean(document.querySelector('#og-sync-conflict-banner')));assert.ok(await page.evaluate(()=>OG_SYNC_BRIDGE.loadConflict()));assert.equal(await page.locator('#og-sync-status').getAttribute('data-mode'),'conflict');
  assert.equal((await remote()).leads.find(x=>x.id==='QA-RECONNECT').nextAction,'QA concurrent other device');

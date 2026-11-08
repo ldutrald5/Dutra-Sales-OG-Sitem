@@ -218,3 +218,10 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 - Localized startup/renderer feedback, preserved sync/PWA/data contracts and coordinated reconnect with initial recovery.
 - Passed 75/75 regression gates and eight-viewport browser acceptance, including cached offline PWA with real API acknowledgement. Browser online-event emulation and existing caught bootstrap debt are recorded.
 - Supabase/preview/domain services unchanged; integration publication only, no production deploy or Stage 3.
+
+
+## 2026-11-08 — P0-A remoto / recuperação de armazenamento local
+
+- Incorporação remota P0-A em7519e4a por fast-forward, sem deploy ou main.
+- Local posterior: falha de leitura/JSON não vira base vazia200; PUT recusa sobrescrita após erro; backup anterior v1 verificado antes da escrita atômica; CLI explícita de export/restore sem sobrescrever destino diferente.
+- Regressões sintéticas de falha I/O, estado desaparecido, restore/restart, IDs/histórico e outbox503/409. Gates finais na story. Não certifica recuperação independente do Railway.

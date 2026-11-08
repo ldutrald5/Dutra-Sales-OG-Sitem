@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -11,11 +11,11 @@ Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
 | decision | 27 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 31 |
+| incident | 32 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 48 |
+| source | 49 |
 
 ## Active decisions
 
@@ -96,6 +96,8 @@ Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-CRM-STATE-READ-EMPTY-001 — Unreadable shared state treated as a new empty CRM** (resolved/high)
+  Only legitimate absence can initialize empty state; corruption/I/O or prior-state evidence must fail closed and cannot authorize a revision-zero overwrite.
 - **INC-CRM-IMPORT-GENERATION-001 — Stale import reviews and colliding import identities** (resolved/high)
   Import reviews belong to a cancellable request generation; canonical record and activity IDs cannot be timestamps/row positions or repeated source hashes alone.
 - **INC-QUOTE-CLIENT-TRANSITION-001 — Partial client bridges retain another account’s commercial context** (resolved/high)
@@ -110,8 +112,6 @@ Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Semantic pagination keeps consecutive technical headings with the first substantive block; approved minimal fix does not change calculations.
 - **INC-PROPOSAL-MEDIA-FALLBACK-CONTRAST-001 — Hero missing-media placeholder inherits unreadable white text** (resolved/high)
   Missing conceptual media keeps a readable explicit placeholder; approved selector correction preserves technical values/DesignDNA.
-- **INC-QUOTE-RECURSIVE-SNAPSHOT-001 — Quote history recursively copies CRM and older quote snapshots** (resolved/high)
-  Quote composition snapshots must exclude application-global CRM/history/operations to keep future saves bounded while preserving existing records.
 
 ## Candidate / planned ideas
 
@@ -179,6 +179,8 @@ Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CRM-STORAGE-RECOVERY-20261108-001 — Local shared-state corruption and recovery regression** (validated/high)
+  Synthetic HTTP on 7519e4a reproduced empty HTTP200 and revision0 overwrite after corrupted state. New fault-injection/HTTP/CLI tests exercise fail-closed storage, previous-state backup, explicit restore, restart and native outbox recovery. No live CRM data or hosted restore used.
 - **SRC-P0A-RACE-20261107-001 — Bounded deterministic delete/import investigation** (validated/high)
   Actual app functions tested with synthetic records and fixed Date; pre-fix failures prove stale preview completion, timestamp/index IDs and source-hash audit-event collisions. Native browser transport gates cover stale reads and delayed acknowledgements. Historical failing execution cause remains unproven.
 - **SRC-P0A-COMMERCIAL-INTEGRITY-20261013-001 — P0-A commercial identity regressions** (validated/high)
@@ -197,8 +199,6 @@ Generated from 205 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas explicitly chose A Impacto OG as best and would discard B/C. Criticized tractor template in composition; praised yellow savings highlight and asked for a complementary black cat-eye-like band. Selection supersedes prior three-way exploration without changing canonical engines, financial assumptions or historical functional templates.
 - **SRC-PROPOSAL-IMPACTO-FINAL-20261009-001 — Lucas official Impacto OG confirmation and isolated final review** (validated/high)
   Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
-- **SRC-PROPOSAL-IMPACTO-IMPLEMENTATION-20261009-001 — Authorized Impacto OG integration and actual export evidence** (validated/high)
-  Lucas authorized development implementation and local commits without publication. One existing proposal renderer now supports pinned Impacto theme revision, topology-compatible first-party conceptual media/text fallback, story before technical annex, always-visible active ROI premises, canonical frozen totals and pt-BR payback. Focused integrated/classic browser exports, immutable legacy revisions, client async safety and 8 viewports passed; actual PDF/PNG and long16-page/24-page cap evidence are available. No live customer data, external sends or runtime mutation.
 
 ## Retrieval workflow
 

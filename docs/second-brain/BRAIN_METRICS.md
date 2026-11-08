@@ -11,11 +11,11 @@
 | Decisions superseded/deprecated | 0 |
 | Experiments completed/implemented | 1/1 |
 | Open questions resolved | 2/8 |
-| Incidents resolved | 30/31 |
+| Incidents resolved | 31/32 |
 | Open/active incidents | 1 |
 | Correctly blocked cycles/releases recorded | 6 |
 | Median tracked cycle time | 0.0 h |
-| Sources in brain | 48 |
+| Sources in brain | 49 |
 
 ## Interpretation
 

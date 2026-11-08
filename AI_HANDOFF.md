@@ -146,3 +146,8 @@ Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outco
 ## Handoff Stage7 — Multi-Veículos
 
 A autorização atual é Stage7, substituindo os bloqueios históricos de sequência acima. Consulte o checkpoint para composição canônica, assinaturas de identidade, recuperação em operations.quotes e gates reais. Autorização histórica Stage7 supersedida por Stage8; não alterar main/produção. O preview integrado é o piloto isolado UXR; V3 histórica continua separada.
+
+
+## Retomada de 2026-11-08 — baseline e proteção local
+
+P0-A integrado por fast-forward na branch remota de integração: `7519e4a1330cea9bccd983f4fb1cebb40a4dc982`; sem main/deploy/infraestrutura. Nova proteção de persistência/backup/restore é local e não publicada. Continuam OG_CRM_SERVICE/state.leads, revisão/409/outbox e formato backup v1; não há novo banco/CRM ou auto-restore. Ver [story](docs/stories/P0-CRM-PERSISTENCE-RECOVERY-01.md) e checkpoint para evidências/limites. Backlog visual ainda não aprovado para implementação permanece separado.

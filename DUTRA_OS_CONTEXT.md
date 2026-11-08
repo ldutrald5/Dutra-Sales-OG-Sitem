@@ -157,3 +157,8 @@ Meu Dia is a readonly operational projection in apps/sistema-og; queue/NBA/outco
 ## CONVERGENCE-01 Stage7 — autorização atual (2026-10-08)
 
 O QG autorizou Multi-Veículos Premium após Stage6.7 COMPLETE. Base `2797d3db087d774f5ec7350deba1f3c162ad1550`. Owners: state.vehicles, state.consultant/operations.quotes, OG_DATA/buildConsolidatedVehiclePieces e calculateCompleteQuote. Status/evidência/publicação atuais no checkpoint V3_UNIFICATION_CHECKPOINT. Stage8 exige nova autorização; o piloto isolado preserva volume/sessão/dados reais.
+
+
+## Retomada de 2026-11-08 — baseline e proteção local
+
+P0-A integrado por fast-forward na branch remota de integração: `7519e4a1330cea9bccd983f4fb1cebb40a4dc982`; sem main/deploy/infraestrutura. Nova proteção de persistência/backup/restore é local e não publicada. Continuam OG_CRM_SERVICE/state.leads, revisão/409/outbox e formato backup v1; não há novo banco/CRM ou auto-restore. Ver [story](docs/stories/P0-CRM-PERSISTENCE-RECOVERY-01.md) e checkpoint para evidências/limites. Backlog visual ainda não aprovado para implementação permanece separado.
