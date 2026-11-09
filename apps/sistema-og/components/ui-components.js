@@ -9,8 +9,16 @@
     const selected = String(lead.id) === String(options.selectedId || '');
     const last = options.lastInteraction;
     const operational = options.operational;
+    const identity = options.identityLabel ? `<small class="sales-desk-row-identity">${escape(options.identityLabel)}</small>` : '';
     const why = operational ? `<small class="mission-row-reason">Por que agora: ${escape(operational.reason)}</small>` : '';
-    return `<article class="sales-desk-row${selected ? ' selected' : ''}" data-desk-lead="${escape(lead.id)}"><button type="button" class="sales-desk-select" data-desk-select="${escape(lead.id)}"${selected ? ' aria-current="true"' : ''}><span><span class="sales-desk-row-title"><b>${escape(lead.empresa || lead.nome || 'Cliente sem nome')}</b>${selected ? '<em>Em foco</em>' : ''}</span><small>${escape(lead.nome || 'Contato não informado')} · ${escape(lead.status || 'novo')}</small>${why}</span><span><strong>${escape(operational?.action || lead.nextAction || 'Definir próximo passo')}</strong><small>${escape(last?.note || 'Sem interação registrada')}</small></span><time>${escape(options.followUpLabel || 'Sem data')}</time></button><button type="button" class="sales-desk-whatsapp" data-desk-whatsapp="${escape(lead.id)}" aria-label="Abrir WhatsApp de ${escape(lead.empresa || lead.nome)}">WhatsApp</button></article>`;
+    return `<article class="sales-desk-row${selected ? ' selected' : ''}" data-desk-lead="${escape(lead.id)}">
+      <button type="button" class="sales-desk-select" data-desk-select="${escape(lead.id)}" aria-pressed="${selected}"${selected ? ' aria-current="true"' : ''}>
+        <span><span class="sales-desk-row-title"><b>${escape(lead.empresa || lead.nome || 'Cliente sem nome')}</b>${selected ? '<em>Em foco</em>' : ''}</span>
+        <small>${escape(lead.nome || 'Contato não informado')} · ${escape(lead.status || 'novo')}</small>${identity}${why}</span>
+        <span><strong>${escape(operational?.action || lead.nextAction || 'Definir próximo passo')}</strong><small>${escape(last?.note || 'Sem interação registrada')}</small></span>
+        <time>${escape(options.followUpLabel || 'Sem data')}</time>
+      </button><button type="button" class="sales-desk-whatsapp" data-desk-whatsapp="${escape(lead.id)}" aria-label="Abrir WhatsApp de ${escape(lead.empresa || lead.nome)}">WhatsApp</button>
+    </article>`;
   }
   function timeline(items) {
     if (!items?.length) return '<div class="sales-desk-empty">Nenhuma interação registrada.</div>';

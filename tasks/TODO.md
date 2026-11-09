@@ -1,5 +1,11 @@
 # Backlog do Sistema OG
 
+## PREMIUM-DESIGN-ADOPTION-01 — Precision Workspace / Mesa V2
+
+- Status: concluída localmente para revisão; sem publicação e com ressalvas de cobertura no relatório.
+- Story: `docs/stories/PREMIUM-DESIGN-ADOPTION-01.md`.
+- Próximo incremento candidato: header da ficha universal Company 360, somente após avaliação deste lote.
+
 Stage8.1 — pacote local concluído/PATCH_READY; patch exclusivo do piloto revisado, aplicação pendente pelo QG. Próxima ação QG: revisar/aplicar somente piloto e smoke; não ampliar escopo. Stage8 aceita online.
 
 

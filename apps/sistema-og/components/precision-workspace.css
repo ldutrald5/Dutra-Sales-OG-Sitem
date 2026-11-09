@@ -1,0 +1,165 @@
+/* Precision Workspace V1 — Mesa only. Existing OG values remain authoritative. */
+.dutra-shell #tab-dia.precision-workspace {
+  --pw-canvas: var(--og-bg);
+  --pw-surface: var(--og-surface);
+  --pw-raised: var(--og-surface-raised);
+  --pw-text: var(--og-text);
+  --pw-muted: var(--og-muted);
+  --pw-brand: var(--og-brand);
+  --pw-hover: #252a31;
+  --pw-selected: #292919;
+  --pw-border: #343a43;
+  --pw-control: #738091;
+  --pw-radius: .5rem;
+  --pw-control-radius: .375rem;
+  --pw-space: 1rem;
+  --pw-caption: .75rem;
+  --pw-body: .875rem;
+  --pw-motion: 120ms;
+  max-width: 100rem;
+  margin-inline: auto;
+  color: var(--pw-text);
+  font-size: var(--pw-body);
+  line-height: 1.5;
+}
+.dutra-shell #tab-dia.precision-workspace > * + * { margin-top: 1rem; }
+.dutra-shell #tab-dia.precision-workspace { gap:1rem; }
+.dutra-shell #tab-dia.precision-workspace > * { margin-top:0; margin-bottom:0; }
+.dutra-shell #tab-dia.precision-workspace .og-command-hero { min-height:0; padding:0 0 1.25rem; border:0; border-bottom:1px solid var(--pw-border); border-radius:0; background:none; box-shadow:none; gap:1rem; }
+.dutra-shell #tab-dia.precision-workspace .og-command-hero::after { display:none; }
+.dutra-shell #tab-dia.precision-workspace .og-command-copy { max-width:none; }
+.dutra-shell #tab-dia.precision-workspace .og-kicker { color:var(--pw-muted); font-size:var(--pw-caption); font-weight:600; letter-spacing:.06em; }
+.dutra-shell #tab-dia.precision-workspace .og-command-hero h1 { margin:.25rem 0; font-size:1.5rem; line-height:2rem; font-weight:600; letter-spacing:-.025em; }
+.dutra-shell #tab-dia.precision-workspace .og-command-hero p { font-size:var(--pw-body); line-height:1.5; color:var(--pw-muted); }
+.dutra-shell #tab-dia.precision-workspace .og-command-clock { background:none; border:0; padding:0; min-width:0; }
+.dutra-shell #tab-dia.precision-workspace .og-command-clock strong { font-size:1.25rem; line-height:1.5; font-weight:500; font-variant-numeric:tabular-nums; }
+.dutra-shell #tab-dia.precision-workspace .og-command-clock span { font-size:var(--pw-caption); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-layout { grid-template-columns:minmax(280px,.42fr) minmax(464px,.58fr); gap:1.5rem; margin-top:1.5rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-side { grid-column:1/-1; order:3; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-queue { padding:0!important; max-height:none; overflow:visible; border:1px solid var(--pw-border); border-radius:var(--pw-radius); background:var(--pw-surface); box-shadow:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-queue .og-section-head { display:flex; align-items:flex-start; gap:1rem; flex-direction:column; padding:1rem 1rem 0; }
+.dutra-shell #tab-dia.precision-workspace .og-section-head h2 { font-size:1.125rem; line-height:1.5rem; font-weight:600; }
+.dutra-shell #tab-dia.precision-workspace .precision-queue-count { display:block; color:var(--pw-muted); font-size:var(--pw-caption); margin-top:.25rem; }
+.dutra-shell #tab-dia.precision-workspace .og-filter-row { display:flex; flex-wrap:wrap; gap:.25rem; }
+.dutra-shell #tab-dia.precision-workspace .og-chip { min-height:44px; padding:.5rem .65rem; border:1px solid transparent; border-radius:var(--pw-control-radius); color:var(--pw-muted); background:transparent; font-size:var(--pw-caption); font-weight:500; }
+.dutra-shell #tab-dia.precision-workspace .og-chip.active { background:var(--pw-raised); color:var(--pw-text); border-color:var(--pw-control); box-shadow:none; }
+.dutra-shell #tab-dia.precision-workspace .og-chip-add { color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-search { margin:1rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-search input { font-size:var(--pw-body); min-height:44px; padding:.65rem .75rem; border-radius:var(--pw-control-radius); background:var(--pw-canvas); border-color:var(--pw-control); color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .og-opportunity-list { gap:0; padding:0 0 .25rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row { display:block; position:relative; padding:0; border:0; border-top:1px solid var(--pw-border); border-radius:0; background:transparent; box-shadow:none; transition:background var(--pw-motion) ease; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row:hover { background:var(--pw-hover); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row.selected { background:var(--pw-selected); box-shadow:inset 2px 0 var(--pw-brand); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select { display:flex; flex-direction:column; align-items:stretch; gap:.5rem; width:100%; padding:1rem; min-height:88px; background:transparent; border:0; border-radius:0; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select b { font-size:var(--pw-body); font-weight:600; white-space:normal; overflow-wrap:anywhere; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row-title { justify-content:space-between; gap:.75rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row-title em { padding:0; background:transparent; color:var(--pw-brand); font-size:var(--pw-caption); font-weight:500; text-transform:none; letter-spacing:0; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select strong { font-size:var(--pw-body); font-weight:400; white-space:normal; color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select small { font-size:var(--pw-caption); color:var(--pw-muted); white-space:normal; line-height:1.4; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select .mission-row-reason { display:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select > span:nth-child(2) > small { display:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-select time { font-size:var(--pw-caption); font-variant-numeric:tabular-nums; color:var(--pw-muted); white-space:normal; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-row.selected time { color:#f5c86a; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-whatsapp { display:none; } /* same channel remains in the selected account */
+.dutra-shell #tab-dia.precision-workspace .sales-desk-client { position:static; max-height:none; overflow:visible; padding:1.25rem; background:var(--pw-surface); border:1px solid var(--pw-border); border-radius:var(--pw-radius); box-shadow:none; scroll-margin-top:8rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-client-head { align-items:flex-start; padding-bottom:1rem; border-bottom:0; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-client-head h2 { font-size:1.25rem; line-height:1.4; font-weight:600; letter-spacing:-.02em; overflow-wrap:anywhere; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-client-head :is(p,small) { color:var(--pw-muted); font-size:var(--pw-caption); line-height:1.5; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-status { flex-shrink:0; white-space:nowrap; color:var(--pw-muted); border-color:var(--pw-border); background:var(--pw-raised); font-size:var(--pw-caption); font-weight:500; text-transform:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-now { margin:0 0 1rem; padding:1rem; border:0; border-left:2px solid var(--pw-brand); border-radius:0 var(--pw-control-radius) var(--pw-control-radius) 0; background:var(--pw-raised); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-now > span { color:var(--pw-brand); font-size:var(--pw-caption); font-weight:600; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-now strong { font-size:1.125rem; font-weight:600; line-height:1.5; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-now small { color:var(--pw-muted); font-size:var(--pw-caption); line-height:1.5; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-now-meta { flex-direction:column; align-items:flex-start; gap:.25rem; }
+.dutra-shell #tab-dia.precision-workspace .precision-action-reason { width:100%; }
+.dutra-shell #tab-dia.precision-workspace .precision-action-reason summary { min-height:44px; display:flex; align-items:center; gap:.5rem; cursor:pointer; color:var(--pw-muted); font-size:var(--pw-caption); }
+.dutra-shell #tab-dia.precision-workspace .precision-action-reason summary::before { content:'+'; }
+.dutra-shell #tab-dia.precision-workspace .precision-action-reason[open] summary::before { content:'−'; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin:.75rem 0; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is(button,a),
+.dutra-shell #tab-dia.precision-workspace .og-button { min-height:44px; min-width:44px; font-size:var(--pw-body); line-height:1.4; font-weight:600; border-radius:var(--pw-control-radius); padding:.65rem .9rem; box-shadow:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is(button,a) { border-color:var(--pw-control); background:var(--pw-raised); color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions .sales-desk-main-action,
+.dutra-shell #tab-dia.precision-workspace .og-button-primary { background:var(--pw-brand); color:var(--pw-canvas); border:1px solid var(--pw-brand); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions .sales-desk-main-action { flex:1 1 100%; transition:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is([data-client-call-ai],[data-client-proposal],[data-client-technical]) { border-color:transparent; background:transparent; color:var(--pw-muted); font-size:var(--pw-caption); }
+.dutra-shell #tab-dia.precision-workspace .precision-register-open .sales-desk-main-action { flex:0 1 auto; color:var(--pw-muted); border-color:transparent; background:transparent; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-registration-route { color:var(--pw-muted); font-size:var(--pw-caption); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-register { margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--pw-border); }
+.dutra-shell #tab-dia.precision-workspace :is(.sales-desk-register,.sales-desk-actions,.sales-desk-history)>summary { padding:.65rem 0; min-height:44px; font-size:var(--pw-body); font-weight:600; border:0; background:none; border-radius:var(--pw-control-radius); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-register-body { padding-top:.75rem; gap:1rem; }
+.dutra-shell #tab-dia.precision-workspace .og-field > span { display:block; margin-bottom:.5rem; color:var(--pw-muted); font-size:var(--pw-caption); font-weight:600; }
+.dutra-shell #tab-dia.precision-workspace .og-field :is(input,select,textarea) { width:100%; min-height:44px; background:var(--pw-canvas); color:var(--pw-text); border:1px solid var(--pw-control); border-radius:var(--pw-control-radius); padding:.65rem .75rem; font-size:var(--pw-body); line-height:1.5; }
+.dutra-shell #tab-dia.precision-workspace :is(input,textarea)::placeholder { color:var(--pw-muted); opacity:1; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-result-quick { gap:.5rem; flex-wrap:wrap; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-result-quick button { min-height:44px; padding:.5rem .65rem; font-size:var(--pw-caption); border-radius:var(--pw-control-radius); color:var(--pw-muted); border:1px solid var(--pw-border); background:transparent; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-next { gap:1rem; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-save-row { display:flex; flex-wrap:wrap; gap:.5rem; padding-top:.25rem; }
+.dutra-shell #tab-dia.precision-workspace .og-button-secondary { background:var(--pw-raised); color:var(--pw-text); border:1px solid var(--pw-control); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-history-body :is(small,time),
+.dutra-shell #tab-dia.precision-workspace .sales-desk-actions button { font-size:var(--pw-caption); color:var(--pw-muted); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-history-body :is(b,p),
+.dutra-shell #tab-dia.precision-workspace .sales-desk-side :is(span,small,em,strong,b,p,button,.og-coach-prompt),
+.dutra-shell #tab-dia.precision-workspace .mission-reference :is(span,small),
+.dutra-shell #tab-dia.precision-workspace .morning-command-panel :is(span,small,p,b,button) { font-size:var(--pw-caption); line-height:1.5; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-actions button { min-height:44px; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi-grid { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin:1rem 0 0; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi { display:flex; gap:.5rem; align-items:center; min-height:44px; padding:.5rem 0; background:none; border:0; border-radius:0; box-shadow:none; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi span { color:var(--pw-muted); font-size:var(--pw-caption); text-transform:none; letter-spacing:0; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi strong { color:var(--pw-text); font-size:var(--pw-body); line-height:1.5; font-weight:600; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi small { display:none; }
+.dutra-shell #tab-dia.precision-workspace .precision-priority-support { border-block:1px solid var(--pw-border); padding:.5rem 0; }
+.dutra-shell #tab-dia.precision-workspace :is(.precision-priority-support,.sales-desk-side,.mission-reference)>summary { font-size:var(--pw-body); color:var(--pw-muted); min-height:44px; padding:.65rem .25rem; cursor:pointer; }
+.dutra-shell #tab-dia.precision-workspace :is(.mission-now,.mission-commitments .clean-card) { background:var(--pw-surface); border:1px solid var(--pw-border); border-radius:var(--pw-radius); box-shadow:none; }
+.dutra-shell #tab-dia.precision-workspace :is(.mission-now,.mission-commitments) :is(p,span,small,time,button,summary) { font-size:var(--pw-caption); }
+.dutra-shell #tab-dia.precision-workspace .mission-now h2 { font-size:1.125rem; }
+.dutra-shell #tab-dia.precision-workspace .mission-quick-actions .og-button { background:var(--pw-raised); border-color:var(--pw-control); color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .precision-view-switch { display:none; }
+.dutra-shell #tab-dia.precision-workspace .precision-skip { position:absolute; left:-10000px; }
+.dutra-shell #tab-dia.precision-workspace .precision-skip:focus { position:static; display:inline-block; padding:.5rem; }
+.dutra-shell #tab-dia.precision-workspace :is(button,a,input,select,textarea,summary):focus-visible { outline:2px solid var(--pw-brand); outline-offset:3px; box-shadow:0 0 0 3px var(--pw-canvas); }
+.dutra-shell #tab-dia.precision-workspace :is(button,a):hover { filter:none; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is(button,a):hover { background:var(--pw-hover); color:var(--pw-text); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is(:disabled,[aria-disabled=true]) { background:var(--pw-raised); color:var(--pw-muted); cursor:not-allowed; border-color:var(--pw-border); }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-client:not(.precision-register-open) .sales-desk-primary-actions .sales-desk-main-action:hover { background:#ffe65c; color:var(--pw-canvas); }
+.dutra-shell #tab-dia.precision-workspace .precision-register-open .sales-desk-primary-actions .sales-desk-main-action:hover { background:transparent; color:var(--pw-muted); }
+/* Single execution region precedes supporting projections without changing owners. */
+.dutra-shell #tab-dia.precision-workspace { display:flex; flex-direction:column; }
+.dutra-shell #tab-dia.precision-workspace .og-command-hero { order:0; }
+.dutra-shell #tab-dia.precision-workspace .precision-view-switch,.dutra-shell #tab-dia.precision-workspace .precision-skip { order:1; }
+.dutra-shell #tab-dia.precision-workspace .sales-desk-layout { order:2; }
+.dutra-shell #tab-dia.precision-workspace .og-kpi-grid { order:3; }
+.dutra-shell #tab-dia.precision-workspace .precision-priority-support { order:4; }
+.dutra-shell #tab-dia.precision-workspace #day-commitments { order:5; }
+.dutra-shell #tab-dia.precision-workspace .mission-reference { order:6; }
+@media(min-width:1600px) { .dutra-shell #tab-dia.precision-workspace .sales-desk-layout { grid-template-columns:minmax(280px,520px) minmax(464px,1fr); } }
+@media(max-width:1199px) { .dutra-shell #tab-dia.precision-workspace .sales-desk-layout { grid-template-columns:minmax(280px,.4fr) minmax(0,.6fr); gap:1rem; } }
+@media(min-width:1024px) and (max-width:1100px) { .dutra-shell #tab-dia.precision-workspace .sales-desk-layout { grid-template-columns:1fr; } }
+@media(max-width:767px) {
+  .dutra-shell #tab-dia.precision-workspace .og-command-hero { position:absolute; width:1px; height:1px; min-height:0; overflow:hidden; clip-path:inset(50%); padding:0; border:0; }
+  .dutra-shell #tab-dia.precision-workspace .precision-view-switch { margin-top:0; }
+  .dutra-shell #tab-dia.precision-workspace .og-command-hero h1 { font-size:1.25rem; line-height:1.75rem; }
+  .dutra-shell #tab-dia.precision-workspace .og-command-hero p { display:none; }
+  .dutra-shell #tab-dia.precision-workspace .og-command-clock { display:none; }
+  .dutra-shell #tab-dia.precision-workspace .precision-view-switch { display:flex; gap:.25rem; padding:.25rem; border:1px solid var(--pw-border); border-radius:var(--pw-radius); background:var(--pw-surface); }
+  .dutra-shell #tab-dia.precision-workspace .precision-view-switch button { flex:1; min-height:44px; padding:.5rem; font-size:var(--pw-body); font-weight:600; color:var(--pw-muted); border-radius:var(--pw-control-radius); }
+  .dutra-shell #tab-dia.precision-workspace .precision-view-switch [aria-pressed=true] { color:var(--pw-text); background:var(--pw-raised); box-shadow:inset 0 -2px var(--pw-brand); }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-layout { display:flex; flex-direction:column; gap:1rem; margin-top:1rem; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-layout > * { width:100%; }
+  .dutra-shell #tab-dia.precision-workspace[data-desk-view=focus] .sales-desk-queue { display:none; }
+  .dutra-shell #tab-dia.precision-workspace[data-desk-view=queue] .sales-desk-client { display:none; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-client { padding:1rem; order:1; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-queue { order:1; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-side { order:2; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-client-head { gap:.5rem; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is(button,a) { flex:1 1 calc(50% - .5rem); }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions .sales-desk-main-action { flex-basis:100%; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-primary-actions :is([data-client-call-ai],[data-client-proposal],[data-client-technical]) { flex:1 1 auto; }
+  .dutra-shell #tab-dia.precision-workspace .og-field :is(input,select,textarea),.dutra-shell #tab-dia.precision-workspace .sales-desk-search input { font-size:1rem; line-height:1.5rem; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-next { grid-template-columns:1fr; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-save-row { flex-direction:column; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-queue .og-filter-row { flex-wrap:wrap; overflow:visible; }
+  .dutra-shell #tab-dia.precision-workspace .sales-desk-now strong { font-size:1rem; }
+}
+@media(prefers-reduced-motion:reduce) { .dutra-shell #tab-dia.precision-workspace { --pw-motion:0ms; scroll-behavior:auto; } .dutra-shell #tab-dia.precision-workspace * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+@media(forced-colors:active) { .dutra-shell #tab-dia.precision-workspace :is(button,a,input,select,textarea,summary):focus-visible { outline-color:Highlight; } .dutra-shell #tab-dia.precision-workspace .sales-desk-row.selected { border-left:2px solid Highlight; } }

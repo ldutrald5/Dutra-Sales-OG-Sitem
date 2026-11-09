@@ -1,5 +1,9 @@
 # Entregas existentes
 
+## PREMIUM-DESIGN-ADOPTION-01 — Precision Workspace / Mesa V2
+
+Implementação local sobre o piloto `a47df3d`: tokens escopados, fila compacta com identidade, conta/ação/registro, mobile Fila/Foco sobre os mesmos owners. Oito viewports e inspeção visual real, regressões de identidade/cotação/sync, lint e85gates/Brain/release executados. Story e relatório registram limitações e a ocorrência intermitente do teste ampliado delete/import. Sem publicação, stack nova ou frontend Company360 completo.
+
 Stage8.1 — apresentação/exportação implementada sobre owners atuais: três templates, branco/PDF/PNG, assets autorizados, revisões imutáveis e UX mobile/desktop. Evidência local e publicação no checkpoint; não implica deploy/aceite online8.1.
 
 

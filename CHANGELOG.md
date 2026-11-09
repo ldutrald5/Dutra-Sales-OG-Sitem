@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — Precision Workspace / Mesa V2 (local)
+
+- Adota superfícies planas, tipografia operacional e fila compacta sobre o piloto Mesa existente.
+- Mobile alterna Fila/Conta em foco sobre a mesma seleção; registro e sync preservam owners e revisão.
+- Sem publicação, dados reais, nova stack ou alteração de Company 360/backend.
+
 ## [Unreleased] — Mesa Comercial SaaS B2B Pilot 01 (2026-11-09, local)
 
 - Reorganiza a Mesa existente para destacar conta, próxima ação e registro de resultado.

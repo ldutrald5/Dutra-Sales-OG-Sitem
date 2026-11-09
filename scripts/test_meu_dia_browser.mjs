@@ -13,6 +13,7 @@ if(artifacts) await mkdir(artifacts,{recursive:true});
 const port=await new Promise(resolve=>{const socket=net.createServer();socket.listen(0,'127.0.0.1',()=>{const port=socket.address().port;socket.close(()=>resolve(port));});});
 const server=spawn(process.execPath,['apps/sistema-og/server.mjs'],{cwd:new URL('../',import.meta.url),env:{...process.env,OG_PORT:String(port),OG_HOST:'127.0.0.1',OG_DATA_DIR:dataDir},stdio:'pipe'});
 let browser;
+let page;
 const base=`http://127.0.0.1:${port}`;
 const isoDay=delta=>{const date=new Date();date.setUTCDate(date.getUTCDate()+delta);return date.toISOString().slice(0,10)+'T10:00';};
 const leads=[
@@ -33,7 +34,10 @@ try {
    if(!localStorage.getItem('og_leads_crm')) {localStorage.setItem('og_leads_crm',JSON.stringify(leads));localStorage.setItem('og_operations_state',JSON.stringify(ops));}
    window.open=(url)=>{window.__qaOpened=String(url);return null;};
  },{leads,ops});
- const page=await context.newPage(); const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ page=await context.newPage(); const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ const deskView=async(view,target=page)=>{if(target.viewportSize().width<768)await target.locator(`button[data-desk-view="${view}"]`).click();};
+ const selectDesk=async(id,target=page)=>{await deskView('queue',target);await target.locator(`[data-desk-select="${id}"]`).click();};
+ const searchDesk=async(value)=>{await deskView('queue');await page.locator('#sales-desk-search').fill(value);};
  await page.goto(base+'/#dia');await page.waitForFunction(()=>document.body.dataset.shellReady==='true');
  await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='ok');
  assert.match(await page.locator('#mission-now-title').textContent(),/QA Frota Prioritária/);
@@ -48,21 +52,23 @@ try {
  assert.match(await page.locator('#day-commitments').textContent(),/Salva \/ preparada · envio não confirmado/);
  assert.match(await page.locator('#day-commitments').textContent(),/Reuniões/);
  assert.ok(!(await page.locator('#day-opportunity-list').textContent()).includes('QA Terminal'));
- await page.locator('#sales-desk-search').fill('Frota Hoje');
+ await searchDesk('Frota Hoje');
  await page.waitForFunction(()=>document.querySelectorAll('#day-opportunity-list [data-desk-lead]').length===1);
- await page.locator('[data-desk-select="QA-B"]').click();
+ await selectDesk('QA-B');
  const sheetTrigger=page.locator('[data-client-crm]');await sheetTrigger.focus();await sheetTrigger.click();
  assert.equal((await page.locator('#client-sheet-title').textContent()).trim(),'QA Frota Hoje');
  await page.locator('[data-client-sheet-close]').first().click();
  assert.equal(await page.locator('#sales-desk-search').inputValue(),'Frota Hoje','sheet close must preserve the queue query');
  assert.equal(await page.locator('[data-desk-select="QA-B"]').getAttribute('aria-current'),'true','sheet close must preserve selected identity');
  await page.waitForFunction(()=>document.activeElement?.hasAttribute('data-client-crm'));
- await page.locator('#sales-desk-search').fill('');await page.waitForFunction(()=>document.querySelectorAll('#day-opportunity-list [data-desk-lead]').length===3);
+ await searchDesk('');await page.waitForFunction(()=>document.querySelectorAll('#day-opportunity-list [data-desk-lead]').length===3);
+ await page.locator('.precision-priority-support > summary').click();
  await page.locator('[data-mission-whatsapp]').click();
  assert.match(await page.evaluate(()=>window.__qaOpened),/^https:\/\/wa.me\//);
  const wa=await page.evaluate(()=>JSON.parse(localStorage.getItem('og_leads_crm')).find(x=>x.id==='QA-A'));
  assert.equal(wa.status,'contatado');assert.equal(wa.interactions.filter(x=>x.type==='whatsapp_opened').length,1);
  await page.locator('[data-mission-act]').click();
+ await page.locator('.precision-priority-support > summary').click();
  await page.locator('#desk-result').selectOption('falar_depois');
  await page.locator('#desk-note').fill('QA retorno confirmado após diagnóstico');
  await page.locator('#desk-next-action').fill('QA confirmar diagnóstico amanhã');
@@ -83,7 +89,7 @@ try {
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('og_leads_crm')).find(x=>x.id==='QA-A').nextAction),'QA confirmar diagnóstico amanhã');
  assert.equal(await page.locator('#day-opportunity-list [data-desk-lead]').count(),3);
  await context.setOffline(true);await page.waitForFunction(()=>document.querySelector('#og-sync-status').dataset.mode==='offline');
- await page.locator('[data-desk-select="QA-B"]').click();await page.locator('[data-client-register]').click();
+ await selectDesk('QA-B');await page.locator('[data-client-register]').click();
  await page.locator('#desk-result').selectOption('nao_atendeu');await page.locator('#desk-next-action').fill('QA novo retorno offline');
  await page.locator('#desk-follow-mode').selectOption('tomorrow');await page.locator('#desk-save-stay').click();
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('og_leads_crm')).find(x=>x.id==='QA-B').nextAction),'QA novo retorno offline');
@@ -91,17 +97,24 @@ try {
  const remote=await page.evaluate(async()=>{const r=await fetch('/api/state');return r.json();});
  assert.ok(JSON.stringify(remote).includes('QA novo retorno offline'),'real reconnect must publish supported operation');
  // Explicit terminal outcome clears stale commitments and removes client from queue.
- await page.locator('[data-desk-select="QA-A"]').click();await page.locator('[data-client-register]').click();
+ await selectDesk('QA-A');await page.locator('[data-client-register]').click();
  await page.locator('#desk-result').selectOption('venda');await page.locator('#desk-save-stay').click();
  await page.waitForFunction(()=>!document.querySelector('[data-desk-lead="QA-A"]'));
  assert.ok(!(await page.locator('.mission-now').textContent()).includes('QA Frota Prioritária'));
- await page.locator('[data-desk-select="QA-C"]').click();assert.match(await page.locator('.sales-desk-now').textContent(),/REVISAR \/ COMPLETAR CONTEXTO/);
+ await selectDesk('QA-C');assert.match(await page.locator('.sales-desk-now').textContent(),/REVISAR \/ COMPLETAR CONTEXTO/);
  console.log('Functional: priority/action/result/NBA/reorder/refresh/offline/reconnect/double-click/dedup/terminal/proposal facts PASS');
  for(const [width,height] of [[320,568],[360,800],[390,844],[430,932],[768,1024],[1280,720],[1440,900],[1920,1080]]) {
-   await page.setViewportSize({width,height});await page.evaluate(()=>scrollTo(0,0));
-   assert.ok(await page.locator('.mission-now').isVisible());
-   const mainAction=await page.locator('[data-mission-act]').boundingBox();
-   assert.ok(mainAction.y+mainAction.height < height-(width<1024?80:0), `${width}: primary action must be visible above navigation at entry`);
+   await page.setViewportSize({width,height});await deskView('focus');
+   if(await page.locator('.sales-desk-register').evaluate(element=>element.open))await page.locator('.sales-desk-register > summary').click();
+   await page.evaluate(()=>scrollTo(0,0));
+   assert.ok(await page.locator('#sales-desk-client').isVisible());
+   // At the two smallest sizes readable metadata may require a short scroll.
+   // Larger viewports still prove that the action is present at initial entry.
+   if(width<=360)await page.locator('[data-client-register]').evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));
+   const mainAction=await page.locator('[data-client-register]').boundingBox();
+   const navTop=width<1024?(await page.locator('.og-mobile-nav').boundingBox()).y:height;
+   assert.ok(mainAction.y>=0&&mainAction.y+mainAction.height<=navTop, `${width}: primary action must be visible above navigation${width<=360?' after a short scroll':' at entry'}`);
+   if(artifacts&&width<=360)await page.screenshot({path:path.join(artifacts,`${width}-action-visible.png`)});
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);assert.ok(overflow<=1,`${width}: overflow ${overflow}`);
    assert.equal(await page.locator('#nav-tabs-container').isVisible(),width>=1024);
    assert.equal(await page.locator('.og-mobile-nav').isVisible(),width<1024);
@@ -121,7 +134,7 @@ try {
    const saved=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(remote)});
    if(!saved.ok)throw new Error('Unable to create isolated remote edit');
  });
- await page.locator('[data-desk-select="QA-B"]').click();await page.locator('[data-client-register]').click();
+ await selectDesk('QA-B');await page.locator('[data-client-register]').click();
  await page.locator('#desk-result').selectOption('falar_depois');await page.locator('#desk-next-action').fill('QA manter alteração local em conflito');
  await page.locator('#desk-follow-mode').selectOption('tomorrow');await page.locator('#desk-save-stay').click();
  await page.waitForFunction(()=>Boolean(document.querySelector('#og-sync-conflict-banner')));
@@ -140,10 +153,10 @@ try {
  const np=await normalized.newPage();
  await np.route('**/api/state',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({revision:0,leads:[],history:[],operations:{}})}));
  await np.goto(base+'/#dia');await np.waitForFunction(()=>document.body.dataset.shellReady==='true');
- await np.locator('[data-desk-select="QA-A"]').click();await np.locator('[data-client-call-ai]').click();
+ await selectDesk('QA-A',np);await np.locator('[data-client-call-ai]').click();
  await np.locator('#call-ai-prepare').click();await np.waitForFunction(()=>!document.querySelector('#call-ai-workspace').classList.contains('hidden'));
  await np.locator('#call-ai-notes').fill('QA anotação que não deve ser descartada');
- await np.locator('.nav-tab[data-tab="dia"]').click();await np.locator('[data-desk-select="QA-N"]').click();
+ await np.locator('.nav-tab[data-tab="dia"]').click();await selectDesk('QA-N',np);
  np.once('dialog',dialog=>dialog.dismiss());await np.locator('[data-client-register]').click();
  assert.ok(!(await np.locator('#call-ai-review').isVisible()),'cancelled account switch must not open review for prior identity');
  await np.locator('.nav-tab[data-tab="dia"]').click();
@@ -154,4 +167,7 @@ try {
  assert.equal(await np.locator('#call-ai-summary').inputValue(),'','account selection must not fabricate conversation facts');
  console.log('Normalized owner bridge: cancel preserves prior notes; accepted switch reviews exact canonical account, no external mutation PASS');
  await normalized.close();
+} catch(error) {
+ if(artifacts&&page)await page.screenshot({path:path.join(artifacts,'failure.png')}).catch(()=>{});
+ throw error;
 } finally {await browser?.close();server.kill('SIGTERM');await rm(dataDir,{recursive:true,force:true});}

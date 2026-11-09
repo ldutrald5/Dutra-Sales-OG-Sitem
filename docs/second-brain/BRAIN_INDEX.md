@@ -1,6 +1,6 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 214 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
@@ -8,14 +8,14 @@ Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
 |---|---:|
 | anti_pattern | 17 |
 | cycle | 32 |
-| decision | 27 |
+| decision | 28 |
 | experiment | 1 |
 | idea | 4 |
 | incident | 35 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 50 |
+| source | 51 |
 
 ## Active decisions
 
@@ -73,6 +73,8 @@ Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
   The primary DUTRA OS proposal experience will be built as a configurable sequence of reusable story blocks over one frozen canonical proposal view model. The first screen must communicate the commercial essence in seconds; technical detail remains available progressively. Theme/tokens, block order, visibility, copy and media are presentation configuration, not business logic. PDF/PNG/print are projections of the same model. Gamma may inform interaction/editability patterns but is not a runtime dependency or source of truth.
 - **DEC-PROPOSAL-IMPACTO-001 — Impacto OG is the selected proposal creative direction** (active/high)
   Use A Impacto OG as the official Stage8.2 Proposal Experience V2 creative direction: short strong opening, clear Cavalo/Carreta composition, and dominant yellow economic value with complementary black eye-inspired band. Archive B/C exploration; retain Stage8.1 functional templates and single canonical proposal/quote/ROI/technical owners. Refinements are reviewed before definitive implementation.
+- **DEC-PRECISION-WORKSPACE-001 — Adopt Precision Workspace incrementally in the existing Mesa** (active/high)
+  Precision Workspace is the experimental internal-workspace direction. Adopt scoped semantic aliases of canonical OG tokens, flat surfaces, readable operational typography and one contextual primary. Queue/focus mobile modes are ephemeral presentation over the same queue and selection. Preserve identity, reviewed writers, durable outbox and real ACK semantics. Impacto OG remains the proposal direction; no global shell rewrite or parallel CRM.
 
 ## Open questions
 
@@ -181,6 +183,8 @@ Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 - **SRC-CRM-PERSISTENCE-REVIEW-20261109-001 — Adversarial review of recovered local CRM persistence** (validated/high)
   20 original file hashes verified. Deterministic synthetic probes on84 demonstrated restore overwrite races, hosted CLI signal mismatch and timestamp/checksum ambiguity; minimal local corrections and38 targeted cases pass. Historical85/19/6 evidence is not a current rerun.
+- **SRC-PRECISION-WORKSPACE-20261109-001 — Approved experimental Precision Workspace handoff** (validated/high)
+  User selected Precision Workspace for local incremental Mesa implementation over a47df3. Supplied DUTRA_DESIGN_V1_HANDOFF.zip SHA256 19d47dafec5b4a123b1f5b12fa66c2c537c4fba20c37fd5ea77b39a147846dc0 is visual specification, not validated business code. Seven documents reconciled with current owners; no publication authorized.
 - **SRC-CRM-STORAGE-RECOVERY-20261108-001 — Local shared-state corruption and recovery regression** (validated/high)
   Synthetic HTTP on 7519e4a reproduced empty HTTP200 and revision0 overwrite after corrupted state. New fault-injection/HTTP/CLI tests exercise fail-closed storage, previous-state backup, explicit restore, restart and native outbox recovery. No live CRM data or hosted restore used.
 - **SRC-P0A-RACE-20261107-001 — Bounded deterministic delete/import investigation** (validated/high)
@@ -197,8 +201,6 @@ Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Na primeira revisão da prancha Stage 8.2, Lucas gostou dos três estilos e pediu preservá-los como exemplos/variantes. Solicitou reduzir levemente a área preta atrás do caminhão e dos títulos para revelar mais amarelo e sugerir olho de gato com sutileza; abertura com problema/solução e poucos dados, podendo destacar pneus atendidos; composição Cavalo × Carreta e investimento progressivo do eixo ao conjunto nas camadas seguintes. Pediu personalização com logo do cliente e registro de uma futura proposta acessível por link com apresentação narrada. Citou 2% de diesel, 20% relacionados à economia/vida do pneu e 18 meses; estes valores são premissas mencionadas, não evidência validada nem defaults universais.
 - **SRC-PROPOSAL-V2-20261009-001 — Proposal Experience V2: Lucas clarification and isolated native-model previews** (validated/high)
   Lucas confirmed 18 months as current lifetime of a new tire and 20% as estimated increase in lifetime. Meanings are resolved without proving universal performance. Audited canonical calculateRoi and snapshot/view-model contracts; produced three isolated visual directions over the same synthetic native quote (2 tractors, 3 trailers, 88 pieces, 44 tires, BRL6490). Synthetic tire price2000 and scoped monthly fuel10000 with20%/18months/2% produce canonical monthly1014.81/year12177.78/payback6.40; unrevised premises return validate/null. No real customer data, production mutation, new owner or publication.
-- **SRC-PROPOSAL-IMPACTO-SELECTED-20261009-001 — Lucas selects Impacto OG and requests tractor/ribbon refinement** (validated/high)
-  Lucas explicitly chose A Impacto OG as best and would discard B/C. Criticized tractor template in composition; praised yellow savings highlight and asked for a complementary black cat-eye-like band. Selection supersedes prior three-way exploration without changing canonical engines, financial assumptions or historical functional templates.
 
 ## Retrieval workflow
 

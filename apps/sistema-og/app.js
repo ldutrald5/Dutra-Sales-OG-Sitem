@@ -4030,6 +4030,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       state.selectedLeadId = lead.id;
       dayFilter = 'all';
       state.salesDeskSearch = '';
+      setDeskView('focus');
       const search = document.getElementById('sales-desk-search');
       if (search) search.value = '';
       renderDayDashboard();
@@ -4131,6 +4132,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root.querySelector('[data-morning-mission]')?.addEventListener('click', () => {
       if (!report.mission) return;
       state.selectedLeadId = report.mission.leadId;
+      setDeskView('focus');
       dayFilter = 'all';
       renderDayDashboard();
       document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:'smooth', block:'start' });
@@ -4277,6 +4279,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       state.selectedLeadId = lead.id;
       dayFilter = 'all';
       document.querySelectorAll('.og-chip[data-day-filter]').forEach(item => item.classList.toggle('active', item.dataset.dayFilter === 'all'));
+      setDeskView('focus');
       renderDayDashboard();
       document.getElementById('sales-desk-client')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }));
@@ -4294,6 +4297,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     dayFilter = 'all';
     state.salesDeskSearch = '';
     state.selectedLeadId = lead.id;
+    setDeskView('focus');
     const search = document.getElementById('sales-desk-search');
     if (search) search.value = '';
     renderDayDashboard();
@@ -4329,14 +4333,16 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       if (!state.selectedLeadId || !state.leads.some(lead => lead.id === state.selectedLeadId)) state.selectedLeadId = selected[0]?.id || null;
       list.innerHTML = selected.slice(0, 30).map(lead => OG_UI_COMPONENTS.clientRow(lead, {
         selectedId: state.selectedLeadId,
+        identityLabel: [clientCodeLabel(lead), lead.cidadeUf].filter(Boolean).join(' · '),
         lastInteraction: OG_SALES_DESK.lastInteraction(lead),
         followUpLabel: formatFollowUp(lead.followUpAt),
         operational: view.describe(lead)
       })).join('');
       list.querySelectorAll('[data-desk-select]').forEach(button => button.addEventListener('click', () => {
         state.selectedLeadId = button.dataset.deskSelect;
+        setDeskView('focus');
         renderDayDashboard();
-        if (window.innerWidth <= 850) requestAnimationFrame(() => document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:'smooth', block:'start' }));
+        if (window.innerWidth <= 850) requestAnimationFrame(() => document.getElementById('sales-desk-client')?.scrollIntoView({ behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start' }));
       }));
       list.querySelectorAll('[data-desk-whatsapp]').forEach(button => button.addEventListener('click', event => {
         event.stopPropagation();
@@ -4353,6 +4359,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     renderAutomationCenter();
     syncProposalTrackingEvents();
     renderSalesDeskClient();
+    const count = document.getElementById('precision-queue-count');
+    if (count) count.textContent = `${selected.length} conta${selected.length === 1 ? '' : 's'} no recorte${selected.length > 30 ? ' · exibindo 30' : ''}`;
     updateDayClock();
   }
 
@@ -4862,24 +4870,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const recent = OG_SALES_DESK.lastInteraction(lead);
     const nba = OG_LEAD_INTELLIGENCE.nextBestAction(lead);
     const resumeRegister = sessionStorage.getItem('og_sales_desk_register_open') === lead.id;
+    const hasPhone = Boolean(String(lead.telefone || '').replace(/\D/g, ''));
+    let hasWhatsApp = false;
+    try { hasWhatsApp = Boolean(OG_WHATSAPP_SERVICE.buildLink(lead.telefone)); } catch { /* Existing owner decides channel availability. */ }
     root.dataset.clientId = lead.id;
     root.innerHTML = `<header class="sales-desk-client-head" aria-label="Conta em foco"><div><span class="og-kicker">CONTA EM FOCO</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
       <section class="sales-desk-now">
         <span>PRÓXIMA AÇÃO</span>
         <strong>${escapeHtml(nba.explicitAction ? nba.action : 'REVISAR / COMPLETAR CONTEXTO')}</strong>
-        <div class="sales-desk-now-meta"><small>Por que agora: ${escapeHtml(nba.reason)}</small><small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small></div>
+        <div class="sales-desk-now-meta"><small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small><details class="precision-action-reason"><summary>Por que agora</summary><small>${escapeHtml(nba.reason)}</small></details></div>
       </section>
       <div class="sales-desk-primary-actions" aria-label="Ações da conta em foco">
         <button type="button" data-client-register class="og-button og-button-primary sales-desk-main-action">Registrar resultado</button>
-        <a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call class="sales-desk-contact-action">Ligar</a>
-        <button type="button" data-client-whatsapp class="sales-desk-contact-action">WhatsApp</button>
+        <a ${hasPhone ? `href="tel:${escapeHtml(lead.telefone)}"` : 'aria-disabled="true" tabindex="-1"'} data-client-call class="sales-desk-contact-action">Ligar${hasPhone ? '' : ' · indisponível'}</a>
+        <button type="button" data-client-whatsapp class="sales-desk-contact-action" ${hasWhatsApp ? '' : 'disabled'}>WhatsApp${hasWhatsApp ? '' : ' · indisponível'}</button>
         <button type="button" data-client-call-ai class="sales-desk-secondary-action">Call AI</button>
         <button type="button" data-client-crm class="sales-desk-secondary-action">Abrir ficha</button>
       </div>
       <small class="sales-desk-registration-route">${lead.salesExecution?.companyId ? 'O registro será revisado no fluxo Sales Execution da mesma conta.' : 'Registre o resultado e combine o próximo passo antes de avançar.'}</small>
-      <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
-        <span><b>1</b> Contatar</span><span><b>2</b> Registrar</span><span><b>3</b> Salvar e avançar</span>
-      </div>
       <details class="sales-desk-register" ${resumeRegister ? 'open' : ''}>
         <summary>Registrar conversa / retorno</summary>
         <div class="sales-desk-register-body">
@@ -4897,8 +4905,8 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
             <label class="og-field hidden" id="desk-specific-wrap"><span>Data específica</span><input id="desk-specific-date" type="datetime-local" value="${escapeHtml(lead.followUpAt || '')}"></label>
           </div>
           <div class="sales-desk-save-row">
-            <button type="button" id="desk-save-stay" class="og-button og-button-secondary">Salvar e ficar</button>
-            <button type="button" id="desk-save-advance" class="og-button og-button-primary">Salvar e próximo cliente →</button>
+            <button type="button" id="desk-save-advance" class="og-button og-button-primary">Salvar e avançar</button>
+            <button type="button" id="desk-save-stay" class="og-button og-button-secondary">Salvar</button>
           </div>
         </div>
       </details>
@@ -4918,12 +4926,14 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       }
       sessionStorage.setItem('og_sales_desk_register_open', lead.id);
       registerDetails.open = true;
+      root.classList.add('precision-register-open');
       requestAnimationFrame(() => root.querySelector('#desk-result')?.focus());
     }
-    root.querySelector('[data-client-call]')?.addEventListener('click', () => openDeskRegister());
+    root.querySelector('[data-client-call]')?.addEventListener('click', () => { if (hasPhone) openDeskRegister(); });
     root.querySelector('[data-client-whatsapp]').addEventListener('click', () => openDeskWhatsApp(lead));
     root.querySelector('[data-client-register]').addEventListener('click', () => openDeskRegister());
     registerDetails.addEventListener('toggle', () => {
+      root.classList.toggle('precision-register-open', registerDetails.open);
       if (registerDetails.open) sessionStorage.setItem('og_sales_desk_register_open', lead.id);
       else if (sessionStorage.getItem('og_sales_desk_register_open') === lead.id) sessionStorage.removeItem('og_sales_desk_register_open');
     });
@@ -5025,6 +5035,15 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     root.querySelector('#desk-save-stay').addEventListener('click', () => saveDeskOutcome(false));
     root.querySelector('#desk-save-advance').addEventListener('click', () => saveDeskOutcome(true));
     syncDeskOutcomeFields();
+    root.classList.toggle('precision-register-open', registerDetails.open);
+  }
+
+  // Presentation only: same queue, selection and owners in both mobile views.
+  function setDeskView(view) {
+    const workspace = document.getElementById('tab-dia');
+    if (!workspace || !['queue', 'focus'].includes(view)) return;
+    workspace.dataset.deskView = view;
+    workspace.querySelectorAll('button[data-desk-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.deskView === view)));
   }
 
   function updateDayClock() {
@@ -5045,6 +5064,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
   }
 
   function initDayDashboard() {
+    document.querySelectorAll('button[data-desk-view]').forEach(button => button.addEventListener('click', () => setDeskView(button.dataset.deskView)));
+    document.querySelector('[data-desk-skip]')?.addEventListener('click', () => {
+      setDeskView('focus');
+      document.getElementById('sales-desk-client')?.focus();
+    });
     document.querySelectorAll('[data-day-filter]').forEach(button => button.addEventListener('click', () => {
       dayFilter = button.dataset.dayFilter;
       renderDayDashboard();

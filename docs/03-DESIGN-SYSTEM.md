@@ -1,5 +1,9 @@
 # Design System
 
+## Adoção experimental Precision Workspace
+
+A Mesa recebe o primeiro lote da direção Precision Workspace em escopo local, sem substituir a linguagem Impacto OG das propostas. [Mapa de tokens, componentes, diferenças e limites](design/PRECISION_WORKSPACE_V1.md). Tokens globais OG e owners existentes permanecem a fonte; expansão para outras superfícies depende de validação do lote atual.
+
 ## Padrão existente
 
 A interface usa preto e grafite como base, amarelo Olho de Gato para ações principais, laranja como luz editorial, verde para sucesso/WhatsApp e vermelho para risco. A direção é operacional, densa e legível, com imagens de frota e produto apenas quando ajudam a reconhecer o contexto.

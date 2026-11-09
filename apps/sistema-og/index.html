@@ -181,6 +181,7 @@
   <link rel="stylesheet" href="components/mission-control.css">
   <link rel="stylesheet" href="components/prospecting-workspace.css">
   <link rel="stylesheet" href="components/call-ai-workspace.css">
+  <link rel="stylesheet" href="components/precision-workspace.css">
   <script src="components/app-shell.js"></script>
 
   <!-- ========================================================================= -->
@@ -191,10 +192,10 @@
     <!-- ======================================================================= -->
     <!-- MEU DIA: SECRETÁRIO, ASSISTENTE E TREINADOR COMERCIAL                  -->
     <!-- ======================================================================= -->
-    <div id="tab-dia" class="tab-content space-y-6">
+    <div id="tab-dia" class="tab-content space-y-6 precision-workspace" data-desk-view="focus">
       <section class="og-command-hero" aria-labelledby="day-title">
         <div class="og-command-copy">
-          <span class="og-kicker">CENTRAL COMERCIAL · OLHO DE GATO</span>
+          <span class="og-kicker">MESA COMERCIAL</span>
           <h1 id="day-title">Meu Dia</h1>
           <p id="day-guidance">Comece pelos retornos vencidos e termine cada conversa com uma ação e uma data.</p>
 
@@ -207,19 +208,15 @@
 
       <section id="morning-command-panel" class="morning-command-panel clean-card hidden" aria-live="polite"></section>
 
-      <section id="mission-control" aria-live="polite" aria-label="Mission Control"><div class="clean-card mission-loading" role="status">Carregando prioridades do CRM…</div></section>
-
-      <section class="og-kpi-grid" aria-label="Indicadores do dia">
-        <button class="og-kpi" data-day-filter="overdue"><span>Vencidos</span><strong id="kpi-overdue">0</strong><small>Precisam de decisão agora</small></button>
-        <button class="og-kpi" data-day-filter="today"><span>Hoje</span><strong id="kpi-today">0</strong><small>Retornos agendados</small></button>
-        <button class="og-kpi" data-day-filter="priority"><span>Prioridade alta</span><strong id="kpi-priority">0</strong><small>Oportunidades importantes</small></button>
-        <button class="og-kpi" data-day-filter="no-action"><span>Sem próximo passo</span><strong id="kpi-no-action">0</strong><small>Risco de esfriar</small></button>
-      </section>
-
+      <div class="precision-view-switch" role="group" aria-label="Vista da Mesa">
+        <button type="button" data-desk-view="queue" aria-pressed="false">Fila de trabalho</button>
+        <button type="button" data-desk-view="focus" aria-pressed="true">Conta em foco</button>
+      </div>
+      <button type="button" class="precision-skip" data-desk-skip>Ir para conta em foco</button>
       <section class="sales-desk-layout" aria-label="Mesa de Vendas">
         <div class="clean-card p-5 sales-desk-queue">
           <div class="og-section-head">
-            <div><span class="og-kicker">MESA DE VENDAS</span><h2>Fila de hoje</h2></div>
+            <div><h2>Fila de trabalho</h2><span id="precision-queue-count" class="precision-queue-count"></span></div>
             <div class="og-filter-row" role="group" aria-label="Ações e filtros da fila">
               <button class="og-chip og-chip-add" type="button" data-quick-lead="dia">＋ Adicionar cliente</button>
               <button class="og-chip active" data-day-filter="all">Todos</button>
@@ -232,7 +229,7 @@
           <div id="day-opportunity-list" class="og-opportunity-list"></div>
         </div>
 
-        <aside id="sales-desk-client" class="clean-card sales-desk-client" aria-live="polite"></aside>
+        <aside id="sales-desk-client" class="clean-card sales-desk-client" aria-label="Conta em foco" tabindex="-1" aria-live="polite"></aside>
 
         <details class="sales-desk-side space-y-4"><summary>Alertas e apoio operacional</summary>
           <div class="clean-card p-5 og-coach-card"><span class="og-kicker">PRÓXIMA MELHOR AÇÃO</span><h2 id="coach-title">Seu foco de hoje</h2><p id="coach-message">Selecione uma conta para trabalhar.</p><div id="coach-prompts" class="og-coach-prompts"></div></div>
@@ -240,6 +237,13 @@
           <div id="automation-center" class="clean-card p-5 automation-center" aria-live="polite"></div>
         </details>
       </section>
+      <section class="og-kpi-grid" aria-label="Indicadores do dia">
+        <button class="og-kpi" data-day-filter="overdue"><span>Vencidos</span><strong id="kpi-overdue">0</strong><small>Precisam de decisão agora</small></button>
+        <button class="og-kpi" data-day-filter="today"><span>Hoje</span><strong id="kpi-today">0</strong><small>Retornos agendados</small></button>
+        <button class="og-kpi" data-day-filter="priority"><span>Prioridade alta</span><strong id="kpi-priority">0</strong><small>Oportunidades importantes</small></button>
+        <button class="og-kpi" data-day-filter="no-action"><span>Sem próximo passo</span><strong id="kpi-no-action">0</strong><small>Risco de esfriar</small></button>
+      </section>
+      <details class="precision-priority-support"><summary>Sugestão de prioridade da fila</summary><section id="mission-control" aria-live="polite" aria-label="Mission Control"><div class="clean-card mission-loading" role="status">Carregando prioridades do CRM…</div></section></details>
       <section id="day-commitments" aria-label="Follow-ups, reuniões, propostas e tarefas"></section>
       <details class="mission-reference"><summary>Briefing e ações de apoio</summary>
           <div class="og-hero-actions" aria-label="Ações rápidas do dia">

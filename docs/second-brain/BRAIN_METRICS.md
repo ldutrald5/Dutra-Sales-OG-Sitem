@@ -15,7 +15,7 @@
 | Open/active incidents | 1 |
 | Correctly blocked cycles/releases recorded | 6 |
 | Median tracked cycle time | 0.0 h |
-| Sources in brain | 50 |
+| Sources in brain | 51 |
 
 ## Interpretation
 
