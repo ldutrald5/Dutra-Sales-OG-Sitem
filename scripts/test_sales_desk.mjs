@@ -116,6 +116,10 @@ assert.match(appSource, /Sua fila ativa terminou/,'fim da fila precisa ser expl�
 assert.match(appSource, /data-empty-quick-lead/,'fila vazia deve permitir cadastrar prospect sem trocar de módulo');
 assert.match(appSource, /data-empty-clear-filter/,'filtro vazio deve oferecer retorno direto à fila completa');
 assert.match(appSource, /data-client-register/,'cliente atual deve expor registro de resultado em um toque');
+assert.match(appSource, /CONTA EM FOCO/,'empresa selecionada deve ter hierarquia explícita');
+assert.match(appSource, /PRÓXIMA AÇÃO/,'próxima ação deve aparecer antes dos detalhes operacionais');
+assert.match(appSource, /sales-desk-main-action/,'registro de resultado deve ser a ação visual primária');
+assert.match(appSource, /fluxo Sales Execution da mesma conta/,'cliente normalizado deve manter a revisão existente explícita');
 assert.match(appSource, /sales-desk-result-quick/,'registro deve oferecer resultados rápidos sem pré-seleção silenciosa');
 assert.match(appSource, /og_sales_desk_register_open/,'fluxo de ligação deve preservar o registro aberto ao retornar');
 assert.match(appSource, /event\.key\.toLowerCase\(\) === 'r'/,'atalho R deve abrir o registro no Meu Dia');

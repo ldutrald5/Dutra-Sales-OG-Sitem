@@ -4862,23 +4862,24 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     const recent = OG_SALES_DESK.lastInteraction(lead);
     const nba = OG_LEAD_INTELLIGENCE.nextBestAction(lead);
     const resumeRegister = sessionStorage.getItem('og_sales_desk_register_open') === lead.id;
-    root.innerHTML = `<header class="sales-desk-client-head"><div><span class="og-kicker">CLIENTE ATUAL</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
-      <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
-        <span><b>1</b> Contatar</span><span><b>2</b> Registrar resultado</span><span><b>3</b> Salvar e avançar</span>
-      </div>
-      <div class="sales-desk-primary-actions">
-        <a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call>Ligar</a>
-        <button type="button" data-client-whatsapp>WhatsApp</button>
-        <button type="button" data-client-register>Registrar</button>
-        <button type="button" data-client-call-ai>Call AI</button>
-        <button type="button" data-client-crm class="sales-desk-secondary-action">Ficha</button>
-      </div>
+    root.dataset.clientId = lead.id;
+    root.innerHTML = `<header class="sales-desk-client-head" aria-label="Conta em foco"><div><span class="og-kicker">CONTA EM FOCO</span><h2>${escapeHtml(lead.empresa || lead.nome)}</h2><p>${escapeHtml(lead.nome || 'Contato não informado')} · ${escapeHtml(formatPhone(lead.telefone))}</p><small class="sales-desk-code">${clientCodeLabel(lead) ? 'Código OG · ' + escapeHtml(clientCodeLabel(lead)) : 'Sem código OG'}</small></div><span class="sales-desk-status">${escapeHtml(lead.status || 'novo')}</span></header>
       <section class="sales-desk-now">
-        <span>AGORA</span>
+        <span>PRÓXIMA AÇÃO</span>
         <strong>${escapeHtml(nba.explicitAction ? nba.action : 'REVISAR / COMPLETAR CONTEXTO')}</strong>
-        <small>Por que agora: ${escapeHtml(nba.reason)}</small>
-        <small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small>
+        <div class="sales-desk-now-meta"><small>Por que agora: ${escapeHtml(nba.reason)}</small><small>${escapeHtml(formatFollowUp(lead.followUpAt))}</small></div>
       </section>
+      <div class="sales-desk-primary-actions" aria-label="Ações da conta em foco">
+        <button type="button" data-client-register class="og-button og-button-primary sales-desk-main-action">Registrar resultado</button>
+        <a href="tel:${escapeHtml(lead.telefone || '')}" data-client-call class="sales-desk-contact-action">Ligar</a>
+        <button type="button" data-client-whatsapp class="sales-desk-contact-action">WhatsApp</button>
+        <button type="button" data-client-call-ai class="sales-desk-secondary-action">Call AI</button>
+        <button type="button" data-client-crm class="sales-desk-secondary-action">Abrir ficha</button>
+      </div>
+      <small class="sales-desk-registration-route">${lead.salesExecution?.companyId ? 'O registro será revisado no fluxo Sales Execution da mesma conta.' : 'Registre o resultado e combine o próximo passo antes de avançar.'}</small>
+      <div class="sales-desk-flow-strip" aria-label="Fluxo rápido">
+        <span><b>1</b> Contatar</span><span><b>2</b> Registrar</span><span><b>3</b> Salvar e avançar</span>
+      </div>
       <details class="sales-desk-register" ${resumeRegister ? 'open' : ''}>
         <summary>Registrar conversa / retorno</summary>
         <div class="sales-desk-register-body">
@@ -4935,12 +4936,11 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
     root.querySelector('[data-client-crm]').addEventListener('click', () => openClientSheet(lead.id));
     const extras = root.querySelector('.sales-desk-primary-actions');
-    extras.insertAdjacentHTML('beforeend', '<button type="button" data-client-proposal>Proposta</button><button type="button" data-client-technical>Aplicação técnica</button>');
+    extras.insertAdjacentHTML('beforeend', '<button type="button" class="sales-desk-secondary-action" data-client-proposal>Proposta</button><button type="button" class="sales-desk-secondary-action" data-client-technical>Aplicação técnica</button>');
     root.querySelector('[data-client-proposal]').addEventListener('click', () => openDeskQuote(lead));
     root.querySelector('[data-client-technical]').addEventListener('click', () => openTechnicalForLead(lead.id));
     if (lead.salesExecution?.companyId) {
       registerDetails.hidden = true;
-      root.querySelector('[data-client-register]').textContent = 'Registrar resultado';
     }
     root.querySelectorAll('[data-desk-template]').forEach(button => button.addEventListener('click', () => openDeskMessageComposer(lead, button.dataset.deskTemplate)));
     root.querySelectorAll('[data-future-action]').forEach(button => button.addEventListener('click', () => {

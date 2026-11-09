@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — Mesa Comercial SaaS B2B Pilot 01 (2026-11-09, local)
+
+- Reorganiza a Mesa existente para destacar conta, próxima ação e registro de resultado.
+- Mantém fila, identidade, revisão Sales Execution, sync e serviços canônicos.
+- Melhora distinção primária/secundária, acessibilidade e filtros mobile sem nova stack.
+
 ## [Unreleased] — P0-CRM-PERSISTENCE-REVIEW-02 (2026-11-09, local)
 
 - Restore recusa criação concorrente e troca de diretório demonstrada, com publicação exclusiva e falha fechada.
