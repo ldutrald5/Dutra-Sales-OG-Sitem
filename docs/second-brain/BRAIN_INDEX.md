@@ -1,21 +1,21 @@
 # DUTRA Builder Brain — Human Index
 
-Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
+Generated from 212 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Collections
 
 | Type | Records |
 |---|---:|
 | anti_pattern | 17 |
-| cycle | 31 |
+| cycle | 32 |
 | decision | 27 |
 | experiment | 1 |
 | idea | 4 |
-| incident | 32 |
+| incident | 35 |
 | knowledge | 13 |
 | open_question | 8 |
 | pattern | 25 |
-| source | 49 |
+| source | 50 |
 
 ## Active decisions
 
@@ -96,6 +96,12 @@ Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent resolved incidents
 
+- **INC-CRM-RESTORE-NOREPLACE-001 — Restore emptiness check did not prevent concurrent overwrite** (resolved/high)
+  Restoring to a new directory must not replace an entry created after the initial validation; exclusive publication refuses existing names.
+- **INC-CRM-RECOVERY-HOSTED-GUARD-001 — Offline CLI missed server-recognized hosted domain signals** (resolved/high)
+  Offline recovery guard must cover every existing server hosted signal, while never being described as shell-level authorization.
+- **INC-CRM-BACKUP-NULL-METADATA-001 — Missing and explicit-null timestamp shared a digest but restored differently** (resolved/high)
+  Sealed backups require their timestamp field, including explicit null, so unchanged checksum cannot authorize changed restored metadata.
 - **INC-CRM-STATE-READ-EMPTY-001 — Unreadable shared state treated as a new empty CRM** (resolved/high)
   Only legitimate absence can initialize empty state; corruption/I/O or prior-state evidence must fail closed and cannot authorize a revision-zero overwrite.
 - **INC-CRM-IMPORT-GENERATION-001 — Stale import reviews and colliding import identities** (resolved/high)
@@ -106,12 +112,6 @@ Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Existing spreadsheet preview/review owns all text and file import paths; comparison keys are typed, and apply is atomic.
 - **INC-COMMAND-HOMONYM-001 — Natural command writes to first homonym** (resolved/high)
   Confirmation of interpretation never confirms which canonical company receives a write.
-- **INC-QUOTE-HISTORICAL-IDENTITY-001 — Historical quote lookup imports a foreign proposal snapshot** (resolved/high)
-  A historical document must agree on quote, record owner, snapshot owner and current canonical client before its commercial data is consumed.
-- **INC-PROPOSAL-HEADING-ORPHAN-001 — Consecutive technical headings orphan in native proposal export** (resolved/high)
-  Semantic pagination keeps consecutive technical headings with the first substantive block; approved minimal fix does not change calculations.
-- **INC-PROPOSAL-MEDIA-FALLBACK-CONTRAST-001 — Hero missing-media placeholder inherits unreadable white text** (resolved/high)
-  Missing conceptual media keeps a readable explicit placeholder; approved selector correction preserves technical values/DesignDNA.
 
 ## Candidate / planned ideas
 
@@ -179,6 +179,8 @@ Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
 
 ## Recent sources
 
+- **SRC-CRM-PERSISTENCE-REVIEW-20261109-001 — Adversarial review of recovered local CRM persistence** (validated/high)
+  20 original file hashes verified. Deterministic synthetic probes on84 demonstrated restore overwrite races, hosted CLI signal mismatch and timestamp/checksum ambiguity; minimal local corrections and38 targeted cases pass. Historical85/19/6 evidence is not a current rerun.
 - **SRC-CRM-STORAGE-RECOVERY-20261108-001 — Local shared-state corruption and recovery regression** (validated/high)
   Synthetic HTTP on 7519e4a reproduced empty HTTP200 and revision0 overwrite after corrupted state. New fault-injection/HTTP/CLI tests exercise fail-closed storage, previous-state backup, explicit restore, restart and native outbox recovery. No live CRM data or hosted restore used.
 - **SRC-P0A-RACE-20261107-001 — Bounded deterministic delete/import investigation** (validated/high)
@@ -197,8 +199,6 @@ Generated from 207 records. Do not edit by hand; run `npm run og:brain:refresh`.
   Lucas confirmed 18 months as current lifetime of a new tire and 20% as estimated increase in lifetime. Meanings are resolved without proving universal performance. Audited canonical calculateRoi and snapshot/view-model contracts; produced three isolated visual directions over the same synthetic native quote (2 tractors, 3 trailers, 88 pieces, 44 tires, BRL6490). Synthetic tire price2000 and scoped monthly fuel10000 with20%/18months/2% produce canonical monthly1014.81/year12177.78/payback6.40; unrevised premises return validate/null. No real customer data, production mutation, new owner or publication.
 - **SRC-PROPOSAL-IMPACTO-SELECTED-20261009-001 — Lucas selects Impacto OG and requests tractor/ribbon refinement** (validated/high)
   Lucas explicitly chose A Impacto OG as best and would discard B/C. Criticized tractor template in composition; praised yellow savings highlight and asked for a complementary black cat-eye-like band. Selection supersedes prior three-way exploration without changing canonical engines, financial assumptions or historical functional templates.
-- **SRC-PROPOSAL-IMPACTO-FINAL-20261009-001 — Lucas official Impacto OG confirmation and isolated final review** (validated/high)
-  Lucas confirmed A as official direction, B/C as history only, and required final vehicle-media/financial/mobile-desktop review before explicit implementation authorization. Isolated final preview guards compatible4x2/trailer3 media and fallback for6x2/6x4/other implement/missing scope; exact prior native snapshot/investment/ROI preserved. No product integration or production change.
 
 ## Retrieval workflow
 

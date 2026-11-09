@@ -3,7 +3,7 @@ import path from 'node:path';
 import store from '../apps/sistema-og/server-state-store.cjs';
 const [action,...args]=process.argv.slice(2);
 try {
-  if (process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.NODE_ENV==='production') throw Error('Comando permitido somente em ambiente local isolado.');
+  if (process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN || process.env.NODE_ENV==='production') throw Error('Comando permitido somente em ambiente local isolado.');
   const options={};
   for(let index=0;index<args.length;index++) {
     const key=args[index];

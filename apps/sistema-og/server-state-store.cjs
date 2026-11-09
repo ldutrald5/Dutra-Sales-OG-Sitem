@@ -42,6 +42,30 @@ function atomicWrite(file, bytes, io = fs) {
   }
 }
 
+// Restore only creates names. A verified temp is linked atomically without
+// replacing an entry that another process may have created after validation.
+function atomicCreate(file, bytes, sameDirectory) {
+  const temporary = `${file}.tmp.${randomUUID()}`;
+  let fd, created;
+  try {
+    sameDirectory();
+    fd = fs.openSync(temporary,'wx',0o600);
+    created = fs.fstatSync(fd);
+    sameDirectory();
+    fs.writeFileSync(fd,bytes,'utf8');
+    fs.fsyncSync(fd);
+    fs.closeSync(fd); fd = undefined;
+    sameDirectory();
+    fs.linkSync(temporary,file); // EEXIST refuses a concurrent destination.
+  } finally {
+    if (fd !== undefined) { try { fs.closeSync(fd); } catch {} }
+    if (created) try {
+      const current = fs.lstatSync(temporary);
+      if (current.dev === created.dev && current.ino === created.ino) fs.unlinkSync(temporary);
+    } catch {}
+  }
+}
+
 function backupDigest(backup) {
   return createHash('sha256').update(JSON.stringify({revision:backup.revision,stateUpdatedAt:backup.stateUpdatedAt ?? null,data:backup.data})).digest('hex');
 }
@@ -54,7 +78,7 @@ function createRecoveryBackup(state) {
 function stateFromBackup(backup) {
   try {
     if (!safety.validateBackup(backup).valid || !['number','string'].includes(typeof backup.revision) || !String(backup.revision).trim() || !Number.isSafeInteger(Number(backup.revision)) || Number(backup.revision) < 0) throw refused();
-    if (backup.integrity && (backup.integrity.algorithm !== 'sha256' || backup.integrity.value !== backupDigest(backup))) throw refused();
+    if (backup.integrity && (!Object.hasOwn(backup,'stateUpdatedAt') || backup.integrity.algorithm !== 'sha256' || backup.integrity.value !== backupDigest(backup))) throw refused();
     return checkedState({revision:Number(backup.revision),updatedAt:Object.hasOwn(backup,'stateUpdatedAt') ? backup.stateUpdatedAt : backup.createdAt ?? null,leads:backup.data.leads,history:backup.data.history,operations:backup.data.operations});
   } catch { throw refused(); }
 }
@@ -115,16 +139,27 @@ function restoreBackup(backupFile, targetDir) {
   try {
     const backup = JSON.parse(fs.readFileSync(backupFile,'utf8')), state = stateFromBackup(backup);
     const target = path.join(targetDir,'shared-state.json');
-    if (fs.existsSync(targetDir)) {
-      if (fs.lstatSync(targetDir).isSymbolicLink()) throw refused();
-      if (fs.existsSync(target)) {
-        const existing = JSON.parse(fs.readFileSync(target,'utf8'));
-        if (JSON.stringify(existing) === JSON.stringify(state)) return {status:'already_restored',revision:state.revision};
-      }
-      if (fs.readdirSync(targetDir).length) throw refused();
-    } else fs.mkdirSync(targetDir,{recursive:true,mode:0o700});
-    atomicWrite(target+'.initialized',JSON.stringify({format:'sistema-og-state-initialized',version:1}));
-    atomicWrite(target,JSON.stringify(state,null,2));
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(path.dirname(targetDir),{recursive:true,mode:0o700});
+      fs.mkdirSync(targetDir,{mode:0o700}); // Refuse a concurrent directory creator.
+    }
+    const directory = fs.lstatSync(targetDir), canonical = fs.realpathSync(targetDir);
+    if (!directory.isDirectory() || directory.isSymbolicLink()) throw refused();
+    const sameDirectory = () => {
+      const current = fs.lstatSync(targetDir);
+      if (!current.isDirectory() || current.isSymbolicLink() || current.dev !== directory.dev || current.ino !== directory.ino || fs.realpathSync(targetDir) !== canonical) throw refused();
+    };
+    if (fs.existsSync(target)) {
+      if (!fs.lstatSync(target).isFile()) throw refused();
+      const existing = JSON.parse(fs.readFileSync(target,'utf8'));
+      sameDirectory();
+      if (JSON.stringify(existing) === JSON.stringify(state)) return {status:'already_restored',revision:state.revision};
+    }
+    if (fs.readdirSync(targetDir).length) throw refused();
+    atomicCreate(target+'.initialized',JSON.stringify({format:'sistema-og-state-initialized',version:1}),sameDirectory);
+    atomicCreate(target,JSON.stringify(state,null,2),sameDirectory);
+    sameDirectory();
+    if (JSON.stringify(JSON.parse(fs.readFileSync(target,'utf8'))) !== JSON.stringify(state)) throw refused();
     return {status:'restored',revision:state.revision,counts:safety.validateBackup(backup).counts,integrityPresent:Boolean(backup.integrity)};
   } catch { throw refused(); }
 }

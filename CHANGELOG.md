@@ -1,5 +1,11 @@
 # Changelog — DUTRA OS
 
+## [Unreleased] — P0-CRM-PERSISTENCE-REVIEW-02 (2026-11-09, local)
+
+- Restore recusa criação concorrente e troca de diretório demonstrada, com publicação exclusiva e falha fechada.
+- CLI alinha guardas de ambiente hospedado ao servidor; backup selado exige timestamp presente mesmo quando nulo. Legado válido permanece suportado.
+- Regressões determinísticas e evidência atual de38 casos focados; limites e evidência histórica separados na story. Sem publicação, alterações de dados reais ou frontend.
+
 ## [Unreleased] — P0-A / integridade comercial (2026-10-13)
 
 - Troca de empresa limpa o contexto comercial, com cancelamento e reaproveitamento técnico sujeito a revisão explícita; guardas impedem identidades incompatíveis na cotação/proposta/exportação.
