@@ -7,6 +7,8 @@
 
   const MAX_SOURCE_BYTES = 250000;
   const MAX_DTO_BYTES = 60000;
+  const MAX_DEPTH = 64;
+  const MAX_NODES = 50000;
   const MAX_VEHICLES = 40;
   const MAX_ITEMS = 100;
   const MAX_TEXT = 300;
@@ -64,7 +66,10 @@
   }
   function boundedJson(value, path, max) {
     const seen = new WeakSet();
-    function inspect(child, at) {
+    let nodes = 0;
+    function inspect(child, at, depth) {
+      if (depth > MAX_DEPTH) fail('DEPTH_LIMIT', at);
+      if (++nodes > MAX_NODES) fail('COMPLEXITY_LIMIT', at);
       if (child === null || typeof child === 'string' || typeof child === 'boolean' || typeof child === 'number' && Number.isFinite(child)) return;
       if (!child || typeof child !== 'object') fail('INVALID_VALUE', at);
       if (seen.has(child)) fail('CIRCULAR_OR_SHARED', at);
@@ -76,10 +81,10 @@
         if (key === 'length' && Array.isArray(child)) continue;
         const descriptor = Object.getOwnPropertyDescriptor(child, key);
         if (typeof key !== 'string' || !descriptor || !Object.hasOwn(descriptor, 'value')) fail('INVALID_VALUE', at);
-        inspect(descriptor.value, `${at}.${key}`);
+        inspect(descriptor.value, `${at}.${key}`, depth + 1);
       }
     }
-    inspect(value, path);
+    inspect(value, path, 0);
     const json = JSON.stringify(value);
     if (!json || BufferLength(json) > max) fail('SIZE_LIMIT', path);
     return json;
@@ -176,10 +181,12 @@
     if (selection.showEconomic && !selection.showCommercial) fail('INVALID_SELECTION', 'selection.showEconomic');
     array(selection.vehicleIds, 'selection.vehicleIds', MAX_VEHICLES);
     if (new Set(selection.vehicleIds).size !== selection.vehicleIds.length) fail('DUPLICATE_REFERENCE', 'selection.vehicleIds');
-    exact(policy.reviewedText, ['subjectName','vehicleNames','itemNames','applicationNames','paymentTerms','roiSources'], 'policy.reviewedText');
+    exact(policy.reviewedText, ['subjectName','vehicleNames','itemNames','itemCodes','applicationNames','applicationCodes','paymentTerms','roiSources'], 'policy.reviewedText');
     exact(policy.reviewedText.vehicleNames, selection.vehicleIds, 'policy.reviewedText.vehicleNames');
     const reviewedItemNames = object(policy.reviewedText.itemNames, 'policy.reviewedText.itemNames');
+    const reviewedItemCodes = object(policy.reviewedText.itemCodes, 'policy.reviewedText.itemCodes');
     const reviewedApplicationNames = object(policy.reviewedText.applicationNames, 'policy.reviewedText.applicationNames');
+    const reviewedApplicationCodes = object(policy.reviewedText.applicationCodes, 'policy.reviewedText.applicationCodes');
     let dto;
     if (source.kind === 'proposal_revision') {
       if (source.fixture !== undefined) fail('MIXED_SOURCE', 'source.fixture');
@@ -214,19 +221,23 @@
         const calculatedItems = array(vehicle.calculatedItems, `snapshot.vehicles.${id}.calculatedItems`, MAX_ITEMS).map((item, i) => {
           exact(item, ['code','name','category','qty','priceUnit','subtotal','isCustomPrice'], `snapshot.vehicles.${id}.calculatedItems[${i}]`);
           itemNameKeys.push(`${id}:${i}`);
-          const visible = {code:str(item.code, 'item.code', 80),name:textReview(item.name, reviewedItemNames[`${id}:${i}`], 'item.name'),quantity:number(item.qty, 'item.qty', {integer:true})};
+          const visible = {code:textReview(str(item.code, 'item.code', 80), reviewedItemCodes[`${id}:${i}`], 'item.code'),name:textReview(item.name, reviewedItemNames[`${id}:${i}`], 'item.name'),quantity:number(item.qty, 'item.qty', {integer:true})};
           return selection.showCommercial ? {...visible,unitPrice:number(item.priceUnit, 'item.priceUnit'),subtotal:number(item.subtotal, 'item.subtotal')} : visible;
         });
         const applications = selection.showApplications ? array(vehicle.applicationRows, `snapshot.vehicles.${id}.applicationRows`, MAX_ITEMS).map((row, i) => {
           exact(row, ['code','name','qty','scope','position','status','origin','path'], `snapshot.vehicles.${id}.applicationRows[${i}]`);
           applicationNameKeys.push(`${id}:${i}`);
           if (!['cavalo','carreta','outro','validar'].includes(row.scope) || !['dianteiro','tracao','truck','carreta','validar'].includes(row.position) || !['runtime','validate'].includes(row.status) || !['calculada','manual'].includes(row.origin)) fail('UNSUPPORTED_APPLICATION', `snapshot.vehicles.${id}.applicationRows[${i}]`);
-          return {code:str(row.code, 'row.code', 80),name:textReview(row.name, reviewedApplicationNames[`${id}:${i}`], 'row.name'),quantity:number(row.qty, 'row.qty', {integer:true}),scope:row.scope,position:row.position,status:row.status,origin:row.origin};
+          return {code:textReview(str(row.code, 'row.code', 80), reviewedApplicationCodes[`${id}:${i}`], 'row.code'),name:textReview(row.name, reviewedApplicationNames[`${id}:${i}`], 'row.name'),quantity:number(row.qty, 'row.qty', {integer:true}),scope:row.scope,position:row.position,status:row.status,origin:row.origin};
         }) : [];
         return {ref:`vehicle-${index + 1}`,label,quantity:number(vehicle.qty, 'vehicle.qty', {positive:true,integer:true}),unit:'veículo',status:'declared',totalTires:number(vehicle.totalTires, 'vehicle.totalTires', {integer:true}),subtotal:selection.showCommercial ? number(vehicle.totalSubtotal, 'vehicle.totalSubtotal') : null,items:calculatedItems,technicalApplications:applications};
       });
       exact(reviewedItemNames, itemNameKeys, 'policy.reviewedText.itemNames');
+      exact(reviewedItemCodes, itemNameKeys, 'policy.reviewedText.itemCodes');
       exact(reviewedApplicationNames, applicationNameKeys, 'policy.reviewedText.applicationNames');
+      exact(reviewedApplicationCodes, applicationNameKeys, 'policy.reviewedText.applicationCodes');
+      const fullFleet = selection.vehicleIds.length === vehicles.length;
+      if (selection.showEconomic && !fullFleet) fail('INVALID_SELECTION', 'selection.showEconomic');
       const investment = number(commercial.totalValue, 'snapshot.commercial.totalValue', {positive:true});
       number(commercial.totalPieces, 'snapshot.commercial.totalPieces', {positive:selection.showCommercial,integer:true});
       number(commercial.totalTires, 'snapshot.commercial.totalTires', {integer:true});
@@ -237,11 +248,13 @@
       }
       const roi = selection.showEconomic ? checkedRoi(snap.roi, now, policy.reviewedText.roiSources) : null;
       if (roi && (snap.roi.investment !== investment || snap.roi.totalTires !== commercial.totalTires)) fail('IDENTITY_MISMATCH', 'snapshot.roi.facts');
-      dto = {schemaVersion:1,publicSessionRef,classification:'commercial_projection',approvalStatus:'not_approved',source:{kind:source.kind,version:record.version,date:snap.preparedAt},expiresAt:policy.expiresAt,subject:{name:subjectName},fleetGroups,approvedCommercial:selection.showCommercial ? {currency:'BRL',investment,totalPieces:commercial.totalPieces,totalTires:commercial.totalTires,paymentTerms:commercial.paymentTerms,validUntil:commercial.validUntil} : null,economicScenario:roi,validation:{status:roi?.status === 'VALIDAR' ? 'VALIDAR' : 'ready_for_review'}};
+      dto = {schemaVersion:1,publicSessionRef,classification:'commercial_projection',approvalStatus:'not_approved',source:{kind:source.kind,version:record.version,date:snap.preparedAt},expiresAt:policy.expiresAt,subject:{name:subjectName},fleetGroups,approvedCommercial:selection.showCommercial && fullFleet ? {currency:'BRL',investment,totalPieces:commercial.totalPieces,totalTires:commercial.totalTires,paymentTerms:commercial.paymentTerms,validUntil:commercial.validUntil} : null,economicScenario:roi,validation:{status:selection.showCommercial && !fullFleet || roi?.status === 'VALIDAR' ? 'VALIDAR' : 'ready_for_review'}};
     } else {
       if (source.record !== undefined || source.clientRef !== null || policy.expectedRevision !== null || selection.showCommercial || selection.showEconomic || selection.showApplications) fail('MIXED_SOURCE', 'source');
       exact(reviewedItemNames, [], 'policy.reviewedText.itemNames');
+      exact(reviewedItemCodes, [], 'policy.reviewedText.itemCodes');
       exact(reviewedApplicationNames, [], 'policy.reviewedText.applicationNames');
+      exact(reviewedApplicationCodes, [], 'policy.reviewedText.applicationCodes');
       exact(policy.reviewedText.roiSources, [], 'policy.reviewedText.roiSources');
       if (policy.reviewedText.paymentTerms !== undefined) fail('MIXED_SOURCE', 'policy.reviewedText.paymentTerms');
       const fixture = exact(source.fixture, ['fixtureId','fixtureVersion','fixtureFingerprint','subject','fleetGroups'], 'source.fixture');
@@ -266,5 +279,5 @@
     return freeze(dto);
   }
 
-  return Object.freeze({project,ProjectionError,LIMITS:Object.freeze({MAX_SOURCE_BYTES,MAX_DTO_BYTES,MAX_VEHICLES,MAX_ITEMS,MAX_TEXT})});
+  return Object.freeze({project,ProjectionError,LIMITS:Object.freeze({MAX_SOURCE_BYTES,MAX_DTO_BYTES,MAX_DEPTH,MAX_NODES,MAX_VEHICLES,MAX_ITEMS,MAX_TEXT})});
 }));

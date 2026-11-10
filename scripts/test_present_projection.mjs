@@ -10,7 +10,7 @@ const copy = value => structuredClone(value);
 const now = '2026-11-10T12:00:00.000Z';
 const expiresAt = '2026-11-11T12:00:00.000Z';
 const publicSessionRef = '123e4567-e89b-42d3-a456-426614174000';
-const reviewed = {subjectName:'Empresa Sintética Alpha',vehicleNames:{'veh-a':'Cavalo sintético','veh-b':'Carreta sintética'},itemNames:{'veh-a:0':'Peça sintética A','veh-b:0':'Peça sintética B'},applicationNames:{'veh-a:0':'Peça sintética A'},paymentTerms:'Teste: 30 dias',roiSources:{tirePrice:'Hipótese fornecida para teste',lifeMonths:'Hipótese fornecida para teste',lifeGainPct:'Hipótese fornecida para teste'}};
+const reviewed = {subjectName:'Empresa Sintética Alpha',vehicleNames:{'veh-a':'Cavalo sintético','veh-b':'Carreta sintética'},itemNames:{'veh-a:0':'Peça sintética A','veh-b:0':'Peça sintética B'},itemCodes:{'veh-a:0':'TEST-A','veh-b:0':'TEST-B'},applicationNames:{'veh-a:0':'Peça sintética A'},applicationCodes:{'veh-a:0':'TEST-A'},paymentTerms:'Teste: 30 dias',roiSources:{tirePrice:'Hipótese fornecida para teste',lifeMonths:'Hipótese fornecida para teste',lifeGainPct:'Hipótese fornecida para teste'}};
 const roiField = (value,unit) => ({value,unit,source:'Hipótese fornecida para teste',status:'reviewed',version:1,updatedAt:now});
 const snapshot = {
   schemaVersion:1,representationVersion:2,quoteId:'quote-alpha',clientId:'lead-alpha',preparedAt:now,templateId:'tecnico',
@@ -28,7 +28,7 @@ const commercialSelection = {subjectName:true,vehicleIds:['veh-a','veh-b'],showA
 const commercialPolicy = {schemaVersion:1,now,expiresAt,publicSessionRef,expectedRevision:{proposalId:'proposal-alpha',clientId:'lead-alpha',quoteId:'quote-alpha',version:3},expectedFixture:null,reviewedText:reviewed};
 const demoSource = {kind:'demonstrative_fixture',clientRef:null,fixture:{fixtureId:'CONCEPT-1',fixtureVersion:1,fixtureFingerprint:'a'.repeat(64),subject:{name:'Operação demonstrativa'},fleetGroups:[{label:'Bitrens conceituais',quantity:5,unit:'conjunto',status:'demonstrative'},{label:'Cavalos adicionais conceituais',quantity:2,unit:'veículo',status:'demonstrative'}]}};
 const demoSelection = {subjectName:true,vehicleIds:['demo-1','demo-2'],showApplications:false,showCommercial:false,showEconomic:false};
-const demoPolicy = {schemaVersion:1,now,expiresAt,publicSessionRef,expectedRevision:null,expectedFixture:{fixtureId:'CONCEPT-1',fixtureVersion:1,fixtureFingerprint:'a'.repeat(64)},reviewedText:{subjectName:'Operação demonstrativa',vehicleNames:{'demo-1':'Bitrens conceituais','demo-2':'Cavalos adicionais conceituais'},itemNames:{},applicationNames:{},roiSources:{}}};
+const demoPolicy = {schemaVersion:1,now,expiresAt,publicSessionRef,expectedRevision:null,expectedFixture:{fixtureId:'CONCEPT-1',fixtureVersion:1,fixtureFingerprint:'a'.repeat(64)},reviewedText:{subjectName:'Operação demonstrativa',vehicleNames:{'demo-1':'Bitrens conceituais','demo-2':'Cavalos adicionais conceituais'},itemNames:{},itemCodes:{},applicationNames:{},applicationCodes:{},roiSources:{}}};
 
 let cases = 0;
 function passes(source,selection,policy) { cases++; return project(source,selection,policy); }
@@ -48,6 +48,8 @@ assert.equal(JSON.stringify(commercialSource),before);
 assert.equal(dto.subject.name,'Empresa Sintética Alpha');
 assert.equal(dto.fleetGroups[0].quantity,1);
 assert.equal(dto.fleetGroups[0].items[0].subtotal,1000);
+assert.equal(dto.fleetGroups[0].items[0].code,'TEST-A');
+assert.equal(dto.fleetGroups[0].technicalApplications[0].code,'TEST-A');
 assert.equal(dto.approvedCommercial.investment,2000);
 assert.equal(dto.economicScenario.results.roi12mPct,-95.5555558);
 assert.equal(dto.economicScenario.results.lifeWithMonths,21.6);
@@ -70,7 +72,7 @@ const nativeSnapshot = proposal.buildSnapshot({
 },{now});
 const nativeSource = {kind:'proposal_revision',clientRef:{leadId:'native-lead'},record:{id:'native-proposal',clientId:'native-lead',quoteId:'native-quote',version:1,status:'internal_draft',snapshot:nativeSnapshot}};
 const nativeSelection = {subjectName:true,vehicleIds:['native-vehicle'],showApplications:false,showCommercial:true,showEconomic:true};
-const nativePolicy = {schemaVersion:1,now,expiresAt,publicSessionRef,expectedRevision:{proposalId:'native-proposal',clientId:'native-lead',quoteId:'native-quote',version:1},expectedFixture:null,reviewedText:{subjectName:'Transportadora Sintética',vehicleNames:{'native-vehicle':'Veículo sintético'},itemNames:{'native-vehicle:0':'Peça N'},applicationNames:{},paymentTerms:'Pagamento sintético',roiSources:{tirePrice:'',lifeMonths:'',lifeGainPct:''}}};
+const nativePolicy = {schemaVersion:1,now,expiresAt,publicSessionRef,expectedRevision:{proposalId:'native-proposal',clientId:'native-lead',quoteId:'native-quote',version:1},expectedFixture:null,reviewedText:{subjectName:'Transportadora Sintética',vehicleNames:{'native-vehicle':'Veículo sintético'},itemNames:{'native-vehicle:0':'Peça N'},itemCodes:{'native-vehicle:0':'TEST-N'},applicationNames:{},applicationCodes:{},paymentTerms:'Pagamento sintético',roiSources:{tirePrice:'',lifeMonths:'',lifeGainPct:''}}};
 const nativeDto = passes(nativeSource,nativeSelection,nativePolicy);
 assert.equal(nativeDto.validation.status,'VALIDAR');
 assert.equal(nativeDto.economicScenario.results,null);
@@ -90,7 +92,33 @@ assert.equal(technicalOnly.fleetGroups[0].subtotal,null);
 assert.ok(!JSON.stringify(technicalOnly).includes('2000'));
 assert.ok(!Object.hasOwn(technicalOnly.fleetGroups[0].items[0],'unitPrice'));
 
+const oneVehicleSelection = {...commercialSelection,vehicleIds:['veh-a'],showApplications:false,showEconomic:false};
+const oneVehiclePolicy = {...commercialPolicy,reviewedText:{...reviewed,vehicleNames:{'veh-a':'Cavalo sintético'},itemNames:{'veh-a:0':'Peça sintética A'},itemCodes:{'veh-a:0':'TEST-A'},applicationNames:{},applicationCodes:{},roiSources:{}}};
+const partial = passes(commercialSource,oneVehicleSelection,oneVehiclePolicy);
+assert.equal(partial.fleetGroups.length,1);
+assert.equal(partial.fleetGroups[0].subtotal,1000);
+assert.equal(partial.fleetGroups[0].totalTires,4);
+assert.equal(partial.approvedCommercial,null);
+assert.equal(partial.economicScenario,null);
+assert.equal(partial.validation.status,'VALIDAR');
+assert.ok(!JSON.stringify(partial).includes('Carreta sintética'));
+assert.ok(!JSON.stringify(partial).includes('TEST-B'));
+rejects('INVALID_SELECTION', (s,q,p) => {
+  q.vehicleIds=['veh-a'];
+  p.reviewedText.vehicleNames={'veh-a':'Cavalo sintético'};
+  p.reviewedText.itemNames={'veh-a:0':'Peça sintética A'};
+  p.reviewedText.itemCodes={'veh-a:0':'TEST-A'};
+  p.reviewedText.applicationNames={'veh-a:0':'Peça sintética A'};
+  p.reviewedText.applicationCodes={'veh-a:0':'TEST-A'};
+});
+assert.equal(dto.fleetGroups.length,2);
+assert.equal(dto.approvedCommercial.totalPieces,4);
+assert.equal(dto.approvedCommercial.totalTires,8);
+
 rejects('UNKNOWN_FIELD', s => {s.record.snapshot.vehicles[0].calculatedItems[0].margin=42;});
+rejects('TEXT_NOT_REVIEWED', s => {s.record.snapshot.vehicles[0].calculatedItems[0].code='CANARY_PRIVATE_ITEM_CODE';});
+rejects('TEXT_NOT_REVIEWED', s => {s.record.snapshot.vehicles[0].applicationRows[0].code='CANARY_PRIVATE_APPLICATION_CODE';});
+rejects('TEXT_NOT_REVIEWED', (s,q,p) => {delete p.reviewedText.itemCodes['veh-a:0'];});
 rejects('UNKNOWN_FIELD', s => {s.record.snapshot.vehicles[0].privateContact='CANARY';});
 rejects('UNKNOWN_FIELD', (s,q) => {q.extra=true;});
 rejects('UNKNOWN_FIELD', (s,q,p) => {p.reviewedText.vehicleNames['veh-x']='X';});
@@ -140,6 +168,15 @@ rejects('IDENTITY_MISMATCH', s => {s.record.snapshot.roi.investment=2001;});
 rejects('UNSUPPORTED_APPLICATION', s => {s.record.snapshot.vehicles[0].applicationRows[0].scope='tractor';});
 rejects('SIZE_LIMIT', s => {s.record.snapshot.vehicles[0].technicalContext.notes='X'.repeat(260000);});
 rejects('CIRCULAR_OR_SHARED', s => {s.record.snapshot.vehicles[0].technicalContext=s.record.snapshot;}, [commercialSource,commercialSelection,commercialPolicy]);
+cases++;
+const tooDeep = copy(demoSource);
+let nested = tooDeep.fixture;
+for (let i=0; i<7000; i++) { nested.extra = {}; nested = nested.extra; }
+assert.throws(() => project(tooDeep,demoSelection,demoPolicy), error => error instanceof ProjectionError && error.code === 'DEPTH_LIMIT');
+cases++;
+const tooWide = copy(demoSource);
+tooWide.extra = Array(50001).fill(0);
+assert.throws(() => project(tooWide,demoSelection,demoPolicy), error => error instanceof ProjectionError && error.code === 'COMPLEXITY_LIMIT');
 cases++;
 const accessor = copy(commercialSource);
 Object.defineProperty(accessor.record.snapshot.client,'company',{get(){throw new Error('getter executado');}});
