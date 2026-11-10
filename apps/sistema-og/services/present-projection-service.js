@@ -40,14 +40,19 @@
     if (typeof value !== 'string' || !value.trim() || value.length > max || /[\u0000-\u001f\u007f]/.test(value)) fail('INVALID_TEXT', path);
     return value.trim();
   }
+  function privateText(value, path, max = MAX_TEXT) {
+    if (typeof value !== 'string' || value.length > max) fail('INVALID_TEXT', path);
+    return value;
+  }
   function number(value, path, {positive = false, integer = false} = {}) {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || positive && value === 0 || integer && !Number.isSafeInteger(value)) fail('INVALID_NUMBER', path);
     return value;
   }
   function time(value, path) {
     str(value, path, 40);
-    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) || !Number.isFinite(Date.parse(value))) fail('INVALID_DATE', path);
-    return Date.parse(value);
+    const parsed = Date.parse(value);
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) || !Number.isFinite(parsed) || new Date(parsed).toISOString().slice(0, 19) !== value.slice(0, 19)) fail('INVALID_DATE', path);
+    return parsed;
   }
   function array(value, path, max) {
     if (!Array.isArray(value) || value.length > max || Object.keys(value).length !== value.length) fail('INVALID_ARRAY', path);
@@ -138,13 +143,13 @@
       if (context.answers != null) {
         object(context.answers, 'snapshot.vehicles[].technicalContext.answers');
         if (Object.keys(context.answers).length > 30) fail('SIZE_LIMIT', 'snapshot.vehicles[].technicalContext.answers');
-        for (const [key, value] of Object.entries(context.answers)) { str(key, 'snapshot.vehicles[].technicalContext.answers.key', 80); str(value, 'snapshot.vehicles[].technicalContext.answers.value', 180); }
+        for (const [key, value] of Object.entries(context.answers)) { str(key, 'snapshot.vehicles[].technicalContext.answers.key', 80); privateText(value, 'snapshot.vehicles[].technicalContext.answers.value', 180); }
       }
       if (context.manualItems != null) array(context.manualItems, 'snapshot.vehicles[].technicalContext.manualItems', MAX_ITEMS).forEach(item => exact(item, ['code','qty','customPrice','applicationScope'], 'snapshot.vehicles[].technicalContext.manualItems[]'));
       array(vehicle.calculatedItems, 'snapshot.vehicles[].calculatedItems', MAX_ITEMS).forEach(item => exact(item, ['code','name','category','qty','priceUnit','subtotal','isCustomPrice'], 'snapshot.vehicles[].calculatedItems[]'));
       array(vehicle.applicationRows, 'snapshot.vehicles[].applicationRows', MAX_ITEMS).forEach(row => {
         exact(row, ['code','name','qty','scope','position','status','origin','path'], 'snapshot.vehicles[].applicationRows[]');
-        array(row.path, 'snapshot.vehicles[].applicationRows[].path', 20).forEach(step => str(step, 'snapshot.vehicles[].applicationRows[].path[]'));
+        array(row.path, 'snapshot.vehicles[].applicationRows[].path', 20).forEach(step => privateText(step, 'snapshot.vehicles[].applicationRows[].path[]'));
       });
     }
     if (snapshot.roi != null) {
@@ -223,7 +228,7 @@
       exact(reviewedItemNames, itemNameKeys, 'policy.reviewedText.itemNames');
       exact(reviewedApplicationNames, applicationNameKeys, 'policy.reviewedText.applicationNames');
       const investment = number(commercial.totalValue, 'snapshot.commercial.totalValue', {positive:true});
-      number(commercial.totalPieces, 'snapshot.commercial.totalPieces', {integer:true});
+      number(commercial.totalPieces, 'snapshot.commercial.totalPieces', {positive:selection.showCommercial,integer:true});
       number(commercial.totalTires, 'snapshot.commercial.totalTires', {integer:true});
       if (selection.showCommercial) {
         if (!commercial.validUntil || commercialExpiry(commercial.validUntil) <= now || commercialExpiry(commercial.validUntil) < time(policy.expiresAt, 'policy.expiresAt')) fail('EXPIRED_OR_MISSING_TERMS', 'snapshot.commercial.validUntil');
