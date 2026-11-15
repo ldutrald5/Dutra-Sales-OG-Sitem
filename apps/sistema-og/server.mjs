@@ -682,6 +682,13 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(403);
     return res.end('Acesso negado');
   }
+  // Only browser assets cross the public static boundary. Server modules,
+  // knowledge files and operator documents remain inaccessible without
+  // relying on their current filenames or on the location of OG_DATA_DIR.
+  const publicExtensions = new Set(['.html', '.js', '.css', '.png', '.jpg', '.jpeg', '.webp', '.svg', '.webmanifest']);
+  if (!publicExtensions.has(path.extname(file).toLowerCase()) && relative !== 'mobile/manifest.json') {
+    return sendJson(res, 403, { error: 'Acesso negado' });
+  }
   fs.stat(file, (error, stat) => {
     if (error || !stat.isFile()) {
       res.writeHead(404);
