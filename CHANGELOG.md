@@ -2,6 +2,11 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — Biblioteca oficial e atualização do app
+
+- A Biblioteca Comercial passa a mostrar o catálogo público Olho de Gato, com 79 fotos, 36 vídeos, 11 segmentos, 5 regiões e OGW Frotas. Materiais próprios seguem acessíveis na seção interna.
+- O botão Atualizar app verifica o GitHub no desktop local e a versão publicada no PWA. O servidor local valida a nova versão antes de registrá-la como ativa.
+
 ## [Unreleased] — DUTRA Intelligence Compiler V1
 
 - Estendido o Builder Brain existente em vez de criar uma segunda memória paralela.

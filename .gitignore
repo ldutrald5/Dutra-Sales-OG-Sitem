@@ -14,6 +14,7 @@ credentials.json
 # Dependencies (AIOX)
 node_modules/
 apps/sistema-og/.data/
+.og-updates/
 apps/sistema-og/imports/*.json
 !apps/sistema-og/imports/.gitkeep
 .wrangler/

@@ -15,6 +15,10 @@ Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado pe
 - Ciclo Comercial Conectado V3.0.
 - Protocolo canônico de contexto e handoff para múltiplas IAs/agentes.
 
+## Em revisão — OG-20 Biblioteca oficial e atualização
+
+- Catálogo Olho de Gato na Biblioteca Comercial e atualização iniciada no app instalado.
+
 ## Próxima frente prioritária
 
 ### V3.x — Venda → Pós-venda → Expansão
