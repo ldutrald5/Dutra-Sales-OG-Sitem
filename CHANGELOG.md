@@ -2,6 +2,11 @@
 
 Registro consolidado das evoluções recentes. O histórico de stories anterior continua em `docs/stories/`.
 
+## [Unreleased] — Aba REUNIÃO
+
+- Integrada ao menu do DUTRA OS uma apresentação de 19 telas com diagnóstico de frota, simuladores de pneus e diesel, tela cheia e quadro de anotações.
+- O rascunho fica na sessão da aba, sem sincronização com o CRM. As projeções usam as premissas informadas no simulador.
+
 ## [Unreleased] — DUTRA Intelligence Compiler V1
 
 - Estendido o Builder Brain existente em vez de criar uma segunda memória paralela.

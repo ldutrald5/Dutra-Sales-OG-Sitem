@@ -12,6 +12,7 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 | OG-15 | Biblioteca Comercial local-first | `material-store.js`, `docs/stories/OG-15-biblioteca-comercial-local-first.md` |
 | OG-16 | Pacotes de materiais ligados a CRM/Call AI | `sales-materials.js`, `docs/stories/OG-16-crm-call-ai-pacotes-materiais.md` |
 | OG-17 | Performance e funil baseados em eventos reais | `performance-engine.js`, `docs/stories/OG-17-performance-funil-eventos-reais.md` |
+| OG-19 | Aba REUNIÃO com apresentação, simulação e quadro local | `docs/stories/OG-19-aba-reuniao.md` |
 | Infra | PWA offline, servidor local e opção Cloudflare | `service-worker.js`, `server.mjs`, `cloudflare/worker.mjs` |
 
 ## TASK-001 — Mesa de Vendas: estrutura base

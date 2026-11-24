@@ -59,6 +59,10 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **PLAYBOOK-01 em validação:** Ficha de Ataque V1 sintetiza perfil, momento, relacionamento explícito, objetivo, lacunas, perguntas e guardrails dentro da Ficha Universal. É uma projeção somente leitura que reutiliza Next Best Action e PRECALL-01; não cria novo score, nova entidade ou novo fato.
 - **PLAYBOOK-01 V1.1:** a ficha deriva relação OG, rota comercial e faixa de frota por regras determinísticas. “Sem evidência” significa “Conhecimento OG não confirmado”; nunca significa automaticamente “não conhece”.
 
+## Aba REUNIÃO — OG-19
+
+A apresentação comercial usa a navegação e o Design System do DUTRA OS. Perfil, custos, simulações e quadro são rascunhos da sessão daquela aba. O módulo não grava interações no CRM. Valores e percentuais dos simuladores são premissas de cenário, não resultados observados na conta.
+
 ## Regra técnica OG
 
 O projeto contém conhecimento técnico e materiais OG, mas **o código não deve inferir aplicações**. Tabelas/fotos/documentos validados são a fonte de verdade. Divergência ou ausência de fonte deve permanecer pendente de validação, nunca “corrigida” silenciosamente por conhecimento geral.

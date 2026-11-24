@@ -2,6 +2,11 @@
 
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.
 
+## OG-19 — Aba REUNIÃO
+
+- **Escopo:** integrar a apresentação, os simuladores de economia e o quadro de anotações ao menu desktop e móvel.
+- **Status:** concluída em código e pronta para revisão. Validação e arquivos em `docs/stories/OG-19-aba-reuniao.md`.
+
 ## TASK-001 — Mesa de Vendas: estrutura base
 
 - **Objetivo:** consolidar fila, conta ativa e painel contextual como interface diária.
