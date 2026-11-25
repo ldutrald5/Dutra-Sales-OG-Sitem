@@ -59,6 +59,12 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **PLAYBOOK-01 em validação:** Ficha de Ataque V1 sintetiza perfil, momento, relacionamento explícito, objetivo, lacunas, perguntas e guardrails dentro da Ficha Universal. É uma projeção somente leitura que reutiliza Next Best Action e PRECALL-01; não cria novo score, nova entidade ou novo fato.
 - **PLAYBOOK-01 V1.1:** a ficha deriva relação OG, rota comercial e faixa de frota por regras determinísticas. “Sem evidência” significa “Conhecimento OG não confirmado”; nunca significa automaticamente “não conhece”.
 
+## Biblioteca oficial e atualizações — OG-20
+
+A Biblioteca Comercial exibe o acervo público do site Olho de Gato. Os índices e as prévias vêm do catálogo oficial. Os links abrem a mídia original. Os materiais internos continuam disponíveis e conservam os contratos do CRM e da Biblioteca.
+
+No Windows, o inicializador consulta a branch `main` do repositório oficial quando solicitado pelo usuário, mantém a instalação original e executa a versão validada no mesmo endereço local. O servidor mantém a pasta de dados original. No PWA hospedado, a atualização acompanha o código já publicado.
+
 ## Regra técnica OG
 
 O projeto contém conhecimento técnico e materiais OG, mas **o código não deve inferir aplicações**. Tabelas/fotos/documentos validados são a fonte de verdade. Divergência ou ausência de fonte deve permanecer pendente de validação, nunca “corrigida” silenciosamente por conhecimento geral.

@@ -2,6 +2,11 @@
 
 Status permitidos: `pronta`, `em andamento`, `bloqueada`, `concluída`. A conclusão exige atualizar este arquivo, `DONE.md` e a story correspondente.
 
+## OG-20 — Biblioteca oficial e atualização do app
+
+- **Escopo:** catálogo oficial na Biblioteca Comercial e atualização pelo GitHub na instalação local.
+- **Status:** pronta para revisão. Validação em `docs/stories/OG-20-biblioteca-oficial-e-atualizacao.md`.
+
 ## TASK-001 — Mesa de Vendas: estrutura base
 
 - **Objetivo:** consolidar fila, conta ativa e painel contextual como interface diária.

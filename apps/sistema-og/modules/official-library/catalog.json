@@ -1,0 +1,2659 @@
+{
+  "source": "https://www.olhodegato.com/",
+  "sourceUpdatedAt": "2026-11-23T16:52:13.507Z",
+  "segments": [
+    {
+      "id": "bau",
+      "code": "SEG-01",
+      "name": "Baú & Carga Seca",
+      "axleSpec": "Semirreboque 3 e 4 Eixos & Rodotrem 9 Eixos",
+      "summary": "Equalização contínua de pressão nos rodados duplos em operações rodoviárias de carga seca, e-commerce e transferência entre centros de distribuição.",
+      "coverImage": "/media/segmentos/bau/bau-07-lemar.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "tanque",
+      "code": "SEG-02",
+      "name": "Tanque & Carga Líquida",
+      "axleSpec": "Tanque Inox, Combustíveis & Óleos Vegetais 3 e 4 Eixos",
+      "summary": "Estabilidade dinâmica e conferência visual imediata de pressão em frotas certificadas SASSMAQ de combustíveis, químicos e óleos vegetais.",
+      "coverImage": "/media/segmentos/tanque/tanque-02-cordiolli-oleo.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "graneleiro-cacamba",
+      "code": "SEG-03",
+      "name": "Graneleiro & Caçamba",
+      "axleSpec": "Carreta 4 Eixos, Bitrem & Rodotrem 9 Eixos",
+      "summary": "Equilíbrio térmico e de pressão sob carga máxima em operações de escoamento agrícola, calcário e agregados.",
+      "coverImage": "/media/segmentos/graneleiro-cacamba/gran-02-cincal.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "distribuidora-bebidas",
+      "code": "SEG-04",
+      "name": "Distribuidora de Bebidas",
+      "axleSpec": "Caminhão Rígido 6x2 Carroceria Rebaixada",
+      "summary": "Conferência visual instantânea antes da saída do centro de distribuição e calibragem ágil em frotas urbanas e regionais de bebidas.",
+      "coverImage": "/media/segmentos/distribuidora-bebidas/beb-03-ambev-stella-olho-de-gato.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "fora-de-estrada-mineradora",
+      "code": "SEG-05",
+      "name": "Fora de Estrada & Mineradora",
+      "axleSpec": "Basculante Vocacional 8x4, Biomassa 6x4 & Rígido Off-Road",
+      "summary": "Conjuntos reforçados para operação severa em mineração, siderurgia, lavra e transporte florestal/bioenergia.",
+      "coverImage": "/media/segmentos/fora-de-estrada-mineradora/min-01-arcelormittal.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "carga-refrigerada",
+      "code": "SEG-06",
+      "name": "Carga Refrigerada",
+      "axleSpec": "Semirreboque Frigorífico 3 e 4 Eixos — Carrier & Thermo King",
+      "summary": "Calibragem ágil por ponto único e preservação de carcaças em rotas dedicadas de alimentos refrigerados e congelados.",
+      "coverImage": "/media/segmentos/carga-refrigerada/refri-02-tombini-perdigao.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "concreteiras",
+      "code": "SEG-07",
+      "name": "Concreteiras",
+      "axleSpec": "Betoneiras 6x4 e 8x4 & Bomba Lança Schwing",
+      "summary": "Estabilidade e igualdade de pressão sob carga rotativa de concreto usinado entre central dosadora e canteiro de obras.",
+      "coverImage": "/media/segmentos/concreteiras/conc-02-polimix.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "conteiner",
+      "code": "SEG-08",
+      "name": "Porta-Contêiner",
+      "axleSpec": "Porta-Contêiner 3 Eixos & Rodotrem Portuário",
+      "summary": "Segurança operacional e menor desgaste de banda em frotas de comércio exterior, portos e terminais retroportuários.",
+      "coverImage": "/media/segmentos/conteiner/cont-01-acl-cargo.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "sider",
+      "code": "SEG-09",
+      "name": "Sider",
+      "axleSpec": "Semirreboque Lonado 3 e 4 Eixos & Rodotrem Sider 9 Eixos",
+      "summary": "Preservação de pneus e rapidez na conferência de pátio em operações de carga paletizada, industrial e automotiva.",
+      "coverImage": "/media/segmentos/sider/sider-01-cia-verde.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "sucroalcooleiro",
+      "code": "SEG-10",
+      "name": "Sucroalcooleiro",
+      "axleSpec": "Reboque & Composição Canavieira",
+      "summary": "Proteção térmica e equalização contínua em implementos canavieiros sujeitos a alta carga e operação contínua de safra.",
+      "coverImage": "/media/segmentos/sucroalcooleiro/sucro-01-usicamp.jpg",
+      "updatedAt": "2026-11-17"
+    },
+    {
+      "id": "onibus",
+      "code": "SEG-11",
+      "name": "Ônibus & Passageiros",
+      "axleSpec": "Ônibus Urbano, Rodoviário & Fretamento — Rodado Duplo",
+      "summary": "Estabilidade direcional, segurança para passageiros e conferência visual imediata de pressão nos rodados traseiros de frotas urbanas e rodoviárias.",
+      "coverImage": "/media/segmentos/onibus/onibus-01-real-ita.jpg",
+      "updatedAt": "2026-11-23"
+    }
+  ],
+  "regions": [
+    {
+      "region": "Sudeste",
+      "statesLabel": "SP · MG · ES",
+      "coverUrl": "/media/segmentos/bau/bau-07-lemar.jpg",
+      "segmentCounts": {
+        "bau": 7,
+        "tanque": 1,
+        "distribuidora-bebidas": 4,
+        "fora-de-estrada-mineradora": 4,
+        "carga-refrigerada": 1,
+        "concreteiras": 7,
+        "conteiner": 2,
+        "sider": 2,
+        "onibus": 2,
+        "graneleiro-cacamba": 1
+      },
+      "segmentCoverUrls": {
+        "bau": "/media/segmentos/bau/bau-07-lemar.jpg",
+        "tanque": "/media/segmentos/tanque/tanque-05-rodoborges.jpg",
+        "distribuidora-bebidas": "/media/segmentos/distribuidora-bebidas/beb-01-ambev-original.jpg",
+        "fora-de-estrada-mineradora": "/media/segmentos/fora-de-estrada-mineradora/min-01-arcelormittal.jpg",
+        "carga-refrigerada": "/media/segmentos/carga-refrigerada/refri-09-prodelog.jpg",
+        "concreteiras": "/media/segmentos/concreteiras/conc-02-polimix.jpg",
+        "conteiner": "/media/segmentos/conteiner/cont-01-acl-cargo.jpg",
+        "sider": "/media/segmentos/sider/sider-05-tg-logistica.jpg",
+        "onibus": "/media/segmentos/onibus/onibus-01-real-ita.jpg",
+        "graneleiro-cacamba": "/media/flagras/flagra-07-rodoborges-transportes.jpg"
+      }
+    },
+    {
+      "region": "Sul",
+      "statesLabel": "PR · SC · RS",
+      "coverUrl": "/media/segmentos/bau/bau-12-grupo-tombini-gnv.jpg",
+      "segmentCounts": {
+        "bau": 1,
+        "tanque": 8,
+        "graneleiro-cacamba": 1,
+        "carga-refrigerada": 6,
+        "concreteiras": 1,
+        "conteiner": 1,
+        "sider": 6,
+        "sucroalcooleiro": 1
+      },
+      "segmentCoverUrls": {
+        "bau": "/media/segmentos/bau/bau-12-grupo-tombini-gnv.jpg",
+        "tanque": "/media/segmentos/tanque/tanque-02-cordiolli-oleo.jpg",
+        "graneleiro-cacamba": "/media/segmentos/graneleiro-cacamba/gran-11-minerios-ferreira.jpg",
+        "carga-refrigerada": "/media/segmentos/carga-refrigerada/refri-02-tombini-perdigao.jpg",
+        "concreteiras": "/media/segmentos/concreteiras/conc-09-supremo-cb74.jpg",
+        "conteiner": "/media/segmentos/conteiner/cont-03-ers.jpg",
+        "sider": "/media/segmentos/sider/sider-01-cia-verde.jpg",
+        "sucroalcooleiro": "/media/segmentos/sucroalcooleiro/sucro-01-usicamp.jpg"
+      }
+    },
+    {
+      "region": "Nordeste",
+      "statesLabel": "BA · CE · MA · PI · PE · SE",
+      "coverUrl": "/media/segmentos/bau/bau-14-tijuca-alimentos.jpg",
+      "segmentCounts": {
+        "bau": 1,
+        "tanque": 1,
+        "graneleiro-cacamba": 7,
+        "carga-refrigerada": 2,
+        "concreteiras": 1,
+        "sider": 1
+      },
+      "segmentCoverUrls": {
+        "bau": "/media/segmentos/bau/bau-14-tijuca-alimentos.jpg",
+        "tanque": "/media/segmentos/tanque/tanque-09-petrox.jpg",
+        "graneleiro-cacamba": "/media/segmentos/graneleiro-cacamba/gran-02-cincal.jpg",
+        "carga-refrigerada": "/media/segmentos/carga-refrigerada/refri-05-alcilene.jpg",
+        "concreteiras": "/media/segmentos/concreteiras/conc-10-diconcreto.jpg",
+        "sider": "/media/segmentos/sider/sider-09-rotrans.jpg"
+      }
+    },
+    {
+      "region": "Centro-Oeste",
+      "statesLabel": "MT · MS · DF · GO",
+      "coverUrl": "/media/segmentos/bau/bau-05-ciem.jpg",
+      "segmentCounts": {
+        "bau": 1,
+        "tanque": 1,
+        "graneleiro-cacamba": 4,
+        "carga-refrigerada": 1,
+        "concreteiras": 1,
+        "sider": 1
+      },
+      "segmentCoverUrls": {
+        "bau": "/media/segmentos/bau/bau-05-ciem.jpg",
+        "tanque": "/media/segmentos/tanque/tanque-08-petro-rio.jpg",
+        "graneleiro-cacamba": "/media/segmentos/graneleiro-cacamba/gran-01-scania-super-randon.jpg",
+        "carga-refrigerada": "/media/segmentos/carga-refrigerada/refri-06-disnorte.jpg",
+        "concreteiras": "/media/segmentos/concreteiras/conc-01-ciplan.jpg",
+        "sider": "/media/segmentos/sider/sider-04-rodofederal.jpg"
+      }
+    },
+    {
+      "region": "Norte",
+      "statesLabel": "PA · TO",
+      "coverUrl": "/media/segmentos/tanque/tanque-11-rodonorte.jpg",
+      "segmentCounts": {
+        "tanque": 1,
+        "graneleiro-cacamba": 2,
+        "concreteiras": 1
+      },
+      "segmentCoverUrls": {
+        "tanque": "/media/segmentos/tanque/tanque-11-rodonorte.jpg",
+        "graneleiro-cacamba": "/media/segmentos/graneleiro-cacamba/gran-08-conexao-agrotrading.jpg",
+        "concreteiras": "/media/segmentos/concreteiras/conc-11-rocha-engenharia.jpg"
+      }
+    }
+  ],
+  "companies": [
+    {
+      "companyName": "ACL Cargo Group",
+      "segmentIds": [
+        "conteiner"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Santos, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/conteiner/cont-01-acl-cargo.jpg"
+    },
+    {
+      "companyName": "Agro Fritzen",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Bom Jesus, PI",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-07-agro-fritzen.jpg"
+    },
+    {
+      "companyName": "Alcilene Transportes",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Jaboatão dos Guararapes, PE",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-05-alcilene.jpg"
+    },
+    {
+      "companyName": "ArcelorMittal",
+      "segmentIds": [
+        "fora-de-estrada-mineradora"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/fora-de-estrada-mineradora/min-01-arcelormittal.jpg"
+    },
+    {
+      "companyName": "Artpetro",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Nova Esperança, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-01-artpetro.jpg"
+    },
+    {
+      "companyName": "Atma Logística",
+      "segmentIds": [
+        "conteiner"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Varginha, MG",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/conteiner/cont-02-atma.jpg"
+    },
+    {
+      "companyName": "Cervejaria Ambev",
+      "segmentIds": [
+        "distribuidora-bebidas"
+      ],
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "totalCount": 4,
+      "photoCount": 4,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/distribuidora-bebidas/beb-01-ambev-original.jpg"
+    },
+    {
+      "companyName": "Cia Verde Logística",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Curitiba, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-01-cia-verde.jpg"
+    },
+    {
+      "companyName": "CIEM Transportes",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Goianápolis, GO",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-05-ciem.jpg"
+    },
+    {
+      "companyName": "Cincal Calcário e Brita",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Curimatá, PI",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-02-cincal.jpg"
+    },
+    {
+      "companyName": "Ciplan Concreto",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Brasília, DF",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-01-ciplan.jpg"
+    },
+    {
+      "companyName": "Concrevit Concreto",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Cariacica, ES",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-04-concrevit-betoneira.jpg"
+    },
+    {
+      "companyName": "Conexão Agrotrading",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Norte",
+      "headquarters": "Paragominas, PA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-08-conexao-agrotrading.jpg"
+    },
+    {
+      "companyName": "Cordiolli Transportes (G10)",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-02-cordiolli-oleo.jpg"
+    },
+    {
+      "companyName": "Dalagnollo Transportes",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Luís Eduardo Magalhães, BA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-09-dalagnollo.jpg"
+    },
+    {
+      "companyName": "Del Pozo Transportes",
+      "segmentIds": [
+        "tanque",
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Ponta Grossa, PR",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-04-del-pozo-inox.jpg"
+    },
+    {
+      "companyName": "Diconcreto",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Santa Inês, MA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-10-diconcreto.jpg"
+    },
+    {
+      "companyName": "Disnorte",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Sinop, MT",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-06-disnorte.jpg"
+    },
+    {
+      "companyName": "Eco Forte Bioenergia",
+      "segmentIds": [
+        "fora-de-estrada-mineradora"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Mogi Guaçu, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/fora-de-estrada-mineradora/min-02-eco-forte.jpg"
+    },
+    {
+      "companyName": "ERS Transporte & Logística",
+      "segmentIds": [
+        "conteiner"
+      ],
+      "region": "Sul",
+      "headquarters": "Paranaguá, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/conteiner/cont-03-ers.jpg"
+    },
+    {
+      "companyName": "F. Útil Transportes",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Oeste Baiano, BA",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-03-f-util-graneleiro.jpg"
+    },
+    {
+      "companyName": "Frota Scania Super Basculante",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Mato Grosso do Sul, MS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-01-scania-super-randon.jpg"
+    },
+    {
+      "companyName": "Gral Transportes",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Sul",
+      "headquarters": "Chapecó, SC",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-04-gral.jpg"
+    },
+    {
+      "companyName": "Grupo Dago Transportes",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Criciúma, SC",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-08-grupo-dago.jpg"
+    },
+    {
+      "companyName": "Grupo Tombini",
+      "segmentIds": [
+        "bau",
+        "carga-refrigerada"
+      ],
+      "region": "Sul",
+      "headquarters": "Palmitos, SC",
+      "totalCount": 2,
+      "photoCount": 1,
+      "videoCount": 1,
+      "coverUrl": "/media/segmentos/bau/bau-12-grupo-tombini-gnv.jpg"
+    },
+    {
+      "companyName": "Grupo Tombini · Perdigão",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Sul",
+      "headquarters": "Palmitos, SC",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-02-tombini-perdigao.jpg"
+    },
+    {
+      "companyName": "GTFoods",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-03-gtfoods.jpg"
+    },
+    {
+      "companyName": "Itatibense Transportes",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Itatiba, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-13-itatibense.jpg"
+    },
+    {
+      "companyName": "J. Pina",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Rondonópolis, MT",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-05-j-pina.jpg"
+    },
+    {
+      "companyName": "JJ Mendes",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Maracanaú, CE",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-07-jj-mendes.jpg"
+    },
+    {
+      "companyName": "Lambertti Transportes",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Sul",
+      "headquarters": "Marechal Cândido Rondon, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-08-lambertti.jpg"
+    },
+    {
+      "companyName": "Layce Produtos e Logística",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Bom Jardim, MA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-10-layce.jpg"
+    },
+    {
+      "companyName": "Lemar Transportes",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Osasco, SP",
+      "totalCount": 2,
+      "photoCount": 1,
+      "videoCount": 1,
+      "coverUrl": "/media/segmentos/bau/bau-07-lemar.jpg"
+    },
+    {
+      "companyName": "Mercado Livre",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Osasco, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-06-mercado-livre.jpg"
+    },
+    {
+      "companyName": "Minérios Ferreira",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Sul",
+      "headquarters": "Capão da Canoa, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-11-minerios-ferreira.jpg"
+    },
+    {
+      "companyName": "Nutritins Agro",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Norte",
+      "headquarters": "Paraíso do Tocantins, TO",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-12-nutritins-agro.jpg"
+    },
+    {
+      "companyName": "Operação Canavieira Usicamp",
+      "segmentIds": [
+        "sucroalcooleiro"
+      ],
+      "region": "Sul",
+      "headquarters": "Sarandi, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sucroalcooleiro/sucro-01-usicamp.jpg"
+    },
+    {
+      "companyName": "Operação Fora de Estrada RK 430B",
+      "segmentIds": [
+        "fora-de-estrada-mineradora"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Minas Gerais, MG",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/fora-de-estrada-mineradora/min-03-randon-rk430b.jpg"
+    },
+    {
+      "companyName": "Petro Rio",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Sinop, MT",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-08-petro-rio.jpg"
+    },
+    {
+      "companyName": "Petrox Distribuidora",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Aracaju, SE",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-09-petrox.jpg"
+    },
+    {
+      "companyName": "Polimix Concreto",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-02-polimix.jpg"
+    },
+    {
+      "companyName": "Prodelog",
+      "segmentIds": [
+        "carga-refrigerada"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Jundiaí, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/carga-refrigerada/refri-09-prodelog.jpg"
+    },
+    {
+      "companyName": "Rocha Engenharia",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Norte",
+      "headquarters": "Altamira, PA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-11-rocha-engenharia.jpg"
+    },
+    {
+      "companyName": "Rodo Corso",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Flores da Cunha, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-10-rodo-corso.jpg"
+    },
+    {
+      "companyName": "Rodoborges",
+      "segmentIds": [
+        "tanque",
+        "graneleiro-cacamba"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Uberaba, MG",
+      "totalCount": 2,
+      "photoCount": 1,
+      "videoCount": 1,
+      "coverUrl": "/media/segmentos/tanque/tanque-05-rodoborges.jpg"
+    },
+    {
+      "companyName": "RodoFederal",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Várzea Grande, MT",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-04-rodofederal.jpg"
+    },
+    {
+      "companyName": "Rodomaior Transportes",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Centro-Oeste",
+      "headquarters": "Campo Grande, MS",
+      "totalCount": 2,
+      "photoCount": 2,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-06-rodomaior.jpg"
+    },
+    {
+      "companyName": "Rodonorte",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Norte",
+      "headquarters": "Tailândia, PA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-11-rodonorte.jpg"
+    },
+    {
+      "companyName": "Rodoseco Transportes",
+      "segmentIds": [
+        "graneleiro-cacamba"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Luís Eduardo Magalhães, BA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/graneleiro-cacamba/gran-14-rodoseco.jpg"
+    },
+    {
+      "companyName": "Rotrans Transportes",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Feira de Santana, BA",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-09-rotrans.jpg"
+    },
+    {
+      "companyName": "Saifer Transportes",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Jundiaí, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-09-saifer.jpg"
+    },
+    {
+      "companyName": "Scavol Transportes",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Santo Ângelo, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-10-scavol.jpg"
+    },
+    {
+      "companyName": "SHLOG Transportes",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Guarulhos, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-08-shlog.jpg"
+    },
+    {
+      "companyName": "Supermix Concreto",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "totalCount": 4,
+      "photoCount": 4,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-03-supermix.jpg"
+    },
+    {
+      "companyName": "Supremo Secil Cimentos",
+      "segmentIds": [
+        "concreteiras"
+      ],
+      "region": "Sul",
+      "headquarters": "Pomerode, SC",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/concreteiras/conc-09-supremo-cb74.jpg"
+    },
+    {
+      "companyName": "TG Logística",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Mogi Guaçu, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-05-tg-logistica.jpg"
+    },
+    {
+      "companyName": "Tijuca Alimentos",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Nordeste",
+      "headquarters": "Fortaleza, CE",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-14-tijuca-alimentos.jpg"
+    },
+    {
+      "companyName": "TransDaniel",
+      "segmentIds": [
+        "bau"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Pouso Alegre, MG",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/bau/bau-10-transdaniel.jpg"
+    },
+    {
+      "companyName": "Transleone",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Itajaí, SC",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-12-transleone.jpg"
+    },
+    {
+      "companyName": "Transportadora Cavalinho",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Vacaria, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-06-cavalinho.jpg"
+    },
+    {
+      "companyName": "TransVR",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Lajeado, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-06-transvr.jpg"
+    },
+    {
+      "companyName": "TSA Cargo",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Guarulhos, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-07-tsa-cargo.jpg"
+    },
+    {
+      "companyName": "Vêneto Transportes",
+      "segmentIds": [
+        "sider"
+      ],
+      "region": "Sul",
+      "headquarters": "Caxias do Sul, RS",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/sider/sider-11-veneto.jpg"
+    },
+    {
+      "companyName": "Via Dupla Transportes",
+      "segmentIds": [
+        "tanque"
+      ],
+      "region": "Sul",
+      "headquarters": "Araucária, PR",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/tanque/tanque-07-via-dupla.jpg"
+    },
+    {
+      "companyName": "Viação na Montanha",
+      "segmentIds": [
+        "onibus"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Campos do Jordão, SP",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/onibus/onibus-02-viacao-na-montanha.jpg"
+    },
+    {
+      "companyName": "Viação Real Ita",
+      "segmentIds": [
+        "onibus"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Cachoeiro de Itapemirim, ES",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/onibus/onibus-01-real-ita.jpg"
+    },
+    {
+      "companyName": "VIX Logística",
+      "segmentIds": [
+        "fora-de-estrada-mineradora"
+      ],
+      "region": "Sudeste",
+      "headquarters": "Vitória, ES",
+      "totalCount": 1,
+      "photoCount": 1,
+      "videoCount": 0,
+      "coverUrl": "/media/segmentos/fora-de-estrada-mineradora/min-04-vix.jpg"
+    }
+  ],
+  "photos": [
+    {
+      "id": "pho-bau-07",
+      "kind": "photo",
+      "title": "Rodotrem baú Guerra — Scania R450",
+      "subjectDetail": "Composição rodoviária da Lemar Transportes com equilíbrio contínuo de pressão entre pneus internos e externos.",
+      "segmentId": "bau",
+      "companyName": "Lemar Transportes",
+      "region": "Sudeste",
+      "headquarters": "Osasco, SP",
+      "url": "/media/segmentos/bau/bau-07-lemar.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-05",
+      "kind": "photo",
+      "title": "Rodotrem baú Randon 9 eixos",
+      "subjectDetail": "Composição Volvo FH de alta capacidade da CIEM Transportes com equalizadores instalados nos rodados.",
+      "segmentId": "bau",
+      "companyName": "CIEM Transportes",
+      "region": "Centro-Oeste",
+      "headquarters": "Goianápolis, GO",
+      "url": "/media/segmentos/bau/bau-05-ciem.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-06",
+      "kind": "photo",
+      "title": "Semirreboque baú Randon GNV/Biometano",
+      "subjectDetail": "Frota dedicada Mercado Livre movida a biometano e GNV utilizando Equalizador Olho de Gato nos três eixos.",
+      "segmentId": "bau",
+      "companyName": "Mercado Livre",
+      "region": "Sudeste",
+      "headquarters": "Osasco, SP",
+      "url": "/media/segmentos/bau/bau-06-mercado-livre.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-08",
+      "kind": "photo",
+      "title": "Conjunto Scania com baú 3 eixos",
+      "subjectDetail": "Caminhão Scania e semirreboque furgão alumínio da SHLOG Transportes equipados com sistema Olho de Gato.",
+      "segmentId": "bau",
+      "companyName": "SHLOG Transportes",
+      "region": "Sudeste",
+      "headquarters": "Guarulhos, SP",
+      "url": "/media/segmentos/bau/bau-08-shlog.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-09",
+      "kind": "photo",
+      "title": "Composição baú de alta capacidade",
+      "subjectDetail": "Conjunto de múltiplos eixos da Saifer Transportes padronizado com equalizadores nos rodados duplos.",
+      "segmentId": "bau",
+      "companyName": "Saifer Transportes",
+      "region": "Sudeste",
+      "headquarters": "Jundiaí, SP",
+      "url": "/media/segmentos/bau/bau-09-saifer.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-10",
+      "kind": "photo",
+      "title": "Semirreboque baú 3 eixos Volvo FH",
+      "subjectDetail": "Carreta furgão alumínio da TransDaniel com bico central de calibragem e inspeção visual rápida.",
+      "segmentId": "bau",
+      "companyName": "TransDaniel",
+      "region": "Sudeste",
+      "headquarters": "Pouso Alegre, MG",
+      "url": "/media/segmentos/bau/bau-10-transdaniel.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-12",
+      "kind": "photo",
+      "title": "Semirreboque baú Randon 3 eixos — Scania GNV",
+      "subjectDetail": "Conjunto sustentável movido a GNV do Grupo Tombini com semirreboque furgão alumínio Randon e Equalizador Olho de Gato.",
+      "segmentId": "bau",
+      "companyName": "Grupo Tombini",
+      "region": "Sul",
+      "headquarters": "Palmitos, SC",
+      "url": "/media/segmentos/bau/bau-12-grupo-tombini-gnv.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-13",
+      "kind": "photo",
+      "title": "Semirreboque baú 3 eixos espaçados Scania",
+      "subjectDetail": "Furgão alumínio Vanderleia da Itatibense Transportes & Logística com controle visual imediato de pressão nos três eixos.",
+      "segmentId": "bau",
+      "companyName": "Itatibense Transportes",
+      "region": "Sudeste",
+      "headquarters": "Itatiba, SP",
+      "url": "/media/segmentos/bau/bau-13-itatibense.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-bau-14",
+      "kind": "photo",
+      "title": "Rodotrem baú Randon 9 eixos — Volvo FH",
+      "subjectDetail": "Composição rodotrem furgão de carga seca da Tijuca Alimentos em operação rodoviária com Equalizador de Pneus Olho de Gato nos rodados duplos.",
+      "segmentId": "bau",
+      "companyName": "Tijuca Alimentos",
+      "region": "Nordeste",
+      "headquarters": "Fortaleza, CE",
+      "url": "/media/segmentos/bau/bau-14-tijuca-alimentos.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-02",
+      "kind": "photo",
+      "title": "Tanque Librelato 4 eixos óleo vegetal",
+      "subjectDetail": "Scania 6x2 da Cordiolli Transportes (G10) certificado SASSMAQ utilizando Equalizador Olho de Gato.",
+      "segmentId": "tanque",
+      "companyName": "Cordiolli Transportes (G10)",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "/media/segmentos/tanque/tanque-02-cordiolli-oleo.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-03",
+      "kind": "photo",
+      "title": "Semirreboque tanque Randon Linha R",
+      "subjectDetail": "Configuração 4 eixos da Cordiolli Transportes com equalização mecânica contínua nos pneus.",
+      "segmentId": "tanque",
+      "companyName": "Cordiolli Transportes (G10)",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "/media/segmentos/tanque/tanque-03-cordiolli-randon.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-04",
+      "kind": "photo",
+      "title": "Tanque inox Biasi 4 eixos — Volvo FH 500",
+      "subjectDetail": "Composição tanque isotérmico inox da Del Pozo Transportes dedicada ao transporte de óleo vegetal.",
+      "segmentId": "tanque",
+      "companyName": "Del Pozo Transportes",
+      "region": "Sul",
+      "headquarters": "Ponta Grossa, PR",
+      "url": "/media/segmentos/tanque/tanque-04-del-pozo-inox.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-05",
+      "kind": "photo",
+      "title": "Detalhe dos 3 eixos equipados no tanque",
+      "subjectDetail": "Vista aproximada do Equalizador Olho de Gato instalado nos cubos dos três eixos da frota Rodoborges.",
+      "segmentId": "tanque",
+      "companyName": "Rodoborges",
+      "region": "Sudeste",
+      "headquarters": "Uberaba, MG",
+      "url": "/media/segmentos/tanque/tanque-05-rodoborges.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-06",
+      "kind": "photo",
+      "title": "Tanque inox 4 eixos — Actros 2546",
+      "subjectDetail": "Conjunto Mercedes-Benz Actros da Transportadora Cavalinho com rodados duplos equalizados.",
+      "segmentId": "tanque",
+      "companyName": "Transportadora Cavalinho",
+      "region": "Sul",
+      "headquarters": "Vacaria, RS",
+      "url": "/media/segmentos/tanque/tanque-06-cavalinho.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-07",
+      "kind": "photo",
+      "title": "Tanque Randon Triel-HT 4 eixos",
+      "subjectDetail": "Composição Scania da Via Dupla Transportes em box operacional com sistema Olho de Gato.",
+      "segmentId": "tanque",
+      "companyName": "Via Dupla Transportes",
+      "region": "Sul",
+      "headquarters": "Araucária, PR",
+      "url": "/media/segmentos/tanque/tanque-07-via-dupla.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-tanq-08",
+      "kind": "photo",
+      "title": "Rodotrem tanque combustíveis 9 eixos — VW Meteor",
+      "subjectDetail": "Composição rodotrem de transporte de combustíveis da Petro Rio tracionada por VW Meteor com rodados duplos equalizados pelo sistema Olho de Gato.",
+      "segmentId": "tanque",
+      "companyName": "Petro Rio",
+      "region": "Centro-Oeste",
+      "headquarters": "Sinop, MT",
+      "url": "/media/segmentos/tanque/tanque-08-petro-rio.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-09",
+      "kind": "photo",
+      "title": "Bitrem tanque Randon combustíveis — Iveco",
+      "subjectDetail": "Conjunto bitrem tanque Randon da Petrox Distribuidora em operação de combustíveis com Equalizador Olho de Gato instalado nos rodados.",
+      "segmentId": "tanque",
+      "companyName": "Petrox Distribuidora",
+      "region": "Nordeste",
+      "headquarters": "Aracaju, SE",
+      "url": "/media/segmentos/tanque/tanque-09-petrox.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-10",
+      "kind": "photo",
+      "title": "Tanque inox Metanox 3 eixos — Volvo FH 500",
+      "subjectDetail": "Semirreboque tanque isotérmico inox Metanox da Rodo Corso dedicado ao transporte de polpa de suco com equalização contínua de pressão.",
+      "segmentId": "tanque",
+      "companyName": "Rodo Corso",
+      "region": "Sul",
+      "headquarters": "Flores da Cunha, RS",
+      "url": "/media/segmentos/tanque/tanque-10-rodo-corso.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-11",
+      "kind": "photo",
+      "title": "Rodotanque inox Biasi óleo vegetal — Scania",
+      "subjectDetail": "Composição rodotanque inox Biasi da Rodonorte para transporte de óleo vegetal com Equalizador de Pneus Olho de Gato nos rodados duplos.",
+      "segmentId": "tanque",
+      "companyName": "Rodonorte",
+      "region": "Norte",
+      "headquarters": "Tailândia, PA",
+      "url": "/media/segmentos/tanque/tanque-11-rodonorte.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-12",
+      "kind": "photo",
+      "title": "Tanque inox 3 eixos espaçados — Produtos perigosos",
+      "subjectDetail": "Conjunto tanque inox da Transleone equipado para transporte de produtos perigosos e combustíveis com conferência visual rápida pelo sistema Olho de Gato.",
+      "segmentId": "tanque",
+      "companyName": "Transleone",
+      "region": "Sul",
+      "headquarters": "Itajaí, SC",
+      "url": "/media/segmentos/tanque/tanque-12-transleone.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-01",
+      "kind": "photo",
+      "title": "Rodotrem caçamba Randon — Scania 560R",
+      "subjectDetail": "Composição basculante 9 eixos tracionada por Scania Super 560R 6x4 com equalizadores nos rodados.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Frota Scania Super Basculante",
+      "region": "Centro-Oeste",
+      "headquarters": "Mato Grosso do Sul, MS",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-01-scania-super-randon.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-02",
+      "kind": "photo",
+      "title": "Rodotrem caçamba 9 eixos — Volvo FH 540",
+      "subjectDetail": "Conjunto pesado da Cincal Calcário e Brita equipado para proteção de pneus em rotas mistas.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Cincal Calcário e Brita",
+      "region": "Nordeste",
+      "headquarters": "Curimatá, PI",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-02-cincal.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-03",
+      "kind": "photo",
+      "title": "Rodotrem graneleiro Randon 9 eixos",
+      "subjectDetail": "Volvo FH 540 6x4 da F. Útil Transportes com calibragem centralizada nos eixos graneleiros.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "F. Útil Transportes",
+      "region": "Nordeste",
+      "headquarters": "Oeste Baiano, BA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-03-f-util-graneleiro.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-04",
+      "kind": "photo",
+      "title": "Rodotrem basculante Scania 6x4",
+      "subjectDetail": "Unidade basculante da F. Útil Transportes em operação severa de pátio e rodovia.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "F. Útil Transportes",
+      "region": "Nordeste",
+      "headquarters": "Oeste Baiano, BA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-04-f-util-cacamba.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-05",
+      "kind": "photo",
+      "title": "Graneleiro Librelato 4 eixos — Scania Bluefun",
+      "subjectDetail": "Conjunto Scania Bluefun Edition da J. Pina com semirreboque graneleiro 4 eixos equalizado.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "J. Pina",
+      "region": "Centro-Oeste",
+      "headquarters": "Rondonópolis, MT",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-05-j-pina.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-06",
+      "kind": "photo",
+      "title": "Rodotrem graneleiro 9 eixos Scania",
+      "subjectDetail": "Composição de escoamento de grãos da Rodomaior Transportes equipada com sistema Olho de Gato.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Rodomaior Transportes",
+      "region": "Centro-Oeste",
+      "headquarters": "Campo Grande, MS",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-06-rodomaior.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-gran-07",
+      "kind": "photo",
+      "title": "Rodocaçamba 9 eixos — Volvo FH Globetrotter",
+      "subjectDetail": "Composição rodocaçamba da Agro Fritzen em operação de campo e lavoura equipada com Equalizador Olho de Gato nos rodados duplos.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Agro Fritzen",
+      "region": "Nordeste",
+      "headquarters": "Bom Jesus, PI",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-07-agro-fritzen.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-08",
+      "kind": "photo",
+      "title": "Rodocaçamba Randon New R 9 eixos — Volvo FH 540",
+      "subjectDetail": "Conjunto rodocaçamba Randon New R da Conexão Agrotrading em unidade armazenadora com sistema Olho de Gato instalado nos eixos.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Conexão Agrotrading",
+      "region": "Norte",
+      "headquarters": "Paragominas, PA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-08-conexao-agrotrading.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-09",
+      "kind": "photo",
+      "title": "Rodocaçamba Randon New R 9 eixos — Scania",
+      "subjectDetail": "Composição rodocaçamba Randon New R da Dalagnollo Transportes em operação de basculamento equipada com Equalizador Olho de Gato.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Dalagnollo Transportes",
+      "region": "Nordeste",
+      "headquarters": "Luís Eduardo Magalhães, BA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-09-dalagnollo.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-10",
+      "kind": "photo",
+      "title": "Basculante 3 eixos em descarga — Volvo FH 540",
+      "subjectDetail": "Conjunto caçamba basculante da Layce Produtos e Logística em operação de descarga com equalização de pressão nos pneus.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Layce Produtos e Logística",
+      "region": "Nordeste",
+      "headquarters": "Bom Jardim, MA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-10-layce.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-11",
+      "kind": "photo",
+      "title": "Rodocaçamba 9 eixos — Scania 70 Anos",
+      "subjectDetail": "Composição rodocaçamba comemorativa de 70 anos da Minérios Ferreira equipada com Equalizador de Pneus Olho de Gato.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Minérios Ferreira",
+      "region": "Sul",
+      "headquarters": "Capão da Canoa, RS",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-11-minerios-ferreira.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-12",
+      "kind": "photo",
+      "title": "Rodocaçamba 9 eixos em moega — Volvo FH 540",
+      "subjectDetail": "Conjunto rodocaçamba da Nutritins Agro em descarga sobre moega graneleira utilizando Equalizador Olho de Gato nos rodados duplos.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Nutritins Agro",
+      "region": "Norte",
+      "headquarters": "Paraíso do Tocantins, TO",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-12-nutritins-agro.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-13",
+      "kind": "photo",
+      "title": "Semirreboque caçamba Randon Linha R 3 eixos",
+      "subjectDetail": "Implemento caçamba basculante Randon Linha R da Rodomaior Transportes equipado com Equalizador Olho de Gato nos cubos traseiros.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Rodomaior Transportes",
+      "region": "Centro-Oeste",
+      "headquarters": "Campo Grande, MS",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-13-rodomaior-cacamba.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-gran-14",
+      "kind": "photo",
+      "title": "Rodocaçamba Randon 9 eixos — Volvo FH 540",
+      "subjectDetail": "Composição rodocaçamba Randon da Rodoseco Transportes padronizada com sistema de equalização de pressão Olho de Gato.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Rodoseco Transportes",
+      "region": "Nordeste",
+      "headquarters": "Luís Eduardo Magalhães, BA",
+      "url": "/media/segmentos/graneleiro-cacamba/gran-14-rodoseco.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-beb-01",
+      "kind": "photo",
+      "title": "Caminhão 6x2 distribuição Antarctica Original",
+      "subjectDetail": "Unidade de distribuição urbana Ambev equipada com Equalizador Olho de Gato nos rodados traseiros.",
+      "segmentId": "distribuidora-bebidas",
+      "companyName": "Cervejaria Ambev",
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "url": "/media/segmentos/distribuidora-bebidas/beb-01-ambev-original.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-beb-02",
+      "kind": "photo",
+      "title": "Iveco Tector 6x2 distribuição Corona",
+      "subjectDetail": "Implemento de bebidas Truckvan na frota Ambev com equalização ativa nos dois eixos traseiros.",
+      "segmentId": "distribuidora-bebidas",
+      "companyName": "Cervejaria Ambev",
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "url": "/media/segmentos/distribuidora-bebidas/beb-02-ambev-corona.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-beb-03",
+      "kind": "photo",
+      "title": "Unidade técnica Olho de Gato junto à frota Stella Artois",
+      "subjectDetail": "Acompanhamento técnico em campo da equipe Olho de Gato nos rodados duplos da distribuição Ambev.",
+      "segmentId": "distribuidora-bebidas",
+      "companyName": "Cervejaria Ambev",
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "url": "/media/segmentos/distribuidora-bebidas/beb-03-ambev-stella-olho-de-gato.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-beb-04",
+      "kind": "photo",
+      "title": "Iveco Tector 24-280 6x2 distribuição Skol",
+      "subjectDetail": "Padronização pneumática para alta frequência de entregas urbanas na operação Cervejaria Ambev.",
+      "segmentId": "distribuidora-bebidas",
+      "companyName": "Cervejaria Ambev",
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "url": "/media/segmentos/distribuidora-bebidas/beb-04-ambev-skol.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-min-01",
+      "kind": "photo",
+      "title": "Basculante vocacional 8x4 Rossetti",
+      "subjectDetail": "Caminhão severo 38 toneladas em operação ArcelorMittal com proteção pneumática nos rodados.",
+      "segmentId": "fora-de-estrada-mineradora",
+      "companyName": "ArcelorMittal",
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "url": "/media/segmentos/fora-de-estrada-mineradora/min-01-arcelormittal.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-min-02",
+      "kind": "photo",
+      "title": "Conjunto Scania 6x4 transporte de biomassa",
+      "subjectDetail": "Semirreboque de alta cubagem da Eco Forte Bioenergia operando em trechos mistos de terra e asfalto.",
+      "segmentId": "fora-de-estrada-mineradora",
+      "companyName": "Eco Forte Bioenergia",
+      "region": "Sudeste",
+      "headquarters": "Mogi Guaçu, SP",
+      "url": "/media/segmentos/fora-de-estrada-mineradora/min-02-eco-forte.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-min-03",
+      "kind": "photo",
+      "title": "Caminhão rígido fora de estrada RK 430B",
+      "subjectDetail": "Equipamento pesado de lavra com kit de equalização de alta resistência no rodado traseiro.",
+      "segmentId": "fora-de-estrada-mineradora",
+      "companyName": "Operação Fora de Estrada RK 430B",
+      "region": "Sudeste",
+      "headquarters": "Minas Gerais, MG",
+      "url": "/media/segmentos/fora-de-estrada-mineradora/min-03-randon-rk430b.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-min-04",
+      "kind": "photo",
+      "title": "Basculante pesado 8x4 — Frota CB-556",
+      "subjectDetail": "Caminhão vocacional da VIX Logística equipado para operação severa em terreno não pavimentado.",
+      "segmentId": "fora-de-estrada-mineradora",
+      "companyName": "VIX Logística",
+      "region": "Sudeste",
+      "headquarters": "Vitória, ES",
+      "url": "/media/segmentos/fora-de-estrada-mineradora/min-04-vix.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-refri-02",
+      "kind": "photo",
+      "title": "Câmara fria 3 eixos — Operação Perdigão",
+      "subjectDetail": "Volvo FH 460 do Grupo Tombini em logística refrigerada Perdigão com rodados duplos equalizados.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Grupo Tombini · Perdigão",
+      "region": "Sul",
+      "headquarters": "Palmitos, SC",
+      "url": "/media/segmentos/carga-refrigerada/refri-02-tombini-perdigao.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-refri-03",
+      "kind": "photo",
+      "title": "Semirreboque frigorífico 4 eixos Thermo King",
+      "subjectDetail": "Frota própria Scania da GTFoods equipada com sistema Olho de Gato nos eixos da câmara fria.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "GTFoods",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "/media/segmentos/carga-refrigerada/refri-03-gtfoods.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-refri-04",
+      "kind": "photo",
+      "title": "Câmara fria 3 eixos Carrier — DAF XF 480 55 Anos",
+      "subjectDetail": "Conjunto frigorífico comemorativo de 55 anos da Gral Transportes com equipamento Carrier e Equalizador de Pneus Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Gral Transportes",
+      "region": "Sul",
+      "headquarters": "Chapecó, SC",
+      "url": "/media/segmentos/carga-refrigerada/refri-04-gral.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-refri-05",
+      "kind": "photo",
+      "title": "Baú refrigerado Fibrasil Thermo Star — VW Delivery",
+      "subjectDetail": "Caminhão frigorífico VW Delivery com implemento Fibrasil e equipamento Thermo Star da Alcilene Transportes utilizando sistema Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Alcilene Transportes",
+      "region": "Nordeste",
+      "headquarters": "Jaboatão dos Guararapes, PE",
+      "url": "/media/segmentos/carga-refrigerada/refri-05-alcilene.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-refri-06",
+      "kind": "photo",
+      "title": "Câmara fria 3 eixos Rodofrio R990 — Alimentos",
+      "subjectDetail": "Semirreboque frigorífico de alimentos da Disnorte com equipamento Rodofrio R990 e rodados duplos equalizados pelo Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Disnorte",
+      "region": "Centro-Oeste",
+      "headquarters": "Sinop, MT",
+      "url": "/media/segmentos/carga-refrigerada/refri-06-disnorte.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-refri-07",
+      "kind": "photo",
+      "title": "Baú frigorífico Hornburg Carrier — VW Delivery 11.180",
+      "subjectDetail": "Unidade urbana refrigerada VW Delivery 11.180 Prime com carroceria Hornburg e unidade Carrier da JJ Mendes equipada com Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "JJ Mendes",
+      "region": "Nordeste",
+      "headquarters": "Maracanaú, CE",
+      "url": "/media/segmentos/carga-refrigerada/refri-07-jj-mendes.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-refri-08",
+      "kind": "photo",
+      "title": "Câmara fria Randon Thermo King A-500 — Scania R450",
+      "subjectDetail": "Conjunto Scania R450 com semirreboque frigorífico Randon e unidade Thermo King A-500 da Lambertti Transportes equipado com Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Lambertti Transportes",
+      "region": "Sul",
+      "headquarters": "Marechal Cândido Rondon, PR",
+      "url": "/media/segmentos/carga-refrigerada/refri-08-lambertti.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-refri-09",
+      "kind": "photo",
+      "title": "Baú refrigerado 8x2 — VW Constellation 24.280",
+      "subjectDetail": "Caminhão 8x2 VW Constellation 24.280 da Prodelog em operação de cargas refrigeradas com Equalizador Olho de Gato nos cubos.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Prodelog",
+      "region": "Sudeste",
+      "headquarters": "Jundiaí, SP",
+      "url": "/media/segmentos/carga-refrigerada/refri-09-prodelog.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-refri-10",
+      "kind": "photo",
+      "title": "Câmara fria 3 eixos Carrier X4 — Volvo FH 460",
+      "subjectDetail": "Conjunto frigorífico Volvo FH 460 da Gral Transportes com unidade Carrier X4 e Equalizador de Pneus Olho de Gato nos três eixos.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Gral Transportes",
+      "region": "Sul",
+      "headquarters": "Chapecó, SC",
+      "url": "/media/segmentos/carga-refrigerada/refri-10-gral-volvo.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-conc-01",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Liebherr — Frota 0410",
+      "subjectDetail": "Caminhão betoneira da Ciplan Cimento Concreto equipado com Equalizador Olho de Gato nos eixos de tração.",
+      "segmentId": "concreteiras",
+      "companyName": "Ciplan Concreto",
+      "region": "Centro-Oeste",
+      "headquarters": "Brasília, DF",
+      "url": "/media/segmentos/concreteiras/conc-01-ciplan.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-02",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Liebherr — Frota 5425",
+      "subjectDetail": "Unidade Polimix com mangueiras e visores Olho de Gato visíveis nos rodados traseiros.",
+      "segmentId": "concreteiras",
+      "companyName": "Polimix Concreto",
+      "region": "Sudeste",
+      "headquarters": "São Paulo, SP",
+      "url": "/media/segmentos/concreteiras/conc-02-polimix.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-03",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Convicta",
+      "subjectDetail": "Frota concreteira Supermix operando com pressão equalizada nos dois eixos traseiros duplos.",
+      "segmentId": "concreteiras",
+      "companyName": "Supermix Concreto",
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "url": "/media/segmentos/concreteiras/conc-03-supermix.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-04",
+      "kind": "photo",
+      "title": "Betoneira Concrevit — Frota 769",
+      "subjectDetail": "Caminhão betoneira da Concrevit equipado com Equalizador de Pneus Olho de Gato nos dois eixos traseiros duplos.",
+      "segmentId": "concreteiras",
+      "companyName": "Concrevit Concreto",
+      "region": "Sudeste",
+      "headquarters": "Cariacica, ES",
+      "url": "/media/segmentos/concreteiras/conc-04-concrevit-betoneira.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-05",
+      "kind": "photo",
+      "title": "Bomba Lança Schwing BL41 — Frota 631",
+      "subjectDetail": "Unidade autobomba de concreto Schwing Stetter BL41 da Concrevit com equalização pneumática Olho de Gato nos rodados traseiros.",
+      "segmentId": "concreteiras",
+      "companyName": "Concrevit Concreto",
+      "region": "Sudeste",
+      "headquarters": "Cariacica, ES",
+      "url": "/media/segmentos/concreteiras/conc-05-concrevit-bomba.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-06",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Siti — Frota BT 2060",
+      "subjectDetail": "Caminhão betoneira 4 eixos da Supermix na central dosadora com sistema Olho de Gato instalado nos rodados duplos.",
+      "segmentId": "concreteiras",
+      "companyName": "Supermix Concreto",
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "url": "/media/segmentos/concreteiras/conc-06-supermix-bt2060.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-07",
+      "kind": "photo",
+      "title": "Detalhe Técnico — Rodado Duplo Betoneira Supermix",
+      "subjectDetail": "Detalhe aproximado dos dois eixos traseiros da betoneira Supermix evidenciando a instalação central do Equalizador Olho de Gato.",
+      "segmentId": "concreteiras",
+      "companyName": "Supermix Concreto",
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "url": "/media/segmentos/concreteiras/conc-07-supermix-rodado.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-08",
+      "kind": "photo",
+      "title": "Betoneira Bomba 8x4 — Frota BT 2045",
+      "subjectDetail": "Conjunto betoneira com lança acoplada Volvo VM 270 da Supermix equipado com Equalizador Olho de Gato para operação em obra.",
+      "segmentId": "concreteiras",
+      "companyName": "Supermix Concreto",
+      "region": "Sudeste",
+      "headquarters": "Belo Horizonte, MG",
+      "url": "/media/segmentos/concreteiras/conc-08-supermix-bt2045.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-09",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Liebherr — Frota CB 74",
+      "subjectDetail": "Caminhão betoneira Liebherr 4 eixos da Supremo Secil Cimentos equipado com Equalizador de Pneus Olho de Gato nos eixos traseiros.",
+      "segmentId": "concreteiras",
+      "companyName": "Supremo Secil Cimentos",
+      "region": "Sul",
+      "headquarters": "Pomerode, SC",
+      "url": "/media/segmentos/concreteiras/conc-09-supremo-cb74.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-conc-10",
+      "kind": "photo",
+      "title": "Betoneira 8x4 Liebherr BT 05 — VW Constellation 31.320",
+      "subjectDetail": "Caminhão betoneira Liebherr 4 eixos da Diconcreto equipado com Equalizador Olho de Gato para operação severa em central dosadora.",
+      "segmentId": "concreteiras",
+      "companyName": "Diconcreto",
+      "region": "Nordeste",
+      "headquarters": "Santa Inês, MA",
+      "url": "/media/segmentos/concreteiras/conc-10-diconcreto.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-conc-11",
+      "kind": "photo",
+      "title": "Betoneira 6x4 Liebherr BT02 — Mercedes-Benz 2729",
+      "subjectDetail": "Unidade betoneira Liebherr Mercedes-Benz 2729 da Rocha Engenharia com sistema Olho de Gato instalado nos rodados de tração.",
+      "segmentId": "concreteiras",
+      "companyName": "Rocha Engenharia",
+      "region": "Norte",
+      "headquarters": "Altamira, PA",
+      "url": "/media/segmentos/concreteiras/conc-11-rocha-engenharia.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-cont-01",
+      "kind": "photo",
+      "title": "DAF XF 530 6x2 porta-contêiner",
+      "subjectDetail": "Operação portuária da ACL Cargo Group equipada com sistema Olho de Gato para calibragem constante.",
+      "segmentId": "conteiner",
+      "companyName": "ACL Cargo Group",
+      "region": "Sudeste",
+      "headquarters": "Santos, SP",
+      "url": "/media/segmentos/conteiner/cont-01-acl-cargo.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-cont-02",
+      "kind": "photo",
+      "title": "Conjunto porta-contêiner Guerra 3 eixos",
+      "subjectDetail": "Composição rodoviária Atma em transporte de contêiner marítimo com rodados equalizados.",
+      "segmentId": "conteiner",
+      "companyName": "Atma Logística",
+      "region": "Sudeste",
+      "headquarters": "Varginha, MG",
+      "url": "/media/segmentos/conteiner/cont-02-atma.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-cont-03",
+      "kind": "photo",
+      "title": "Rodotrem porta-contêiner — Axor 2651",
+      "subjectDetail": "Frota certificada SASSMAQ da ERS Logística tracionando contêineres com Equalizador Olho de Gato.",
+      "segmentId": "conteiner",
+      "companyName": "ERS Transporte & Logística",
+      "region": "Sul",
+      "headquarters": "Paranaguá, PR",
+      "url": "/media/segmentos/conteiner/cont-03-ers.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-01",
+      "kind": "photo",
+      "title": "Carreta sider Randon 4 eixos — Iveco 440",
+      "subjectDetail": "Conjunto lonado 4 eixos da Cia Verde Logística com equalização ativa nos rodados duplos.",
+      "segmentId": "sider",
+      "companyName": "Cia Verde Logística",
+      "region": "Sul",
+      "headquarters": "Curitiba, PR",
+      "url": "/media/segmentos/sider/sider-01-cia-verde.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-02",
+      "kind": "photo",
+      "title": "Sider Facchini 3 eixos espaçados — Volvo FH",
+      "subjectDetail": "Configuração Vanderleia da Del Pozo Transportes equipada com Equalizador Olho de Gato.",
+      "segmentId": "sider",
+      "companyName": "Del Pozo Transportes",
+      "region": "Sul",
+      "headquarters": "Ponta Grossa, PR",
+      "url": "/media/segmentos/sider/sider-02-del-pozo.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-04",
+      "kind": "photo",
+      "title": "Rodotrem sider Facchini 9 eixos",
+      "subjectDetail": "Composição rodoviária lonada Volvo FH da RodoFederal equipada com Equalizador de Pneus Olho de Gato nos rodados duplos.",
+      "segmentId": "sider",
+      "companyName": "RodoFederal",
+      "region": "Centro-Oeste",
+      "headquarters": "Várzea Grande, MT",
+      "url": "/media/segmentos/sider/sider-04-rodofederal.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-05",
+      "kind": "photo",
+      "title": "Semirreboque sider 3 eixos espaçados",
+      "subjectDetail": "Frota Mercedes-Benz da TG Logística com implemento lonado sider e equalização pneumática nos três eixos.",
+      "segmentId": "sider",
+      "companyName": "TG Logística",
+      "region": "Sudeste",
+      "headquarters": "Mogi Guaçu, SP",
+      "url": "/media/segmentos/sider/sider-05-tg-logistica.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-06",
+      "kind": "photo",
+      "title": "Semirreboque sider Randon 4 eixos — Scania",
+      "subjectDetail": "Conjunto lonado 4 eixos da TransVR com quarto eixo direcional e rodados duplos equipados com sistema Olho de Gato.",
+      "segmentId": "sider",
+      "companyName": "TransVR",
+      "region": "Sul",
+      "headquarters": "Lajeado, RS",
+      "url": "/media/segmentos/sider/sider-06-transvr.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-07",
+      "kind": "photo",
+      "title": "Carreta sider 3 eixos — VW Constellation",
+      "subjectDetail": "Unidade lonada comemorativa de 30 anos da TSA Cargo equipada para calibragem unificada e proteção de carcaças.",
+      "segmentId": "sider",
+      "companyName": "TSA Cargo",
+      "region": "Sudeste",
+      "headquarters": "Guarulhos, SP",
+      "url": "/media/segmentos/sider/sider-07-tsa-cargo.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-sider-08",
+      "kind": "photo",
+      "title": "Semirreboque sider Guerra 3 eixos",
+      "subjectDetail": "Conjunto lonado Guerra de 3 eixos do Grupo Dago Transportes equipado com Equalizador de Pneus Olho de Gato nos rodados duplos.",
+      "segmentId": "sider",
+      "companyName": "Grupo Dago Transportes",
+      "region": "Sul",
+      "headquarters": "Criciúma, SC",
+      "url": "/media/segmentos/sider/sider-08-grupo-dago.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-sider-09",
+      "kind": "photo",
+      "title": "Semirreboque sider 3 eixos espaçados",
+      "subjectDetail": "Carreta lonada Vanderleia de 3 eixos espaçados da Rotrans Transportes padronizada com Equalizador Olho de Gato.",
+      "segmentId": "sider",
+      "companyName": "Rotrans Transportes",
+      "region": "Nordeste",
+      "headquarters": "Feira de Santana, BA",
+      "url": "/media/segmentos/sider/sider-09-rotrans.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-sider-10",
+      "kind": "photo",
+      "title": "Carreta sider 4 eixos Facchini — Bebidas e carga paletizada",
+      "subjectDetail": "Semirreboque sider Facchini 4 eixos da Scavol Transportes para transporte rodoviário de bebidas e carga paletizada equipado com sistema Olho de Gato.",
+      "segmentId": "sider",
+      "companyName": "Scavol Transportes",
+      "region": "Sul",
+      "headquarters": "Santo Ângelo, RS",
+      "url": "/media/segmentos/sider/sider-10-scavol.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-sider-11",
+      "kind": "photo",
+      "title": "Semirreboque sider Linshalm 3 eixos — Scania",
+      "subjectDetail": "Conjunto sider Linshalm da Vêneto Transportes com Equalizador Olho de Gato instalado nos três eixos.",
+      "segmentId": "sider",
+      "companyName": "Vêneto Transportes",
+      "region": "Sul",
+      "headquarters": "Caxias do Sul, RS",
+      "url": "/media/segmentos/sider/sider-11-veneto.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-sucro-01",
+      "kind": "photo",
+      "title": "Reboque canavieiro com Equalizador Olho de Gato",
+      "subjectDetail": "Detalhe da instalação do equalizador central no rodado duplo de implemento canavieiro Usicamp.",
+      "segmentId": "sucroalcooleiro",
+      "companyName": "Operação Canavieira Usicamp",
+      "region": "Sul",
+      "headquarters": "Sarandi, PR",
+      "url": "/media/segmentos/sucroalcooleiro/sucro-01-usicamp.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "pho-onibus-01",
+      "kind": "photo",
+      "title": "Ônibus rodoviário Comil Campione — Frota 60490",
+      "subjectDetail": "Ônibus rodoviário da Viação Real Ita equipado com Equalizador de Pneus Olho de Gato no rodado traseiro para estabilidade e segurança dos passageiros.",
+      "segmentId": "onibus",
+      "companyName": "Viação Real Ita",
+      "region": "Sudeste",
+      "headquarters": "Cachoeiro de Itapemirim, ES",
+      "url": "/media/segmentos/onibus/onibus-01-real-ita.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-onibus-02",
+      "kind": "photo",
+      "title": "Ônibus urbano ecológico — Frota 8033",
+      "subjectDetail": "Ônibus urbano da Viação na Montanha operando com Equalizador Olho de Gato no eixo traseiro para conferência visual rápida de pressão no pátio.",
+      "segmentId": "onibus",
+      "companyName": "Viação na Montanha",
+      "region": "Sudeste",
+      "headquarters": "Campos do Jordão, SP",
+      "url": "/media/segmentos/onibus/onibus-02-viacao-na-montanha.jpg",
+      "recordedAt": "2026-11-23"
+    },
+    {
+      "id": "pho-tanq-01",
+      "kind": "photo",
+      "title": "Tanque Randon 4 eixos combustíveis",
+      "subjectDetail": "Conjunto Volvo FH 6x2 da Artpetro com semirreboque tanque 1+3 eixos equipado nos rodados duplos.",
+      "segmentId": "tanque",
+      "companyName": "Artpetro",
+      "region": "Sul",
+      "headquarters": "Nova Esperança, PR",
+      "url": "/media/segmentos/tanque/tanque-01-artpetro.jpg",
+      "recordedAt": "2026-11-17"
+    }
+  ],
+  "videos": [
+    {
+      "id": "vid-flagra-01",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Cooperativa COMIGO",
+      "subjectDetail": "Frota da Cooperativa COMIGO registrada em operação rodoviária equipada com Equalizador de Pressão Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Cooperativa COMIGO",
+      "region": "Centro-Oeste",
+      "headquarters": "Rio Verde, GO",
+      "url": "/media/flagras/flagra-01-cooperativa-comigo.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-01-cooperativa-comigo.jpg",
+      "duration": "00:17",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-02",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Grupo Tombini",
+      "subjectDetail": "Conjunto frigorífico do Grupo Tombini em rodagem rodoviária com rodados duplos equalizados pelo sistema Olho de Gato.",
+      "segmentId": "carga-refrigerada",
+      "companyName": "Grupo Tombini",
+      "region": "Sul",
+      "headquarters": "Palmitos, SC",
+      "url": "/media/flagras/flagra-02-grupo-tombini.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-02-grupo-tombini.jpg",
+      "duration": "00:22",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-03",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Lemar Transportes",
+      "subjectDetail": "Composição rodoviária da Lemar Logística e Transportes registrada na estrada utilizando Equalizador Olho de Gato.",
+      "segmentId": "bau",
+      "companyName": "Lemar Transportes",
+      "region": "Sudeste",
+      "headquarters": "Osasco, SP",
+      "url": "/media/flagras/flagra-03-lemar-transportes.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-03-lemar-transportes.jpg",
+      "duration": "00:27",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-04",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Locar Guindastes e Transportes",
+      "subjectDetail": "Unidade pesada da Locar Transportes Intermodais registrada em operação com sistema de equalização Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Locar Guindastes e Transportes",
+      "region": "Sudeste",
+      "headquarters": "Guarulhos, SP",
+      "url": "/media/flagras/flagra-04-locar-transportes.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-04-locar-transportes.jpg",
+      "duration": "00:29",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-05",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Manarim Transportes",
+      "subjectDetail": "Frota da Manarim Transportes em rodagem rodoviária equipada nos eixos com Equalizador de Pneus Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Manarim Transportes",
+      "region": "Sudeste",
+      "headquarters": "Itupeva, SP",
+      "url": "/media/flagras/flagra-05-manarim-transportes.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-05-manarim-transportes.jpg",
+      "duration": "00:28",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-06",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — RLR Transportes",
+      "subjectDetail": "Caminhão da RLR Transportes registrado em operação em Minas Gerais com rodados equipados com Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "RLR Transportes",
+      "region": "Sudeste",
+      "headquarters": "Itabirito, MG",
+      "url": "/media/flagras/flagra-06-rlr-transportes.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-06-rlr-transportes.jpg",
+      "duration": "00:15",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-07",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Rodoborges",
+      "subjectDetail": "Rodotrem basculante Randon 9 eixos da Rodoborges registrado em operação rodoviária com Equalizador Olho de Gato.",
+      "segmentId": "graneleiro-cacamba",
+      "companyName": "Rodoborges",
+      "region": "Sudeste",
+      "headquarters": "Uberaba, MG",
+      "url": "/media/flagras/flagra-07-rodoborges-transportes.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-07-rodoborges-transportes.jpg",
+      "duration": "00:11",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-flagra-08",
+      "kind": "video",
+      "videoCategory": "flagra",
+      "isVertical": true,
+      "title": "Flagra na Estrada — Vitória Terraplenagem e Locação",
+      "subjectDetail": "Equipamento da Vitória Serviços de Terraplenagem e Locação em operação equipado com sistema Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Vitória Terraplenagem e Locação",
+      "region": "Sudeste",
+      "headquarters": "Bragança Paulista, SP",
+      "url": "/media/flagras/flagra-08-vitoria-terraplenagem.mp4",
+      "thumbnailUrl": "/media/flagras/flagra-08-vitoria-terraplenagem.jpg",
+      "duration": "00:22",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-instalacao-01",
+      "kind": "video",
+      "videoCategory": "instalacao",
+      "title": "Instalação em 1 minuto e meio com 3 ferramentas",
+      "subjectDetail": "Passo a passo prático de instalação do Equalizador de Pressão Olho de Gato no rodado duplo utilizando apenas três ferramentas.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtu.be/hMu8tH_nyy8",
+      "thumbnailUrl": "https://i.ytimg.com/vi/hMu8tH_nyy8/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-manutencao-01",
+      "kind": "video",
+      "videoCategory": "manutencao",
+      "title": "Review Completo — Uso, Manutenção e Benefícios",
+      "subjectDetail": "Análise técnica detalhada sobre funcionamento, rotina de inspeção visual, manutenção preventiva e dúvidas frequentes do Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato · Trucão Auto Peças",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtu.be/mbVERpmvKtY",
+      "thumbnailUrl": "https://i.ytimg.com/vi/mbVERpmvKtY/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-manutencao-02",
+      "kind": "video",
+      "videoCategory": "manutencao",
+      "isVertical": true,
+      "title": "Calibragem Ideal e Economia",
+      "subjectDetail": "Como a manutenção contínua da pressão equalizada entre pneus internos e externos evita arraste e preserva a carcaça.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/CUJSBoBDc_E",
+      "thumbnailUrl": "https://i.ytimg.com/vi/CUJSBoBDc_E/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-depoimento-01",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "title": "Depoimento OG Mil — Resultado em Frota",
+      "subjectDetail": "Relato real de operação e economia com o sistema de equalização Olho de Gato aplicado em frota pesada.",
+      "segmentId": "geral",
+      "companyName": "OG Mil · Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtu.be/sTK16JaQRQo",
+      "thumbnailUrl": "https://i.ytimg.com/vi/sTK16JaQRQo/hqdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-depoimento-02",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento — Usabilidade para Motoristas",
+      "subjectDetail": "Motoristas destacam a praticidade da conferência visual imediata e segurança na rodagem diária com o Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/I6TtouO5GZg",
+      "thumbnailUrl": "https://i.ytimg.com/vi/I6TtouO5GZg/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-institucional-01",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "title": "Vídeo Institucional — Gestão Inteligente de Frota",
+      "subjectDetail": "Apresentação oficial do Equalizador de Pressão Olho de Gato: economia de diesel, vida útil de pneus e segurança operacional.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtu.be/hDF0C31IW7I",
+      "thumbnailUrl": "https://i.ytimg.com/vi/hDF0C31IW7I/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-curiosidade-01",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Como Funciona o Olho de Gato",
+      "subjectDetail": "Demonstração rápida do visor indicador de pressão e do equilíbrio automático nos rodados duplos.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/pbdWUUrx6bI",
+      "thumbnailUrl": "https://i.ytimg.com/vi/pbdWUUrx6bI/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-odg-curiosidade-02",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Demonstração Prática ao Vivo",
+      "subjectDetail": "Teste prático ao vivo demonstrando a resposta imediata do Equalizador Olho de Gato no caminhão.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/iM1GsgqWWVE",
+      "thumbnailUrl": "https://i.ytimg.com/vi/iM1GsgqWWVE/maxresdefault.jpg",
+      "recordedAt": "2026-11-17"
+    },
+    {
+      "id": "vid-ogw-frotas-01",
+      "kind": "video",
+      "videoCategory": "ogw-frotas",
+      "isVertical": false,
+      "title": "OGW Frotas — Gestão Inteligente no WhatsApp",
+      "subjectDetail": "Plataforma da Olho de Gato para gestão operacional e financeira de frotas via WhatsApp: checklist e controle de pneus, abastecimentos, manutenção preventiva e DRE por caminhão sem instalar aplicativo.",
+      "segmentId": "geral",
+      "companyName": "OGW Frotas · Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "/media/ogw-frotas/ogw-frotas-apresentacao.mp4",
+      "thumbnailUrl": "/media/ogw-frotas/ogw-frotas-cover.jpg",
+      "duration": "00:51",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-formulatruck-01",
+      "kind": "video",
+      "videoCategory": "formula-truck",
+      "isVertical": true,
+      "title": "Fórmula Truck — 4 Anos Usando Olho de Gato",
+      "subjectDetail": "A Fórmula Truck utiliza o Equalizador Olho de Gato há mais de 4 anos sob altíssima exigência térmica e mecânica nas pistas.",
+      "segmentId": "geral",
+      "companyName": "Fórmula Truck · Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/XwLd0PPQcmA",
+      "thumbnailUrl": "https://i.ytimg.com/vi/XwLd0PPQcmA/maxresdefault.jpg",
+      "duration": "00:48",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-formulatruck-02",
+      "kind": "video",
+      "videoCategory": "formula-truck",
+      "isVertical": true,
+      "title": "Fórmula Truck 2025 — Presença Oficial nas Pistas",
+      "subjectDetail": "Bastidores e presença oficial do Equalizador de Pressão Olho de Gato nos caminhões de competição da temporada 2025 da Fórmula Truck.",
+      "segmentId": "geral",
+      "companyName": "Fórmula Truck · Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/Y7A4Vfyz1Yg",
+      "thumbnailUrl": "https://i.ytimg.com/vi/Y7A4Vfyz1Yg/maxresdefault.jpg",
+      "duration": "00:59",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-manutencao-03",
+      "kind": "video",
+      "videoCategory": "manutencao",
+      "title": "4 Testes Essenciais de Funcionamento",
+      "subjectDetail": "Passo a passo dos 4 testes práticos essenciais que conferem o perfeito funcionamento e vedação do Equalizador de Pressão Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtu.be/vGnjdhCiiz8",
+      "thumbnailUrl": "https://i.ytimg.com/vi/vGnjdhCiiz8/maxresdefault.jpg",
+      "duration": "04:38",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-manutencao-04",
+      "kind": "video",
+      "videoCategory": "manutencao",
+      "isVertical": true,
+      "title": "Benefício — Equalização dos Dois Pneus",
+      "subjectDetail": "Demonstração prática de como o sistema mantém a pressão equalizada continuamente entre os dois pneus do rodado duplo.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/fI7betUGaKI",
+      "thumbnailUrl": "https://i.ytimg.com/vi/fI7betUGaKI/maxresdefault.jpg",
+      "duration": "01:15",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-manutencao-05",
+      "kind": "video",
+      "videoCategory": "manutencao",
+      "isVertical": true,
+      "title": "Calibragem a Cada 15 Dias é Suficiente?",
+      "subjectDetail": "Entenda por que apenas calibrar quinzenalmente não evita variações térmicas na estrada e o benefício da equalização contínua.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/W7oTI6KV7h4",
+      "thumbnailUrl": "https://i.ytimg.com/vi/W7oTI6KV7h4/maxresdefault.jpg",
+      "duration": "00:45",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-depoimento-03",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento Cliente — Na Prática na Estrada",
+      "subjectDetail": "Relato de cliente na rotina rodoviária destacando o funcionamento e a confiabilidade do Equalizador de Pressão Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato · Profissão Caminhoneiro",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/uAemunsV068",
+      "thumbnailUrl": "https://i.ytimg.com/vi/uAemunsV068/maxresdefault.jpg",
+      "duration": "00:35",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-depoimento-04",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento Borracheiro — Sem vs Com Olho de Gato",
+      "subjectDetail": "Visão técnica de borracharia mostrando a diferença de desgaste e conservação dos pneus com o uso do Equalizador Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/wQIG6QHWaxE",
+      "thumbnailUrl": "https://i.ytimg.com/vi/wQIG6QHWaxE/maxresdefault.jpg",
+      "duration": "01:27",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-depoimento-05",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento Motorista — Fim do Teste no Martelinho",
+      "subjectDetail": "Motorista explica por que bater martelinho no pneu não identifica perda fina de pressão e como o visor Olho de Gato resolve na hora.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/l0hCGIIhUWs",
+      "thumbnailUrl": "https://i.ytimg.com/vi/l0hCGIIhUWs/maxresdefault.jpg",
+      "duration": "00:56",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-depoimento-06",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento — Gestão e Padrão em Grandes Frotas",
+      "subjectDetail": "Relato sobre padronização operacional, controle de custos com pneus e crescimento sustentável em transportadoras.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/7JJO7Im3cFY",
+      "thumbnailUrl": "https://i.ytimg.com/vi/7JJO7Im3cFY/maxresdefault.jpg",
+      "duration": "01:14",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-depoimento-07",
+      "kind": "video",
+      "videoCategory": "depoimentos",
+      "isVertical": true,
+      "title": "Depoimento — Frota Concreteira em Maringá",
+      "subjectDetail": "Resultado real em frota concreteira de Maringá equipada com o Equalizador de Pressão Olho de Gato sob operação severa.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/kzvHfFU6hRM",
+      "thumbnailUrl": "https://i.ytimg.com/vi/kzvHfFU6hRM/maxresdefault.jpg",
+      "duration": "00:56",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-03",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — O Segredo para Calibrar Pneus",
+      "subjectDetail": "Como o Equalizador Olho de Gato simplifica a calibragem em ponto único e indica visualmente a pressão correta no caminhão.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato · Fala Estradeiro",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/S7GZLvCclMs",
+      "thumbnailUrl": "https://i.ytimg.com/vi/S7GZLvCclMs/maxresdefault.jpg",
+      "duration": "01:02",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-04",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Prejuízos Comuns vs Eficiência com Olho de Gato",
+      "subjectDetail": "Comparativo direto explicando os prejuízos mais comuns de pressão desigual nos rodados e os ganhos reais com o Olho de Gato.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/Og533ucKltc",
+      "thumbnailUrl": "https://i.ytimg.com/vi/Og533ucKltc/maxresdefault.jpg",
+      "duration": "00:43",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-05",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Frota Mais Sustentável",
+      "subjectDetail": "Menor consumo de diesel e maior aproveitamento de carcaças reduzem o descarte prematuro de pneus e emissões na operação.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/tRoEEK8OlAY",
+      "thumbnailUrl": "https://i.ytimg.com/vi/tRoEEK8OlAY/maxresdefault.jpg",
+      "duration": "00:52",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-06",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Evite Problemas Futuros na Frota",
+      "subjectDetail": "Inspeção preventiva rápida nos rodados duplos evitando que pequenas perdas de pressão se transformem em perda de carcaça.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/IU0GhTbEuWo",
+      "thumbnailUrl": "https://i.ytimg.com/vi/IU0GhTbEuWo/maxresdefault.jpg",
+      "duration": "00:42",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-07",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Tempo Parado é Prejuízo",
+      "subjectDetail": "Como reduzir paradas não programadas na rodovia e agilizar a liberação de pátio com conferência visual de calibragem.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/MuMHvAEX8ys",
+      "thumbnailUrl": "https://i.ytimg.com/vi/MuMHvAEX8ys/maxresdefault.jpg",
+      "duration": "01:07",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-08",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Onde Está o Desperdício nos Pneus",
+      "subjectDetail": "Identificação do arraste invisível causado por diferença de PSI entre pneus gêmeos e como estancar esse custo oculto.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/XBO7ZJVVgoY",
+      "thumbnailUrl": "https://i.ytimg.com/vi/XBO7ZJVVgoY/maxresdefault.jpg",
+      "duration": "00:47",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-09",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Pneu Murcho Gera Prejuízo",
+      "subjectDetail": "Impacto direto de rodar com baixa pressão no aquecimento da banda de rodagem, consumo de combustível e segurança.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/or3aGm2Ybi4",
+      "thumbnailUrl": "https://i.ytimg.com/vi/or3aGm2Ybi4/maxresdefault.jpg",
+      "duration": "00:46",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-10",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Proteção com Pneu Furado",
+      "subjectDetail": "Em caso de furo ou perda súbita, a válvula interna de segurança isola o pneu avariado e preserva o pneu gêmeo na viagem.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/dpYi8i2LGLs",
+      "thumbnailUrl": "https://i.ytimg.com/vi/dpYi8i2LGLs/maxresdefault.jpg",
+      "duration": "01:00",
+      "recordedAt": "2026-11-18"
+    },
+    {
+      "id": "vid-odg-curiosidade-11",
+      "kind": "video",
+      "videoCategory": "institucional",
+      "isVertical": true,
+      "title": "Curiosidade — Gestão Eficiente de Pneus na Frota",
+      "subjectDetail": "Reflexão prática sobre gestão eficiente de pneus e redução de custos operacionais para transportadores e frotistas.",
+      "segmentId": "geral",
+      "companyName": "Olho de Gato",
+      "region": "Sul",
+      "headquarters": "Maringá, PR",
+      "url": "https://youtube.com/shorts/IZ5ygorj41c",
+      "thumbnailUrl": "https://i.ytimg.com/vi/IZ5ygorj41c/maxresdefault.jpg",
+      "duration": "00:44",
+      "recordedAt": "2026-11-18"
+    }
+  ],
+  "previews": {
+    "/media/flagras/flagra-01-cooperativa-comigo.jpg": "/assets/official-library/f4d326fc40bd016c.webp",
+    "/media/flagras/flagra-02-grupo-tombini.jpg": "/assets/official-library/70cf7d748a587049.webp",
+    "/media/flagras/flagra-03-lemar-transportes.jpg": "/assets/official-library/d319a39edb41c54b.webp",
+    "/media/flagras/flagra-04-locar-transportes.jpg": "/assets/official-library/50aaabb384cfcbd3.webp",
+    "/media/flagras/flagra-05-manarim-transportes.jpg": "/assets/official-library/f732d5798f1cd0d6.webp",
+    "/media/flagras/flagra-06-rlr-transportes.jpg": "/assets/official-library/82cd54429144f454.webp",
+    "/media/flagras/flagra-07-rodoborges-transportes.jpg": "/assets/official-library/e487418d93eaee82.webp",
+    "/media/flagras/flagra-08-vitoria-terraplenagem.jpg": "/assets/official-library/7619c9b604dfbc1e.webp",
+    "/media/ogw-frotas/ogw-frotas-cover.jpg": "/assets/official-library/6d74a65a747e8789.webp",
+    "/media/segmentos/bau/bau-05-ciem.jpg": "/assets/official-library/00d495c7a6e06b2b.webp",
+    "/media/segmentos/bau/bau-06-mercado-livre.jpg": "/assets/official-library/f065eac82da18c48.webp",
+    "/media/segmentos/bau/bau-07-lemar.jpg": "/assets/official-library/14d757573868494c.webp",
+    "/media/segmentos/bau/bau-08-shlog.jpg": "/assets/official-library/43f1116f0f8e42bf.webp",
+    "/media/segmentos/bau/bau-09-saifer.jpg": "/assets/official-library/23b008a7c78c6b7d.webp",
+    "/media/segmentos/bau/bau-10-transdaniel.jpg": "/assets/official-library/58940ae52182e5f9.webp",
+    "/media/segmentos/bau/bau-12-grupo-tombini-gnv.jpg": "/assets/official-library/464d023e19b646ca.webp",
+    "/media/segmentos/bau/bau-13-itatibense.jpg": "/assets/official-library/ef2cc38484271fee.webp",
+    "/media/segmentos/bau/bau-14-tijuca-alimentos.jpg": "/assets/official-library/18364ce0169be1aa.webp",
+    "/media/segmentos/carga-refrigerada/refri-02-tombini-perdigao.jpg": "/assets/official-library/20b0339c480a9759.webp",
+    "/media/segmentos/carga-refrigerada/refri-03-gtfoods.jpg": "/assets/official-library/e6312a0813307c10.webp",
+    "/media/segmentos/carga-refrigerada/refri-04-gral.jpg": "/assets/official-library/056a3e556735435d.webp",
+    "/media/segmentos/carga-refrigerada/refri-05-alcilene.jpg": "/assets/official-library/bc8405c1a4113e34.webp",
+    "/media/segmentos/carga-refrigerada/refri-06-disnorte.jpg": "/assets/official-library/29b8df90c69babf5.webp",
+    "/media/segmentos/carga-refrigerada/refri-07-jj-mendes.jpg": "/assets/official-library/1e5bc4032a4bb533.webp",
+    "/media/segmentos/carga-refrigerada/refri-08-lambertti.jpg": "/assets/official-library/d78d649061bf6a81.webp",
+    "/media/segmentos/carga-refrigerada/refri-09-prodelog.jpg": "/assets/official-library/dcf2aa47e298758d.webp",
+    "/media/segmentos/carga-refrigerada/refri-10-gral-volvo.jpg": "/assets/official-library/665bcfc8c1749c3c.webp",
+    "/media/segmentos/concreteiras/conc-01-ciplan.jpg": "/assets/official-library/edc427542411aa01.webp",
+    "/media/segmentos/concreteiras/conc-02-polimix.jpg": "/assets/official-library/d6b2e238d151e8fa.webp",
+    "/media/segmentos/concreteiras/conc-03-supermix.jpg": "/assets/official-library/453a2100eb653343.webp",
+    "/media/segmentos/concreteiras/conc-04-concrevit-betoneira.jpg": "/assets/official-library/00e76553c66bb127.webp",
+    "/media/segmentos/concreteiras/conc-05-concrevit-bomba.jpg": "/assets/official-library/403e3d4cea8e96a4.webp",
+    "/media/segmentos/concreteiras/conc-06-supermix-bt2060.jpg": "/assets/official-library/e2fad8195a0bbc9f.webp",
+    "/media/segmentos/concreteiras/conc-07-supermix-rodado.jpg": "/assets/official-library/2b9b9e3ae49965c8.webp",
+    "/media/segmentos/concreteiras/conc-08-supermix-bt2045.jpg": "/assets/official-library/7d8538fda91de94a.webp",
+    "/media/segmentos/concreteiras/conc-09-supremo-cb74.jpg": "/assets/official-library/5e9a140a4e87da02.webp",
+    "/media/segmentos/concreteiras/conc-10-diconcreto.jpg": "/assets/official-library/1767efc8f1f1c714.webp",
+    "/media/segmentos/concreteiras/conc-11-rocha-engenharia.jpg": "/assets/official-library/f21aef0c93131887.webp",
+    "/media/segmentos/conteiner/cont-01-acl-cargo.jpg": "/assets/official-library/d86c29ab697d99e7.webp",
+    "/media/segmentos/conteiner/cont-02-atma.jpg": "/assets/official-library/e25aef68ad63baf5.webp",
+    "/media/segmentos/conteiner/cont-03-ers.jpg": "/assets/official-library/3b7910f6ee46f30f.webp",
+    "/media/segmentos/distribuidora-bebidas/beb-01-ambev-original.jpg": "/assets/official-library/94d9dc586298f71f.webp",
+    "/media/segmentos/distribuidora-bebidas/beb-02-ambev-corona.jpg": "/assets/official-library/ca7761b6db6779d0.webp",
+    "/media/segmentos/distribuidora-bebidas/beb-03-ambev-stella-olho-de-gato.jpg": "/assets/official-library/a7736d4c125e534e.webp",
+    "/media/segmentos/distribuidora-bebidas/beb-04-ambev-skol.jpg": "/assets/official-library/1fb5b079be46feea.webp",
+    "/media/segmentos/fora-de-estrada-mineradora/min-01-arcelormittal.jpg": "/assets/official-library/0e137f0755c020bf.webp",
+    "/media/segmentos/fora-de-estrada-mineradora/min-02-eco-forte.jpg": "/assets/official-library/74fdd6584401d618.webp",
+    "/media/segmentos/fora-de-estrada-mineradora/min-03-randon-rk430b.jpg": "/assets/official-library/ab1b164e6a3189e9.webp",
+    "/media/segmentos/fora-de-estrada-mineradora/min-04-vix.jpg": "/assets/official-library/954873eca61c7570.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-01-scania-super-randon.jpg": "/assets/official-library/296abb3e2dd2d72f.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-02-cincal.jpg": "/assets/official-library/e52022e79687547b.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-03-f-util-graneleiro.jpg": "/assets/official-library/e06272bc753fe861.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-04-f-util-cacamba.jpg": "/assets/official-library/65e9e0bceb753023.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-05-j-pina.jpg": "/assets/official-library/73cd8f0f77768192.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-06-rodomaior.jpg": "/assets/official-library/75d47a8117dbf2db.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-07-agro-fritzen.jpg": "/assets/official-library/59be818ddbe42920.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-08-conexao-agrotrading.jpg": "/assets/official-library/3de3b63b92f21c0a.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-09-dalagnollo.jpg": "/assets/official-library/cd50a43da978b478.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-10-layce.jpg": "/assets/official-library/7d93853573b991f5.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-11-minerios-ferreira.jpg": "/assets/official-library/e08f9221e0855d91.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-12-nutritins-agro.jpg": "/assets/official-library/b99a08a46a0ba1f3.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-13-rodomaior-cacamba.jpg": "/assets/official-library/31e338c2e3b39b17.webp",
+    "/media/segmentos/graneleiro-cacamba/gran-14-rodoseco.jpg": "/assets/official-library/e49777faaa3bd3f0.webp",
+    "/media/segmentos/onibus/onibus-01-real-ita.jpg": "/assets/official-library/fec7c64b077f0251.webp",
+    "/media/segmentos/onibus/onibus-02-viacao-na-montanha.jpg": "/assets/official-library/108569ab465f346c.webp",
+    "/media/segmentos/sider/sider-01-cia-verde.jpg": "/assets/official-library/0f14270b50a9042b.webp",
+    "/media/segmentos/sider/sider-02-del-pozo.jpg": "/assets/official-library/e9735219456b032c.webp",
+    "/media/segmentos/sider/sider-04-rodofederal.jpg": "/assets/official-library/8b741449ed6b2073.webp",
+    "/media/segmentos/sider/sider-05-tg-logistica.jpg": "/assets/official-library/d8baa63685e397b3.webp",
+    "/media/segmentos/sider/sider-06-transvr.jpg": "/assets/official-library/3536a2477de72b11.webp",
+    "/media/segmentos/sider/sider-07-tsa-cargo.jpg": "/assets/official-library/36ea3c97201e912d.webp",
+    "/media/segmentos/sider/sider-08-grupo-dago.jpg": "/assets/official-library/919cd2ab749dd352.webp",
+    "/media/segmentos/sider/sider-09-rotrans.jpg": "/assets/official-library/41637e0dfd527045.webp",
+    "/media/segmentos/sider/sider-10-scavol.jpg": "/assets/official-library/bae246edabc50336.webp",
+    "/media/segmentos/sider/sider-11-veneto.jpg": "/assets/official-library/964be3fb26ede15b.webp",
+    "/media/segmentos/sucroalcooleiro/sucro-01-usicamp.jpg": "/assets/official-library/81f0080b2c382862.webp",
+    "/media/segmentos/tanque/tanque-01-artpetro.jpg": "/assets/official-library/8e0ea4604ca21a52.webp",
+    "/media/segmentos/tanque/tanque-02-cordiolli-oleo.jpg": "/assets/official-library/aa010e4cd02c8d70.webp",
+    "/media/segmentos/tanque/tanque-03-cordiolli-randon.jpg": "/assets/official-library/548a5c119acb6de4.webp",
+    "/media/segmentos/tanque/tanque-04-del-pozo-inox.jpg": "/assets/official-library/108f67c95400ac77.webp",
+    "/media/segmentos/tanque/tanque-05-rodoborges.jpg": "/assets/official-library/009c43b13470d5d8.webp",
+    "/media/segmentos/tanque/tanque-06-cavalinho.jpg": "/assets/official-library/dc6ea03236113842.webp",
+    "/media/segmentos/tanque/tanque-07-via-dupla.jpg": "/assets/official-library/ec2c34f715da292f.webp",
+    "/media/segmentos/tanque/tanque-08-petro-rio.jpg": "/assets/official-library/3da663accc4dd644.webp",
+    "/media/segmentos/tanque/tanque-09-petrox.jpg": "/assets/official-library/83c7650ab75b1636.webp",
+    "/media/segmentos/tanque/tanque-10-rodo-corso.jpg": "/assets/official-library/9fcba0d36836fc53.webp",
+    "/media/segmentos/tanque/tanque-11-rodonorte.jpg": "/assets/official-library/29ac68cc0a5ee529.webp",
+    "/media/segmentos/tanque/tanque-12-transleone.jpg": "/assets/official-library/1f700750ab24faca.webp",
+    "https://i.ytimg.com/vi/7JJO7Im3cFY/maxresdefault.jpg": "/assets/official-library/17903f49eff83cf1.webp",
+    "https://i.ytimg.com/vi/CUJSBoBDc_E/maxresdefault.jpg": "/assets/official-library/d15ef9123ce46ba8.webp",
+    "https://i.ytimg.com/vi/I6TtouO5GZg/maxresdefault.jpg": "/assets/official-library/a06680bebc5609fb.webp",
+    "https://i.ytimg.com/vi/IU0GhTbEuWo/maxresdefault.jpg": "/assets/official-library/cf8feca73f592fd7.webp",
+    "https://i.ytimg.com/vi/IZ5ygorj41c/maxresdefault.jpg": "/assets/official-library/bb4207e46f077e16.webp",
+    "https://i.ytimg.com/vi/MuMHvAEX8ys/maxresdefault.jpg": "/assets/official-library/3f3e229f6faf861f.webp",
+    "https://i.ytimg.com/vi/Og533ucKltc/maxresdefault.jpg": "/assets/official-library/63d0ec648b1cc36b.webp",
+    "https://i.ytimg.com/vi/S7GZLvCclMs/maxresdefault.jpg": "/assets/official-library/a4e88a36a4012b89.webp",
+    "https://i.ytimg.com/vi/W7oTI6KV7h4/maxresdefault.jpg": "/assets/official-library/18ef0fc7a80adda3.webp",
+    "https://i.ytimg.com/vi/XBO7ZJVVgoY/maxresdefault.jpg": "/assets/official-library/c01682cbb114d620.webp",
+    "https://i.ytimg.com/vi/XwLd0PPQcmA/maxresdefault.jpg": "/assets/official-library/4d087852271c850a.webp",
+    "https://i.ytimg.com/vi/Y7A4Vfyz1Yg/maxresdefault.jpg": "/assets/official-library/5390a77eac5111c8.webp",
+    "https://i.ytimg.com/vi/dpYi8i2LGLs/maxresdefault.jpg": "/assets/official-library/f3887ce815dcc37a.webp",
+    "https://i.ytimg.com/vi/fI7betUGaKI/maxresdefault.jpg": "/assets/official-library/ae8e1edc8f270eb9.webp",
+    "https://i.ytimg.com/vi/hDF0C31IW7I/maxresdefault.jpg": "/assets/official-library/732632da2c83c7f2.webp",
+    "https://i.ytimg.com/vi/hMu8tH_nyy8/maxresdefault.jpg": "/assets/official-library/cb983f21e1ce8c55.webp",
+    "https://i.ytimg.com/vi/iM1GsgqWWVE/maxresdefault.jpg": "/assets/official-library/db39596a9da54afb.webp",
+    "https://i.ytimg.com/vi/kzvHfFU6hRM/maxresdefault.jpg": "/assets/official-library/042b2744b9cb2ca2.webp",
+    "https://i.ytimg.com/vi/l0hCGIIhUWs/maxresdefault.jpg": "/assets/official-library/03b95f82d07154f0.webp",
+    "https://i.ytimg.com/vi/mbVERpmvKtY/maxresdefault.jpg": "/assets/official-library/cb28f440a42356db.webp",
+    "https://i.ytimg.com/vi/or3aGm2Ybi4/maxresdefault.jpg": "/assets/official-library/26153cbb75c568d0.webp",
+    "https://i.ytimg.com/vi/pbdWUUrx6bI/maxresdefault.jpg": "/assets/official-library/324a0ffebe4b409c.webp",
+    "https://i.ytimg.com/vi/sTK16JaQRQo/hqdefault.jpg": "/assets/official-library/fba20f51b79d3c41.webp",
+    "https://i.ytimg.com/vi/tRoEEK8OlAY/maxresdefault.jpg": "/assets/official-library/989f447eabe6a88a.webp",
+    "https://i.ytimg.com/vi/uAemunsV068/maxresdefault.jpg": "/assets/official-library/d1c6de988154a3aa.webp",
+    "https://i.ytimg.com/vi/vGnjdhCiiz8/maxresdefault.jpg": "/assets/official-library/7f4bd7d459ef8b09.webp",
+    "https://i.ytimg.com/vi/wQIG6QHWaxE/maxresdefault.jpg": "/assets/official-library/dd7115c6e31add80.webp"
+  }
+}

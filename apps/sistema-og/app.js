@@ -769,6 +769,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabIds = new Set([...tabs].map(tab => tab.getAttribute('data-tab')).filter(Boolean));
   const desktopSecondaryTabs = new Set(['comunicacao','guia','catalogo','transportadoras','scripts','biblioteca','operacoes','historico']);
 
+  const officialLibraryRoot = document.getElementById('official-library');
+  let officialLibrary;
+  let loadingOfficialLibrary;
+
+  function openOfficialLibrary(focus) {
+    if (!officialLibraryRoot || officialLibrary || loadingOfficialLibrary) return;
+    const status = officialLibraryRoot.querySelector('[data-official-status]');
+    const retry = officialLibraryRoot.querySelector('[data-official-retry]');
+    const recoverFocus = document.activeElement === retry;
+    status.textContent = 'Carregando o catálogo oficial…';
+    retry.classList.add('hidden');
+    loadingOfficialLibrary = import('./modules/official-library/library.js')
+      .then(({ mountOfficialLibrary }) => mountOfficialLibrary(officialLibraryRoot))
+      .then(instance => {
+        officialLibrary = instance;
+        if (focus && state.currentTab === 'biblioteca' && (recoverFocus || document.activeElement === document.body)) focusTabHeading('biblioteca');
+      })
+      .catch(() => {
+        status.textContent = 'O catálogo está indisponível nesta abertura.';
+        retry.classList.remove('hidden');
+      })
+      .finally(() => { loadingOfficialLibrary = null; });
+  }
+
+  officialLibraryRoot?.querySelector('[data-official-retry]')?.addEventListener('click', () => openOfficialLibrary(true));
+
   function tabFromLocation() {
     const raw = decodeURIComponent(String(location.hash || '').replace(/^#\/?/, '').trim());
     return tabIds.has(raw) ? raw : 'dia';
@@ -814,6 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateRoute = options.updateRoute !== false;
     const routeMode = options.routeMode || 'push';
     const shouldFocus = options.focus !== false;
+    if (state.currentTab === 'biblioteca' && safeTabId !== 'biblioteca') officialLibrary?.deactivate();
     state.currentTab = safeTabId;
     tabs.forEach(t => {
       if (t.getAttribute('data-tab') === safeTabId) {
@@ -858,7 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (safeTabId === 'crm') renderCrmModule();
     else if (safeTabId === 'guia') renderConsultantEngine();
     else if (safeTabId === 'call-ai') { renderCallAIContext(); renderCallIntelligenceDashboard(); }
-    else if (safeTabId === 'biblioteca') renderMaterialLibrary();
+    else if (safeTabId === 'biblioteca') { openOfficialLibrary(shouldFocus); renderMaterialLibrary(); }
     else if (safeTabId === 'operacoes') renderOperationsFoundation();
 
     document.querySelectorAll('.og-mobile-nav [data-mobile-tab]').forEach(button => button.classList.toggle('active', button.dataset.mobileTab === safeTabId));
@@ -8649,6 +8676,22 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
     });
     banner.querySelector('[data-pwa-update-later]')?.addEventListener('click', () => banner.remove());
   }
+
+  document.getElementById('btn-app-update')?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    try {
+      const { updateApp } = await import('./modules/desktop-update.js');
+      await updateApp(button, {
+        notify: showNotification,
+        reload() {
+          pwaReloadRequested = true;
+          location.reload();
+        },
+      });
+    } catch {
+      showNotification('A atualização está indisponível nesta abertura.', 'warning');
+    }
+  });
 
   async function initServiceWorkerUpdates() {
     if (!('serviceWorker' in navigator)) return;

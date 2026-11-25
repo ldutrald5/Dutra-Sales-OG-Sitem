@@ -1662,3 +1662,10 @@ body.og-dialog-open { overflow: hidden; }
 .call-intelligence-dashboard-detail { color:#8f99a9; font-size:.58rem; line-height:1.45; }
 @media (max-width:900px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:560px) { .call-intelligence-dashboard-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+
+#btn-app-update { min-height: 36px; white-space: nowrap; }
+#btn-app-update:disabled { cursor: wait; opacity: .65; }
+@media (max-width: 520px) {
+  #btn-app-update { min-height: 44px; padding-inline: .55rem; font-size: .65rem; }
+}

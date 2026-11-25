@@ -141,3 +141,9 @@ A chave usada pelo harness é server-side. Preferir chave Supabase moderna `sb_s
 ## ADRs relacionados — Inteligência operacional
 
 - `docs/architecture/ADR-INTELLIGENCE-COMPILER-001.md` — estende o Builder Brain existente como camada durável de evidência/decisão, usa Skills finas + Context Router e mantém dados voláteis no CRM/runtime.
+
+## OG-20 — Catálogo oficial e atualização desktop
+
+O catálogo comercial usa um índice versionado, extraído da galeria pública em `https://www.olhodegato.com/`. As prévias são servidas pelo app. Os vídeos e os links para os arquivos originais usam as URLs oficiais. A biblioteca de materiais internos mantém o armazenamento e os contratos de recomendação existentes.
+
+A atualização local funciona em instalações com ou sem Git. O servidor supervisionado aceita pedidos de atualização somente na origem local e resolve a branch `main` do repositório oficial. O pacote vinculado ao SHA é validado e preparado em `.og-updates/` fora dos arquivos servidos. O supervisor mantém a pasta de dados original e grava o ponteiro ativo somente após obter o SHA esperado em `/api/health`. Se a nova versão falhar ao iniciar, reinicia a anterior. A origem local permanece a mesma para conservar os dados do navegador. O botão no PWA usa o service worker da aplicação publicada.
