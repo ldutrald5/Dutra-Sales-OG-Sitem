@@ -76,6 +76,10 @@ Registre no mínimo:
 
 Isso permite continuidade por ChatGPT, Codex, Claude, Gemini, outro agente ou desenvolvedor humano.
 
+## Handoff — Atualização desktop
+
+O atalho do Windows inicia `scripts/start-og-desktop.mjs`. Em uma cópia local, o botão Atualizar app consulta a `main` do repositório oficial. O supervisor mantém a origem local e o diretório de dados e registra a nova versão depois do teste de saúde. Instalações anteriores precisam receber o novo inicializador junto com OG-20 uma vez. O PWA hospedado atualiza pela publicação, sem executar instaladores no PC.
+
 ## Handoff — WhatsApp/Kaption
 
 Para tarefas relacionadas ao WhatsApp automático:

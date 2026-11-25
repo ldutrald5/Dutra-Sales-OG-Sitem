@@ -13,6 +13,7 @@ Este registro descreve capacidades já presentes no código. Não substitui test
 | OG-16 | Pacotes de materiais ligados a CRM/Call AI | `sales-materials.js`, `docs/stories/OG-16-crm-call-ai-pacotes-materiais.md` |
 | OG-17 | Performance e funil baseados em eventos reais | `performance-engine.js`, `docs/stories/OG-17-performance-funil-eventos-reais.md` |
 | OG-19 | Aba REUNIÃO com apresentação, simulação e quadro local | `docs/stories/OG-19-aba-reuniao.md` |
+| OG-20 | Catálogo oficial e atualização do app | `docs/stories/OG-20-biblioteca-oficial-e-atualizacao.md` |
 | Infra | PWA offline, servidor local e opção Cloudflare | `service-worker.js`, `server.mjs`, `cloudflare/worker.mjs` |
 
 ## TASK-001 — Mesa de Vendas: estrutura base

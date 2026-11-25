@@ -37,6 +37,7 @@
   <!-- Estilos Customizados Ultra Clean & Print Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="modules/meeting/meeting.css">
+  <link rel="stylesheet" href="modules/official-library/library.css">
 </head>
 <body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
 
@@ -70,6 +71,7 @@
 
         <!-- Contatos Rápidos da Empresa e Botão Versão Mobile -->
         <div class="flex items-center gap-4">
+          <button id="btn-app-update" type="button" class="og-button og-button-ghost" title="Verificar atualizações do DUTRA OS">Atualizar app</button>
           <button id="btn-install-app" type="button" class="hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-bold transition shadow-sm" title="Instalar o Sistema OG neste aparelho">
             <span>📱</span>
             <span>Instalar app</span>
@@ -1276,6 +1278,13 @@
     </section>
 
     <div id="tab-biblioteca" class="tab-content hidden space-y-5">
+      <div id="official-library">
+        <h1>Biblioteca Comercial</h1>
+        <p data-official-status role="status">Carregando o catálogo oficial…</p>
+        <button type="button" class="og-button og-button-ghost hidden" data-official-retry>Tentar novamente</button>
+      </div>
+      <details>
+        <summary>Materiais internos já cadastrados</summary>
       <section class="library-hero" aria-labelledby="library-title">
         <div><span class="og-kicker">BIBLIOTECA COMERCIAL</span><h1 id="library-title">O material certo, na hora da conversa.</h1><p>Organize vídeos, imagens, PDFs, apresentações, áudios, links, scripts e mensagens. Arquivos enviados ficam guardados somente neste aparelho.</p></div>
         <button id="library-new" type="button" class="og-button og-button-primary">＋ Cadastrar material</button>
@@ -1319,6 +1328,7 @@
           </form>
         </aside>
       </div>
+      </details>
     </div>
 
   </main>

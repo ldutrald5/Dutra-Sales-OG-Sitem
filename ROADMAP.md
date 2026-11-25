@@ -18,6 +18,9 @@ Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado pe
 ## Em revisão — OG-19 Aba REUNIÃO
 
 - Apresentação comercial, simuladores e quadro integrados ao menu do DUTRA OS para uso durante o diagnóstico de frota.
+## Em revisão — OG-20 Biblioteca oficial e atualização
+
+- Catálogo Olho de Gato na Biblioteca Comercial e atualização iniciada no app instalado.
 
 ## Próxima frente prioritária
 

@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v68';
+const SW_VERSION = 'v70';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -61,6 +61,10 @@ const SHELL_URLS = [
   '/knowledge/og-sales-brain.json',
   '/services/prospect-parser.js',
   '/modules/sales-desk.js',
+  '/modules/desktop-update.js',
+  '/modules/official-library/library.js',
+  '/modules/official-library/library.css',
+  '/modules/official-library/catalog.json',
   '/modules/meeting/meeting.css',
   '/modules/meeting/meeting.js',
   '/modules/meeting/content.js',
@@ -130,6 +134,10 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data && event.data.type === 'OG_REFRESH_SHELL' && event.ports[0]) {
+    event.waitUntil(refreshShell().then(() => event.ports[0].postMessage({ ok: true }),
+      () => event.ports[0].postMessage({ ok: false })));
+  }
   if (event.data && event.data.type === 'FLUSH_OUTBOX') {
     event.waitUntil(flushOutbox().then(ok => {
       if (event.ports && event.ports[0]) event.ports[0].postMessage({ ok });
@@ -195,6 +203,20 @@ self.addEventListener('fetch', event => {
   }
   event.respondWith(staleWhileRevalidate(req));
 });
+
+async function refreshShell() {
+  const critical = ['/', '/index.html', '/app.js', '/styles.css', '/data.js'];
+  const fresh = await Promise.all(SHELL_URLS.map(async url => {
+    const response = await fetch(url, { cache: 'reload', signal: AbortSignal.timeout(12000) }).catch(() => null);
+    if (!response?.ok) {
+      if (critical.includes(url)) throw new Error('Shell indisponível');
+      return null;
+    }
+    return [url, response];
+  }));
+  const cache = await caches.open(CACHE_SHELL);
+  await Promise.all(fresh.filter(Boolean).map(([url, response]) => cache.put(url, response)));
+}
 
 async function networkFirstNavigation(req) {
   try {

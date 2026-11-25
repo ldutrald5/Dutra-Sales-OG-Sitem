@@ -24,7 +24,7 @@ Ready for Review
 
 ## Entrega
 
-Revisão pelo GitHub. O escopo termina no repositório, sem publicação em produção.
+A PR #123 integra a aba à versão principal depois da Biblioteca Oficial e do atualizador. A publicação na Hostinger segue a implantação automática da branch `main`.
 
 O rascunho usa `sessionStorage` e acompanha a sessão daquela aba. Os vídeos públicos do material de referência exigem conexão e carregam mediante clique.
 

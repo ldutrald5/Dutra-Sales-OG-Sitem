@@ -26,6 +26,12 @@ O sistema é local-first, instalável como PWA e mantém o núcleo comercial fun
 3. Dois cliques em **INICIAR-SISTEMA-OG.cmd**.
 4. Abra **http://127.0.0.1:4321**
 
+### Atualizar pelo aplicativo
+
+No Windows, com o inicializador de OG-20 ou posterior, abra o mesmo atalho e clique em **Atualizar app**. O botão consulta a `main` no GitHub, pede confirmação e reinicia o servidor local na nova versão. Uma instalação anterior precisa receber essa versão uma vez. Mantenha a pasta original para conservar configurações e dados. O atualizador usa o `tar.exe` disponível nas versões suportadas do Windows.
+
+No PWA instalado a partir do site do DUTRA OS, o mesmo botão verifica a versão publicada e recarrega a janela instalada.
+
 ### Terminal
 ```bash
 npm install

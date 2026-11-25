@@ -6,6 +6,10 @@ Registro consolidado das evoluções recentes. O histórico de stories anterior 
 
 - Integrada ao menu do DUTRA OS uma apresentação de 19 telas com diagnóstico de frota, simuladores de pneus e diesel, tela cheia e quadro de anotações.
 - O rascunho fica na sessão da aba, sem sincronização com o CRM. As projeções usam as premissas informadas no simulador.
+## [Unreleased] — Biblioteca oficial e atualização do app
+
+- A Biblioteca Comercial passa a mostrar o catálogo público Olho de Gato, com 79 fotos, 36 vídeos, 11 segmentos, 5 regiões e OGW Frotas. Materiais próprios seguem acessíveis na seção interna.
+- O botão Atualizar app verifica o GitHub no desktop local e a versão publicada no PWA. O servidor local valida a nova versão antes de registrá-la como ativa.
 
 ## [Unreleased] — DUTRA Intelligence Compiler V1
 

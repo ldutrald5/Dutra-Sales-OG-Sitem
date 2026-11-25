@@ -1,0 +1,40 @@
+#official-library { display: grid; gap: 1rem; }
+#official-library .official-nav { display: flex; flex-wrap: wrap; gap: .45rem; }
+#official-library .official-nav button { min-height: 44px; }
+#official-library .official-nav button[aria-pressed=true] { background: var(--og-brand-soft); color: var(--og-brand); border-color: var(--og-brand); }
+#official-library .official-filters { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: .65rem; padding: .85rem; }
+#official-library label { display: grid; min-width: 0; gap: .25rem; font-size: .77rem; font-weight: 700; color: var(--og-muted); }
+#official-library :is(select, input) { min-width: 0; width: 100%; min-height: 44px; padding: .6rem .7rem; border: 1px solid var(--og-border); border-radius: .65rem; background: var(--og-bg); color: var(--og-text); font-size: 1rem; }
+#official-library .official-results { display: grid; gap: 1rem; }
+#official-library .official-results h2 { margin-bottom: .6rem; color: var(--og-text); font-size: 1.1rem; font-weight: 800; }
+#official-library .official-results h2 small { color: var(--og-brand); font-size: .75rem; }
+#official-library .official-results p { margin-bottom: .65rem; color: var(--og-muted); }
+#official-library .official-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
+#official-library .official-card { display: flex; flex-direction: column; width: 100%; overflow: hidden; text-align: left; color: var(--og-text); background: var(--og-surface); border: 1px solid var(--og-border); border-radius: .8rem; }
+#official-library .official-card:hover { border-color: var(--og-brand); }
+#official-library .official-cover { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--og-surface-raised); }
+#official-library .official-cover img { width: 100%; height: 100%; object-fit: cover; }
+#official-library .official-play { position: absolute; inset: auto .45rem .45rem auto; padding: .25rem .5rem; border-radius: .38rem; color: var(--og-text); background: #070707db; font-size: .72rem; font-weight: 700; }
+#official-library .official-card-copy { display: grid; gap: .3rem; padding: .65rem; overflow-wrap: anywhere; }
+#official-library .official-card-copy strong { font-size: .84rem; line-height: 1.3; }
+#official-library .official-card-copy small { color: var(--og-muted); font-size: .72rem; }
+#official-library .official-result-head { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+#official-library [data-more-media] { margin-top: .8rem; }
+#official-library .official-dialog { width: min(46rem, calc(100% - 1.2rem)); max-height: 92dvh; margin: auto; padding: 1rem; overflow: auto; color: var(--og-text); background: var(--og-surface); border: 1px solid var(--og-border); border-radius: 1rem; }
+#official-library .official-dialog::backdrop { background: #000c; }
+#official-library .official-dialog header { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .6rem; }
+#official-library .official-dialog h2 { font-size: 1.1rem; font-weight: 800; }
+#official-library .official-dialog :is(p, small) { display: block; margin-top: .65rem; color: var(--og-muted); overflow-wrap: anywhere; }
+#official-library .official-dialog a { display: inline-flex; margin-top: .75rem; }
+#official-library .official-media-view :is(img, video, iframe) { width: 100%; max-height: 52dvh; object-fit: contain; border: 0; background: var(--og-bg); }
+#official-library .official-media-view iframe { aspect-ratio: 16 / 9; }
+#tab-biblioteca > details > summary { width: fit-content; padding: .5rem 0; color: var(--og-muted); cursor: pointer; }
+@media (max-width: 880px) {
+  #official-library .official-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #official-library .official-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  #official-library .official-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #official-library .official-filters { grid-template-columns: minmax(0, 1fr); }
+  #official-library .official-dialog { padding: .65rem; }
+}

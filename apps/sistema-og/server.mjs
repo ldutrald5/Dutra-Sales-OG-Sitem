@@ -4,6 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { createDesktopUpdater, isDesktopRequest } from './server-desktop-update.mjs';
 
 const require = createRequire(import.meta.url);
 const operationsModel = require('./operations-model.js');
@@ -23,6 +24,13 @@ const localAccessToken = String(process.env.OG_LOCAL_ACCESS_TOKEN || '');
 const localAccessPin = String(process.env.OG_LOCAL_ACCESS_PIN || '');
 const lanMode = !['127.0.0.1', 'localhost', '::1'].includes(host);
 const hostedMode = Boolean(process.env.RAILWAY_ENVIRONMENT_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN || process.env.OG_PUBLIC_DOMAIN);
+const desktopUpdater = !lanMode && !hostedMode && process.connected && process.env.OG_DESKTOP_UPDATE_DIR
+  ? createDesktopUpdater({ directory: process.env.OG_DESKTOP_UPDATE_DIR, current: process.env.OG_RELEASE_SHA || null })
+  : null;
+let desktopUpdateReady = false;
+if (desktopUpdater) process.on('message', message => {
+  if (message?.type === 'og-desktop-ready') desktopUpdateReady = true;
+});
 const writeWindows = new Map();
 const publicEventWindows = new Map();
 const prospectResearchWindows = new Map();
@@ -319,6 +327,30 @@ footer{margin-top:28px;border-top:1px solid #202a35;padding-top:16px;color:#6474
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
+
+  if (url.pathname === '/api/desktop-update') {
+    if (!['GET', 'POST'].includes(req.method)) return sendJson(res, 405, { error: 'Método não permitido.' });
+    if (!isDesktopRequest(req, port, req.method === 'POST')) return sendJson(res, 403, { error: 'Atualização disponível apenas no computador.' });
+    if (!desktopUpdater) return sendJson(res, 409, { error: 'Abra o Sistema OG pelo atalho atualizado do Windows.' });
+    if (!desktopUpdateReady) return sendJson(res, 503, { error: 'O DUTRA OS está iniciando. Tente novamente em instantes.' });
+    try {
+      if (req.method === 'GET') return sendJson(res, 200, await desktopUpdater.check());
+      const { sha } = await readBody(req, 1024);
+      const result = await desktopUpdater.prepare(sha);
+      if (result.available && !res.destroyed) {
+        desktopUpdateReady = false;
+        res.once('close', () => { if (!res.writableFinished) desktopUpdateReady = true; });
+        res.once('finish', () => process.send({ type: 'og-desktop-update', sha: result.latest }, error => {
+          if (error) desktopUpdateReady = true;
+        }));
+      }
+      return sendJson(res, 200, result);
+    } catch (error) {
+      console.warn('Atualização local indisponível:', error.message);
+      const safeMessage = /^[A-ZÁÉÍÓÚ][^\r\n]{1,120}\.$/u.test(error.message) ? error.message : 'Não foi possível preparar a atualização local. A versão anterior continua ativa.';
+      return sendJson(res, 409, { error: safeMessage });
+    }
+  }
 
   if (['/health', '/api/health'].includes(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) {
     const release = String(process.env.OG_RELEASE_SHA || '').trim();
