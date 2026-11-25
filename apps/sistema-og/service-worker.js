@@ -6,7 +6,7 @@
  *  - API (/api/*): sempre rede (nunca cache)
  *  - Demais GET same-origin: stale-while-revalidate
  */
-const SW_VERSION = 'v69';
+const SW_VERSION = 'v70';
 const CACHE_SHELL = `sistema-og-shell-${SW_VERSION}`;
 const CACHE_RUNTIME = `sistema-og-runtime-${SW_VERSION}`;
 const SYNC_DB = 'sistema-og-sync';
@@ -65,6 +65,12 @@ const SHELL_URLS = [
   '/modules/official-library/library.js',
   '/modules/official-library/library.css',
   '/modules/official-library/catalog.json',
+  '/modules/meeting/meeting.css',
+  '/modules/meeting/meeting.js',
+  '/modules/meeting/content.js',
+  '/modules/meeting/simulators.js',
+  '/modules/meeting/board.js',
+  '/modules/meeting/icons.js',
   '/modules/prospecting-engine.js',
   '/modules/lead-intelligence.js',
   '/modules/signal-center.js',

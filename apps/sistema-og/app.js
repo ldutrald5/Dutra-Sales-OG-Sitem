@@ -769,6 +769,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabIds = new Set([...tabs].map(tab => tab.getAttribute('data-tab')).filter(Boolean));
   const desktopSecondaryTabs = new Set(['comunicacao','guia','catalogo','transportadoras','scripts','biblioteca','operacoes','historico']);
 
+  const meetingPanel = document.getElementById('tab-reuniao');
+  let meeting;
+  let loadingMeeting;
+
+  function openMeeting(focus) {
+    if (!meetingPanel || meeting || loadingMeeting) return;
+    const retry = meetingPanel.querySelector('[data-meeting-retry]');
+    const status = meetingPanel.querySelector('[data-meeting-loading]');
+    retry.classList.add('hidden');
+    status.textContent = 'Carregando apresentação…';
+    loadingMeeting = import('./modules/meeting/meeting.js').then(({ mountMeeting }) => {
+      if (state.currentTab !== 'reuniao') return;
+      const hadFocus = meetingPanel.contains(document.activeElement);
+      meeting = mountMeeting(meetingPanel);
+      if (focus || hadFocus) focusTabHeading('reuniao');
+    }).catch(error => {
+      status.textContent = 'A apresentação está indisponível nesta abertura.';
+      retry.classList.remove('hidden');
+      console.warn('Falha ao abrir a aba Reunião.', error);
+    }).finally(() => { loadingMeeting = null; });
+  }
+
+  meetingPanel?.querySelector('[data-meeting-retry]')?.addEventListener('click', () => openMeeting(true));
+
   const officialLibraryRoot = document.getElementById('official-library');
   let officialLibrary;
   let loadingOfficialLibrary;
@@ -840,6 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateRoute = options.updateRoute !== false;
     const routeMode = options.routeMode || 'push';
     const shouldFocus = options.focus !== false;
+    if (state.currentTab === 'reuniao' && safeTabId !== 'reuniao') meeting?.deactivate();
     if (state.currentTab === 'biblioteca' && safeTabId !== 'biblioteca') officialLibrary?.deactivate();
     state.currentTab = safeTabId;
     tabs.forEach(t => {
@@ -862,7 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const mobileMore = document.querySelector('[data-mobile-more]');
     if (mobileMore) {
-      const secondaryTabs = new Set(['cotacao','prospeccao','guia','scripts','biblioteca','operacoes','historico','catalogo','transportadoras','comunicacao']);
+      const secondaryTabs = new Set(['cotacao','prospeccao','guia','scripts','biblioteca','operacoes','historico','catalogo','transportadoras','comunicacao','reuniao']);
       const active = secondaryTabs.has(safeTabId);
       mobileMore.classList.toggle('active', active);
       if (active) mobileMore.setAttribute('aria-current', 'page');
@@ -885,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (safeTabId === 'crm') renderCrmModule();
     else if (safeTabId === 'guia') renderConsultantEngine();
     else if (safeTabId === 'call-ai') { renderCallAIContext(); renderCallIntelligenceDashboard(); }
+    else if (safeTabId === 'reuniao') openMeeting(shouldFocus);
     else if (safeTabId === 'biblioteca') { openOfficialLibrary(shouldFocus); renderMaterialLibrary(); }
     else if (safeTabId === 'operacoes') renderOperationsFoundation();
 
@@ -8730,6 +8756,7 @@ Pode me passar o valor e o prazo de entrega, por favor?`;
       <button type="button" data-mobile-more aria-expanded="false" aria-haspopup="menu" aria-controls="og-mobile-more-sheet"><span aria-hidden="true">＋</span><small>Mais</small></button>
       <div id="og-mobile-more-sheet" class="og-mobile-more-sheet hidden" role="menu" aria-label="Mais ferramentas">
         <div class="og-mobile-more-head"><strong>Mais ferramentas</strong><small>Abra só quando precisar.</small></div>
+        <button type="button" data-mobile-tab="reuniao" role="menuitem"><span aria-hidden="true">▣</span><small>REUNIÃO</small></button>
         <button type="button" data-mobile-tab="cotacao" role="menuitem"><span>⚡</span><small>Cotação</small></button>
         <button type="button" data-mobile-tab="prospeccao" role="menuitem"><span>🎯</span><small>Prospecção</small></button>
         <button type="button" data-mobile-tab="guia" role="menuitem"><span>🚛</span><small>Suportes</small></button>

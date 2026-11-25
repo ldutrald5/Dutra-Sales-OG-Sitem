@@ -15,6 +15,9 @@ Este é o resumo executivo atual. O roadmap histórico/arquitetural detalhado pe
 - Ciclo Comercial Conectado V3.0.
 - Protocolo canônico de contexto e handoff para múltiplas IAs/agentes.
 
+## Em revisão — OG-19 Aba REUNIÃO
+
+- Apresentação comercial, simuladores e quadro integrados ao menu do DUTRA OS para uso durante o diagnóstico de frota.
 ## Em revisão — OG-20 Biblioteca oficial e atualização
 
 - Catálogo Olho de Gato na Biblioteca Comercial e atualização iniciada no app instalado.

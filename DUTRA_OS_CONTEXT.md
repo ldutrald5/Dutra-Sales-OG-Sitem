@@ -59,6 +59,9 @@ A navegação deve favorecer: Meu Dia, Mesa de Vendas, CRM, Prospecção, Comuni
 - **PLAYBOOK-01 em validação:** Ficha de Ataque V1 sintetiza perfil, momento, relacionamento explícito, objetivo, lacunas, perguntas e guardrails dentro da Ficha Universal. É uma projeção somente leitura que reutiliza Next Best Action e PRECALL-01; não cria novo score, nova entidade ou novo fato.
 - **PLAYBOOK-01 V1.1:** a ficha deriva relação OG, rota comercial e faixa de frota por regras determinísticas. “Sem evidência” significa “Conhecimento OG não confirmado”; nunca significa automaticamente “não conhece”.
 
+## Aba REUNIÃO — OG-19
+
+A apresentação comercial usa a navegação e o Design System do DUTRA OS. Perfil, custos, simulações e quadro são rascunhos da sessão daquela aba. O módulo não grava interações no CRM. Valores e percentuais dos simuladores são premissas de cenário, não resultados observados na conta.
 ## Biblioteca oficial e atualizações — OG-20
 
 A Biblioteca Comercial exibe o acervo público do site Olho de Gato. Os índices e as prévias vêm do catálogo oficial. Os links abrem a mídia original. Os materiais internos continuam disponíveis e conservam os contratos do CRM e da Biblioteca.

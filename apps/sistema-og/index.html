@@ -36,6 +36,7 @@
 
   <!-- Estilos Customizados Ultra Clean & Print Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="modules/meeting/meeting.css">
   <link rel="stylesheet" href="modules/official-library/library.css">
 </head>
 <body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased">
@@ -118,6 +119,10 @@
         <button data-tab="call-ai" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
           <span aria-hidden="true">🎧</span>
           <span>Call AI</span>
+        </button>
+        <button type="button" data-tab="reuniao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M5 4v11h14V4m-7 11v5m-4 0h8m-7-8 3-3 2 1 2-2"></path></svg>
+          <span>REUNIÃO</span>
         </button>
         <button data-tab="comunicacao" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2 flex-shrink-0 font-medium"><span>✉ Central de Comunicação</span></button>
 
@@ -1266,6 +1271,12 @@
     <!-- ======================================================================= -->
     <!-- FASE 2: BIBLIOTECA COMERCIAL                                            -->
     <!-- ======================================================================= -->
+    <section id="tab-reuniao" class="tab-content hidden" aria-label="Reunião">
+      <h1 class="text-xl font-bold">Reunião</h1>
+      <p data-meeting-loading role="status">Carregando apresentação…</p>
+      <button type="button" class="og-button og-button-ghost hidden" data-meeting-retry>Tentar novamente</button>
+    </section>
+
     <div id="tab-biblioteca" class="tab-content hidden space-y-5">
       <div id="official-library">
         <h1>Biblioteca Comercial</h1>
